@@ -4,14 +4,21 @@ Thumbs.db
 *.swp
 *.swo
 
-# Embedded repositories and protected directories
+# Embedded git repositories and large build artifacts
+**/.git
+**/.git/
+AetosOne-HA/aetos-build/frontend/
+AetosOne-HA/aetos-build/haos-cache/
+AetosOne-HA/aetos-build/haos-cache-x86/
+AetosOne-HA/aetos-build/os/
+
+# Protected files/dirs with permission issues
 .storage/
 .venv/
 node_modules/
 __pycache__/
 *.pyc
-AetosOne-HA/
-AetosOne-TB/
+.claude/settings.local.json.tmp*
 
 # IDE
 .vscode/
