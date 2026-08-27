@@ -64,7 +64,13 @@ try {
     }
 
     git pull origin $currentBranch --quiet 2>$null
+
+    # Add all changes including new folders and submodules
     git add -A 2>$null
+    git add -u 2>$null
+
+    # Handle submodules
+    git submodule update --init --recursive 2>$null
 
     $statusOutput = git status --porcelain 2>$null
     if ($statusOutput) {
