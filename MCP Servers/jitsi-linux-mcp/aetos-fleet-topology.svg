@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1730" width="1500" height="1730" font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+<defs>
+  <marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 z" fill="#475569"/>
+  </marker>
+  <marker id="ahr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 z" fill="#B91C1C"/>
+  </marker>
+  <marker id="ahb" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 z" fill="#1D4ED8"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="1500" height="1730" fill="#FBFBF9"/>
+
+<text x="40" y="44" font-size="27" font-weight="700" fill="#0F172A">Aetos Fleet Architecture — Multi-Site Notification and Management Hub</text>
+<text x="40" y="70" font-size="14" fill="#64748B">v2 · fleet scale · all Aetos One sites and locations · mixed residential and industrial · design only</text>
+
+<!-- ============ T0 + T1 EDGE ============ -->
+<rect x="40" y="92" width="1420" height="556" rx="12" fill="#F1F5F9" stroke="#CBD5E1"/>
+<rect x="56" y="106" width="330" height="28" rx="6" fill="#334155"/>
+<text x="71" y="125" font-size="14" font-weight="700" fill="#FFFFFF">T0 + T1 — EDGE  (every site and location)</text>
+<text x="1130" y="126" font-size="13" fill="#B91C1C" font-weight="700">T0 survives loss of every tier below</text>
+
+<rect x="84" y="160" width="1360" height="470" rx="9" fill="#E2E8F0" opacity="0.55"/>
+<rect x="76" y="153" width="1360" height="470" rx="9" fill="#EDF2F7" opacity="0.8"/>
+<rect x="68" y="146" width="1360" height="470" rx="9" fill="#FFFFFF" stroke="#94A3B8" stroke-dasharray="7 5"/>
+<text x="86" y="174" font-size="14" font-weight="700" fill="#334155">Aetos One image — identical on every site, differentiated only by enrollment</text>
+
+<!-- automations -->
+<rect x="100" y="196" width="300" height="92" rx="7" fill="#FFFFFF" stroke="#94A3B8"/>
+<rect x="100" y="196" width="5" height="92" fill="#64748B"/>
+<text x="118" y="219" font-size="14" font-weight="700" fill="#0F172A">Automations + Blueprints</text>
+<text x="118" y="242" font-size="12" fill="#475569" font-family="monospace">automation.aetos_alert_&lt;rule_id&gt;</text>
+<text x="118" y="261" font-size="12" fill="#475569">blueprints (per site_class)</text>
+<text x="118" y="280" font-size="12" fill="#475569">customer automations</text>
+
+<!-- alert script -->
+<rect x="470" y="200" width="300" height="84" rx="7" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="488" y="225" font-size="14" font-weight="700" fill="#1E3A8A" font-family="monospace">script.aetos_alert</text>
+<text x="488" y="247" font-size="12" fill="#1E40AF">the single alert interface — nothing else</text>
+<text x="488" y="264" font-size="12" fill="#1E40AF">calls a notify service directly</text>
+<text x="488" y="280" font-size="11" fill="#3B82F6" font-family="monospace">severity · rule_id · message · lifecycle</text>
+<line x1="400" y1="242" x2="464" y2="242" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+
+<!-- T0 local delivery -->
+<rect x="330" y="352" width="300" height="104" rx="7" fill="#FEF2F2" stroke="#B91C1C" stroke-width="2"/>
+<text x="348" y="376" font-size="14" font-weight="700" fill="#7F1D1D">T0 — LOCAL DELIVERY</text>
+<text x="348" y="398" font-size="12" fill="#991B1B">critical only · fires first, always</text>
+<text x="348" y="417" font-size="12" fill="#991B1B">Aetos One app + local Telegram</text>
+<text x="348" y="438" font-size="12" font-weight="700" fill="#B91C1C">no network, no hub, no LLM</text>
+<path d="M580,284 L580,318 L480,318 L480,346" fill="none" stroke="#B91C1C" stroke-width="1.8" marker-end="url(#ahr)"/>
+
+<!-- T1 edge filter -->
+<rect x="760" y="352" width="300" height="104" rx="7" fill="#FFFBEB" stroke="#B45309" stroke-width="2"/>
+<text x="778" y="376" font-size="14" font-weight="700" fill="#78350F">T1 — EDGE FILTER</text>
+<text x="778" y="398" font-size="12" fill="#92400E">cooldown · dedupe · severity gate</text>
+<text x="778" y="417" font-size="12" fill="#92400E">event key: site.entity.rule_id</text>
+<text x="778" y="438" font-size="12" font-weight="700" fill="#B45309">the primary scaling lever</text>
+<path d="M660,284 L660,318 L910,318 L910,346" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+
+<!-- recipients local -->
+<rect x="330" y="498" width="300" height="72" rx="7" fill="#FFFFFF" stroke="#B91C1C"/>
+<text x="348" y="522" font-size="13" font-weight="700" fill="#7F1D1D">Site operator / owner</text>
+<text x="348" y="543" font-size="12" fill="#991B1B">phone · local Telegram</text>
+<text x="348" y="561" font-size="11" fill="#B91C1C">delivered independently of everything below</text>
+<line x1="480" y1="456" x2="480" y2="492" stroke="#B91C1C" stroke-width="1.8" marker-end="url(#ahr)"/>
+
+<!-- mqtt client -->
+<rect x="760" y="498" width="300" height="86" rx="7" fill="#FFFFFF" stroke="#475569" stroke-width="1.6"/>
+<text x="778" y="522" font-size="13" font-weight="700" fill="#0F172A">MQTT client (TLS)</text>
+<text x="778" y="543" font-size="12" fill="#475569">per-site credential, scoped to own prefix</text>
+<text x="778" y="562" font-size="12" fill="#475569">store-and-forward buffer, replay on reconnect</text>
+<line x1="910" y1="456" x2="910" y2="492" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+
+<!-- right column -->
+<rect x="1140" y="196" width="270" height="46" rx="6" fill="#FFFFFF" stroke="#94A3B8"/>
+<text x="1155" y="216" font-size="12" font-weight="700" fill="#0F172A" font-family="monospace">automation.aetos_heartbeat</text>
+<text x="1155" y="234" font-size="11" fill="#64748B">every 5 min — dead vs quiet</text>
+
+<rect x="1140" y="256" width="270" height="46" rx="6" fill="#FFFFFF" stroke="#94A3B8"/>
+<text x="1155" y="276" font-size="12" font-weight="700" fill="#0F172A">Health telemetry</text>
+<text x="1155" y="294" font-size="11" fill="#64748B">Aetos One + core version, disk, failed integrations</text>
+
+<rect x="1140" y="316" width="270" height="56" rx="6" fill="#F0FDF4" stroke="#15803D"/>
+<text x="1155" y="336" font-size="12" font-weight="700" fill="#14532D" font-family="monospace">script.aetos_remote_ack</text>
+<text x="1155" y="353" font-size="12" font-weight="700" fill="#14532D" font-family="monospace">script.aetos_remote_diag</text>
+<text x="1155" y="368" font-size="11" fill="#166534">allow-listed — the only invocable surface</text>
+
+<rect x="1140" y="386" width="270" height="52" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-dasharray="6 4"/>
+<text x="1155" y="406" font-size="12" font-weight="700" fill="#475569" font-family="monospace">Site MCP</text>
+<text x="1155" y="424" font-size="11" fill="#64748B">installed, STOPPED by default — surgery only</text>
+
+<path d="M1140,219 L1105,219 L1105,540 L1066,540" fill="none" stroke="#94A3B8" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="1140" y1="279" x2="1105" y2="279" stroke="#94A3B8" stroke-width="1.3"/>
+<line x1="1140" y1="344" x2="1105" y2="344" stroke="#94A3B8" stroke-width="1.3"/>
+
+<!-- ============ T2 TRANSPORT ============ -->
+<rect x="40" y="672" width="1420" height="142" rx="12" fill="#EEF2FF" stroke="#C7D2FE"/>
+<rect x="56" y="686" width="200" height="28" rx="6" fill="#3730A3"/>
+<text x="71" y="705" font-size="14" font-weight="700" fill="#FFFFFF">T2 — TRANSPORT</text>
+
+<rect x="330" y="690" width="800" height="106" rx="8" fill="#FFFFFF" stroke="#4338CA" stroke-width="1.8"/>
+<text x="352" y="714" font-size="14" font-weight="700" fill="#312E81">Mosquitto (clustered)</text>
+<text x="352" y="737" font-size="11.5" fill="#4338CA" font-family="monospace">aetos/&lt;tenant&gt;/&lt;site_id&gt;/alert/&lt;severity&gt;   ·   /alert/lifecycle   ·   /telemetry</text>
+<text x="352" y="756" font-size="11.5" fill="#4338CA" font-family="monospace">aetos/&lt;tenant&gt;/&lt;site_id&gt;/heartbeat   ·   /cmd/req   ·   /cmd/res</text>
+<text x="352" y="780" font-size="12" font-weight="700" fill="#312E81">per-site ACL — tenant isolation enforced at the broker, not in application logic</text>
+<line x1="910" y1="584" x2="910" y2="684" stroke="#475569" stroke-width="1.8" marker-end="url(#ah)"/>
+
+<!-- ============ T3 CONTROL PLANE ============ -->
+<rect x="40" y="838" width="1420" height="562" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+<rect x="56" y="852" width="270" height="28" rx="6" fill="#0F766E"/>
+<text x="71" y="871" font-size="14" font-weight="700" fill="#FFFFFF">T3 — CONTROL PLANE</text>
+
+<rect x="70" y="898" width="310" height="156" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.6"/>
+<text x="88" y="922" font-size="13.5" font-weight="700" fill="#134E4A">SITE REGISTRY</text>
+<text x="88" y="944" font-size="11.5" fill="#475569">source of truth for routing</text>
+<text x="88" y="967" font-size="11.5" fill="#334155" font-family="monospace">site_id · tenant_id · site_class</text>
+<text x="88" y="986" font-size="11.5" fill="#334155">contacts by role</text>
+<text x="88" y="1005" font-size="11.5" fill="#334155">channel bindings</text>
+<text x="88" y="1024" font-size="11.5" fill="#334155">package version · enrollment state</text>
+<text x="88" y="1045" font-size="11" fill="#0F766E" font-weight="700">audience lives here, not in the image</text>
+
+<rect x="420" y="898" width="310" height="156" rx="8" fill="#FFFFFF" stroke="#475569" stroke-width="1.6"/>
+<text x="438" y="922" font-size="13.5" font-weight="700" fill="#0F172A">n8n — queue mode</text>
+<text x="438" y="944" font-size="11.5" fill="#475569">Redis + workers</text>
+<text x="438" y="967" font-size="11.5" fill="#334155" font-family="monospace">hub_ingest</text>
+<text x="438" y="986" font-size="11.5" fill="#334155" font-family="monospace">hub_route</text>
+<text x="438" y="1005" font-size="11.5" fill="#334155" font-family="monospace">hub_escalate</text>
+<text x="438" y="1024" font-size="11.5" fill="#334155" font-family="monospace">fleet_health · fleet_rollout</text>
+<text x="438" y="1045" font-size="11" fill="#64748B">enrichment and integration</text>
+
+<rect x="770" y="898" width="310" height="156" rx="8" fill="#FFFFFF" stroke="#B45309" stroke-width="1.6"/>
+<text x="788" y="922" font-size="13.5" font-weight="700" fill="#78350F">ALERT ENGINE</text>
+<text x="788" y="944" font-size="11.5" fill="#92400E">Grafana Alerting / Alertmanager</text>
+<text x="788" y="967" font-size="11.5" fill="#334155">dedupe · grouping</text>
+<text x="788" y="986" font-size="11.5" fill="#334155">silences · on-call rotation</text>
+<text x="788" y="1005" font-size="11.5" fill="#334155">escalation timers</text>
+<text x="788" y="1024" font-size="11.5" fill="#334155" font-family="monospace">fired → acked → resolved</text>
+<text x="788" y="1045" font-size="11" fill="#B45309" font-weight="700">solved problems — do not rebuild in n8n</text>
+
+<rect x="1120" y="898" width="310" height="156" rx="8" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="1.8"/>
+<text x="1138" y="922" font-size="13.5" font-weight="700" fill="#1E3A8A">FLEET MCP SERVER</text>
+<text x="1138" y="944" font-size="11.5" fill="#1E40AF">one connector, site as a parameter</text>
+<text x="1138" y="967" font-size="11.5" fill="#334155" font-family="monospace">fleet_list_sites</text>
+<text x="1138" y="986" font-size="11.5" fill="#334155" font-family="monospace">fleet_get_state(site, …)</text>
+<text x="1138" y="1005" font-size="11.5" fill="#334155" font-family="monospace">fleet_call_script(site, …)</text>
+<text x="1138" y="1024" font-size="11.5" fill="#334155" font-family="monospace">fleet_alert_history · push_package</text>
+<text x="1138" y="1045" font-size="11" fill="#1D4ED8" font-weight="700">allow-listed scripts only — never call_service</text>
+
+<path d="M730,796 L730,850 L575,850 L575,892" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#ah)"/>
+<line x1="380" y1="960" x2="414" y2="960" stroke="#0F766E" stroke-width="1.5" marker-end="url(#ah)"/>
+<line x1="414" y1="990" x2="380" y2="990" stroke="#0F766E" stroke-width="1.5" marker-end="url(#ah)"/>
+<line x1="730" y1="975" x2="764" y2="975" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M1120,975 L1100,975 L1100,880 L240,880 L240,892" fill="none" stroke="#0F766E" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+
+<!-- channels -->
+<rect x="70" y="1100" width="1010" height="58" rx="8" fill="#0F172A"/>
+<text x="92" y="1126" font-size="14" font-weight="700" fill="#FFFFFF">OUTBOUND CHANNELS</text>
+<text x="92" y="1146" font-size="12" fill="#CBD5E1">Telegram · Slack · email · SMS / voice for critical escalation at unmanned industrial sites</text>
+<line x1="925" y1="1054" x2="925" y2="1094" stroke="#475569" stroke-width="1.8" marker-end="url(#ah)"/>
+
+<!-- recipients -->
+<rect x="70" y="1200" width="310" height="84" rx="7" fill="#FFFFFF" stroke="#94A3B8"/>
+<text x="88" y="1224" font-size="13" font-weight="700" fill="#0F172A">operator / owner</text>
+<text x="88" y="1245" font-size="11.5" fill="#475569">warning + critical</text>
+<text x="88" y="1265" font-size="11.5" fill="#B91C1C" font-weight="700">acts first — receives before management</text>
+
+<rect x="420" y="1200" width="310" height="84" rx="7" fill="#FFFFFF" stroke="#94A3B8"/>
+<text x="438" y="1224" font-size="13" font-weight="700" fill="#0F172A">supervisor</text>
+<text x="438" y="1245" font-size="11.5" fill="#475569">warning + critical, industrial</text>
+<text x="438" y="1265" font-size="11.5" fill="#64748B">immediate, parallel to operator</text>
+
+<rect x="770" y="1200" width="310" height="84" rx="7" fill="#FFFFFF" stroke="#94A3B8"/>
+<text x="788" y="1224" font-size="13" font-weight="700" fill="#0F172A">management</text>
+<text x="788" y="1245" font-size="11.5" fill="#475569">critical if unmanned, else T+10m unacked</text>
+<text x="788" y="1265" font-size="11.5" fill="#B45309" font-weight="700">escalation path, not primary path</text>
+
+<line x1="225" y1="1158" x2="225" y2="1194" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+<line x1="575" y1="1158" x2="575" y2="1194" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+<line x1="925" y1="1158" x2="925" y2="1194" stroke="#475569" stroke-width="1.5" marker-end="url(#ah)"/>
+
+<rect x="70" y="1310" width="1010" height="66" rx="7" fill="#FEFCE8" stroke="#CA8A04"/>
+<text x="92" y="1334" font-size="12.5" font-weight="700" fill="#713F12">Severity is set at the edge. Audience is resolved from the registry.</text>
+<text x="92" y="1356" font-size="12" fill="#854D0E">One image serves residential and industrial because routing differs by data, not by code. Changing who hears what across the whole fleet is a registry edit.</text>
+
+<!-- ============ T4 REASONING ============ -->
+<rect x="40" y="1424" width="1420" height="230" rx="12" fill="#F5F3FF" stroke="#DDD6FE"/>
+<rect x="56" y="1438" width="330" height="28" rx="6" fill="#5B21B6"/>
+<text x="71" y="1457" font-size="14" font-weight="700" fill="#FFFFFF">T4 — REASONING  (on demand only)</text>
+
+<rect x="1120" y="1482" width="310" height="146" rx="8" fill="#FFFFFF" stroke="#5B21B6" stroke-width="1.8"/>
+<text x="1138" y="1506" font-size="13.5" font-weight="700" fill="#4C1D95">claude.ai</text>
+<text x="1138" y="1528" font-size="11.5" fill="#334155">fleet triage — shared fault signatures</text>
+<text x="1138" y="1547" font-size="11.5" fill="#334155">blueprint + package authoring</text>
+<text x="1138" y="1566" font-size="11.5" fill="#334155">n8n workflow authoring</text>
+<text x="1138" y="1585" font-size="11.5" fill="#334155">diagnosis of a single site</text>
+<text x="1138" y="1608" font-size="11" font-weight="700" fill="#B91C1C">not resident — never the detector</text>
+<line x1="1275" y1="1054" x2="1275" y2="1476" stroke="#1D4ED8" stroke-width="1.8" marker-end="url(#ahb)"/>
+
+<rect x="740" y="1502" width="310" height="86" rx="8" fill="#FFFFFF" stroke="#94A3B8" stroke-dasharray="6 4"/>
+<text x="758" y="1526" font-size="13" font-weight="700" fill="#334155" font-family="monospace">Site MCP — one site</text>
+<text x="758" y="1548" font-size="11.5" fill="#475569">temporary attach for surgery</text>
+<text x="758" y="1568" font-size="11.5" fill="#64748B">started, worked, stopped. never many at once</text>
+<line x1="1114" y1="1545" x2="1058" y2="1545" stroke="#5B21B6" stroke-width="1.6" marker-end="url(#ah)"/>
+
+<rect x="70" y="1500" width="270" height="90" rx="8" fill="#FEF2F2" stroke="#B91C1C" stroke-dasharray="6 4"/>
+<text x="88" y="1524" font-size="12.5" font-weight="700" fill="#7F1D1D">No LLM in any alert path</text>
+<text x="88" y="1546" font-size="11.5" fill="#991B1B">detection is T3's job, always</text>
+<text x="88" y="1566" font-size="11.5" fill="#991B1B">delivery is T0's job, always</text>
+
+<!-- legend -->
+<text x="40" y="1690" font-size="12" font-weight="700" fill="#334155">Legend</text>
+<rect x="112" y="1679" width="14" height="14" fill="#FEF2F2" stroke="#B91C1C"/><text x="133" y="1691" font-size="11.5" fill="#475569">critical / safety</text>
+<rect x="240" y="1679" width="14" height="14" fill="#FFFBEB" stroke="#B45309"/><text x="261" y="1691" font-size="11.5" fill="#475569">warning / throttling</text>
+<rect x="392" y="1679" width="14" height="14" fill="#EFF6FF" stroke="#1D4ED8"/><text x="413" y="1691" font-size="11.5" fill="#475569">Claude-facing interface</text>
+<rect x="566" y="1679" width="14" height="14" fill="#F0FDF4" stroke="#15803D"/><text x="587" y="1691" font-size="11.5" fill="#475569">allow-listed remote surface</text>
+<rect x="762" y="1679" width="14" height="14" fill="#FFFFFF" stroke="#94A3B8" stroke-dasharray="4 3"/><text x="783" y="1691" font-size="11.5" fill="#475569">deferred or disabled by default</text>
+<text x="1010" y="1691" font-size="11.5" fill="#94A3B8">aetos-fleet-architecture v2 · 2026-07-19</text>
+</svg>

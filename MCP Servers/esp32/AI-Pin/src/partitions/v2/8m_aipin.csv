@@ -1,0 +1,13 @@
+# AI-Pin custom 8MB layout for the "Aetos One" custom wake word.
+# The MultiNet7-EN inference code grows the app to ~2.98MB and the model
+# itself needs 2.63MB of assets - dual-OTA no longer fits in 8MB, so this
+# uses the same factory-only pattern as the repo's own partitions/v2/4m.csv
+# (no over-the-air updates; flash over USB instead).
+# factory app: 5MB (app 2.98MB -> 40% free); assets: 2.9375MB.
+# Sums exactly to 8MB: 0x10000 + 0x500000 + 0x2F0000 = 0x800000.
+# Name,   Type, SubType, Offset,  Size, Flags
+nvs,      data, nvs,     0x9000,   0x4000,
+otadata,  data, ota,     0xd000,   0x2000,
+phy_init, data, phy,     0xf000,   0x1000,
+factory,  app,  factory, 0x10000,  0x500000,
+assets,   data, spiffs,  0x510000, 0x2F0000,

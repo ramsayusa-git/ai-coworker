@@ -1,0 +1,31 @@
+{
+    "target": "esp32s3",
+    "builds": [
+        {
+            "name": "seeed-xiao-s3-sense-cam",
+            "sdkconfig_append": [
+                "CONFIG_ESP_PHY_MAX_WIFI_TX_POWER=10",
+                "CONFIG_ESP_PHY_MAX_TX_POWER=10",
+                "CONFIG_SPIRAM_MODE_OCT=y",
+                "CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y",
+                "CONFIG_ESPTOOLPY_FLASHSIZE=\"8MB\"",
+                "CONFIG_PARTITION_TABLE_CUSTOM=y",
+                "CONFIG_PARTITION_TABLE_CUSTOM_FILENAME=\"partitions/v2/8m_aipin.csv\"",
+                "CONFIG_CAMERA_OV2640=y",
+                "CONFIG_CAMERA_OV2640_AUTO_DETECT_DVP_INTERFACE_SENSOR=y",
+                "CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y",
+                "CONFIG_ESP_CONSOLE_SECONDARY_NONE=y",
+                "CONFIG_USE_AFE_WAKE_WORD=n",
+                "CONFIG_USE_CUSTOM_WAKE_WORD=y",
+                "CONFIG_CUSTOM_WAKE_WORD=\"hi aetos;hi ay toss;hi a toss;hi eh toss;hi ay toes;hi a toes;hi aetos one;hi ay toss one\"",
+                "CONFIG_CUSTOM_WAKE_WORD_DISPLAY=\"Hi Aetos\"",
+                "CONFIG_CUSTOM_WAKE_WORD_THRESHOLD=10",
+                "CONFIG_SR_MN_EN_MULTINET7_QUANT=y",
+                "CONFIG_SR_MN_EN_NONE=n",
+                "CONFIG_SR_WN_WN9_NIHAOXIAOZHI_TTS=n",
+                "CONFIG_SR_WN_WN9_JARVIS_TTS=n",
+                "CONFIG_SR_WN_WN9_HIESP=n"
+            ]
+        }
+    ]
+}
