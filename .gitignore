@@ -1,0 +1,23 @@
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Embedded repositories and protected directories
+.storage/
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+AetosOne-HA/
+AetosOne-TB/
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Dependencies
+.env
+.env.local
