@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(crontab -l)",
+      "Bash(chmod +x /home/krishna/ai-work-space/ai-coworker/githuh-repo-update/update-hourly.sh)",
+      "Bash(crontab)",
+      "Bash(/home/krishna/ai-work-space/ai-coworker/githuh-repo-update/update-hourly.sh)",
+      "Bash(pkill -f \"git.*ai-coworker\")",
+      "Bash(rm -f /home/krishna/ai-work-space/ai-coworker/.git/index.lock /home/krishna/ai-work-space/ai-coworker/.git/gc.log)",
+      "Bash(echo \"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\")",
+      "Bash(chmod 600 ~/.github-token)",
+      "Bash(git filter-branch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  }
+}

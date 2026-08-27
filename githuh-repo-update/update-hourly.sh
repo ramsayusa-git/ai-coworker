@@ -7,9 +7,16 @@ SCRIPT_DIR="/home/krishna/ai-work-space/ai-coworker/githuh-repo-update"
 REPO_DIR="/home/krishna/ai-work-space/ai-coworker"
 UPDATE_FILE="$REPO_DIR/hourly-update.txt"
 LOG_FILE="$SCRIPT_DIR/hourly-update.log"
-GITHUB_TOKEN="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"
+TOKEN_FILE="$HOME/.github-token"
 GITHUB_USER="ramsayusa-git"
 GITHUB_REPO="ai-coworker"
+
+# Read token from secure file
+if [ ! -f "$TOKEN_FILE" ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Token file not found at $TOKEN_FILE" >> "$LOG_FILE"
+    exit 1
+fi
+GITHUB_TOKEN=$(cat "$TOKEN_FILE")
 
 # Create directories if they don't exist
 mkdir -p "$REPO_DIR"
