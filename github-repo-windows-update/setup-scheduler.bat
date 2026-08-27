@@ -22,6 +22,7 @@ if %errorLevel% neq 0 (
 REM Define variables
 set TASK_NAME=GitHubHourlySync
 set SCRIPT_PATH=D:\ai-workspace\github-repo-windows-update\git-hourly-sync.ps1
+set REPO_PATH=D:\ai-workspace
 set LOG_PATH=%USERPROFILE%\AppData\Local\git-hourly-sync.log
 
 REM Check if script exists

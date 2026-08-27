@@ -1,6 +1,6 @@
 # GitHub Hourly Sync Setup Guide
 
-This guide sets up automated hourly git pull, commit, and push operations for your repository.
+This guide sets up automated hourly git pull, commit, and push operations for your entire **D:\ai-workspace** folder and all subfolders (including new ones that are created in the future).
 
 ## Security Note
 

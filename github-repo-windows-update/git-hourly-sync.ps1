@@ -1,61 +1,99 @@
-# Hourly Git Sync Script
-# Pulls latest, commits changes, pushes to remote
+# Hourly Git Sync Script - Zero User Interaction
+# Completely automated: pull, commit, push with no prompts
 
 param(
-    [string]$RepoPath = "D:\ai-workspace",
-    [string]$CommitMessage = "Hourly sync - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    [string]$RepoPath = "D:\ai-workspace"
 )
 
-# Load credentials from secure storage
+$ProgressPreference = 'SilentlyContinue'
+$VerbosePreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Continue'
+
+$LogFile = "$env:USERPROFILE\AppData\Local\git-hourly-sync.log"
+
+function Log {
+    param([string]$Message)
+    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    "$timestamp - $Message" | Add-Content -Path $LogFile -ErrorAction SilentlyContinue
+}
+
+function EnsureLogDir {
+    $logDir = Split-Path $LogFile
+    if (-not (Test-Path $logDir)) {
+        New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+    }
+}
+
+EnsureLogDir
+
 $tokenPath = "$env:USERPROFILE\.git-token.xml"
 if (-not (Test-Path $tokenPath)) {
-    Write-Error "Token file not found at $tokenPath. Run setup first."
+    Log "ERROR: Token file not found"
     exit 1
 }
 
 try {
-    $credential = Import-Clixml -Path $tokenPath
+    $credential = Import-Clixml -Path $tokenPath -ErrorAction Stop
     $token = $credential.GetNetworkCredential().Password
-} catch {
-    Write-Error "Failed to load token: $_"
-    exit 1
-}
-
-# Change to repo directory
-Push-Location $RepoPath
-
-try {
-    # Configure git with token for this operation
-    $env:GIT_TRACE = 0  # Silence debug output
-
-    # Pull latest changes
-    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Pulling latest changes..."
-    git pull origin main --quiet 2>&1 | Out-Null
-
-    # Stage all changes
-    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Staging changes..."
-    git add -A
-
-    # Check if there are changes to commit
-    $status = git status --porcelain
-    if ($status) {
-        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Committing changes..."
-        git commit -m $CommitMessage --quiet
-
-        # Push to remote using token
-        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Pushing to remote..."
-        $remoteUrl = "https://git:${token}@github.com/ramsayusa-git/ai-coworker.git"
-        git push $remoteUrl main --quiet
-
-        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] ✓ Sync complete"
-    } else {
-        Write-Host "[$(Get-Date -Format 'HH:mm:ss')] No changes to commit"
+    if (-not $token) {
+        Log "ERROR: Failed to extract token"
+        exit 1
     }
 } catch {
-    Write-Error "Git operation failed: $_"
+    Log "ERROR: Failed to load token"
+    exit 1
+}
+
+if (-not (Test-Path $RepoPath)) {
+    Log "ERROR: Repository path not found"
+    exit 1
+}
+
+Push-Location $RepoPath -ErrorAction Stop
+
+try {
+    $env:GIT_TRACE = 0
+    $env:GIT_TERMINAL_PROMPT = 0
+
+    Log "Starting sync"
+
+    $currentBranch = git rev-parse --abbrev-ref HEAD 2>$null
+    if (-not $currentBranch) {
+        Log "ERROR: Could not determine branch"
+        exit 1
+    }
+
+    git pull origin $currentBranch --quiet 2>$null
+    git add -A 2>$null
+
+    $statusOutput = git status --porcelain 2>$null
+    if ($statusOutput) {
+        $commitMsg = "Hourly sync - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        git commit -m $commitMsg --no-edit --quiet 2>$null
+
+        if ($LASTEXITCODE -eq 0) {
+            $remoteUrl = "https://$token@github.com/ramsayusa-git/ai-coworker.git"
+            git push $remoteUrl $currentBranch --quiet 2>$null
+
+            if ($LASTEXITCODE -eq 0) {
+                Log "SUCCESS: Sync complete"
+            } else {
+                Log "ERROR: Push failed"
+                exit 1
+            }
+        } else {
+            Log "ERROR: Commit failed"
+            exit 1
+        }
+    } else {
+        Log "INFO: No changes to commit"
+    }
+
+} catch {
+    Log "ERROR: Exception occurred"
     exit 1
 } finally {
-    Pop-Location
-    # Clear sensitive data
+    Pop-Location -ErrorAction SilentlyContinue
     Remove-Variable token -ErrorAction SilentlyContinue
+    Remove-Variable credential -ErrorAction SilentlyContinue
 }
