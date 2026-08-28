@@ -1,0 +1,36 @@
+Aetos One:
+  # Brand
+  primary-color: "#273A80"
+  accent-color: "#E6701C"
+  dark-primary-color: "#1B2A5E"
+  light-primary-color: "#3A4FA0"
+  # Text
+  primary-text-color: "#1B2440"
+  secondary-text-color: "#5A6484"
+  text-primary-color: "#FFFFFF"
+  disabled-text-color: "#9AA3BC"
+  # Backgrounds
+  primary-background-color: "#F6F8FD"
+  secondary-background-color: "#EEF1FB"
+  card-background-color: "#FFFFFF"
+  ha-card-background: "#FFFFFF"
+  # Sidebar / header
+  app-header-background-color: "#FFFFFF"
+  app-header-text-color: "#273A80"
+  sidebar-icon-color: "#5A6484"
+  sidebar-selected-icon-color: "#273A80"
+  sidebar-selected-text-color: "#273A80"
+  # Accents / states
+  state-icon-color: "#273A80"
+  paper-item-icon-active-color: "#E6701C"
+  switch-checked-color: "#E6701C"
+  switch-checked-button-color: "#E6701C"
+  slider-color: "#E6701C"
+  label-badge-background-color: "#273A80"
+  # Cards
+  ha-card-border-radius: "12px"
+  ha-card-box-shadow: "0 2px 8px rgba(20,30,60,0.06)"
+  divider-color: "#E1E5F0"
+  # Mushroom accents
+  mush-rgb-blue: "39, 58, 128"
+  mush-rgb-orange: "230, 112, 28"

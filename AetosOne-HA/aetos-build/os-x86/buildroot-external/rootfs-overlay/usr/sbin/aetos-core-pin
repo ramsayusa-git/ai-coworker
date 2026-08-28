@@ -1,0 +1,94 @@
+#!/bin/sh
+# Aetos One — Core image pin (ZERO-window brand protection).
+#
+# WHY THIS FILE AND NOT updater.json
+#   /mnt/data/supervisor/updater.json is only a CACHE of the upstream version
+#   feed. Supervisor rewrites it by design, and freezing it breaks the add-on
+#   store (the store needs that feed). Editing it was the wrong fix.
+#
+#   /mnt/data/supervisor/homeassistant.json holds Core's real settings,
+#   including:
+#       "image":          which Core image to use
+#       "override_image": if true, Supervisor treats the image as locally
+#                         managed and will NOT pull or replace it
+#
+#   Setting override_image=true means the branded Core container is never
+#   swapped for a stock upstream one. There is therefore NO window in which
+#   Home Assistant branding is visible - not 30s, not one frame.
+#
+#   The add-on store is unaffected: Supervisor keeps updating itself, add-ons
+#   and repositories normally.
+set -u
+
+HAJSON=/mnt/data/supervisor/homeassistant.json
+LOG=/var/log/aetos-core-pin.log
+log() { echo "[$(date '+%F %H:%M:%S')] $*" >> "$LOG" 2>/dev/null; }
+
+log "=== aetos-core-pin starting ==="
+
+# Wait for Supervisor to create the file (slow first boot: up to ~10 min)
+i=0
+while [ ! -f "$HAJSON" ] && [ $i -lt 120 ]; do
+  sleep 5
+  i=$((i + 1))
+done
+
+if [ ! -f "$HAJSON" ]; then
+  log "homeassistant.json not present yet; will retry next boot"
+  exit 0
+fi
+
+# Drop immutability so we can write our settings
+chattr -i "$HAJSON" 2>/dev/null
+
+python3 - "$HAJSON" <<'PYEOF' >> "$LOG" 2>&1
+import json, sys
+path = sys.argv[1]
+try:
+    with open(path) as f:
+        data = json.load(f)
+except Exception as e:
+    print("cannot read homeassistant.json:", e)
+    sys.exit(1)
+
+changed = []
+
+# The decisive setting: Supervisor must not pull/replace our branded image.
+if data.get("override_image") is not True:
+    data["override_image"] = True
+    changed.append("override_image=True")
+
+# Keep watchdog on so Core is restarted if it crashes, but Supervisor
+# will restart it from OUR image, not a fresh upstream pull.
+if data.get("watchdog") is not True:
+    data["watchdog"] = True
+    changed.append("watchdog=True")
+
+if changed:
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+    print("core-pin applied:", ", ".join(changed))
+else:
+    print("core-pin already in effect")
+
+print("image   =", data.get("image"))
+print("version =", data.get("version"))
+print("override_image =", data.get("override_image"))
+PYEOF
+
+# DO NOT make this file immutable.
+#
+# Tested on device 2026-08-08: chattr +i here breaks Core startup with
+#   ERROR supervisor.utils.json Can't write /data/homeassistant.json:
+#   [Errno 1] Operation not permitted
+# Supervisor rewrites homeassistant.json routinely (access tokens, state),
+# not just for settings, so freezing it prevents Home Assistant from starting.
+#
+# Verified that override_image=true PERSISTS without the immutable flag, so the
+# freeze was never needed. If anything ever does flip it, aetos-brand-watch
+# catches the container change and restores branding.
+chattr -i "$HAJSON" 2>/dev/null || true
+log "override_image set (file intentionally left writable - see comment)"
+
+log "=== aetos-core-pin done ==="
+exit 0

@@ -1,0 +1,13 @@
+[Unit]
+Description=Aetos One brand guard safety net (daily)
+# Primary protection is event-driven (aetos-brand-watch.service).
+# This timer only covers the rare case where the watcher died or an
+# event was missed. Daily instead of every 5 min = far less SD card wear.
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=24h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

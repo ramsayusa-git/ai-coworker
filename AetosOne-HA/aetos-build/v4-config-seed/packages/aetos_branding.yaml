@@ -1,0 +1,52 @@
+# Aetos One white-label branding helpers + first-boot defaults.
+# Helpers persist edits (no `initial:`); the automation sets initial values
+# only when empty, so a client's changes are never overwritten on restart.
+
+input_text:
+  aetos_brand_name:
+    name: Aetos Brand Name
+    max: 255
+    icon: mdi:rename-box
+  aetos_brand_logo:
+    name: Aetos Brand Logo
+    max: 255
+    icon: mdi:image
+  aetos_primary_color:
+    name: Aetos Primary Color
+    max: 32
+    icon: mdi:palette
+  aetos_accent_color:
+    name: Aetos Accent Color
+    max: 32
+    icon: mdi:palette-outline
+
+automation:
+  - alias: Aetos One - branding first-boot defaults
+    id: aetos_branding_defaults
+    mode: single
+    trigger:
+      - platform: homeassistant
+        event: start
+    action:
+      - variables:
+          empty: ["", "unknown", "unavailable"]
+      - if: "{{ states('input_text.aetos_brand_name') in empty }}"
+        then:
+          - service: input_text.set_value
+            target: { entity_id: input_text.aetos_brand_name }
+            data: { value: "Aetos One" }
+      - if: "{{ states('input_text.aetos_brand_logo') in empty }}"
+        then:
+          - service: input_text.set_value
+            target: { entity_id: input_text.aetos_brand_logo }
+            data: { value: "/static/icons/aetos-shield.png" }
+      - if: "{{ states('input_text.aetos_primary_color') in empty }}"
+        then:
+          - service: input_text.set_value
+            target: { entity_id: input_text.aetos_primary_color }
+            data: { value: "#273A80" }
+      - if: "{{ states('input_text.aetos_accent_color') in empty }}"
+        then:
+          - service: input_text.set_value
+            target: { entity_id: input_text.aetos_accent_color }
+            data: { value: "#E6701C" }

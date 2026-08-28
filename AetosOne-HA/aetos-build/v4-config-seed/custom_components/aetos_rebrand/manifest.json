@@ -1,0 +1,11 @@
+{
+  "domain": "aetos_rebrand",
+  "name": "Aetos One Rebrand",
+  "version": "1.0.0",
+  "documentation": "https://www.aetostechlabs.com",
+  "issue_tracker": "https://www.aetostechlabs.com",
+  "dependencies": ["persistent_notification"],
+  "codeowners": ["@aetostechlabs"],
+  "iot_class": "local_push",
+  "integration_type": "system"
+}

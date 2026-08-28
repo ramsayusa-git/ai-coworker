@@ -1,0 +1,5 @@
+https://github.com/blakeblackshear/frigate-hass-addons
+https://github.com/homeassistant-ai/ha-mcp
+https://github.com/Ferdinand99/home-assistant-newt-addon
+https://github.com/netbirdio/addon-netbird
+https://github.com/brenner-tobias/ha-addons

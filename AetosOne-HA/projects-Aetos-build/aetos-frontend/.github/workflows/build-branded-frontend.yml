@@ -1,0 +1,90 @@
+name: Build branded frontend wheel
+
+# Builds a home_assistant_frontend wheel with Aetos One branding baked in,
+# then publishes it as a release/artifact you can install on your HA box.
+
+on:
+  workflow_dispatch:
+    inputs:
+      frontend_ref:
+        description: "home-assistant/frontend git ref (tag/branch). Blank = value in branding/config.env"
+        required: false
+        default: ""
+  push:
+    paths:
+      - "branding/**"
+      - ".github/workflows/build-branded-frontend.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this branding repo
+        uses: actions/checkout@v4
+        with:
+          path: branding-repo
+
+      - name: Load config
+        id: cfg
+        run: |
+          source branding-repo/branding/config.env
+          REF="${{ github.event.inputs.frontend_ref }}"
+          [ -z "$REF" ] && REF="$FRONTEND_REF"
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "Building frontend ref: $REF"
+
+      - name: Checkout home-assistant/frontend
+        uses: actions/checkout@v4
+        with:
+          repository: home-assistant/frontend
+          ref: ${{ steps.cfg.outputs.ref }}
+          path: frontend
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Enable corepack / yarn
+        run: corepack enable
+
+      - name: Install JS deps
+        working-directory: frontend
+        run: yarn install --immutable
+
+      - name: Apply Aetos branding overlay
+        env:
+          FRONTEND_DIR: ${{ github.workspace }}/frontend
+          BRANDING_DIR: ${{ github.workspace }}/branding-repo/branding
+        run: |
+          chmod +x branding-repo/branding/apply-branding.sh
+          branding-repo/branding/apply-branding.sh
+
+      - name: Build frontend + wheel
+        working-directory: frontend
+        run: |
+          pip install build
+          # Produces the compiled frontend and a python wheel
+          script/build_frontend || yarn build
+          python -m build --wheel --outdir dist_wheel .
+          ls -la dist_wheel
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aetos-hass-frontend-wheel
+          path: frontend/dist_wheel/*.whl
+          if-no-files-found: error
+
+      - name: Publish as release (on manual run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: aetos-frontend-${{ steps.cfg.outputs.ref }}
+          files: frontend/dist_wheel/*.whl

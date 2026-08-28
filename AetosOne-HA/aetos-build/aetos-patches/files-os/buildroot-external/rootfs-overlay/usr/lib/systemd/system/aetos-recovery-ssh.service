@@ -1,0 +1,13 @@
+[Unit]
+Description=Aetos One recovery SSH (dropbear :22222) key install
+After=haos-config.service root-.ssh.mount
+Wants=haos-config.service
+ConditionPathExists=/usr/share/aetos/authorized_keys
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/aetos-recovery-ssh
+
+[Install]
+WantedBy=multi-user.target

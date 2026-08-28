@@ -1,0 +1,13 @@
+[Unit]
+Description=Aetos One brand guard (self-healing branding)
+After=docker.service hassos-supervisor.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/aetos-brand-guard
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

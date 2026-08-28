@@ -1,0 +1,15 @@
+[Unit]
+Description=Aetos One - ensure Home Assistant Core container starts on first boot
+After=haos-supervisor.service
+Wants=haos-supervisor.service
+RequiresMountsFor=/mnt/data
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sh -c 'sleep 30'
+ExecStart=/usr/sbin/aetos-core-kick
+Restart=on-failure
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target

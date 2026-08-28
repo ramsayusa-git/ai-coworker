@@ -1,0 +1,44 @@
+#!/bin/sh
+# Aetos One — brand watch (event-driven).
+#
+# Watches the Docker event stream and reacts the moment the Home Assistant
+# Core container is (re)created or started. That is exactly when an update
+# has replaced the container and wiped the Aetos branding.
+#
+# Why event-driven instead of polling:
+#   - restores in seconds instead of up to N minutes
+#   - no periodic docker exec / checksum work against the SD card
+#     (~288 wake-ups a day saved; less card wear)
+#   - fires precisely when it matters, and also catches manual restarts
+#
+# A separate low-frequency timer (daily) acts as a safety net in case this
+# watcher ever dies or an event is missed.
+set -u
+
+LOG=/var/log/aetos-brand-guard.log
+log() { echo "[$(date '+%F %H:%M:%S')] [watch] $*" >> "$LOG" 2>/dev/null; }
+
+log "=== brand watch started (event-driven) ==="
+
+# Run once at startup so a boot straight after an update is covered.
+sleep 30
+/usr/sbin/aetos-brand-guard 2>/dev/null
+
+# Follow container lifecycle events for the Core container.
+# 'start' covers: update (new container), manual restart, Supervisor repair.
+docker events \
+    --filter 'type=container' \
+    --filter 'container=homeassistant' \
+    --filter 'event=start' \
+    --format '{{.Actor.Attributes.name}} {{.Action}}' 2>/dev/null |
+while read -r name action; do
+  log "event: $name $action"
+  # Give Core a moment to finish coming up before exec'ing into it.
+  sleep 20
+  /usr/sbin/aetos-brand-guard 2>/dev/null
+done
+
+# If we get here the event stream ended (docker restarted); systemd will
+# restart this unit and we re-attach.
+log "event stream ended; exiting for systemd restart"
+exit 1

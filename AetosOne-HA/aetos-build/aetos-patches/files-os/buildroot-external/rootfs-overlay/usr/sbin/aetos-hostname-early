@@ -1,0 +1,37 @@
+#!/bin/sh
+# Aetos One - set the hostname EARLY (before NetworkManager runs DHCP) so the
+# very first DHCP request carries the name. Without this, a freshly flashed unit
+# boots with hostname "(none)", NetworkManager leases with no hostname, and the
+# router/DHCP table (what LAN scanners show) never learns the name until a later
+# reboot. mDNS was unaffected, but the DHCP-hostname column stayed blank.
+#
+# Only seeds a name when the current one is empty/default; a user rename that has
+# already been persisted to /etc/hostname (bind-mounted from the data overlay) is
+# left untouched. An optional /mnt/data/supervisor/homeassistant/aetos_hostname.txt
+# provides a per-unit default.
+set -e
+
+HN=/etc/hostname
+cur=$(cat "$HN" 2>/dev/null | tr -d '[:space:]')
+
+desired="aetosone"
+UF="/mnt/data/supervisor/homeassistant/aetos_hostname.txt"
+if [ -s "$UF" ]; then
+    v=$(tr -d '[:space:]' < "$UF" 2>/dev/null)
+    [ -n "$v" ] && desired="$v"
+fi
+
+case "$cur" in
+    ""|"(none)"|"localhost"|"homeassistant")
+        printf '%s\n' "$desired" > "$HN" 2>/dev/null || true
+        hostname "$desired" 2>/dev/null || true
+        if command -v hostnamectl >/dev/null 2>&1; then
+            hostnamectl set-hostname "$desired" 2>/dev/null || true
+        fi
+        echo "aetos-hostname-early: seeded hostname '$desired' (was '${cur:-none}')"
+        ;;
+    *)
+        echo "aetos-hostname-early: keeping existing hostname '$cur'"
+        ;;
+esac
+exit 0

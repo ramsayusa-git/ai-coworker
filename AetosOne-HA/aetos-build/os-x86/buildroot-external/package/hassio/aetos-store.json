@@ -1,0 +1,14 @@
+{
+  "repositories": [
+    "core",
+    "local",
+    "https://github.com/hassio-addons/repository",
+    "https://github.com/esphome/home-assistant-addon",
+    "https://github.com/music-assistant/home-assistant-addon",
+    "https://github.com/blakeblackshear/frigate-hass-addons",
+    "https://github.com/homeassistant-ai/ha-mcp",
+    "https://github.com/Ferdinand99/home-assistant-newt-addon",
+    "https://github.com/netbirdio/addon-netbird",
+    "https://github.com/brenner-tobias/ha-addons"
+  ]
+}

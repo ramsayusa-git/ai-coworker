@@ -1,0 +1,17 @@
+disable apparmor.service
+
+enable systemd-time-wait-sync.service
+
+enable aetos-hostname-early.service
+
+enable aetos-update-block.service
+
+enable aetos-recovery-ssh.service
+
+
+enable aetos-clock-guard.service
+
+enable aetos-addons-firstboot.service
+enable aetos-addons-firstboot.timer
+
+enable aetos-core-kick.service

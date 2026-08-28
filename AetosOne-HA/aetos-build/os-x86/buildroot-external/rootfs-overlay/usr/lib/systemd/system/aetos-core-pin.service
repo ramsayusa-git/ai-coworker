@@ -1,0 +1,14 @@
+[Unit]
+Description=Aetos One Core image pin (zero-window brand protection)
+After=hassos-supervisor.service docker.service
+Wants=hassos-supervisor.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/aetos-core-pin
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

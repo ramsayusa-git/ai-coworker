@@ -1,0 +1,146 @@
+# =====================================================================
+# Aetos One — Sumeru Water Plant  (top-menu home layout, real wpa01 entities)
+# Cards: Mushroom, timer-bar-card, mini-graph-card, clock-weather-card.
+# =====================================================================
+title: Aetos One
+views:
+  - title: Overview
+    path: overview
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: custom:mushroom-template-card
+            primary: >-
+              {% set h = now().hour %}
+              {% if h < 12 %}Good morning{% elif h < 17 %}Good afternoon{% else %}Good evening{% endif %}, {{ user }}
+            secondary: "{{ now().strftime('%A, %d %B %Y') }}"
+            icon: mdi:water-pump
+            icon_color: "#273A80"
+          - type: custom:clock-weather-card
+            entity: weather.forecast_home
+            forecast_rows: 3
+
+      - type: grid
+        title: Wash Process
+        cards:
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.start_all_wash_process
+            name: Start All
+            icon: mdi:play-circle
+            icon_color: green
+            tap_action: {action: toggle}
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.stop_all
+            name: Stop All
+            icon: mdi:stop-circle
+            icon_color: red
+            tap_action: {action: toggle}
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.normal_wash
+            name: Normal Wash
+            icon: mdi:washing-machine
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.back_wash
+            name: Back Wash
+            icon: mdi:backup-restore
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.rinse_wash
+            name: Rinse Wash
+            icon: mdi:water
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.test_wash_sequence
+            name: Test Sequence
+            icon: mdi:test-tube
+
+      - type: grid
+        title: Valves
+        cards:
+          - type: custom:mushroom-entity-card
+            entity: switch.valve_one
+            name: Valve 1
+            icon: mdi:pipe-valve
+          - type: custom:mushroom-entity-card
+            entity: switch.valve_two
+            name: Valve 2
+            icon: mdi:pipe-valve
+          - type: custom:mushroom-entity-card
+            entity: switch.valve_three
+            name: Valve 3
+            icon: mdi:pipe-valve
+          - type: custom:mushroom-entity-card
+            entity: switch.valve_four
+            name: Valve 4
+            icon: mdi:pipe-valve
+          - type: custom:mushroom-entity-card
+            entity: switch.valve_five
+            name: Valve 5
+            icon: mdi:pipe-valve
+          - type: custom:mushroom-entity-card
+            entity: switch.valve_six
+            name: Valve 6
+            icon: mdi:pipe-valve
+
+      - type: grid
+        title: Wash Status
+        cards:
+          - type: custom:timer-bar-card
+            entities: [timer.wash_timer]
+            name: Wash Timer
+            bar_foreground: "#E6701C"
+          - type: custom:mushroom-template-card
+            primary: Status
+            secondary: "{{ states('sensor.wash_status_display') }}"
+            icon: mdi:information-outline
+            icon_color: "#273A80"
+          - type: custom:mushroom-template-card
+            primary: Runtime
+            secondary: "{{ states('sensor.wash_runtime_display') }}"
+            icon: mdi:timer-outline
+            icon_color: "#E6701C"
+          - type: custom:mushroom-entity-card
+            entity: counter.wash_cycle_life_count
+            name: Lifetime Cycles
+            icon: mdi:counter
+          - type: custom:mushroom-entity-card
+            entity: input_number.wash_cycle_count
+            name: Cycle Count
+            icon: mdi:numeric
+
+      - type: grid
+        title: Network & Media
+        cards:
+          - type: custom:mini-graph-card
+            name: M4R Speed
+            entities:
+              - {entity: sensor.m4r_download_speed, name: Down, color: "#273A80"}
+              - {entity: sensor.m4r_upload_speed, name: Up, color: "#E6701C"}
+            hours_to_show: 6
+            points_per_hour: 6
+          - type: custom:mushroom-media-player-card
+            entity: media_player.hisense_tv
+            use_media_info: true
+          - type: custom:mushroom-media-player-card
+            entity: media_player.google_speaker_mi
+          - type: custom:mushroom-media-player-card
+            entity: media_player.google_mini_speaker_two
+
+      - type: grid
+        title: People
+        cards:
+          - type: custom:mushroom-person-card
+            entity: person.krishna
+          - type: custom:mushroom-person-card
+            entity: person.sumeru
+
+      - type: grid
+        cards:
+          - type: markdown
+            content: >
+              <div style="text-align:center">
+              <b style="color:#273A80">Powered by Aetos Tech Labs</b><br>
+              <span style="font-size:0.85em">
+              <a href="https://www.aetostechlabs.com">www.aetostechlabs.com</a> ·
+              krishna@aetostechlabs.com · Mobile: +91 99666 12678
+              </span></div>

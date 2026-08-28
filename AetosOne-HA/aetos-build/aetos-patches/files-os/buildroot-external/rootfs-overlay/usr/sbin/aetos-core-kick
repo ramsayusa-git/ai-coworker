@@ -1,0 +1,21 @@
+#!/bin/sh
+# Aetos One - guarantee Home Assistant Core actually STARTS on first boot.
+# Symptom worked around: on a fresh flash the Supervisor sometimes creates the
+# 'homeassistant' container but leaves it in state "created" (never started), so
+# the UI never comes up. This watches for that and starts it. Harmless if the
+# Supervisor already handles it (starting a running container is a no-op).
+i=0
+while [ "$i" -lt 72 ]; do
+    st=$(docker inspect -f '{{.State.Status}}' homeassistant 2>/dev/null)
+    case "$st" in
+        running)
+            echo "aetos-core-kick: Home Assistant Core is running"
+            exit 0 ;;
+        created|exited)
+            echo "aetos-core-kick: Core container is '$st' -> starting it"
+            docker start homeassistant >/dev/null 2>&1 ;;
+    esac
+    i=$((i + 1))
+    sleep 10
+done
+exit 0

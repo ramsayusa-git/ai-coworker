@@ -1,0 +1,28 @@
+diff --git a/buildroot-external/package/hassio/hassio.mk b/buildroot-external/package/hassio/hassio.mk
+index 4f73167..a60c2be 100644
+--- a/buildroot-external/package/hassio/hassio.mk
++++ b/buildroot-external/package/hassio/hassio.mk
+@@ -18,11 +18,11 @@ else ifeq ($(BR2_PACKAGE_HASSIO_CHANNEL_DEV),y)
+ HASSIO_VERSION_CHANNEL = "dev"
+ endif
+ 
+-HASSIO_CONTAINER_IMAGES_ARCH = supervisor dns audio cli multicast observer core
++HASSIO_CONTAINER_IMAGES_ARCH = supervisor dns audio cli multicast observer
+ 
+ define HASSIO_CONFIGURE_CMDS
+-	# Deploy only landing page for "core" by setting version to "landingpage"
+-	curl -s $(HASSIO_VERSION_URL)$(HASSIO_VERSION_CHANNEL)".json" | jq '.core = "landingpage"' > $(@D)/version.json
++	# AETOS ONE: pin core to our preloaded branded core version (offline, no pull)
++	curl -s $(HASSIO_VERSION_URL)$(HASSIO_VERSION_CHANNEL)".json" | jq '.core = "2026.7.2"' > $(@D)/version.json
+ endef
+ 
+ define HASSIO_BUILD_CMDS
+@@ -32,6 +32,8 @@ define HASSIO_BUILD_CMDS
+ 		$(BR2_EXTERNAL_HAOS_PATH)/package/hassio/fetch-container-image.sh \
+ 			$(BR2_PACKAGE_HASSIO_ARCH) $(BR2_PACKAGE_HASSIO_MACHINE) $(@D)/version.json $(image) "$(HASSIO_DL_DIR)" "$(@D)/images"
+ 	)
++	# AETOS ONE: preload branded core image (baked frontend) for offline first boot
++	$(Q)cp $(BR2_EXTERNAL_HAOS_PATH)/package/hassio/aetos-core.tar $(@D)/images/
+ endef
+ 
+ HASSIO_INSTALL_IMAGES = YES

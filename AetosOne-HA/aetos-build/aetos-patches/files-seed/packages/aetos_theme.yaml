@@ -1,0 +1,12 @@
+# Auto-apply the Aetos One theme as the frontend default at startup.
+automation:
+  - alias: Aetos One - set default theme
+    id: aetos_default_theme
+    trigger:
+      - platform: homeassistant
+        event: start
+    action:
+      - service: frontend.set_theme
+        data:
+          name: Aetos One
+    mode: single

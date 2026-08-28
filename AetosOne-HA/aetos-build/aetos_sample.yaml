@@ -1,0 +1,138 @@
+# Aetos One — demo devices for the showcase dashboard. Safe to delete on a real unit.
+
+input_boolean:
+  aetos_living_on: {name: Living light, icon: mdi:lightbulb, initial: true}
+  aetos_bedroom_on: {name: Bedroom light, icon: mdi:lightbulb, initial: false}
+  aetos_kitchen_on: {name: Kitchen light, icon: mdi:lightbulb, initial: true}
+  aetos_fan_on: {name: Ceiling fan, icon: mdi:fan, initial: true}
+  aetos_ac_on: {name: AC power, icon: mdi:air-conditioner, initial: false}
+  aetos_security: {name: Security, icon: mdi:shield-home, initial: true}
+  aetos_motion_src: {name: Motion source, initial: false}
+
+input_number:
+  aetos_living_bri: {name: Living brightness, initial: 72, min: 0, max: 100, step: 1}
+  aetos_bedroom_bri: {name: Bedroom brightness, initial: 0, min: 0, max: 100, step: 1}
+  aetos_kitchen_bri: {name: Kitchen brightness, initial: 45, min: 0, max: 100, step: 1}
+  aetos_fan_pct: {name: Fan speed, initial: 66, min: 0, max: 100, step: 33}
+  aetos_blinds_pos: {name: Blinds, initial: 80, min: 0, max: 100, step: 1}
+  aetos_curtains_pos: {name: Curtains, initial: 40, min: 0, max: 100, step: 1}
+  aetos_humidity: {name: Humidity, initial: 46, min: 0, max: 100, step: 1, unit_of_measurement: "%"}
+  aetos_power: {name: Power now, initial: 430, min: 0, max: 5000, step: 1, unit_of_measurement: W}
+  aetos_co2: {name: CO2, initial: 612, min: 350, max: 2000, step: 1, unit_of_measurement: ppm}
+  aetos_lux: {name: Illuminance, initial: 340, min: 0, max: 100000, step: 1, unit_of_measurement: lx}
+  aetos_battery: {name: Lock battery, initial: 88, min: 0, max: 100, step: 1, unit_of_measurement: "%"}
+  aetos_outdoor: {name: Outdoor temp, initial: 26, min: -20, max: 55, step: 0.1, unit_of_measurement: "°C"}
+  aetos_energy_today: {name: Energy today, initial: 8.4, min: 0, max: 100, step: 0.1, unit_of_measurement: kWh, icon: mdi:lightning-bolt}
+  aetos_thermostat: {name: Thermostat, initial: 21.5, min: 7, max: 35, step: 0.5, unit_of_measurement: "°C", icon: mdi:thermostat}
+
+input_button:
+  aetos_all_lights: {name: All lights, icon: mdi:lightbulb-group}
+  aetos_away: {name: Away, icon: mdi:shield-lock}
+  aetos_movie: {name: Movie, icon: mdi:movie}
+  aetos_goodnight: {name: Goodnight, icon: mdi:weather-night}
+
+climate:
+  - platform: generic_thermostat
+    name: Living room AC
+    unique_id: aetos_ac
+    heater: input_boolean.aetos_ac_on
+    target_sensor: sensor.living_room_temperature
+    min_temp: 16
+    max_temp: 30
+    ac_mode: true
+    target_temp: 24
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+
+camera:
+  - {platform: local_file, name: Front door cam, file_path: /config/www/cam_front.jpg}
+  - {platform: local_file, name: Garden cam, file_path: /config/www/cam_garden.jpg}
+  - {platform: local_file, name: Garage cam, file_path: /config/www/cam_garage.jpg}
+  - {platform: local_file, name: Living cam, file_path: /config/www/cam_living.jpg}
+
+template:
+  - light:
+      - name: Living room
+        unique_id: aetos_living
+        state: "{{ is_state('input_boolean.aetos_living_on','on') }}"
+        level: "{{ (states('input_number.aetos_living_bri')|float(0) * 2.55)|int }}"
+        turn_on: [{action: input_boolean.turn_on, target: {entity_id: input_boolean.aetos_living_on}}]
+        turn_off: [{action: input_boolean.turn_off, target: {entity_id: input_boolean.aetos_living_on}}]
+        set_level:
+          - {action: input_number.set_value, target: {entity_id: input_number.aetos_living_bri}, data: {value: "{{ (brightness / 2.55)|int }}"}}
+          - {action: input_boolean.turn_on, target: {entity_id: input_boolean.aetos_living_on}}
+      - name: Bedroom
+        unique_id: aetos_bedroom
+        state: "{{ is_state('input_boolean.aetos_bedroom_on','on') }}"
+        level: "{{ (states('input_number.aetos_bedroom_bri')|float(0) * 2.55)|int }}"
+        turn_on: [{action: input_boolean.turn_on, target: {entity_id: input_boolean.aetos_bedroom_on}}]
+        turn_off: [{action: input_boolean.turn_off, target: {entity_id: input_boolean.aetos_bedroom_on}}]
+        set_level:
+          - {action: input_number.set_value, target: {entity_id: input_number.aetos_bedroom_bri}, data: {value: "{{ (brightness / 2.55)|int }}"}}
+          - {action: input_boolean.turn_on, target: {entity_id: input_boolean.aetos_bedroom_on}}
+      - name: Kitchen
+        unique_id: aetos_kitchen
+        state: "{{ is_state('input_boolean.aetos_kitchen_on','on') }}"
+        level: "{{ (states('input_number.aetos_kitchen_bri')|float(0) * 2.55)|int }}"
+        turn_on: [{action: input_boolean.turn_on, target: {entity_id: input_boolean.aetos_kitchen_on}}]
+        turn_off: [{action: input_boolean.turn_off, target: {entity_id: input_boolean.aetos_kitchen_on}}]
+        set_level:
+          - {action: input_number.set_value, target: {entity_id: input_number.aetos_kitchen_bri}, data: {value: "{{ (brightness / 2.55)|int }}"}}
+          - {action: input_boolean.turn_on, target: {entity_id: input_boolean.aetos_kitchen_on}}
+  - fan:
+      - name: Ceiling fan
+        unique_id: aetos_ceiling
+        state: "{{ states('input_boolean.aetos_fan_on') }}"
+        percentage: "{{ states('input_number.aetos_fan_pct')|int }}"
+        speed_count: 3
+        turn_on: [{action: input_boolean.turn_on, target: {entity_id: input_boolean.aetos_fan_on}}]
+        turn_off: [{action: input_boolean.turn_off, target: {entity_id: input_boolean.aetos_fan_on}}]
+        set_percentage: [{action: input_number.set_value, target: {entity_id: input_number.aetos_fan_pct}, data: {value: "{{ percentage }}"}}]
+  - cover:
+      - name: Living blinds
+        unique_id: aetos_blinds
+        position: "{{ states('input_number.aetos_blinds_pos')|int }}"
+        open_cover: [{action: input_number.set_value, target: {entity_id: input_number.aetos_blinds_pos}, data: {value: 100}}]
+        close_cover: [{action: input_number.set_value, target: {entity_id: input_number.aetos_blinds_pos}, data: {value: 0}}]
+        set_cover_position: [{action: input_number.set_value, target: {entity_id: input_number.aetos_blinds_pos}, data: {value: "{{ position }}"}}]
+      - name: Bedroom curtains
+        unique_id: aetos_curtains
+        position: "{{ states('input_number.aetos_curtains_pos')|int }}"
+        open_cover: [{action: input_number.set_value, target: {entity_id: input_number.aetos_curtains_pos}, data: {value: 100}}]
+        close_cover: [{action: input_number.set_value, target: {entity_id: input_number.aetos_curtains_pos}, data: {value: 0}}]
+        set_cover_position: [{action: input_number.set_value, target: {entity_id: input_number.aetos_curtains_pos}, data: {value: "{{ position }}"}}]
+  - sensor:
+      - {name: Living room temperature, unique_id: aetos_living_temp, unit_of_measurement: "°C", state: "24", device_class: temperature}
+      - {name: Bedroom temperature, unique_id: aetos_bedroom_temp, unit_of_measurement: "°C", state: "23", device_class: temperature}
+      - {name: Outdoor temperature, unique_id: aetos_outdoor_temp, unit_of_measurement: "°C", state: "{{ states('input_number.aetos_outdoor') }}", device_class: temperature}
+      - {name: Humidity, unique_id: aetos_hum, unit_of_measurement: "%", state: "{{ states('input_number.aetos_humidity')|int }}", device_class: humidity}
+      - {name: CO2, unique_id: aetos_co2s, unit_of_measurement: ppm, state: "{{ states('input_number.aetos_co2')|int }}", device_class: carbon_dioxide}
+      - {name: Illuminance, unique_id: aetos_luxs, unit_of_measurement: lx, state: "{{ states('input_number.aetos_lux')|int }}", device_class: illuminance}
+      - {name: Lock battery, unique_id: aetos_batt, unit_of_measurement: "%", state: "{{ states('input_number.aetos_battery')|int }}", device_class: battery}
+      - {name: Power now, unique_id: aetos_pow, unit_of_measurement: W, state: "{{ states('input_number.aetos_power')|int }}", device_class: power}
+      - {name: Air quality, unique_id: aetos_aqi, state: "Good", icon: mdi:air-filter}
+      - {name: Front door status, unique_id: aetos_front_door, state: "Clear", icon: mdi:door}
+      - {name: Aetos clock, unique_id: aetos_clock, state: "{{ now().strftime('%H:%M') }}", icon: mdi:clock-outline}
+      - {name: Aetos date, unique_id: aetos_date, state: "{{ now().strftime('%A, %d %B') }}", icon: mdi:calendar}
+  - binary_sensor:
+      - {name: Living room motion, unique_id: aetos_motion, state: "{{ is_state('input_boolean.aetos_motion_src','on') }}", device_class: motion}
+      - {name: Front door contact, unique_id: aetos_door, state: "off", device_class: door}
+      - {name: Water leak, unique_id: aetos_leak, state: "off", device_class: moisture}
+  - weather:
+      - name: Aetos Weather
+        unique_id: aetos_weather
+        condition_template: "sunny"
+        temperature_template: "28"
+        temperature_unit: "°C"
+        humidity_template: "45"
+        wind_speed_template: "8"
+        wind_speed_unit: "km/h"
+        forecast_daily_template: >
+          {% set b = now() %}
+          {{ [
+            {"datetime": b.isoformat(), "condition":"sunny","temperature":30,"templow":22},
+            {"datetime": (b+timedelta(days=1)).isoformat(), "condition":"partlycloudy","temperature":29,"templow":21},
+            {"datetime": (b+timedelta(days=2)).isoformat(), "condition":"cloudy","temperature":27,"templow":20},
+            {"datetime": (b+timedelta(days=3)).isoformat(), "condition":"rainy","temperature":25,"templow":19},
+            {"datetime": (b+timedelta(days=4)).isoformat(), "condition":"sunny","temperature":31,"templow":23}
+          ] }}

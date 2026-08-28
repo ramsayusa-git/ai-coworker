@@ -1,0 +1,17 @@
+[Unit]
+Description=Aetos One boot-time clock guard (floor clock to build date; NTP-blocked networks)
+DefaultDependencies=no
+After=mnt-data.mount
+RequiresMountsFor=/mnt/data
+# Run before anything that does TLS / needs a sane clock.
+Before=systemd-time-wait-sync.service haos-supervisor.service network-pre.target
+Before=shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/aetos-clock-guard
+
+[Install]
+WantedBy=sysinit.target

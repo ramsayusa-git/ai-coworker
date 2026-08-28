@@ -1,0 +1,287 @@
+diff --git a/src/html/authorize.html.template b/src/html/authorize.html.template
+index 19b5d2b5..25378344 100644
+--- a/src/html/authorize.html.template
++++ b/src/html/authorize.html.template
+@@ -39,21 +39,21 @@
+       }
+ 
+       .header img {
+-        height: 112px;
+-        width: 112px;
++        height: 196px;
++        width: 196px;
+       }
+ 
+       /* Aetos One - animated aurora background */
+       body { position: relative; overflow-x: hidden; }
+       .aurora-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+-      .aurora-bg span { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .45; will-change: transform; }
+-      .aurora-bg .a1 { width: 46vmax; height: 46vmax; background: #273A80; top: -12vh; left: -8vw; animation: aur1 20s ease-in-out infinite alternate; }
+-      .aurora-bg .a2 { width: 40vmax; height: 40vmax; background: #E6701C; bottom: -14vh; right: -6vw; animation: aur2 24s ease-in-out infinite alternate; }
+-      .aurora-bg .a3 { width: 34vmax; height: 34vmax; background: #3D55B0; top: 28vh; right: 18vw; animation: aur3 28s ease-in-out infinite alternate; }
++      .aurora-bg span { position: absolute; border-radius: 50%; filter: blur(52px); opacity: .72; will-change: transform; }
++      .aurora-bg .a1 { width: 54vmax; height: 54vmax; background: #273A80; top: -12vh; left: -8vw; animation: aur1 20s ease-in-out infinite alternate; }
++      .aurora-bg .a2 { width: 48vmax; height: 48vmax; background: #E6701C; bottom: -14vh; right: -6vw; animation: aur2 24s ease-in-out infinite alternate; }
++      .aurora-bg .a3 { width: 42vmax; height: 42vmax; background: #3D55B0; top: 28vh; right: 18vw; animation: aur3 28s ease-in-out infinite alternate; }
+       @keyframes aur1 { from { transform: translate(0,0) scale(1); } to { transform: translate(9vw,11vh) scale(1.18); } }
+       @keyframes aur2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-11vw,-9vh) scale(1.12); } }
+       @keyframes aur3 { from { transform: translate(0,0) scale(1); } to { transform: translate(7vw,-13vh) scale(1.22); } }
+-      @media (prefers-color-scheme: dark) { html, body { background-color: #0E1330 !important; } .aurora-bg span { opacity: .5; } }
++      @media (prefers-color-scheme: dark) { html, body { background-color: #0E1330 !important; } .aurora-bg span { opacity: .78; } }
+       @media (prefers-reduced-motion: reduce) { .aurora-bg span { animation: none; } }
+       .content { position: relative; z-index: 1; }
+     </style>
+diff --git a/src/html/index.html.template b/src/html/index.html.template
+index cb4219c9..a81289eb 100644
+--- a/src/html/index.html.template
++++ b/src/html/index.html.template
+@@ -63,14 +63,26 @@
+         height: 96px;
+       }
+       #ha-launch-screen .ha-launch-screen-spacer-top {
+-        flex: 1;
+-        margin-top: calc( 2 * max(var(--safe-area-inset-top, 0px), 48px) + 46px );
+-        padding-top: 48px;
++        flex: 2;
++        margin-top: 0;
++        padding-top: 0;
+       }
+       #ha-launch-screen .ha-launch-screen-spacer-bottom {
+-        flex: 1;
++        flex: 3;
+         padding-top: 16px;
+       }
++      #ha-launch-screen .aetos-launch-footer {
++        flex: 0;
++        margin: 0 16px max(var(--safe-area-inset-bottom, 0px), 40px);
++        font-size: 12px;
++        line-height: 16px;
++        letter-spacing: .05em;
++        text-transform: uppercase;
++        text-align: center;
++        color: var(--primary-text-color, #212121);
++        opacity: .6;
++        animation: launch-lockup-in var(--ha-animation-duration-normal, 250ms) ease-out both;
++      }
+       .ohf-logo {
+         margin: max(var(--safe-area-inset-bottom, 0px), 48px) 0;
+         display: flex;
+@@ -105,8 +117,8 @@
+       @media (max-height: 560px) {
+         /* body selector to avoid minification causing bad jinja2 */
+         body #ha-launch-screen .ha-launch-screen-spacer-top {
+-          margin-top: 24px;
+-          padding-top: 24px;
++          margin-top: 0;
++          padding-top: 0;
+         }
+         body #ha-launch-screen .ha-launch-screen-spacer-bottom {
+           padding-top: 16px;
+@@ -122,7 +134,7 @@
+       <div class="ha-launch-screen-spacer-top"></div>
+       <img class="launch-logo" src="/static/icons/favicon-512x512.png" alt="Aetos One" />
+       <div id="ha-launch-screen-info-box" class="ha-launch-screen-spacer-bottom"></div>
+-      
++      <div class="aetos-launch-footer">A project from Aetos Techlabs LLP</div>
+     </div>
+     <home-assistant></home-assistant>
+     <%= renderTemplate("_js_base.html.template") %>
+diff --git a/src/html/onboarding.html.template b/src/html/onboarding.html.template
+index 5b064e8c..9ecbe925 100644
+--- a/src/html/onboarding.html.template
++++ b/src/html/onboarding.html.template
+@@ -44,14 +44,14 @@
+       /* Aetos One - animated aurora background */
+       body { position: relative; overflow-x: hidden; }
+       .aurora-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+-      .aurora-bg span { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .45; will-change: transform; }
+-      .aurora-bg .a1 { width: 46vmax; height: 46vmax; background: #273A80; top: -12vh; left: -8vw; animation: aur1 20s ease-in-out infinite alternate; }
+-      .aurora-bg .a2 { width: 40vmax; height: 40vmax; background: #E6701C; bottom: -14vh; right: -6vw; animation: aur2 24s ease-in-out infinite alternate; }
+-      .aurora-bg .a3 { width: 34vmax; height: 34vmax; background: #3D55B0; top: 28vh; right: 18vw; animation: aur3 28s ease-in-out infinite alternate; }
++      .aurora-bg span { position: absolute; border-radius: 50%; filter: blur(52px); opacity: .72; will-change: transform; }
++      .aurora-bg .a1 { width: 54vmax; height: 54vmax; background: #273A80; top: -12vh; left: -8vw; animation: aur1 20s ease-in-out infinite alternate; }
++      .aurora-bg .a2 { width: 48vmax; height: 48vmax; background: #E6701C; bottom: -14vh; right: -6vw; animation: aur2 24s ease-in-out infinite alternate; }
++      .aurora-bg .a3 { width: 42vmax; height: 42vmax; background: #3D55B0; top: 28vh; right: 18vw; animation: aur3 28s ease-in-out infinite alternate; }
+       @keyframes aur1 { from { transform: translate(0,0) scale(1); } to { transform: translate(9vw,11vh) scale(1.18); } }
+       @keyframes aur2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-11vw,-9vh) scale(1.12); } }
+       @keyframes aur3 { from { transform: translate(0,0) scale(1); } to { transform: translate(7vw,-13vh) scale(1.22); } }
+-      @media (prefers-color-scheme: dark) { html, body#particles { background-color: #0E1330 !important; } .aurora-bg span { opacity: .5; } }
++      @media (prefers-color-scheme: dark) { html, body#particles { background-color: #0E1330 !important; } .aurora-bg span { opacity: .78; } }
+       @media (prefers-reduced-motion: reduce) { .aurora-bg span { animation: none; } }
+       .content { position: relative; z-index: 1; }
+     </style>
+diff --git a/src/panels/config/info/ha-config-info.ts b/src/panels/config/info/ha-config-info.ts
+index 4e1b0640..082e446c 100644
+--- a/src/panels/config/info/ha-config-info.ts
++++ b/src/panels/config/info/ha-config-info.ts
+@@ -83,6 +83,8 @@ const PAGES = [
+   iconColor: string;
+ }[];
+ 
++const AETOS_OS_VERSION = "v11.0.8";
++
+ @customElement("ha-config-info")
+ class HaConfigInfo extends LitElement {
+   @property({ attribute: false }) public hass!: HomeAssistant;
+@@ -115,157 +117,15 @@ class HaConfigInfo extends LitElement {
+       >
+         <div class="content">
+           <ha-card outlined class="header">
+-            <a
+-              href=${documentationUrl(this.hass, "")}
+-              target="_blank"
+-              rel="noreferrer"
+-            >
+-              <ha-logo-svg
+-                title=${this.hass.localize(
+-                  "ui.panel.config.info.home_assistant_logo"
+-                )}
+-              >
+-              </ha-logo-svg>
+-            </a>
+-            <p>Home Assistant</p>
++            <img src="/static/icons/aetos-shield.png" alt="Aetos One" style="height:64px;width:64px;object-fit:contain;margin-top:8px" />
++            <p>Aetos One</p>
+             <ul class="versions">
+               <li>
+-                <span class="version-label"
+-                  >${this.hass.localize(
+-                    "ui.panel.config.info.installation_method"
+-                  )}</span
+-                >
+-                <span class="version">${this._installationMethod || "…"}</span>
+-              </li>
+-              <li>
+-                <span class="version-label">Core</span>
+-                <span class="version">${hass.connection.haVersion}</span>
+-              </li>
+-              ${
+-                this._hassioInfo
+-                  ? html`
+-                      <li>
+-                        <span class="version-label">Supervisor</span>
+-                        <span class="version"
+-                          >${this._hassioInfo.supervisor}</span
+-                        >
+-                      </li>
+-                    `
+-                  : nothing
+-              }
+-              ${
+-                this._osInfo
+-                  ? html`
+-                      <li>
+-                        <span class="version-label">Operating System</span>
+-                        <span class="version">${this._osInfo.version}</span>
+-                      </li>
+-                    `
+-                  : nothing
+-              }
+-              <li>
+-                <span class="version-label">
+-                  ${this.hass.localize(
+-                    "ui.panel.config.info.frontend_version_label"
+-                  )}
+-                </span>
+-                <span class="version">
+-                  ${JS_VERSION}${JS_TYPE !== "modern" ? ` · ${JS_TYPE}` : ""}
+-                </span>
++                <span class="version-label">Aetos One OS</span>
++                <span class="version">${AETOS_OS_VERSION}</span>
+               </li>
+-              ${
+-                this.hass.auth.external?.config.appVersion
+-                  ? html`
+-                      <li>
+-                        <span class="version-label"
+-                          >${this.hass.localize(
+-                            "ui.panel.config.info.external_app_version"
+-                          )}</span
+-                        >
+-                        <span class="version"
+-                          >${this.hass.auth.external?.config.appVersion}</span
+-                        >
+-                      </li>
+-                    `
+-                  : nothing
+-              }
+             </ul>
+           </ha-card>
+-          <ha-card outlined class="ohf ${isDark ? "dark" : ""}">
+-            <div>
+-              ${this.hass.localize("ui.panel.config.info.proud_part_of")}
+-            </div>
+-            <a
+-              href="https://www.openhomefoundation.org"
+-              target="_blank"
+-              rel="noreferrer"
+-            >
+-              <img src="/static/icons/ohf.svg" alt="Open Home Foundation" />
+-            </a>
+-          </ha-card>
+-
+-          <ha-card outlined class="pages">
+-            <ha-list-base>
+-              <ha-list-item-button @click=${this._showShortcuts}>
+-                <div
+-                  slot="start"
+-                  class="icon-background"
+-                  style="background-color: #9e4dd1;"
+-                >
+-                  <ha-svg-icon .path=${mdiKeyboard}></ha-svg-icon>
+-                </div>
+-                <span slot="headline"
+-                  >${this.hass.localize("ui.panel.config.info.shortcuts")}</span
+-                >
+-              </ha-list-item-button>
+-
+-              ${PAGES.map(
+-                (page) => html`
+-                  <ha-list-item-button
+-                    .href=${documentationUrl(this.hass, page.path)}
+-                    target="_blank"
+-                    rel="noopener noreferrer"
+-                  >
+-                    <div
+-                      slot="start"
+-                      class="icon-background"
+-                      style=${`background-color: ${page.iconColor};`}
+-                    >
+-                      <ha-svg-icon .path=${page.iconPath}></ha-svg-icon>
+-                    </div>
+-                    <span slot="headline">
+-                      ${this.hass.localize(
+-                        `ui.panel.config.info.items.${page.name}`
+-                      )}
+-                    </span>
+-                    <ha-svg-icon slot="end" .path=${mdiOpenInNew}></ha-svg-icon>
+-                  </ha-list-item-button>
+-                `
+-              )}
+-            </ha-list-base>
+-            ${
+-              customUiList.length
+-                ? html`
+-                    <div class="custom-ui">
+-                      ${this.hass.localize("ui.panel.config.info.custom_uis")}
+-                      ${customUiList.map(
+-                        (item) => html`
+-                          <div>
+-                            <a
+-                              href=${item.url}
+-                              target="_blank"
+-                              rel="noreferrer"
+-                            >
+-                              ${item.name}</a
+-                            >: ${item.version}
+-                          </div>
+-                        `
+-                      )}
+-                    </div>
+-                  `
+-                : nothing
+-            }
+-          </ha-card>
+         </div>
+       </hass-subpage>
+     `;

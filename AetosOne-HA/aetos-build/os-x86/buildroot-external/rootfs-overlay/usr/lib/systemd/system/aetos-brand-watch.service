@@ -1,0 +1,16 @@
+[Unit]
+Description=Aetos One brand watch (event-driven branding restore)
+After=docker.service
+Wants=docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/aetos-brand-watch
+Restart=always
+RestartSec=20
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

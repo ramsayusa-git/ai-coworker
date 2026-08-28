@@ -1,0 +1,127 @@
+name: Build branded HAOS image (RPi4)
+
+# Produces a SINGLE pre-branded, flashable Home Assistant OS image for RPi4.
+# Download the .img.xz artifact and flash it directly with Raspberry Pi Imager.
+# A CI runner has rootful Docker, so the data-partition step (loop-mount + DinD)
+# that a rootless machine can't do works here.
+
+on:
+  workflow_dispatch:
+    inputs:
+      frontend_ref:
+        description: "home-assistant/frontend tag (blank = branding/config.env)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write   # to publish the image as a release
+
+env:
+  CORE_VERSION: "2026.7.2"
+  HA_MACHINE: "raspberrypi4-64"
+  HA_ARCH: "aarch64"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout branding repo
+        uses: actions/checkout@v4
+        with: { path: branding-repo }
+
+      - name: Free up disk space (HAOS build needs ~40GB)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          large-packages: true
+          docker-images: false
+          swap-storage: true
+
+      - name: Load config
+        id: cfg
+        run: |
+          source branding-repo/branding/config.env
+          REF="${{ github.event.inputs.frontend_ref }}"; [ -z "$REF" ] && REF="$FRONTEND_REF"
+          echo "fe_ref=$REF" >> "$GITHUB_OUTPUT"
+
+      - name: Setup QEMU (arm64 emulation)
+        uses: docker/setup-qemu-action@v3
+        with: { platforms: arm64 }
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      # ---- 1) Build the branded frontend --------------------------------------
+      - name: Checkout home-assistant/frontend
+        uses: actions/checkout@v4
+        with:
+          repository: home-assistant/frontend
+          ref: ${{ steps.cfg.outputs.fe_ref }}
+          submodules: recursive
+          path: frontend
+
+      - name: Apply branding + build frontend
+        run: |
+          set -e
+          corepack enable
+          cd frontend
+          cp -f ../branding-repo/branding/assets/icons/* public/static/icons/
+          git apply ../branding-repo/branding/patches/v2-branding.patch
+          COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack yarn install --immutable
+          NODE_OPTIONS=--max-old-space-size=6144 corepack yarn build
+          test -d hass_frontend
+
+      # ---- 2) Branded arm64 CORE container + save for offline preload ---------
+      - name: Build & save branded core image
+        run: |
+          set -e
+          CTX=core-ctx; mkdir -p "$CTX"
+          cp -r frontend/hass_frontend "$CTX/hass_frontend"
+          cat > "$CTX/Dockerfile" <<EOF
+          FROM ghcr.io/home-assistant/${HA_MACHINE}-homeassistant:${CORE_VERSION}
+          COPY hass_frontend/ /usr/local/lib/python3.14/site-packages/hass_frontend/
+          EOF
+          docker buildx build --platform linux/arm64 --load \
+            -t ghcr.io/home-assistant/${HA_MACHINE}-homeassistant:${CORE_VERSION} "$CTX"
+          mkdir -p os-core
+          docker save --format=docker \
+            ghcr.io/home-assistant/${HA_MACHINE}-homeassistant:${CORE_VERSION} \
+            -o os-core/aetos-core.tar || \
+          docker save ghcr.io/home-assistant/${HA_MACHINE}-homeassistant:${CORE_VERSION} \
+            -o os-core/aetos-core.tar
+
+      # ---- 3) HAOS OS repo + injection ----------------------------------------
+      - name: Checkout HAOS operating-system
+        run: |
+          git clone --depth 1 --recurse-submodules --shallow-submodules \
+            https://github.com/home-assistant/operating-system.git os
+          cp os-core/aetos-core.tar os/buildroot-external/package/hassio/aetos-core.tar
+          git -C os apply ../branding-repo/branding/patches/haos-hassio-injection.patch
+
+      # ---- 4) Build the OS image (rootful docker on the runner) ----------------
+      - name: Build hassos builder + rpi4 image
+        run: |
+          set -e
+          cd os
+          docker build -t hassos:local .
+          mkdir -p output
+          docker run --rm --privileged \
+            -v "$PWD:/build" -v "$PWD/cache:/cache" \
+            -e BUILDER_UID="$(id -u)" -e BUILDER_GID="$(id -g)" \
+            hassos:local make rpi4_64
+          ls -lh output/images/
+
+      - name: Upload flashable image
+        uses: actions/upload-artifact@v4
+        with:
+          name: aetos-one-haos-rpi4-${{ env.CORE_VERSION }}
+          path: os/output/images/*.img.xz
+          if-no-files-found: error
+
+      - name: Publish as release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: aetos-haos-rpi4-${{ env.CORE_VERSION }}
+          files: os/output/images/*.img.xz

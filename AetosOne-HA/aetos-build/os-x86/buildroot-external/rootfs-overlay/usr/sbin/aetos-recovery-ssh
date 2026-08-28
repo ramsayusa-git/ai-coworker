@@ -1,0 +1,22 @@
+#!/bin/sh
+# Aetos One - install the baked recovery SSH key and start host debug SSH.
+#
+# HAOS's haos-config only enables the port-22222 dropbear when
+# /root/.ssh/authorized_keys is present, and it copies that from
+# /mnt/boot/CONFIG/authorized_keys - otherwise it deletes the key and stops
+# dropbear. Baking the key into the read-only rootfs at /root/.ssh does not
+# work (that path is a bind-mount from the overlay partition, and haos-config
+# wipes it). So we keep the public key in the read-only rootfs at
+# /usr/share/aetos/authorized_keys and, on every boot (after haos-config),
+# copy it into place and start dropbear on :22222.
+
+KEY_SRC="/usr/share/aetos/authorized_keys"
+KEY_DST="/root/.ssh/authorized_keys"
+
+[ -f "$KEY_SRC" ] || exit 0
+install -d -m 700 /root/.ssh
+cp -f "$KEY_SRC" "$KEY_DST"
+chmod 600 "$KEY_DST"
+# dropbear.service has ConditionFileNotEmpty=/root/.ssh/authorized_keys and
+# listens on :22222 (see dropbear.service.d/haos.conf).
+systemctl start dropbear >/dev/null 2>&1 || true

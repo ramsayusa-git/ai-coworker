@@ -1,8 +1,12 @@
 # System files
 .DS_Store
+.AppleDouble
+.LSOverride
 Thumbs.db
+Desktop.ini
 *.swp
 *.swo
+*~
 
 # Embedded git repositories and large build artifacts
 **/.git
@@ -11,20 +15,60 @@ AetosOne-HA/aetos-build/frontend/
 AetosOne-HA/aetos-build/haos-cache/
 AetosOne-HA/aetos-build/haos-cache-x86/
 AetosOne-HA/aetos-build/os/
+AetosOne-HA/aetos-build/build/
+
+# OS images / packages / backups - exceed or bloat GitHub limits (kept locally only)
+*.img.xz
+*.img
+*.iso
+*.tar.gz
+*.rar
+AetosOne-HA/projects-Aetos-build/*.zip
+AetosOne-HA/aetos-build/*.log
+
+# Embedded upstream ThingsBoard clone (own .git + >100MB build jars; cannot sync inside this repo)
+AetosOne-TB/thingsboard/
+
+# Build output
+**/target/
+dist/
+*.o
+*.a
+*.so
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Databases (churn constantly, bloat history)
+*.db
+*.db-wal
+*.db-shm
 
 # Protected files/dirs with permission issues
 .storage/
 .venv/
+venv/
+ENV/
 node_modules/
 __pycache__/
 *.pyc
+*.egg-info/
+*.egg
+.npm
 .claude/settings.local.json.tmp*
 
 # IDE
 .vscode/
 .idea/
 *.code-workspace
+.sublime-project
+.sublime-workspace
 
-# Dependencies
+# Dependencies / secrets
 .env
 .env.local
+.env.*.local

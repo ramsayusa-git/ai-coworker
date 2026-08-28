@@ -1,0 +1,15 @@
+[Unit]
+Description=Aetos One add-on installer retry (self-healing until success)
+# The installer script no-ops once /mnt/data/aetos/addons-installed exists, so
+# this timer is a cheap safety net: if the first-boot run couldn't finish (no
+# internet yet, Core still unpacking, repos slow to clone) it retries without
+# needing a reboot.
+
+[Timer]
+OnBootSec=4min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Persistent=false
+
+[Install]
+WantedBy=timers.target

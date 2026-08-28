@@ -1,0 +1,79 @@
+#!/bin/sh
+# Aetos One — brand guard (self-healing branding).
+#
+# THE PROBLEM THIS SOLVES
+#   Aetos branding lives INSIDE the Home Assistant Core container at
+#     /usr/local/lib/python3.14/site-packages/hass_frontend/
+#   Any Core update replaces that container, so the branding disappears.
+#   Blocking updates is not a workable answer: the Supervisor rewrites
+#   updater.json back to auto_update=true, and blocking the Supervisor
+#   breaks the add-on store.
+#
+# THE APPROACH
+#   Let Home Assistant update freely (store keeps working). After ANY change,
+#   detect stock branding and restore ours. Branding becomes permanent because
+#   it is re-applied, not defended.
+set -u
+
+MARKER_MD5="4c98f808b116f3a3aa1e07a6e5502018"          # Aetos eagle favicon
+FE_IN_CORE="/usr/local/lib/python3.14/site-packages/hass_frontend"
+FAVICON="$FE_IN_CORE/static/icons/favicon-512x512.png"
+# Branded copy lives on the DATA partition (shipped via the seed), NOT in the
+# rootfs: hassos-system0 is a fixed 256MB read-only partition and a ~68MB
+# payload there overflows it, breaking the image build.
+PAYLOAD="/mnt/data/supervisor/homeassistant/aetos/hass_frontend.tar.xz"
+STAGE="/mnt/data/aetos-brand-stage"
+LOG="/var/log/aetos-brand-guard.log"
+
+log() { echo "[$(date '+%F %H:%M:%S')] $*" >> "$LOG" 2>/dev/null; }
+
+# Core must be running
+if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^homeassistant$'; then
+  exit 0
+fi
+
+# What favicon is Core currently serving?
+CUR=$(docker exec homeassistant sh -c "md5sum $FAVICON 2>/dev/null | cut -d' ' -f1" 2>/dev/null)
+
+if [ "$CUR" = "$MARKER_MD5" ]; then
+  exit 0                                   # branding intact, nothing to do
+fi
+
+log "=== branding MISSING (found md5='$CUR') — restoring ==="
+
+if [ ! -f "$PAYLOAD" ]; then
+  log "ERROR: branded payload $PAYLOAD not found; cannot restore"
+  exit 1
+fi
+
+# Unpack our branded frontend to a staging dir on the data partition
+rm -rf "$STAGE" 2>/dev/null
+mkdir -p "$STAGE" 2>/dev/null
+if ! tar -xJf "$PAYLOAD" -C "$STAGE" 2>>"$LOG"; then
+  log "ERROR: failed to unpack payload"
+  exit 1
+fi
+
+# Copy it into the running Core container, replacing the stock frontend
+if docker cp "$STAGE/hass_frontend/." "homeassistant:$FE_IN_CORE/" 2>>"$LOG"; then
+  log "branded frontend copied into Core"
+else
+  log "ERROR: docker cp failed"
+  rm -rf "$STAGE" 2>/dev/null
+  exit 1
+fi
+
+rm -rf "$STAGE" 2>/dev/null
+
+# Verify before restarting
+NEW=$(docker exec homeassistant sh -c "md5sum $FAVICON 2>/dev/null | cut -d' ' -f1" 2>/dev/null)
+if [ "$NEW" = "$MARKER_MD5" ]; then
+  log "verified restored (md5=$NEW); restarting Core to load it"
+  docker restart homeassistant >/dev/null 2>&1
+  log "=== branding restored successfully ==="
+else
+  log "ERROR: restore did not verify (md5=$NEW)"
+  exit 1
+fi
+
+exit 0

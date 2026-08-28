@@ -1,0 +1,26 @@
+default_config:
+
+# Aetos One: rebrand 'Home Assistant' -> 'Aetos One' in Supervisor/Core notifications.
+aetos_rebrand:
+
+# Aetos One: keep Core/OS/Supervisor updates disabled + Supervisor auto-update off,
+# and dismiss system update-available notifications (no update UI, no prompts).
+aetos_no_update:
+
+homeassistant:
+  # Native name rebrand — sets the sidebar header + browser tab to "Aetos One".
+  # Lives in /config, so it SURVIVES Core/OS updates (unlike the frontend wheel).
+  name: "Aetos One"
+  packages: !include_dir_named packages
+
+frontend:
+  themes: !include_dir_merge_named themes
+  # Runtime branding module: swaps the logo/favicon and rewrites any residual
+  # "Home Assistant" text in the app. Served from /config/www, so it also
+  # survives Core updates. This replaces baking branding into the frontend wheel.
+  extra_module_url:
+    - /local/aetos_brand.js
+    - /local/aetos_header_anim.js
+
+# SSL/HTTPS removed for v7.3 — Aetos One serves plain HTTP on :8123.
+# (Add TLS later via a reverse proxy or Nabu Casa if needed; do not bake a self-signed cert.)

@@ -1,0 +1,13 @@
+# Aetos One local dev backend (HA Core 2026.8.0)
+# Serve the branded dev frontend build instead of the stock pip package
+frontend:
+  development_repo: /run/media/krishna/data-backup/claude-cowork/AetosOne-HA/aetos-build/frontend
+# NOTE: no `http:` block on purpose — deprecated in 2026.8 (moves to UI, removed 2027.2). Default port 8123.
+config:
+api:
+lovelace:
+cloud:
+system_health:
+logbook:
+history:
+sun:

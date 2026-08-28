@@ -1,0 +1,15 @@
+[Unit]
+Description=Aetos One first-boot add-on repository registrar (repos only, no installs)
+After=haos-supervisor.service aetos-clock-guard.service network-online.target
+Wants=network-online.target
+RequiresMountsFor=/mnt/data
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sh -c 'sleep 45'
+ExecStart=/usr/sbin/aetos-addons-firstboot
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

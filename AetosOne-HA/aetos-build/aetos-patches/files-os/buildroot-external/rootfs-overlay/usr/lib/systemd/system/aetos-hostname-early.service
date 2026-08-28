@@ -1,0 +1,15 @@
+[Unit]
+Description=Aetos One - seed hostname before NetworkManager (first-boot DHCP name)
+# Must run after the persisted /etc/hostname bind-mount is in place, and BEFORE
+# NetworkManager sends its first DHCP request, so the request carries the name.
+After=etc-hostname.mount
+Wants=etc-hostname.mount
+Before=NetworkManager.service network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/aetos-hostname-early
+
+[Install]
+WantedBy=multi-user.target
