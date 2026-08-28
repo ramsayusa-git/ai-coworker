@@ -1,0 +1,1 @@
+Flash from this dir with: python -m esptool --chip esp32s3 -p COM8 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 8MB --flash_freq 80m 0x0 bootloader/bootloader.bin 0x8000 partition_table/partition-table.bin 0xd000 ota_data_initial.bin 0x10000 xiaozhi.bin 0x510000 generated_assets.bin
