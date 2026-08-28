@@ -28,3 +28,5 @@ __pycache__/
 # Dependencies
 .env
 .env.local
+*.zip
+*.tar.gz
