@@ -1,5 +1,5 @@
-# Hourly Git Sync Script - Zero User Interaction
-# Completely automated: pull, commit, push with no prompts
+# Hourly Git Sync Script - Full Workspace Sync
+# Syncs ALL folders and files including MCP Servers, AetosOne, completely automated, no prompts
 
 param(
     [string]$RepoPath = "D:\ai-workspace"
@@ -55,19 +55,24 @@ try {
     $env:GIT_TRACE = 0
     $env:GIT_TERMINAL_PROMPT = 0
 
-    Log "Starting sync"
+    Log "Starting full workspace sync"
 
+    # Ensure on main branch
     $currentBranch = git rev-parse --abbrev-ref HEAD 2>$null
-    if (-not $currentBranch) {
-        Log "ERROR: Could not determine branch"
-        exit 1
+    if ($currentBranch -ne "main") {
+        git checkout main 2>$null
+        $currentBranch = "main"
     }
 
     git pull origin $currentBranch --quiet 2>$null
 
-    # Add all changes including new folders and submodules
+    # Aggressive sync - add ALL changes
     git add -A 2>$null
     git add -u 2>$null
+
+    # Force add MCP Servers and AetosOne folders
+    git add -f MCP* 2>$null
+    git add -f AetosOne* 2>$null
 
     # Handle submodules
     git submodule update --init --recursive 2>$null
