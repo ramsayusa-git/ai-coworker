@@ -1,5 +1,5 @@
 name: BP Monitor
-version: "1.2.1"
+version: "1.3.1"
 slug: bp_monitor
 description: Guided Bluetooth blood-pressure dashboard for the RBP1711150377 (ISSC BT5050) BLE cuff
 url: https://aetostechlabs.com

@@ -40,9 +40,9 @@ log = logging.getLogger("engine")
 
 STEP_ORDER = ["wake", "scanning", "connecting", "checking", "contact", "signal", "live"]
 STEP_TEXT = {
-    "idle":       ("Idle", "Waiting for the Bluetooth source to start."),
+    "idle":       ("Not scanning", "Bluetooth scanning is off so the adapter stays free. Press the button on the ecg2 or put it on, then press Scan."),
     "wake":       ("Turn on the device", "Press the button on the ecg2 or put it on. It only advertises for a few seconds after waking — do this now."),
-    "scanning":   ("Scanning for ecg2", "Looking for the device over Bluetooth. Keep it within 2 m of the Home Assistant box."),
+    "scanning":   ("Scanning for ecg2", "Looking for the device over Bluetooth. Keep it within 2 m of the hub."),
     "connecting": ("Connecting", "Device found — opening the Bluetooth link."),
     "checking":   ("Checking device", "Reading model, firmware and battery; subscribing to the heart-rate stream."),
     "contact":    ("Waiting for skin contact", "Connected. Place the electrodes on your skin (both contacts). The stream starts by itself."),
@@ -87,6 +87,7 @@ class Status:
     profile_id: int | None = None
     profile_name: str = ""
     hr_raw: float | None = None
+    rr_raw: float | None = None
     calibrated: bool = False
     calibration: dict = field(default_factory=dict)
     uptime_s: float = 0.0
@@ -292,7 +293,7 @@ class Engine:
         try:
             # store the RAW heart rate; calibration is applied on read
             self.store.add_hr_sample(self._session_id, self.status.hr_raw,
-                                     self.status.rr_ms, self.status.quality,
+                                     self.status.rr_raw, self.status.quality,
                                      self.status.quality_score)
         except Exception:
             log.exception("failed to store HR sample")
@@ -355,8 +356,11 @@ class Engine:
             st.hr = (max(0.0, round(raw + self._hr_offset, 1))
                      if raw is not None else None)
             st.calibrated = bool(self._hr_offset)
-            # RR is a measured interval, so it stays uncalibrated
-            st.rr_ms = round(60000 / self._qrs.hr_bpm) if self._qrs.hr_bpm else None
+            # RR is derived from HR, so it follows the same offset — otherwise
+            # the dashboard would show a heart rate and an interval that
+            # contradict each other (rr_raw keeps the measured value).
+            st.rr_raw = round(60000 / self._qrs.hr_bpm) if self._qrs.hr_bpm else None
+            st.rr_ms = round(60000 / st.hr) if st.hr else None
             for cb in self.on_beat:
                 try:
                     cb(st.hr)

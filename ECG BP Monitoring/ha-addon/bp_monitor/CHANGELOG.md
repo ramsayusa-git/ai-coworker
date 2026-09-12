@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.3.0 — 2026-09-13
+**Scans once instead of forever.** The add-on used to loop wake → scan → wake
+→ scan indefinitely, which kept the Bluetooth adapter busy for nothing, left a
+permanent "Scanning" pill in the header, and meant two add-ons sharing one
+dongle were both hammering it. It now runs a single scan pass when the add-on
+starts and then stops, reporting why it stopped: the cuff wasn't advertising,
+the link closed after a measurement, or a connect attempt failed.
+
+Because scanning stops, there has to be a way to start it again — so a single
+contextual **Scan** button appears in the step panel whenever the add-on is
+idle. It is not a return of the start/stop/reconnect trio: there is one button,
+it only appears when it can do something, and it disappears while a scan,
+connect or measurement is in progress. `POST /api/scan` backs it.
+
+## 1.2.3 — 2026-09-13
+The calibration control was still being missed, so the gear is now a clearly
+labelled **"Calibration"** button in the accent colour at the top right of the
+header, not a bare icon. A dot appears on it whenever an offset is active. It
+opens the same sheet: the active-profile selector and plus/minus steppers for
+systolic, diastolic and pulse.
+
+## 1.2.2 — 2026-09-12
+Dropped "Home Assistant" from the dashboard's own wording — the scanning hint
+now reads "Keep the cuff within 2 m of the hub". The box is branded Aetos One
+Hub, so the underlying platform's name has no business appearing in the product
+UI. Code comments and docstrings still say Home Assistant where they describe
+what the add-on actually talks to; renaming those would make the source lie.
+
 ## 1.2.1 — 2026-09-12
 Calibration was buried in the Profiles tab and people could not find it. There
 is now a **gear button at the top right** opening a settings sheet with the

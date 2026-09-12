@@ -21,14 +21,25 @@ class BleSource:
         self.address = address.upper()
         self.name_prefix = (name_prefix or "").lower()
         self.scan_timeout = scan_timeout
-        self.enabled = True          # UI start/stop
+        self.enabled = True          # one scan pass runs at add-on start
+        self.idle_reason = "Not scanning"
         self._wake = asyncio.Event()
         self._client = None
         self.available = True
 
     def start(self):
+        """Run one more scan pass (the dashboard's Scan button)."""
         self.enabled = True
+        self.idle_reason = "Not scanning"
         self._wake.set()
+
+    def pause(self, reason: str):
+        """End this pass and wait for the user instead of scanning on a loop.
+        An endless scan keeps the adapter busy for nothing, and two add-ons
+        sharing one dongle end up fighting over it."""
+        self.idle_reason = reason
+        self.enabled = False
+        log.info("scan paused: %s", reason)
 
     def stop(self):
         self.enabled = False
@@ -59,7 +70,7 @@ class BleSource:
             if not self.enabled:
                 eng.source_released("ble")
                 if eng.status.step not in ("mqtt_wait",):
-                    eng.set_step("idle", "Bluetooth stopped")
+                    eng.set_step("idle", self.idle_reason)
                 self._wake.clear()
                 await self._wake.wait()
                 continue
@@ -78,8 +89,8 @@ class BleSource:
                     if not self.enabled:
                         continue
                     self.available = True
-                    eng.set_step("wake", "Not advertising — press the button on the ecg2, then wait")
-                    await asyncio.sleep(3)
+                    self.pause("The ecg2 wasn't advertising during that scan. "
+                               "Press its button or put it on, then press Scan.")
                     continue
                 eng.set_step("connecting", f"{dev.name or 'ecg2'} [{dev.address}]")
                 eng.set_device_info(address=dev.address)
@@ -122,7 +133,7 @@ class BleSource:
                             except Exception:
                                 pass
                     if self.enabled:
-                        eng.set_step("error", "Bluetooth link dropped")
+                        self.pause("The Bluetooth link closed. Press Scan to reconnect.")
             except Exception as e:
                 msg = str(e) or e.__class__.__name__
                 ml = msg.lower()
@@ -133,7 +144,7 @@ class BleSource:
                     await asyncio.sleep(30)
                     continue
                 log.warning("BLE attempt failed: %s", msg)
-                eng.set_step("error", msg[:120])
+                self.pause(f"Connection attempt failed: {msg[:130]}")
             finally:
                 self._client = None
                 eng.status.connected = False

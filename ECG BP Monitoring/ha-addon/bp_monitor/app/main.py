@@ -77,6 +77,15 @@ def build_app(engine: Engine, ble: BleSource | None) -> web.Application:
             "Content-Type": "text/csv",
             "Content-Disposition": 'attachment; filename="bp_readings.csv"'})
 
+    async def scan(request):
+        """Run one more scan pass. The add-on scans once at start and then
+        waits rather than looping — this is how the user asks for another."""
+        if not ble:
+            return web.json_response({"ok": False, "error": "no Bluetooth source"},
+                                     status=400)
+        ble.start()
+        return web.json_response({"ok": True, "status": engine.snapshot()})
+
     # ---------------------------------------------------------- profiles
     async def profiles_list(request):
         return web.json_response({
@@ -198,6 +207,7 @@ def build_app(engine: Engine, ble: BleSource | None) -> web.Application:
     app.router.add_post("/api/history/{rid}/profile", reading_assign)
     app.router.add_get("/api/trend", trend)
     app.router.add_get("/api/stats", stats)
+    app.router.add_post("/api/scan", scan)
     app.router.add_get("/api/profiles", profiles_list)
     app.router.add_post("/api/profiles", profiles_add)
     app.router.add_post("/api/profiles/{pid}", profiles_update)

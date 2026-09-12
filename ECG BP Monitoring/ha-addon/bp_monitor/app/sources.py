@@ -37,17 +37,26 @@ class BleSource:
         self.address = (address or "").upper()
         self.name_prefix = name_prefix or ""
         self.scan_timeout = max(int(scan_timeout), 15)
-        self.enabled = True
+        self.enabled = True          # one scan pass runs at add-on start
         self.available = True
+        self.idle_reason = "Not scanning"
         self._wake = asyncio.Event()
 
     def start(self):
+        """Run one more scan pass (the dashboard's Scan button)."""
         self.enabled = True
+        self.idle_reason = "Not scanning"
         self._wake.set()
 
     def stop(self):
         self.enabled = False
         self._wake.set()
+
+    def pause(self, reason: str):
+        """End this pass and wait for the user instead of scanning on a loop."""
+        self.idle_reason = reason
+        self.enabled = False
+        log.info("scan paused: %s", reason)
 
     # ------------------------------------------------------------ helpers
     @staticmethod
@@ -113,7 +122,7 @@ class BleSource:
                 continue
             if not self.enabled:
                 eng.source_released("ble")
-                eng.set_step("idle", "Bluetooth stopped")
+                eng.set_step("idle", self.idle_reason)
                 self._wake.clear()
                 await self._wake.wait()
                 continue
@@ -129,9 +138,11 @@ class BleSource:
                     self.scan_timeout,
                     on_tick=lambda s: eng.set_step("scanning", f"{s} s left in this pass"))
                 if not found:
-                    eng.set_step("wake", "Not advertising yet — press the button on "
-                                         "the cuff now, it only advertises briefly")
-                    await asyncio.sleep(2)
+                    # One pass, then stop. Scanning in an endless loop keeps the
+                    # adapter busy for nothing (and two add-ons sharing one
+                    # dongle fight over it), so the user restarts it explicitly.
+                    self.pause("The cuff wasn't advertising during that scan. "
+                               "Press its button, then press Scan.")
                     continue
 
                 addr = self._addr_from_path(ble.device_path)
@@ -179,7 +190,8 @@ class BleSource:
                         if not await ble.is_connected():
                             break
                 if self.enabled:
-                    eng.set_step("error", "Bluetooth link dropped — will retry")
+                    self.pause("The cuff closed the Bluetooth link — that is normal "
+                               "after a measurement. Press Scan to reconnect.")
 
             except BleUnavailable as e:
                 self.available = False
@@ -190,7 +202,7 @@ class BleSource:
             except Exception as e:
                 msg = str(e) or e.__class__.__name__
                 log.warning("BLE attempt failed: %s", msg)
-                eng.set_step("error", msg[:160])
+                self.pause(f"Connection attempt failed: {msg[:140]}")
             finally:
                 eng.status.connected = False
                 eng.source_released("ble")
@@ -199,7 +211,6 @@ class BleSource:
                 except Exception:
                     pass
                 await ble.close()
-            await asyncio.sleep(3)
 
 
 # ---------------------------------------------------------------- MQTT

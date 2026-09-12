@@ -27,9 +27,9 @@ log = logging.getLogger("engine")
 
 STEP_ORDER = ["wake", "scanning", "connecting", "checking", "ready", "result"]
 STEP_TEXT = {
-    "idle":       ("Idle", "Press Start to begin the guided connection."),
+    "idle":       ("Not scanning", "Bluetooth scanning is off so the adapter stays free. Press the button on the cuff, then press Scan."),
     "wake":       ("Turn on the cuff", "Press the power/start button on the cuff. It only advertises for a few seconds after waking — do this now."),
-    "scanning":   ("Scanning for the cuff", "Looking for RBP1711150377 over Bluetooth. Keep it within 2 m of the Home Assistant box."),
+    "scanning":   ("Scanning for the cuff", "Looking for RBP1711150377 over Bluetooth. Keep the cuff within 2 m of the hub."),
     "connecting": ("Connecting", "Device found — opening the Bluetooth link."),
     "checking":   ("Checking device", "Reading model/firmware and subscribing to the measurement channel."),
     "ready":      ("Ready — start a measurement", "Connected. Put the cuff on your arm and press its own Start button; the reading appears here automatically when it finishes."),
