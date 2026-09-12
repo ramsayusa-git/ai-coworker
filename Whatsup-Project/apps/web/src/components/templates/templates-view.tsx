@@ -27,6 +27,7 @@ function render(body: string, vars: string[]) {
 export function TemplatesView() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [status, setStatus] = useState<Template["status"] | "all">("all");
+  const [channel, setChannel] = useState<Template["channel"] | "all">("all");
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState({ name: "", category: "utility" as TemplateCategory, body: "" });
   const [saving, setSaving] = useState(false);
@@ -37,8 +38,10 @@ export function TemplatesView() {
   useEffect(() => { load(); }, [load]);
 
   const filtered = useMemo(
-    () => (status === "all" ? templates : templates.filter((t) => t.status === status)),
-    [templates, status]
+    () => templates
+      .filter((t) => status === "all" || t.status === status)
+      .filter((t) => channel === "all" || t.channel === channel),
+    [templates, status, channel]
   );
 
   const previewVars = useMemo(() => Array.from(form.body.matchAll(/\{\{(\w*)\}\}/g)).map((m) => m[1]), [form.body]);
@@ -106,6 +109,14 @@ export function TemplatesView() {
         </div>
       )}
 
+      <div className="mb-2 flex gap-2">
+        {(["all", "whatsapp", "sms"] as const).map((c) => (
+          <button key={c} onClick={() => setChannel(c)}
+            className={`rounded-full px-3 py-1 text-xs capitalize ${channel === c ? "bg-zinc-800 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+            {c === "all" ? "All channels" : c}
+          </button>
+        ))}
+      </div>
       <div className="mb-3 flex gap-2">
         {(["all", "approved", "pending", "rejected", "draft"] as const).map((s) => (
           <button key={s} onClick={() => setStatus(s)}
@@ -122,6 +133,7 @@ export function TemplatesView() {
               <div>
                 <div className="font-mono text-sm font-medium">{t.name}</div>
                 <div className="mt-1 flex gap-1">
+                  <span className={`rounded px-1.5 py-0.5 text-xs capitalize ${t.channel === "sms" ? "bg-indigo-100 text-indigo-700" : "bg-green-100 text-green-700"}`}>{t.channel}</span>
                   <span className={`rounded px-1.5 py-0.5 text-xs capitalize ${categoryColor[t.category]}`}>{t.category}</span>
                   <span className={`rounded px-1.5 py-0.5 text-xs capitalize ${statusColor[t.status]}`}>{t.status}</span>
                 </div>

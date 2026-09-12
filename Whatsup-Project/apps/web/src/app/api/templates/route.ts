@@ -15,6 +15,7 @@ export async function POST(req: Request) {
   const tpl: Template = {
     id: `t${Date.now()}`,
     name: body.name.trim(),
+    channel: body.channel ?? "whatsapp",
     language: body.language ?? "en",
     category: body.category ?? "utility",
     status: "pending",

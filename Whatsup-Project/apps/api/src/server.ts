@@ -14,6 +14,9 @@ import { campaignsRoutes, processCampaigns } from "./modules/campaigns.js";
 import { botsRoutes } from "./modules/bots.js";
 import { teamsRoutes } from "./modules/teams.js";
 import { analyticsRoutes } from "./modules/analytics.js";
+import { automationsRoutes } from "./modules/automations.js";
+import { adsRoutes, processScheduledAds } from "./modules/ads.js";
+import { socialPostsRoutes, processScheduledSocialPosts } from "./modules/social-posts.js";
 
 const app = Fastify({
   logger: { transport: { target: "pino-pretty", options: { translateTime: "HH:MM:ss", ignore: "pid,hostname" } } },
@@ -50,6 +53,9 @@ await app.register(async (scoped) => {
   await scoped.register(botsRoutes);
   await scoped.register(teamsRoutes);
   await scoped.register(analyticsRoutes);
+  await scoped.register(automationsRoutes);
+  await scoped.register(adsRoutes);
+  await scoped.register(socialPostsRoutes);
 }, { prefix: "/v1" });
 
 const port = Number(process.env.PORT ?? 4000);
@@ -60,4 +66,10 @@ app.listen({ port, host: "0.0.0.0" }).then(() => {
   setInterval(() => {
     processCampaigns().catch((err) => app.log.error({ err }, "processCampaigns tick failed"));
   }, 45_000);
+  // Launches scheduled ad campaigns / publishes scheduled social posts once their
+  // scheduledAt arrives — same real-adapter, honest-failure pattern as above.
+  setInterval(() => {
+    processScheduledAds().catch((err) => app.log.error({ err }, "processScheduledAds tick failed"));
+    processScheduledSocialPosts().catch((err) => app.log.error({ err }, "processScheduledSocialPosts tick failed"));
+  }, 30_000);
 });

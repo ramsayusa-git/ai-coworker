@@ -13,6 +13,8 @@ const nav = [
   { href: "/broadcasts", label: "Broadcasts", icon: "📣" },
   { href: "/templates", label: "Templates", icon: "📄" },
   { href: "/bots", label: "Bots", icon: "🤖" },
+  { href: "/automations", label: "Automations", icon: "🔀" },
+  { href: "/ads-manager", label: "Ads & Social", icon: "📢" },
   { href: "/channels", label: "Channels", icon: "🔌" },
   { href: "/analytics", label: "Analytics", icon: "📊" },
   { href: "/settings", label: "Settings", icon: "⚙️" },

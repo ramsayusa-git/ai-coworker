@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1 — 2026-09-12
+Calibration was buried in the Profiles tab. There is now a **gear button at the
+top right** opening a settings sheet with the active-profile selector and the
+heart-rate calibration stepper, plus reset and a link through to profile
+management. A dot on the gear shows when the offset is non-zero. The stepper
+stays in the Profiles tab too — both render from the same state. Escape or a
+click outside closes the sheet.
+
 ## 1.2.0 — 2026-09-12
 **Profiles.** Every wear is attributed to a profile. A selector in the top bar
 sets who is being recorded; the new Profiles tab adds, renames, selects and

@@ -197,6 +197,36 @@ Verified in the live browser pane with `localStorage.clear()` + reload: the app
 auto-bootstrapped to Sunrise Clinic with no manual step and Visit Templates /
 Queue rendered real data immediately.
 
+## Real custom-domain verification + activation for white-label branding — 12 Sep 2026 (sixth pass)
+
+Ramsay pointed at the same feature already built in the Whatsup-Project ("Aetos One Chat") partner
+console and asked for it here too: the `Branding.customDomain` field previously just stored a raw
+string with no proof the org actually owned that domain, and no way to stage a change before it
+went live. Rebuilt to match the Whatsup pattern exactly:
+
+- Schema: `Branding` gained `customDomainStatus` (unset/pending/verified/failed),
+  `customDomainActive` (bool), `domainVerificationToken`, `domainVerifiedAt`.
+- `branding.service.ts`: saving/clearing `customDomain` always resets status to `pending`/`unset`,
+  clears `active`, and mints a fresh verification token. `GET /branding/domain-instructions` returns
+  the exact TXT (`_aetosclinics-verify.<domain>`) + CNAME (`<subdomain> -> edge.aetosone.clinics`)
+  records to add. `POST /branding/domain-verify` does real `dns.resolveTxt`/`resolveCname` lookups
+  (Node's `dns/promises`, no third-party API) and only flips to `verified` if both resolve.
+  `POST /branding/domain-activate` refuses to activate unless status is `verified` — verified and
+  active are deliberately separate states, same reasoning as Whatsup's partner console. The public
+  `getByCustomDomain()` lookup (used pre-login to resolve branding by hostname) now requires BOTH
+  verified AND active before serving a custom domain's branding; the free subdomain path is
+  unaffected (always live once saved, no external DNS to get wrong).
+- `apps/web/src/pages/BrandingPage.tsx`: status + active badges next to the domain field, a DNS
+  records table, Verify/Activate buttons (Activate disabled with a tooltip until verified), and an
+  always-visible worked example filling in the org's actual typed/saved domain — never a bare
+  placeholder that disappears when there's nothing saved yet.
+
+Verified end-to-end in the live browser pane, not just via curl: saved a test domain, watched the
+DNS-instructions block and pending/inactive badges appear, clicked **Verify domain** for real and
+watched it correctly report "failed" with the genuine `ENOTFOUND` DNS errors (the test domain has
+no real records), confirmed **Activate domain** stays disabled until verified. Cleared the test
+domain back to unset afterward.
+
 ## MCP server (`apps/mcp-server`)
 
 Implemented: `list_addons`, `enable_addon`, `disable_addon`, `configure_addon`,

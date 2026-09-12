@@ -2,6 +2,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch, getCachedMe } from "@/lib/api";
 import type { Team } from "@/lib/types";
+import { FUNCTIONAL_ROLES, type FunctionalRole } from "@/lib/types";
+
+const FUNCTIONAL_ROLE_LABELS: Record<FunctionalRole, string> = {
+  administrator: "Administrator", broadcast_manager: "Broadcast Manager", template_manager: "Template Manager",
+  contact_manager: "Contact Manager", operator: "Operator", developer: "Developer",
+  billing_manager: "Billing Manager", dashboard_viewer: "Dashboard Viewer",
+};
 
 const tabs = ["Organization", "Branding", "Team & Roles", "Roles & Permissions", "Billing", "API & Webhooks"] as const;
 
@@ -18,7 +25,7 @@ const RBAC_MATRIX: Array<{ role: string; scope: string; can: string }> = [
 ];
 type Tab = (typeof tabs)[number];
 
-type Member = { userId: string; name: string | null; email: string; role: string; status: string };
+type Member = { userId: string; name: string | null; email: string; role: string; status: string; functionalRoles?: string[] };
 type Invite = { id: string; email: string; role: string; acceptUrl?: string; token: string; expiresAt: string };
 
 function Field({ label, value, hint }: { label: string; value: string; hint?: string }) {
@@ -194,6 +201,63 @@ function TeamsPanel({ members }: { members: Member[] }) {
   );
 }
 
+function FunctionalRolesCell({ member, onSaved }: { member: Member; onSaved: () => void }) {
+  const me = getCachedMe();
+  const canEdit = me?.role === "org_owner" || me?.role === "org_admin";
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>(member.functionalRoles ?? []);
+  const [saving, setSaving] = useState(false);
+
+  function toggle(role: FunctionalRole) {
+    setSelected((prev) => (prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]));
+  }
+
+  async function save() {
+    setSaving(true);
+    try {
+      await apiFetch(`/members/${member.userId}`, { method: "PATCH", body: JSON.stringify({ functionalRoles: selected }) });
+      setOpen(false);
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!canEdit) {
+    return (
+      <span className="text-xs text-zinc-500">
+        {member.functionalRoles && member.functionalRoles.length > 0
+          ? member.functionalRoles.map((r) => FUNCTIONAL_ROLE_LABELS[r as FunctionalRole] ?? r).join(", ")
+          : "None"}
+      </span>
+    );
+  }
+
+  return (
+    <details open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)} className="relative">
+      <summary className="cursor-pointer list-none text-xs text-zinc-600 hover:underline">
+        {member.functionalRoles && member.functionalRoles.length > 0
+          ? member.functionalRoles.map((r) => FUNCTIONAL_ROLE_LABELS[r as FunctionalRole] ?? r).join(", ")
+          : <span className="text-zinc-400">None — click to set</span>}
+      </summary>
+      <div className="absolute z-10 mt-1 w-56 rounded-md border border-zinc-200 bg-white p-2 shadow-lg">
+        <div className="space-y-1">
+          {FUNCTIONAL_ROLES.map((role) => (
+            <label key={role} className="flex items-center gap-2 text-xs text-zinc-700">
+              <input type="checkbox" checked={selected.includes(role)} onChange={() => toggle(role)} />
+              {FUNCTIONAL_ROLE_LABELS[role]}
+            </label>
+          ))}
+        </div>
+        <div className="mt-2 flex justify-end gap-2">
+          <button onClick={() => { setSelected(member.functionalRoles ?? []); setOpen(false); }} className="text-xs text-zinc-400 hover:underline">Cancel</button>
+          <button onClick={save} disabled={saving} className="rounded-md bg-emerald-600 px-2 py-1 text-xs font-medium text-white disabled:opacity-40">Save</button>
+        </div>
+      </div>
+    </details>
+  );
+}
+
 export function SettingsView() {
   const [tab, setTab] = useState<Tab>("Organization");
   const [members, setMembers] = useState<Member[]>([]);
@@ -253,13 +317,19 @@ export function SettingsView() {
         <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-zinc-50 text-left text-xs text-zinc-500">
-              <tr><th className="px-4 py-2 font-medium">User</th><th className="px-4 py-2 font-medium">Role</th><th className="px-4 py-2 font-medium">Status</th></tr>
+              <tr>
+                <th className="px-4 py-2 font-medium">User</th>
+                <th className="px-4 py-2 font-medium">Role</th>
+                <th className="px-4 py-2 font-medium">Functional roles</th>
+                <th className="px-4 py-2 font-medium">Status</th>
+              </tr>
             </thead>
             <tbody>
               {members.map((r) => (
                 <tr key={r.userId} className="border-t border-zinc-100">
                   <td className="px-4 py-2 font-medium">{r.name || r.email}{r.userId === me?.userId ? " (you)" : ""}</td>
                   <td className="px-4 py-2 font-mono text-xs text-zinc-600">{r.role}</td>
+                  <td className="px-4 py-2"><FunctionalRolesCell member={r} onSaved={loadTeam} /></td>
                   <td className="px-4 py-2"><span className="text-xs text-emerald-600">{r.status}</span></td>
                 </tr>
               ))}
@@ -267,11 +337,12 @@ export function SettingsView() {
                 <tr key={inv.id} className="border-t border-zinc-100">
                   <td className="px-4 py-2 font-medium text-zinc-500">{inv.email}</td>
                   <td className="px-4 py-2 font-mono text-xs text-zinc-600">{inv.role}</td>
+                  <td className="px-4 py-2 text-xs text-zinc-300">—</td>
                   <td className="px-4 py-2"><span className="text-xs text-amber-600">invited</span></td>
                 </tr>
               ))}
               {members.length === 0 && invites.length === 0 && (
-                <tr><td colSpan={3} className="px-4 py-6 text-center text-xs text-zinc-400">Loading…</td></tr>
+                <tr><td colSpan={4} className="px-4 py-6 text-center text-xs text-zinc-400">Loading…</td></tr>
               )}
             </tbody>
           </table>

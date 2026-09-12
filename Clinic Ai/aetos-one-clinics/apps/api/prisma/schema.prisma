@@ -71,6 +71,12 @@ model Branding {
   primaryColor    String       @default("#1F3A5F")
   accentColor     String       @default("#2F855A")
   customDomain    String?      @unique
+  // Verified and active are deliberately separate: DNS can be checked ahead of
+  // time (or paused later) without redoing the lookup. unset|pending|verified|failed.
+  customDomainStatus   String    @default("unset")
+  customDomainActive   Boolean   @default(false)
+  domainVerificationToken String?
+  domainVerifiedAt        DateTime?
   subdomain       String?      @unique // free "<slug>.aetosone.clinics" every clinic gets by default
   supportEmail    String?
   supportPhone    String?

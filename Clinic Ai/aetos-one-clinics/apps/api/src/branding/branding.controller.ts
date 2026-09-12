@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { BrandingService } from './branding.service';
 import { TenantRequest } from '../tenancy/tenant.middleware';
 import { Roles } from '../auth/roles.decorator';
@@ -27,5 +27,22 @@ export class BrandingController {
   @Roles('OWNER', 'ADMIN')
   upsert(@Req() req: TenantRequest, @Body() body: Record<string, unknown>) {
     return this.branding.upsert(req.organizationId!, body as any);
+  }
+
+  @Get('domain-instructions')
+  domainInstructions(@Req() req: TenantRequest) {
+    return this.branding.getDomainInstructions(req.organizationId!);
+  }
+
+  @Post('domain-verify')
+  @Roles('OWNER', 'ADMIN')
+  verifyDomain(@Req() req: TenantRequest) {
+    return this.branding.verifyDomain(req.organizationId!);
+  }
+
+  @Post('domain-activate')
+  @Roles('OWNER', 'ADMIN')
+  activateDomain(@Req() req: TenantRequest, @Body() body: { active: boolean }) {
+    return this.branding.setDomainActive(req.organizationId!, !!body.active);
   }
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.1 — 2026-09-12
+Calibration was buried in the Profiles tab and people could not find it. There
+is now a **gear button at the top right** opening a settings sheet with the
+active-profile selector and the calibration steppers for **all three values**
+(systolic, diastolic, pulse) in one place, plus reset and a link through to
+profile management. A dot on the gear shows when any offset is non-zero, so a
+calibrated dashboard is never silently calibrated. The steppers stay in the
+Profiles tab too — both render from the same state and stay in sync. Escape or
+a click outside closes the sheet.
+
 ## 1.2.0 — 2026-09-12
 **Profiles.** The cuff is normally shared, so every reading is now attributed
 to a profile. A selector in the top bar sets who the next measurement is for;

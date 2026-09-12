@@ -3,6 +3,7 @@ import { eq, and } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { channels, contacts, conversations, messages, campaignRecipients } from "../db/schema.js";
 import { getAdapter, type NormalizedInboundMessage } from "../adapters/index.js";
+import { runAutomations } from "./automations.js";
 
 async function ingestInbound(orgId: string, channelId: string, evt: NormalizedInboundMessage) {
   let [contact] = await db.select().from(contacts)
@@ -17,7 +18,9 @@ async function ingestInbound(orgId: string, channelId: string, evt: NormalizedIn
     .where(and(eq(conversations.orgId, orgId), eq(conversations.contactId, contact.id), eq(conversations.channelId, channelId)));
   const now = new Date();
   const windowExpires = new Date(now.getTime() + 24 * 3_600_000);
+  let isNewConversation = false;
   if (!conv) {
+    isNewConversation = true;
     [conv] = await db.insert(conversations).values({
       orgId, channelId, contactId: contact.id, status: "open", unread: 1,
       lastMessage: evt.body, lastMessageAt: now, lastMessageDirection: "in", serviceWindowExpiresAt: windowExpires,
@@ -39,6 +42,13 @@ async function ingestInbound(orgId: string, channelId: string, evt: NormalizedIn
   // over them. A human (or a future rule) can resume the recipient explicitly later.
   await db.update(campaignRecipients).set({ status: "paused", updatedAt: new Date() })
     .where(and(eq(campaignRecipients.orgId, orgId), eq(campaignRecipients.contactId, contact.id), eq(campaignRecipients.status, "active")));
+
+  // Wati's Automations "Rules" (trigger + filter + action) — evaluated against this real
+  // inbound event, not a simulated one. new_conversation fires once per brand-new thread;
+  // keyword_received fires on every inbound message body.
+  const automationCtx = { conversationId: conv.id, contactId: contact.id, channelId, messageBody: evt.body };
+  if (isNewConversation) await runAutomations(orgId, "new_conversation", automationCtx);
+  await runAutomations(orgId, "keyword_received", automationCtx);
 }
 
 // Meta sends delivery receipts ("statuses": sent/delivered/read/failed) on the same

@@ -59,19 +59,19 @@ export const channels: Channel[] = [
 import type { Template, Broadcast } from "./types";
 
 export const templates: Template[] = [
-  { id: "t1", name: "order_confirmation", language: "en", category: "utility", status: "approved",
+  { id: "t1", name: "order_confirmation", channel: "whatsapp", language: "en", category: "utility", status: "approved",
     body: "Hi {{1}}, your order #{{2}} is confirmed and will arrive by {{3}}.", variables: ["name", "order_id", "eta"],
     quality: "green", updatedAt: ago(60 * 24 * 10) },
-  { id: "t2", name: "diwali_sale_2026", language: "en", category: "marketing", status: "approved",
+  { id: "t2", name: "diwali_sale_2026", channel: "whatsapp", language: "en", category: "marketing", status: "approved",
     body: "🎉 {{1}}, our Diwali Sale is live! Flat {{2}}% off on all inverters. Shop now: {{3}}", variables: ["name", "discount", "link"],
     quality: "yellow", updatedAt: ago(60 * 24 * 2) },
-  { id: "t3", name: "otp_login", language: "en", category: "authentication", status: "approved",
+  { id: "t3", name: "otp_login", channel: "whatsapp", language: "en", category: "authentication", status: "approved",
     body: "{{1}} is your Aetos Store verification code. Valid for 5 minutes.", variables: ["otp"],
     quality: "green", updatedAt: ago(60 * 24 * 30) },
-  { id: "t4", name: "abandoned_cart_reminder", language: "en", category: "marketing", status: "pending",
+  { id: "t4", name: "abandoned_cart_reminder", channel: "whatsapp", language: "en", category: "marketing", status: "pending",
     body: "Hey {{1}}, you left {{2}} in your cart. Complete your order before stock runs out!", variables: ["name", "product"],
     updatedAt: ago(60 * 6) },
-  { id: "t5", name: "cod_confirmation", language: "en", category: "utility", status: "rejected",
+  { id: "t5", name: "cod_confirmation", channel: "whatsapp", language: "en", category: "utility", status: "rejected",
     body: "Confirm your COD order #{{1}} by replying YES.", variables: ["order_id"],
     rejectionReason: "Category mismatch — reclassify as Utility with explicit opt-out language.", updatedAt: ago(60 * 24 * 1) },
 ];

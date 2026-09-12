@@ -165,6 +165,37 @@ input[type=text].grow{flex:1 1 170px}
   text-align:center}
 .cal .cpreview b{color:var(--ink-2)}
 
+
+/* ------------------------------------------- settings sheet (top right) */
+.gear{appearance:none;width:34px;height:34px;flex:0 0 auto;border-radius:10px;
+  border:1px solid var(--line);background:var(--card-2);color:var(--ink-2);
+  cursor:pointer;display:grid;place-items:center;transition:all .15s}
+.gear:hover{border-color:var(--brand);color:var(--brand);
+  background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+.gear svg{width:18px;height:18px;display:block}
+.gear.on{border-color:var(--brand);color:var(--brand);
+  background:color-mix(in srgb,var(--brand) 12%,var(--card))}
+.gear .gdot{position:absolute;margin:-13px 0 0 13px;width:7px;height:7px;
+  border-radius:50%;background:var(--accent);border:1.5px solid var(--card)}
+.sheet-back{position:fixed;inset:0;z-index:90;background:rgba(8,11,20,.28)}
+.sheet{position:fixed;z-index:91;right:14px;top:62px;
+  width:min(400px,calc(100vw - 28px));max-height:calc(100vh - 80px);overflow:auto;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 2px 6px rgba(0,0,0,.08),0 28px 60px -18px rgba(8,11,20,.45)}
+.sheet h3{margin:0;padding:14px 16px 12px;font-size:13px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);
+  border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:9px}
+.sheet h3 .x{margin-left:auto;appearance:none;border:0;background:transparent;
+  color:var(--ink-3);font-size:19px;line-height:1;cursor:pointer;padding:0 2px}
+.sheet h3 .x:hover{color:var(--ink)}
+.sheet .srow{padding:13px 16px;border-bottom:1px solid var(--line-2);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sheet .srow .sl{font-size:12.5px;font-weight:650;color:var(--ink-3)}
+.sheet .sfoot{padding:12px 16px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.sheet .sfoot .sub{font-size:11.5px;color:var(--ink-3);margin-right:auto;max-width:22ch}
+.sheet .cpnote{padding:0 16px 12px;font-size:11.5px;line-height:1.55;color:var(--ink-3)}
+@media (max-width:560px){ .sheet{right:8px;left:8px;width:auto;top:58px} }
+
 /* ---------------------------------------------------------- layout */
 main{max-width:1180px;margin:0 auto;padding:18px 16px 56px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
@@ -395,6 +426,12 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
       </span>
       <span class="calflag" id="calflag" hidden>calibrated</span>
       <span class="pill" id="statepill"><i class="dot"></i><span id="statetext">Starting…</span></span>
+      <button class="gear" id="gear" aria-label="Settings and calibration" title="Settings & calibration">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6 1.65 1.65 0 0010 3.09V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="gdot" id="gdot" hidden></span>
+      </button>
     </div>
 
     <nav class="tabs" role="tablist">
@@ -423,6 +460,32 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
         Device
       </button>
     </nav>
+  </div>
+</div>
+
+<div class="sheet-back" id="sheetback" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Settings and calibration" hidden>
+  <h3>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.2" stroke-linecap="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+    Settings &amp; calibration
+    <button class="x" id="sheetclose" aria-label="Close">&times;</button>
+  </h3>
+  <div class="srow">
+    <span class="sl">Recording for</span>
+    <span class="who" style="margin-left:auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg>
+      <select id="whosel2" aria-label="Active profile"></select>
+    </span>
+  </div>
+  <div class="calgrid" id="calgrid2" style="grid-template-columns:1fr"></div>
+  <p class="cpnote">The offset is stored per profile and applied when a value is shown or published &mdash; the database always keeps the rate the detector measured, so changing it later re-aligns your whole history. RR interval stays uncalibrated.</p>
+  <div class="sfoot">
+    <span class="sub" id="calhint2"></span>
+    <button class="btn" id="calreset2">Reset</button>
+    <button class="btn" id="goprofiles">Manage profiles</button>
   </div>
 </div>
 
@@ -681,7 +744,11 @@ function renderProfiles(){
   sel.innerHTML = profiles.map(p =>
       `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")
     + `<option value="none">Unassigned</option>`;
-  sel.value = String(status.profile_id == null ? "none" : status.profile_id);
+  const cur = String(status.profile_id == null ? "none" : status.profile_id);
+  sel.value = cur;
+  const sel2 = $("whosel2");
+  sel2.innerHTML = sel.innerHTML;
+  sel2.value = cur;
 
   const off = (calibration || {}).hr || 0;
   $("calflag").hidden = !off;
@@ -754,17 +821,19 @@ async function loadProfiles(){
 /* ---------------------------------------------------------- calibration */
 function renderCalibration(){
   const p = activeProfile();
-  $("calfor").textContent = p ? "for " + p.name : "for unassigned sessions";
-  $("calhint").textContent = p
-    ? "Applies to " + p.name + "'s heart rate only."
-    : "No profile selected — this offset applies to unassigned sessions.";
+  const forWhom = p ? "for " + p.name : "for unassigned sessions";
+  const hint = p ? "Applies to " + p.name + "'s heart rate only."
+                 : "No profile selected — applies to unassigned sessions.";
+  $("calfor").textContent = forWhom;
+  $("calhint").textContent = hint;
+  $("calhint2").textContent = hint;
   const v = (calibration || {}).hr || 0;
   const raw = status.hr_raw != null ? status.hr_raw
             : (status.hr != null ? status.hr - v : null);
   const preview = raw != null
     ? `measured <b>${Math.round(raw)}</b> → shown <b>${Math.max(0, Math.round(raw + v))}</b> bpm`
     : `applied to every heart-rate value`;
-  $("calgrid").innerHTML = `<div class="cal c-sys">
+  const html = `<div class="cal c-sys">
       <div class="ck"><i></i>Heart rate</div>
       <div class="stepper-row">
         <button class="stepbtn" data-cal="hr" data-d="-1"
@@ -774,10 +843,15 @@ function renderCalibration(){
           aria-label="Increase heart-rate offset">+</button>
       </div>
       <div class="cpreview">${preview}</div></div>`;
-  $("calgrid").querySelectorAll("[data-cal]").forEach(b => {
+  // the stepper lives in two places: the Profiles tab and the top-right
+  // settings sheet, which is where people actually look for it
+  $("calgrid").innerHTML = html;
+  $("calgrid2").innerHTML = html;
+  $("gdot").hidden = !v;
+  document.querySelectorAll("[data-cal]").forEach(b => {
     b.onclick = async () => {
       const next = ((calibration || {}).hr || 0) + parseInt(b.dataset.d, 10);
-      $("calgrid").querySelectorAll("[data-cal]").forEach(x => x.disabled = true);
+      document.querySelectorAll("[data-cal]").forEach(x => x.disabled = true);
       const r = await postJSON("api/calibration", {hr: next});
       if(r && r.calibration) calibration = r.calibration;
       await loadStats();
@@ -805,6 +879,27 @@ $("padd").onclick = async () => {
 };
 $("pname").addEventListener("keydown", e => { if(e.key === "Enter") $("padd").click(); });
 $("whosel").onchange = e => selectProfile(e.target.value);
+$("whosel2").onchange = e => selectProfile(e.target.value);
+
+/* ------------------------------------------- settings sheet (top right) */
+function openSheet(on){
+  $("sheet").hidden = !on;
+  $("sheetback").hidden = !on;
+  $("gear").classList.toggle("on", on);
+  if(on){ loadProfiles(); }
+}
+$("gear").onclick = () => openSheet($("sheet").hidden);
+$("sheetclose").onclick = () => openSheet(false);
+$("sheetback").onclick = () => openSheet(false);
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape" && !$("sheet").hidden) openSheet(false);
+});
+$("calreset2").onclick = () => $("calreset").click();
+$("goprofiles").onclick = () => {
+  openSheet(false);
+  const b = document.querySelector('nav.tabs button[data-view="profiles"]');
+  if(b) b.click();
+};
 
 function renderHistFilter(){
   const sel = $("histfilter");

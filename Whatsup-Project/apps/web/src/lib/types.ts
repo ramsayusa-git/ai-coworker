@@ -95,6 +95,7 @@ export type TemplateStatus = "approved" | "pending" | "rejected" | "draft";
 export interface Template {
   id: string;
   name: string;
+  channel: "whatsapp" | "sms";
   language: string;
   category: TemplateCategory;
   status: TemplateStatus;
@@ -144,6 +145,75 @@ export interface Team {
   name: string;
   createdAt: string;
   members: TeamMember[];
+}
+
+// Wati-style multi-select functional roles — additive to the single hierarchical `role`.
+export const FUNCTIONAL_ROLES = [
+  "administrator", "broadcast_manager", "template_manager", "contact_manager",
+  "operator", "developer", "billing_manager", "dashboard_viewer",
+] as const;
+export type FunctionalRole = (typeof FUNCTIONAL_ROLES)[number];
+
+export type AutomationTriggerType = "new_conversation" | "keyword_received";
+export interface AutomationFilter { field: "channel" | "tag"; op: "eq" | "contains"; value: string }
+export type AutomationAction =
+  | { type: "assign_team"; teamId: string }
+  | { type: "add_tag"; tag: string }
+  | { type: "send_template"; templateId: string }
+  | { type: "change_status"; status: string };
+
+export interface AutomationRule {
+  id: string;
+  orgId: string;
+  name: string;
+  enabled: boolean;
+  triggerType: AutomationTriggerType;
+  triggerConfig: { keyword?: string };
+  filters: AutomationFilter[];
+  actions: AutomationAction[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const AD_PLATFORMS = ["whatsapp", "facebook", "instagram", "twitter", "linkedin", "google_ads", "tiktok"] as const;
+export type AdPlatform = (typeof AD_PLATFORMS)[number];
+export const AD_PLATFORM_LABELS: Record<AdPlatform, string> = {
+  whatsapp: "WhatsApp", facebook: "Facebook", instagram: "Instagram", twitter: "Twitter / X",
+  linkedin: "LinkedIn", google_ads: "Google Ads", tiktok: "TikTok",
+};
+
+export interface AdCampaign {
+  id: string;
+  orgId: string;
+  channelId: string | null;
+  templateId: string | null;
+  platform: AdPlatform;
+  name: string;
+  dailyBudgetPaise: number;
+  scheduledAt: string | null;
+  status: "draft" | "scheduled" | "active" | "failed";
+  externalCampaignId: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+}
+
+export const ORGANIC_PLATFORMS = ["facebook", "instagram", "twitter", "linkedin", "tiktok"] as const;
+export type OrganicPlatform = (typeof ORGANIC_PLATFORMS)[number];
+export const ORGANIC_PLATFORM_LABELS: Record<OrganicPlatform, string> = {
+  facebook: "Facebook", instagram: "Instagram", twitter: "Twitter / X", linkedin: "LinkedIn", tiktok: "TikTok",
+};
+
+export interface SocialPostResult { status: "published" | "failed"; externalId?: string; error?: string }
+export interface SocialPost {
+  id: string;
+  orgId: string;
+  platforms: OrganicPlatform[];
+  caption: string;
+  mediaUrl: string | null;
+  scheduledAt: string | null;
+  status: "draft" | "scheduled" | "published" | "failed";
+  results: Record<string, SocialPostResult>;
+  createdAt: string;
 }
 
 export type BotNodeType = "trigger" | "message" | "condition" | "ai" | "handoff";

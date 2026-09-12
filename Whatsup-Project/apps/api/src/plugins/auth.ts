@@ -2,7 +2,7 @@ import fp from "fastify-plugin";
 import jwt from "@fastify/jwt";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 
-export type AuthUser = { userId: string; orgId: string; role: string; email: string };
+export type AuthUser = { userId: string; orgId: string; role: string; email: string; functionalRoles?: string[] };
 
 declare module "fastify" {
   interface FastifyInstance {

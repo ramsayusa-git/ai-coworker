@@ -6,8 +6,8 @@ import { db, withOrgDb } from "../db/client.js";
 import { users, orgMembers, orgs, partners, invites } from "../db/schema.js";
 import { ACCESS_TOKEN_TTL, issueRefreshFamily, rotateRefreshToken, revokeRefreshToken } from "../auth-tokens.js";
 
-function signSession(app: FastifyInstance, userId: string, orgId: string, role: string, email: string) {
-  return app.jwt.sign({ userId, orgId, role, email }, { expiresIn: ACCESS_TOKEN_TTL });
+function signSession(app: FastifyInstance, userId: string, orgId: string, role: string, email: string, functionalRoles: string[] = []) {
+  return app.jwt.sign({ userId, orgId, role, email, functionalRoles }, { expiresIn: ACCESS_TOKEN_TTL });
 }
 
 export async function authRoutes(app: FastifyInstance) {
@@ -20,16 +20,16 @@ export async function authRoutes(app: FastifyInstance) {
       return reply.status(401).send({ error: "Invalid email or password" });
     }
 
-    const [membership] = await db.select({ role: orgMembers.role, orgId: orgs.id, orgName: orgs.name })
+    const [membership] = await db.select({ role: orgMembers.role, functionalRoles: orgMembers.functionalRoles, orgId: orgs.id, orgName: orgs.name })
       .from(orgMembers).innerJoin(orgs, eq(orgMembers.orgId, orgs.id))
       .where(eq(orgMembers.userId, user.id)).limit(1);
     if (!membership) return reply.status(403).send({ error: "User has no organization" });
 
-    const token = signSession(app, user.id, membership.orgId, membership.role, user.email);
+    const token = signSession(app, user.id, membership.orgId, membership.role, user.email, membership.functionalRoles ?? []);
     const refreshToken = await issueRefreshFamily(user.id);
     return reply.send({
       token, refreshToken,
-      user: { id: user.id, email: user.email, name: user.name, orgId: membership.orgId, orgName: membership.orgName, role: membership.role },
+      user: { id: user.id, email: user.email, name: user.name, orgId: membership.orgId, orgName: membership.orgName, role: membership.role, functionalRoles: membership.functionalRoles ?? [] },
     });
   });
 
@@ -47,15 +47,15 @@ export async function authRoutes(app: FastifyInstance) {
 
     const [user] = await db.select().from(users).where(eq(users.id, result.userId));
     if (!user) return reply.status(401).send({ error: "Invalid refresh token" });
-    const [membership] = await db.select({ role: orgMembers.role, orgId: orgs.id, orgName: orgs.name })
+    const [membership] = await db.select({ role: orgMembers.role, functionalRoles: orgMembers.functionalRoles, orgId: orgs.id, orgName: orgs.name })
       .from(orgMembers).innerJoin(orgs, eq(orgMembers.orgId, orgs.id))
       .where(eq(orgMembers.userId, user.id)).limit(1);
     if (!membership) return reply.status(403).send({ error: "User has no organization" });
 
-    const token = signSession(app, user.id, membership.orgId, membership.role, user.email);
+    const token = signSession(app, user.id, membership.orgId, membership.role, user.email, membership.functionalRoles ?? []);
     return reply.send({
       token, refreshToken: result.token,
-      user: { id: user.id, email: user.email, name: user.name, orgId: membership.orgId, orgName: membership.orgName, role: membership.role },
+      user: { id: user.id, email: user.email, name: user.name, orgId: membership.orgId, orgName: membership.orgName, role: membership.role, functionalRoles: membership.functionalRoles ?? [] },
     });
   });
 
@@ -122,10 +122,38 @@ export async function authRoutes(app: FastifyInstance) {
     const { orgId } = req.params as { orgId: string };
     if (orgId !== req.authUser!.orgId) return reply.status(403).send({ error: "Forbidden" });
     return withOrgDb(orgId, (scoped) =>
-      scoped.select({ userId: users.id, name: users.name, email: users.email, role: orgMembers.role, status: orgMembers.status })
+      scoped.select({
+        userId: users.id, name: users.name, email: users.email, role: orgMembers.role,
+        status: orgMembers.status, functionalRoles: orgMembers.functionalRoles,
+      })
         .from(orgMembers).innerJoin(users, eq(orgMembers.userId, users.id))
         .where(eq(orgMembers.orgId, orgId))
     );
+  });
+
+  // Edit a member's hierarchical role and/or their multi-select functional roles (Wati-style
+  // Broadcast Manager/Template Manager/etc — see rbac.ts). Same org_owner/org_admin gate as
+  // sending an invite. A functional-role change only takes effect on that member's next
+  // login/token-refresh (functionalRoles is baked into the JWT at sign time, same as role).
+  app.patch("/orgs/:orgId/members/:userId", { preHandler: app.authenticate }, async (req, reply) => {
+    const { orgId, userId } = req.params as { orgId: string; userId: string };
+    if (orgId !== req.authUser!.orgId) return reply.status(403).send({ error: "Forbidden" });
+    if (!["org_owner", "org_admin"].includes(req.authUser!.role)) {
+      return reply.status(403).send({ error: "Only org owners/admins can edit member roles" });
+    }
+    const { role, functionalRoles } = req.body as { role?: string; functionalRoles?: string[] };
+    const patch: Record<string, unknown> = {};
+    if (role !== undefined) patch.role = role;
+    if (functionalRoles !== undefined) patch.functionalRoles = functionalRoles;
+    if (Object.keys(patch).length === 0) return reply.status(400).send({ error: "nothing to update" });
+
+    const updated = await withOrgDb(orgId, async (scoped) => {
+      const [row] = await scoped.update(orgMembers).set(patch)
+        .where(and(eq(orgMembers.orgId, orgId), eq(orgMembers.userId, userId))).returning();
+      return row;
+    });
+    if (!updated) return reply.status(404).send({ error: "member not found" });
+    return updated;
   });
 
   app.post("/auth/accept-invite", async (req, reply) => {

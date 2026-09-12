@@ -86,6 +86,10 @@ export const orgMembers = pgTable("org_members", {
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   role: roleEnum("role").notNull().default("agent"),
   status: text("status").default("active"), // "invited" | "active"
+  // Wati-style multi-select functional roles — additive to the hierarchical `role` ladder
+  // above, not a replacement: a viewer can also hold "billing_manager" without being promoted
+  // to org_admin. See apps/api/src/rbac.ts FUNCTIONAL_ROLE_CAPS for what each grants.
+  functionalRoles: text("functional_roles").array().default([]),
 }, (t) => [unique().on(t.orgId, t.userId)]);
 
 // Wati-style agent grouping, separate from an individual's role — lets a conversation or
@@ -235,6 +239,7 @@ export const templates = pgTable("templates", {
   id: uuid("id").primaryKey().defaultRandom(),
   orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  channel: text("channel").notNull().default("whatsapp"), // whatsapp | sms — SMS templates skip Meta approval, are just plain text
   language: text("language").default("en"),
   category: text("category").notNull(),
   status: text("status").default("pending"),
@@ -302,3 +307,59 @@ export const campaignRecipients = pgTable("campaign_recipients", {
   status: text("status").default("active"), // active | paused | completed
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [unique().on(t.campaignId, t.contactId)]);
+
+// Wati-style Automations "Rules": trigger + filter + action, evaluated live against real
+// inbound events (see webhooks.ts runAutomations()) — distinct from the drag-and-drop bot
+// flow editor, which is a conversational flow, not an event-rule engine.
+export const automationRules = pgTable("automation_rules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  enabled: boolean("enabled").default(true),
+  // "new_conversation" | "keyword_received"
+  triggerType: text("trigger_type").notNull(),
+  triggerConfig: jsonb("trigger_config").$type<{ keyword?: string }>().default({}),
+  filters: jsonb("filters").$type<Array<{ field: "channel" | "tag"; op: "eq" | "contains"; value: string }>>().default([]),
+  actions: jsonb("actions").$type<Array<
+    | { type: "assign_team"; teamId: string }
+    | { type: "add_tag"; tag: string }
+    | { type: "send_template"; templateId: string }
+    | { type: "change_status"; status: string }
+  >>().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Wati's "Ads" module — Click-to-WhatsApp campaigns on Meta Ads. Real Graph Marketing API
+// calls when META_AD_ACCOUNT_ID/META_MARKETING_ACCESS_TOKEN are configured (see
+// adapters/meta-ads.ts); this table is the local record of what was attempted and its
+// real outcome — never a fabricated "active" status.
+export const adCampaigns = pgTable("ad_campaigns", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  channelId: uuid("channel_id").references(() => channels.id),
+  templateId: uuid("template_id").references(() => templates.id),
+  platform: text("platform").notNull().default("whatsapp"), // whatsapp|facebook|instagram|twitter|linkedin|google_ads|tiktok
+  name: text("name").notNull(),
+  dailyBudgetPaise: integer("daily_budget_paise").notNull(),
+  scheduledAt: timestamp("scheduled_at"), // null = launch immediately on create
+  status: text("status").default("draft"), // draft | scheduled | active | failed
+  externalCampaignId: text("external_campaign_id"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Organic social posts — Facebook/Instagram/Twitter(X)/LinkedIn/TikTok. Real publish API
+// calls per platform (see adapters/social/*); "results" holds each targeted platform's
+// real outcome (externalId or error), never a fabricated success.
+export const socialPosts = pgTable("social_posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  platforms: text("platforms").array().notNull().default([]), // subset of facebook|instagram|twitter|linkedin|tiktok
+  caption: text("caption").notNull(),
+  mediaUrl: text("media_url"),
+  scheduledAt: timestamp("scheduled_at"),
+  status: text("status").default("draft"), // draft | scheduled | published | failed
+  results: jsonb("results").$type<Record<string, { status: "published" | "failed"; externalId?: string; error?: string }>>().default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
