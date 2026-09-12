@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { desc, eq } from "drizzle-orm";
 import { withOrgDb } from "../db/client.js";
 import { templates } from "../db/schema.js";
+import { requireCapability } from "../rbac.js";
 
 export async function templatesRoutes(app: FastifyInstance) {
   app.get("/orgs/:orgId/templates", async (req) => {
@@ -11,7 +12,7 @@ export async function templatesRoutes(app: FastifyInstance) {
     );
   });
 
-  app.post("/orgs/:orgId/templates", async (req, reply) => {
+  app.post("/orgs/:orgId/templates", { preHandler: requireCapability("manage_templates") }, async (req, reply) => {
     const { orgId } = req.params as { orgId: string };
     const body = req.body as { name: string; category: string; body: string; language?: string };
     if (!body.name?.trim() || !body.body?.trim()) {

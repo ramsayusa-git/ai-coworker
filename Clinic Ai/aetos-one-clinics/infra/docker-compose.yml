@@ -1,0 +1,95 @@
+version: "3.9"
+
+# Aetos One Clinics — local/dev stack. Every AI capability is its own add-on
+# container (see ../addons), matching the Home Assistant add-on model: the
+# api service is the "supervisor" that discovers, enables and proxies to them.
+# In production each add-on scales independently; here they share one network
+# for simplicity.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: aetos
+      POSTGRES_PASSWORD: aetos
+      POSTGRES_DB: aetos_one_clinics
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports: ["8080:8080"]
+
+  api:
+    build: ../apps/api
+    depends_on: [postgres, redis]
+    environment:
+      DATABASE_URL: postgresql://aetos:aetos@postgres:5432/aetos_one_clinics
+      PORT: 3000
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/aetos-clinics
+      ADDON_REGISTRY_PATH: /addons
+    volumes:
+      - ../addons:/addons:ro
+    ports: ["3000:3000"]
+
+  web:
+    build: ../apps/web
+    depends_on: [api]
+    ports: ["5173:5173"]
+
+  # --- AI add-ons -------------------------------------------------------
+  ai-scribe:
+    build: ../addons/ai-scribe
+    environment:
+      API_BASE_URL: http://api:3000
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports: ["8102:8102"]
+
+  med-safety:
+    build: ../addons/med-safety
+    environment:
+      API_BASE_URL: http://api:3000
+      MED_SAFETY_LLM_PROVIDER: anthropic
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports: ["8101:8101"]
+
+  intake:
+    build: ../addons/intake
+    environment:
+      API_BASE_URL: http://api:3000
+    ports: ["8103:8103"]
+
+  smart-queue:
+    build: ../addons/smart-queue
+    environment:
+      API_BASE_URL: http://api:3000
+    ports: ["8104:8104"]
+
+  follow-up:
+    build: ../addons/follow-up
+    environment:
+      API_BASE_URL: http://api:3000
+    ports: ["8105:8105"]
+
+  revenue-integrity:
+    build: ../addons/revenue-integrity
+    environment:
+      API_BASE_URL: http://api:3000
+    ports: ["8106:8106"]
+
+  abdm-adapter:
+    build: ../addons/abdm-adapter
+    environment:
+      API_BASE_URL: http://api:3000
+    ports: ["8107:8107"]
+
+volumes:
+  pgdata:

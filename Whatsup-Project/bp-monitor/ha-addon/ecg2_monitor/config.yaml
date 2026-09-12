@@ -1,0 +1,50 @@
+name: ECG2 Monitor
+version: "1.0.0"
+slug: ecg2_monitor
+description: Live ECG dashboard for the ikinloop ecg2 BLE sensor (host Bluetooth or MQTT bridge)
+url: https://aetostechlabs.com
+arch:
+  - aarch64
+  - amd64
+  - armv7
+startup: application
+boot: auto
+init: false
+ingress: true
+ingress_port: 8099
+ingress_stream: true
+panel_icon: mdi:heart-pulse
+panel_title: ECG Monitor
+host_dbus: true
+hassio_api: true
+hassio_role: default
+services:
+  - mqtt:want
+map:
+  - share:rw
+options:
+  source: auto
+  device_address: "12:16:00:00:06:63"
+  device_name: ikinloop
+  scan_timeout: 20
+  mqtt_raw_topic: ecg2/raw
+  mqtt_host: ""
+  mqtt_port: 1883
+  mqtt_user: ""
+  mqtt_password: ""
+  discovery_prefix: homeassistant
+  mains_hz: 50
+  log_level: info
+schema:
+  source: list(auto|ble|mqtt|replay)
+  device_address: str
+  device_name: str
+  scan_timeout: int(5,300)
+  mqtt_raw_topic: str
+  mqtt_host: str?
+  mqtt_port: port
+  mqtt_user: str?
+  mqtt_password: password?
+  discovery_prefix: str
+  mains_hz: list(50|60)
+  log_level: list(debug|info|warning|error)

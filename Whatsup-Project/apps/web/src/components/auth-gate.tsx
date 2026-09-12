@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
-import { getCachedMe, getToken, clearSession, type Me } from "@/lib/api";
+import { getCachedMe, getToken, logout as logoutSession, type Me } from "@/lib/api";
 
 const PUBLIC_PATHS = ["/login", "/register", "/accept-invite", "/accept-partner-invite"];
 // Reachable with just a JWT — no cached org profile required. Partner-team-only users
@@ -37,7 +37,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (!me && !(isTokenOnly && hasToken)) return null; // redirecting
 
   function logout() {
-    clearSession();
+    logoutSession();
     router.replace("/login");
   }
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getToken } from "@/lib/api";
+import { useBrand } from "@/components/brand-provider";
 
 const nav = [
   { href: "/", label: "Dashboard" },
@@ -19,6 +20,7 @@ const nav = [
 export function Sidebar() {
   const path = usePathname();
   const [hasPartner, setHasPartner] = useState(false);
+  const brand = useBrand();
 
   useEffect(() => {
     const token = getToken();
@@ -31,9 +33,16 @@ export function Sidebar() {
   }, []);
 
   return (
-    <aside className="w-56 shrink-0 border-r border-zinc-200 bg-white p-4">
-      <div className="mb-6 text-lg font-semibold text-emerald-600">Whatsup</div>
-      <nav className="flex flex-col gap-1">
+    <aside className="flex w-56 shrink-0 flex-col border-r border-zinc-200 bg-white p-4">
+      <div className="mb-6 flex items-center gap-2">
+        {brand.logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={brand.logoUrl} alt={brand.brandName} className="h-7 max-w-[9rem] object-contain" />
+        ) : (
+          <span className="text-lg font-semibold" style={{ color: brand.primaryColor }}>{brand.brandName}</span>
+        )}
+      </div>
+      <nav className="flex flex-1 flex-col gap-1">
         {nav.map((n) => {
           const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
           return (
@@ -64,6 +73,9 @@ export function Sidebar() {
           </>
         )}
       </nav>
+      <div className="mt-4 border-t border-zinc-100 pt-3 text-[11px] text-zinc-400">
+        {brand.footerText || `© ${new Date().getFullYear()} ${brand.brandName}`}
+      </div>
     </aside>
   );
 }

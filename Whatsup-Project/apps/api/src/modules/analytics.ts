@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { eq } from "drizzle-orm";
 import { withOrgDb } from "../db/client.js";
-import { messages, conversations, channels, campaigns } from "../db/schema.js";
+import { messages, conversations, channels, campaigns, users, contacts } from "../db/schema.js";
 
 const COST_PER_OUTBOUND_PAISE = 35;
 
@@ -10,11 +10,13 @@ export async function analyticsRoutes(app: FastifyInstance) {
     const { orgId } = req.params as { orgId: string };
 
     return withOrgDb(orgId, async (db) => {
-      const [allMessages, allConvs, allChannels, allCampaigns] = await Promise.all([
+      const [allMessages, allConvs, allChannels, allCampaigns, allUsers, allContacts] = await Promise.all([
         db.select().from(messages).where(eq(messages.orgId, orgId)),
         db.select().from(conversations).where(eq(conversations.orgId, orgId)),
         db.select().from(channels).where(eq(channels.orgId, orgId)),
         db.select().from(campaigns).where(eq(campaigns.orgId, orgId)),
+        db.select().from(users),
+        db.select().from(contacts).where(eq(contacts.orgId, orgId)),
       ]);
 
       const out = allMessages.filter((m) => m.direction === "out");
@@ -32,6 +34,23 @@ export async function analyticsRoutes(app: FastifyInstance) {
         const d = m.createdAt.toISOString().slice(0, 10);
         if (!days[d]) continue;
         if (m.direction === "out") days[d].sent++; else days[d].received++;
+      }
+
+      const thirtyDaysAgo = Date.now() - 30 * 86_400_000;
+      const newContacts = allContacts.filter((c) => c.createdAt.getTime() >= thirtyDaysAgo).length;
+      const statusCounts = { open: 0, pending: 0, snoozed: 0, resolved: 0 } as Record<string, number>;
+      for (const c of allConvs) statusCounts[c.status ?? "open"] = (statusCounts[c.status ?? "open"] ?? 0) + 1;
+
+      const userById = new Map(allUsers.map((u) => [u.id, u]));
+      const agentStats = new Map<string, { name: string; assigned: number; resolved: number }>();
+      for (const c of allConvs) {
+        if (!c.assigneeId) continue;
+        const u = userById.get(c.assigneeId);
+        const key = c.assigneeId;
+        const entry = agentStats.get(key) ?? { name: u?.name ?? u?.email ?? "Unknown", assigned: 0, resolved: 0 };
+        entry.assigned++;
+        if (c.status === "resolved") entry.resolved++;
+        agentStats.set(key, entry);
       }
 
       const channelById = new Map(allChannels.map((c) => [c.id, c]));
@@ -52,6 +71,9 @@ export async function analyticsRoutes(app: FastifyInstance) {
         costPaise: out.length * COST_PER_OUTBOUND_PAISE,
         dailySeries: Object.entries(days).map(([date, v]) => ({ date, ...v })),
         channelSplit: Array.from(channelCounts.entries()).map(([channel, count]) => ({ channel, count })),
+        newContacts,
+        statusBreakdown: statusCounts,
+        agentLeaderboard: Array.from(agentStats.values()).sort((a, b) => b.assigned - a.assigned),
         topCampaigns: allCampaigns
           .map((c) => ({ name: c.name, delivered: c.stats?.delivered ?? 0, read: c.stats?.read ?? 0,
             ctr: (c.stats?.delivered ?? 0) > 0 ? (c.stats!.read / c.stats!.delivered) : 0 }))

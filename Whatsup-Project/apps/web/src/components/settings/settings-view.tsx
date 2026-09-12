@@ -5,7 +5,7 @@ import { apiFetch, getCachedMe } from "@/lib/api";
 const tabs = ["Organization", "Branding", "Team & Roles", "Roles & Permissions", "Billing", "API & Webhooks"] as const;
 
 const RBAC_MATRIX: Array<{ role: string; scope: string; can: string }> = [
-  { role: "platform_admin", scope: "Platform", can: "Full access across every partner and org (Whatsup ops team only)." },
+  { role: "platform_admin", scope: "Platform", can: "Full access across every partner and org (Aetos One Chat ops team only)." },
   { role: "partner_owner", scope: "Partner", can: "Full control of the partner account: branding, billing, client orgs, other partner members." },
   { role: "partner_admin", scope: "Partner", can: "Same as partner_owner except cannot remove the owner or change billing mode." },
   { role: "partner_support", scope: "Partner", can: "Read-only: view client orgs and health, no branding/billing edits, no client data unless the org grants access." },
@@ -194,9 +194,11 @@ export function SettingsView() {
         <div className="max-w-2xl">
           <p className="mb-3 text-xs text-zinc-500">
             Full role set across the platform. Invites here only offer org-scoped roles (viewer through org_owner) —
-            partner_owner/admin/support are granted from the Partner Console, platform_admin is Whatsup-internal.
-            Enforcement today covers billing/channel/invite actions for org_owner vs org_admin; the finer per-role
-            gates (supervisor/agent/viewer) are the target from the architecture doc and are being rolled out route by route.
+            partner_owner/admin/support are granted from the Partner Console, platform_admin is Aetos One Chat-internal.
+            Enforcement is live route-by-route: viewer is read-only everywhere; agent can send messages, change a
+            conversation&apos;s own status, and manage contacts, but can&apos;t reassign conversations, manage
+            channels/templates/campaigns/bots, or touch billing; supervisor adds reassignment plus
+            templates/campaigns/bots management; org_admin adds channels/team/settings; billing stays org_owner-only.
           </p>
           <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
             <table className="w-full text-sm">
@@ -248,7 +250,7 @@ export function SettingsView() {
               <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-50">Rotate</button>
             </div>
           </div>
-          <Field label="Outbound webhook URL" value="" hint="Signed with HMAC-SHA256; verify X-Whatsup-Signature." />
+          <Field label="Outbound webhook URL" value="" hint="Signed with HMAC-SHA256; verify X-AetosOneChat-Signature." />
         </div>
       )}
 

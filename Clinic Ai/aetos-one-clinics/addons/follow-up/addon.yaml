@@ -1,0 +1,16 @@
+slug: follow-up
+name: Follow-up Engine
+version: "0.1.0"
+description: Chronic-care recall scheduling — WhatsApp nudges and one-tap rebooking on a per-condition cadence.
+icon: calendar-clock
+category: engagement
+coreApiCompat: "^0.1.0"
+port: 8105
+healthPath: /health
+configSchema:
+  - key: whatsapp_business_token
+    label: WhatsApp Business API token
+    type: secret
+    required: true
+subscribesTo: ["encounter.finished"]
+publishes: ["followup.scheduled"]

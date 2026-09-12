@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { desc, eq } from "drizzle-orm";
 import { withOrgDb } from "../db/client.js";
 import { campaigns } from "../db/schema.js";
+import { requireCapability } from "../rbac.js";
 
 export async function campaignsRoutes(app: FastifyInstance) {
   app.get("/orgs/:orgId/campaigns", async (req) => {
@@ -11,7 +12,7 @@ export async function campaignsRoutes(app: FastifyInstance) {
     );
   });
 
-  app.post("/orgs/:orgId/campaigns", async (req, reply) => {
+  app.post("/orgs/:orgId/campaigns", { preHandler: requireCapability("manage_campaigns") }, async (req, reply) => {
     const { orgId } = req.params as { orgId: string };
     const body = req.body as { name: string; templateId: string; segment: string; audienceCount?: number; scheduledAt?: string };
     if (!body.name?.trim() || !body.templateId || !body.segment) {

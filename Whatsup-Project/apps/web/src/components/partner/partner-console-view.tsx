@@ -3,7 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { partnerFetch } from "@/lib/api";
 
 type PartnerRef = { id: string; name: string; slug: string; role: string };
-type Partner = { id: string; name: string; slug: string; brand: Record<string, any>; customDomain: string | null };
+type Partner = {
+  id: string; name: string; slug: string; brand: Record<string, any>;
+  customDomain: string | null; customDomainStatus: "unset" | "pending" | "verified" | "failed";
+};
+type DomainRecord = { type: string; host: string; value: string | null };
+type VerifyResult = { status: string; ownershipOk: boolean; cnameOk: boolean; expectedCname: string; error?: string };
 type ClientOrg = { id: string; name: string; planId: string; walletPaise: number; partnerAccess: string; createdAt: string };
 type PartnerMember = { userId: string; name: string | null; email: string; role: string; status: string };
 type PartnerInvite = { id: string; email: string; role: string; acceptUrl?: string };
@@ -258,8 +263,14 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
   const [brandName, setBrandName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#059669");
   const [supportEmail, setSupportEmail] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [faviconUrl, setFaviconUrl] = useState("");
+  const [footerText, setFooterText] = useState("");
   const [customDomain, setCustomDomain] = useState("");
   const [savingBrand, setSavingBrand] = useState(false);
+  const [domainRecords, setDomainRecords] = useState<DomainRecord[]>([]);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<VerifyResult | null>(null);
 
   const load = useCallback(async () => {
     const [p, orgsRows, mems, invs] = await Promise.all([
@@ -275,7 +286,16 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
     setBrandName(p.brand?.brandName ?? "");
     setPrimaryColor(p.brand?.primaryColor ?? "#059669");
     setSupportEmail(p.brand?.supportEmail ?? "");
+    setLogoUrl(p.brand?.logoUrl ?? "");
+    setFaviconUrl(p.brand?.faviconUrl ?? "");
+    setFooterText(p.brand?.footerText ?? "");
     setCustomDomain(p.customDomain ?? "");
+    if (p.customDomain && p.customDomainStatus !== "unset") {
+      partnerFetch(`/partners/${partnerRef.id}/domain-instructions`).then((d) => setDomainRecords(d.records)).catch(() => setDomainRecords([]));
+    } else {
+      setDomainRecords([]);
+    }
+    setVerifyResult(null);
   }, [partnerRef.id]);
 
   useEffect(() => { load(); }, [load]);
@@ -285,11 +305,23 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
     try {
       await partnerFetch(`/partners/${partnerRef.id}/branding`, {
         method: "PATCH",
-        body: JSON.stringify({ brand: { brandName, primaryColor, supportEmail }, customDomain }),
+        body: JSON.stringify({ brand: { brandName, primaryColor, supportEmail, logoUrl, faviconUrl, footerText }, customDomain }),
       });
       await load();
     } finally {
       setSavingBrand(false);
+    }
+  }
+
+  async function verifyDomain() {
+    setVerifying(true);
+    setVerifyResult(null);
+    try {
+      const result: VerifyResult = await partnerFetch(`/partners/${partnerRef.id}/domain-verify`, { method: "POST" });
+      setVerifyResult(result);
+      await load();
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -376,11 +408,79 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
             <input className={inputCls} value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} disabled={!isAdmin} />
           </label>
           <label className="block text-xs text-zinc-500">
-            Custom domain
-            <input className={inputCls} value={customDomain} onChange={(e) => setCustomDomain(e.target.value)} disabled={!isAdmin}
-              placeholder="app.yourbrand.com" />
-            <p className="mt-1 text-xs text-zinc-400">CNAME → Cloudflare for SaaS. Not yet auto-provisioned — recorded here for ops to wire up.</p>
+            Logo URL
+            <div className="mt-1 flex items-center gap-2">
+              {logoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt="Logo preview" className="h-8 max-w-[6rem] rounded border border-zinc-200 object-contain p-1" />
+              )}
+              <input className={inputCls + " flex-1"} value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)}
+                disabled={!isAdmin} placeholder="https://yourbrand.com/logo.png" />
+            </div>
+            <p className="mt-1 text-[11px] text-zinc-400">Shown in the sidebar and on login/register screens. Transparent PNG or SVG, ~200×40px works best.</p>
           </label>
+          <label className="block text-xs text-zinc-500">
+            Favicon URL
+            <div className="mt-1 flex items-center gap-2">
+              {faviconUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={faviconUrl} alt="Favicon preview" className="h-6 w-6 rounded border border-zinc-200 object-contain" />
+              )}
+              <input className={inputCls + " flex-1"} value={faviconUrl} onChange={(e) => setFaviconUrl(e.target.value)}
+                disabled={!isAdmin} placeholder="https://yourbrand.com/favicon.ico" />
+            </div>
+            <p className="mt-1 text-[11px] text-zinc-400">Sets the browser tab icon for client orgs under this brand.</p>
+          </label>
+          <label className="block text-xs text-zinc-500">
+            Footer text
+            <input className={inputCls} value={footerText} onChange={(e) => setFooterText(e.target.value)}
+              disabled={!isAdmin} placeholder={`© ${new Date().getFullYear()} ${brandName || "Your Brand"}`} />
+            <p className="mt-1 text-[11px] text-zinc-400">Shown at the bottom of the sidebar and on login/invite screens. Leave blank to use the default.</p>
+          </label>
+          <label className="block text-xs text-zinc-500">
+            Custom domain
+            <div className="mt-1 flex items-center gap-2">
+              <input className="w-full max-w-md rounded-md border border-zinc-300 px-2 py-1.5 text-sm" value={customDomain}
+                onChange={(e) => setCustomDomain(e.target.value)} disabled={!isAdmin} placeholder="app.yourbrand.com" />
+              {partner?.customDomain && (
+                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                  partner.customDomainStatus === "verified" ? "bg-emerald-100 text-emerald-700"
+                  : partner.customDomainStatus === "failed" ? "bg-red-100 text-red-700"
+                  : "bg-amber-100 text-amber-700"}`}>
+                  {partner.customDomainStatus}
+                </span>
+              )}
+            </div>
+          </label>
+          {domainRecords.length > 0 && (
+            <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-xs">
+              <p className="mb-2 text-zinc-500">Add these DNS records at your domain registrar, then verify — this does a real live DNS lookup, no manual approval needed:</p>
+              <table className="w-full font-mono text-[11px]">
+                <tbody>
+                  {domainRecords.map((r) => (
+                    <tr key={r.type} className="border-t border-zinc-200 first:border-0">
+                      <td className="py-1 pr-2 text-zinc-500">{r.type}</td>
+                      <td className="py-1 pr-2">{r.host}</td>
+                      <td className="py-1">{r.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {isAdmin && (
+                <button onClick={verifyDomain} disabled={verifying}
+                  className="mt-2 rounded-md border border-zinc-300 bg-white px-3 py-1 text-xs font-medium hover:bg-zinc-100 disabled:opacity-50">
+                  {verifying ? "Checking DNS…" : "Verify domain"}
+                </button>
+              )}
+              {verifyResult && (
+                <p className={`mt-2 ${verifyResult.status === "verified" ? "text-emerald-700" : "text-red-700"}`}>
+                  {verifyResult.status === "verified"
+                    ? "Verified — both records resolved correctly."
+                    : `Not verified yet — TXT ${verifyResult.ownershipOk ? "ok" : "missing"}, CNAME ${verifyResult.cnameOk ? "ok" : "missing"}.${verifyResult.error ? ` (${verifyResult.error})` : ""}`}
+                </p>
+              )}
+            </div>
+          )}
           {isAdmin && (
             <button onClick={saveBranding} disabled={savingBrand}
               className="rounded-md bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">

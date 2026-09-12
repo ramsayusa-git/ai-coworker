@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import type { Bot } from "@/lib/types";
-import { BotGraph } from "./bot-graph";
+import type { Bot, BotEdge, BotNode } from "@/lib/types";
+import { BotFlowEditor } from "./bot-flow-editor";
 import { apiFetch } from "@/lib/api";
 
 type ApiBot = Omit<Bot, "channels" | "sessionsToday" | "handoffRate"> & { channelIds: string[] };
@@ -13,6 +13,8 @@ function fromApi(b: ApiBot): Bot {
 export function BotsView() {
   const [bots, setBots] = useState<Bot[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
 
   const load = useCallback(async () => {
     const rows: ApiBot[] = await apiFetch("/bots");
@@ -27,15 +29,39 @@ export function BotsView() {
     await apiFetch(`/bots/${id}`, { method: "PATCH", body: JSON.stringify({ enabled }) });
   }
 
+  async function createBot() {
+    if (!newName.trim()) return;
+    const bot: ApiBot = await apiFetch("/bots", { method: "POST", body: JSON.stringify({ name: newName.trim() }) });
+    setNewName("");
+    setCreating(false);
+    await load();
+    setSelected(bot.id);
+  }
+
+  async function saveFlow(id: string, patch: { name: string; triggerSummary: string; nodes: BotNode[]; edges: BotEdge[] }) {
+    const updated: ApiBot = await apiFetch(`/bots/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+    setBots((prev) => prev.map((b) => (b.id === id ? fromApi(updated) : b)));
+  }
+
   const current = bots.find((b) => b.id === selected) ?? null;
 
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Bots</h1>
-        <button disabled className="cursor-not-allowed rounded-md bg-zinc-300 px-3 py-1.5 text-sm font-medium text-white">
-          + New bot (builder coming soon)
-        </button>
+        {creating ? (
+          <div className="flex gap-2">
+            <input autoFocus value={newName} onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") createBot(); }}
+              placeholder="Bot name" className="rounded-md border border-zinc-300 px-2 py-1.5 text-sm" />
+            <button onClick={createBot} className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">Create</button>
+          </div>
+        ) : (
+          <button onClick={() => setCreating(true)}
+            className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
+            + New bot
+          </button>
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
@@ -57,16 +83,12 @@ export function BotsView() {
               </div>
             </button>
           ))}
+          {bots.length === 0 && <div className="rounded-lg border border-dashed border-zinc-300 p-4 text-center text-xs text-zinc-400">No bots yet — create one above.</div>}
         </div>
 
         {current && (
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-medium">{current.name} — flow</h2>
-              <span className="text-xs text-zinc-400">Read-only preview · full builder coming soon</span>
-            </div>
-            <BotGraph bot={current} />
-          </div>
+          // key={current.id} forces a fresh editor instance (and local state) per bot
+          <BotFlowEditor key={current.id} bot={current} onSave={(patch) => saveFlow(current.id, patch)} />
         )}
       </div>
     </div>

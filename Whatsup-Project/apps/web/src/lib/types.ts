@@ -23,11 +23,46 @@ export interface Conversation {
   contact: Contact;
   channel: { id: string; name: string; provider: "meta" | "whapi" };
   status: ConvStatus;
-  assignee: string | null;
+  assigneeId: string | null;
+  assigneeName: string | null;
   unread: number;
   lastMessage: string;
   lastMessageAt: string;
   serviceWindowExpiresAt: string;
+  pinned: boolean;
+}
+
+export interface CannedResponse {
+  id: string;
+  shortcut: string;
+  body: string;
+  createdBy: string | null;
+  createdAt: string;
+}
+
+export interface ConversationNote {
+  id: string;
+  body: string;
+  createdAt: string;
+  authorId: string | null;
+  authorName: string | null;
+}
+
+export interface SavedView {
+  id: string;
+  name: string;
+  filters: { status?: string; assignFilter?: string; tag?: string };
+  createdBy: string | null;
+  createdByName: string | null;
+  createdAt: string;
+}
+
+export interface OrgMember {
+  userId: string;
+  name: string | null;
+  email: string;
+  role: string;
+  status: string | null;
 }
 
 export interface ContactFull extends Contact {
@@ -118,4 +153,7 @@ export interface AnalyticsSummary {
   dailySeries: { date: string; sent: number; received: number }[];
   channelSplit: { channel: string; count: number }[];
   topCampaigns: { name: string; delivered: number; read: number; ctr: number }[];
+  newContacts: number;
+  statusBreakdown: { open: number; pending: number; snoozed: number; resolved: number };
+  agentLeaderboard: { name: string; assigned: number; resolved: number }[];
 }

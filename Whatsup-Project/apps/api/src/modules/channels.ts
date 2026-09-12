@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { withOrgDb } from "../db/client.js";
 import { channels } from "../db/schema.js";
+import { requireCapability } from "../rbac.js";
 
 function scrub(row: typeof channels.$inferSelect) {
   const { credentials, ...rest } = row;
@@ -16,7 +17,7 @@ export async function channelsRoutes(app: FastifyInstance) {
     return rows.map(scrub);
   });
 
-  app.post("/orgs/:orgId/channels", async (req, reply) => {
+  app.post("/orgs/:orgId/channels", { preHandler: requireCapability("manage_channels") }, async (req, reply) => {
     const { orgId } = req.params as { orgId: string };
     const body = req.body as {
       provider: "meta" | "whapi"; displayName: string; phoneE164?: string;
@@ -38,7 +39,7 @@ export async function channelsRoutes(app: FastifyInstance) {
     return reply.status(201).send(scrub(row));
   });
 
-  app.patch("/orgs/:orgId/channels/:id/credentials", async (req, reply) => {
+  app.patch("/orgs/:orgId/channels/:id/credentials", { preHandler: requireCapability("manage_channels") }, async (req, reply) => {
     const { orgId, id } = req.params as { orgId: string; id: string };
     const credentials = req.body as Record<string, string>;
     const row = await withOrgDb(orgId, async (db) => {

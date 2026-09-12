@@ -1,0 +1,268 @@
+// Aetos One Clinics — core data model.
+// Single PostgreSQL cluster, shared schema, tenant_id on every clinical table.
+// Row-level security policies (enabled via migration SQL, see prisma/rls.sql) bind
+// each policy to the tenant claim in the JWT so isolation holds even if application
+// code forgets a WHERE clause. See docs/architecture.md section "Data model".
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy
+// ---------------------------------------------------------------------------
+
+model Organization {
+  id        String     @id @default(uuid())
+  name      String
+  createdAt DateTime   @default(now())
+  locations Location[]
+  users     User[]
+  addons    AddonInstallation[]
+  branding  Branding?
+
+  @@map("organizations")
+}
+
+// White-labeling: every clinic/reseller can present the product under its own
+// name, logo, and colors. The web app fetches this by organizationId (or by
+// customDomain before login) and applies it as CSS variables — see
+// apps/web/src/lib/branding.ts. Falls back to "Aetos One Clinics" defaults
+// when no row exists yet.
+model Branding {
+  id              String       @id @default(uuid())
+  organizationId  String       @unique
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  productName     String       @default("Aetos One Clinics")
+  logoUrl         String?
+  faviconUrl      String?
+  primaryColor    String       @default("#1F3A5F")
+  accentColor     String       @default("#2F855A")
+  customDomain    String?      @unique
+  supportEmail    String?
+  supportPhone    String?
+  hidePoweredBy   Boolean      @default(false) // reseller/white-label plans only
+  updatedAt       DateTime     @updatedAt
+
+  @@map("branding")
+}
+
+model Location {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  address        String?
+  patients       Patient[]
+  appointments   Appointment[]
+  encounters     Encounter[]
+  invoices       Invoice[]
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@map("locations")
+}
+
+model User {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  keycloakSub    String       @unique // subject claim from Keycloak OIDC token
+  name           String
+  role           UserRole
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+enum UserRole {
+  OWNER
+  DOCTOR
+  FRONT_DESK
+  ADMIN
+}
+
+// ---------------------------------------------------------------------------
+// Clinical core (FHIR-lite — see @aetos/shared-types for the wire schema)
+// ---------------------------------------------------------------------------
+
+model Patient {
+  id               String        @id @default(uuid())
+  locationId       String
+  location         Location      @relation(fields: [locationId], references: [id])
+  abhaNumber       String?
+  abhaAddress      String?
+  givenName        String
+  familyName       String?
+  gender           String
+  birthDate        DateTime?
+  phone            String
+  preferredLanguage String       @default("en")
+  addressJson      Json?
+  appointments     Appointment[]
+  encounters       Encounter[]
+  invoices         Invoice[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([locationId])
+  @@index([phone])
+  @@map("patients")
+}
+
+model Appointment {
+  id             String      @id @default(uuid())
+  locationId     String
+  location       Location    @relation(fields: [locationId], references: [id])
+  patientId      String
+  patient        Patient     @relation(fields: [patientId], references: [id])
+  practitionerId String
+  start          DateTime
+  end            DateTime?
+  status         String      @default("booked")
+  tokenNumber    Int?
+  triageScore    Float?      // written by the smart-queue add-on
+  encounter      Encounter?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([locationId, start])
+  @@map("appointments")
+}
+
+model Encounter {
+  id             String       @id @default(uuid())
+  locationId     String
+  location       Location     @relation(fields: [locationId], references: [id])
+  patientId      String
+  patient        Patient      @relation(fields: [patientId], references: [id])
+  practitionerId String
+  appointmentId  String?      @unique
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id])
+  status         String       @default("planned")
+  visitTemplateId String?
+  soapNoteJson   Json?        // { subjective, objective, assessment, plan, generatedBy }
+  observations   Observation[]
+  conditions     Condition[]
+  medications    MedicationRequest[]
+  invoices       Invoice[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([locationId, patientId])
+  @@map("encounters")
+}
+
+model Observation {
+  id          String    @id @default(uuid())
+  encounterId String
+  encounter   Encounter @relation(fields: [encounterId], references: [id])
+  patientId   String
+  codeSystem  String
+  code        String
+  display     String
+  valueString String?
+  valueNumber Float?
+  valueUnit   String?
+  source      String    @default("staff") // staff | patient-intake | ai-scribe
+  createdAt   DateTime  @default(now())
+
+  @@index([encounterId])
+  @@map("observations")
+}
+
+model Condition {
+  id              String    @id @default(uuid())
+  encounterId     String
+  encounter       Encounter @relation(fields: [encounterId], references: [id])
+  patientId       String
+  codeSystem      String    // icd10 | snomed
+  code            String
+  display         String
+  clinicalStatus  String    @default("active")
+  createdAt       DateTime  @default(now())
+
+  @@index([encounterId])
+  @@map("conditions")
+}
+
+model MedicationRequest {
+  id              String    @id @default(uuid())
+  encounterId     String
+  encounter       Encounter @relation(fields: [encounterId], references: [id])
+  patientId       String
+  medicationCode  String
+  medicationName  String
+  salt            String?
+  dosageText      String
+  frequency       String?
+  durationDays    Int?
+  status          String    @default("draft")
+  safetyCheckJson Json?     // written by the med-safety add-on
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([encounterId])
+  @@map("medication_requests")
+}
+
+model Invoice {
+  id            String     @id @default(uuid())
+  locationId    String
+  location      Location   @relation(fields: [locationId], references: [id])
+  patientId     String
+  patient       Patient    @relation(fields: [patientId], references: [id])
+  encounterId   String?
+  encounter     Encounter? @relation(fields: [encounterId], references: [id])
+  lineItemsJson Json
+  totalAmount   Decimal    @db.Decimal(10, 2)
+  status        String     @default("draft")
+  paymentMethod String?
+  paidAt        DateTime?
+  createdAt     DateTime   @default(now())
+
+  @@index([locationId, status])
+  @@map("invoices")
+}
+
+// ---------------------------------------------------------------------------
+// Add-on supervisor state (see @aetos/shared-types AddonManifest / AddonState)
+// ---------------------------------------------------------------------------
+
+model AddonInstallation {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  slug           String       // matches addon.yaml slug, e.g. "ai-scribe"
+  enabled        Boolean      @default(false)
+  configJson     Json         @default("{}")
+  installedAt    DateTime     @default(now())
+  lastHealthOk   Boolean?
+  lastHealthAt   DateTime?
+
+  @@unique([organizationId, slug])
+  @@map("addon_installations")
+}
+
+// Append-only audit log — every read/write of a patient record, required for
+// ABDM and expected by ISO 27001 auditors.
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String
+  actorUserId    String?
+  actorAddonSlug String?
+  action         String   // e.g. "patient.read", "prescription.create"
+  resourceType   String
+  resourceId     String
+  metadataJson   Json?
+  at             DateTime @default(now())
+
+  @@index([organizationId, at])
+  @@map("audit_log")
+}

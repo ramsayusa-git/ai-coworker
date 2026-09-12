@@ -71,6 +71,46 @@ export function AnalyticsView() {
         </div>
       </div>
 
+      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <div className="rounded-lg border border-zinc-200 bg-white p-4">
+          <div className="mb-3 text-sm font-medium">Conversation status</div>
+          <div className="space-y-2">
+            {(["open", "pending", "snoozed", "resolved"] as const).map((s) => (
+              <div key={s} className="flex items-center justify-between text-sm">
+                <span className="capitalize text-zinc-600">{s}</span>
+                <span className="font-medium">{data.statusBreakdown[s]}</span>
+              </div>
+            ))}
+            <div className="flex items-center justify-between border-t border-zinc-100 pt-2 text-sm">
+              <span className="text-zinc-600">New contacts (30d)</span>
+              <span className="font-medium">{data.newContacts}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 lg:col-span-2">
+          <div className="mb-3 text-sm font-medium">Agent performance</div>
+          {data.agentLeaderboard.length === 0 ? (
+            <div className="text-sm text-zinc-400">No conversations assigned yet.</div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs text-zinc-500">
+                <tr><th className="py-1 font-medium">Agent</th><th className="py-1 font-medium">Assigned</th><th className="py-1 font-medium">Resolved</th></tr>
+              </thead>
+              <tbody>
+                {data.agentLeaderboard.map((a) => (
+                  <tr key={a.name} className="border-t border-zinc-100">
+                    <td className="py-1.5 font-medium">{a.name}</td>
+                    <td className="py-1.5 text-zinc-600">{a.assigned}</td>
+                    <td className="py-1.5 text-zinc-600">{a.resolved}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
       <div className="mt-6 overflow-hidden rounded-lg border border-zinc-200 bg-white">
         <div className="border-b border-zinc-200 px-4 py-3 text-sm font-medium">Top campaigns</div>
         <table className="w-full text-sm">

@@ -1,0 +1,23 @@
+{
+  "name": "@aetos/mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server exposing Aetos One Clinics management (add-ons, patients, queue, branding, users) to Claude Code, Claude Desktop, Codex, or any MCP-capable client — the same connector pattern Ramsay already uses for aetosonepro (Home Assistant).",
+  "bin": {
+    "aetos-clinics-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "axios": "^1.7.9",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  }
+}

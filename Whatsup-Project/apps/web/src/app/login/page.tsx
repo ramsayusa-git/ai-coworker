@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
+import { useBrand } from "@/components/brand-provider";
 
 export default function LoginPage() {
   const router = useRouter();
+  const brand = useBrand();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,14 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50">
       <form onSubmit={submit} className="w-full max-w-sm rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 text-center text-xl font-semibold text-emerald-600">Whatsup</div>
+        <div className="mb-6 flex justify-center">
+          {brand.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={brand.logoUrl} alt={brand.brandName} className="h-9 max-w-[12rem] object-contain" />
+          ) : (
+            <span className="text-xl font-semibold" style={{ color: brand.primaryColor }}>{brand.brandName}</span>
+          )}
+        </div>
         <div className="space-y-3">
           <div>
             <label className="block text-xs text-zinc-500">Email</label>
@@ -45,10 +54,11 @@ export default function LoginPage() {
             {loading ? "Signing in…" : "Sign in"}
           </button>
           <p className="text-center text-xs text-zinc-500">
-            New to Whatsup? <a href="/register" className="text-emerald-600 hover:underline">Create an organization</a>
+            New to {brand.brandName}? <a href="/register" className="text-emerald-600 hover:underline">Create an organization</a>
           </p>
         </div>
       </form>
+      {brand.footerText && <p className="mt-4 text-center text-[11px] text-zinc-400">{brand.footerText}</p>}
     </div>
   );
 }

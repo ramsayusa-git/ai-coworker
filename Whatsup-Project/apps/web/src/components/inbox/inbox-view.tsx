@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import type { Conversation, ConvStatus, Message } from "@/lib/types";
-import { ConversationList } from "./conversation-list";
+import type { CannedResponse, Conversation, ConversationNote, ConvStatus, Message, OrgMember, SavedView } from "@/lib/types";
+import { ConversationList, type AssignFilter } from "./conversation-list";
 import { Thread } from "./thread";
 import { apiFetch } from "@/lib/api";
 
@@ -13,7 +13,13 @@ export function InboxView() {
   const [convs, setConvs] = useState<Conversation[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<ConvStatus | "all">("all");
+  const [assignFilter, setAssignFilter] = useState<AssignFilter>("all");
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [views, setViews] = useState<SavedView[]>([]);
   const [msgs, setMsgs] = useState<Message[]>([]);
+  const [notes, setNotes] = useState<ConversationNote[]>([]);
+  const [members, setMembers] = useState<OrgMember[]>([]);
+  const [canned, setCanned] = useState<CannedResponse[]>([]);
   const [sending, setSending] = useState(false);
 
   const loadConvs = useCallback(async () => {
@@ -21,12 +27,21 @@ export function InboxView() {
     setConvs(rows.map(withTags));
   }, []);
 
+  const loadViews = useCallback(async () => {
+    const rows: SavedView[] = await apiFetch("/saved-views");
+    setViews(rows);
+  }, []);
+
   useEffect(() => { loadConvs(); }, [loadConvs]);
+  useEffect(() => { loadViews(); }, [loadViews]);
+  useEffect(() => { apiFetch("/members").then(setMembers).catch(() => setMembers([])); }, []);
+  useEffect(() => { apiFetch("/canned-responses").then(setCanned).catch(() => setCanned([])); }, []);
 
   useEffect(() => {
-    if (!selected) return;
+    if (!selected) { setNotes([]); return; }
     let alive = true;
     apiFetch(`/conversations/${selected}/messages`).then((d) => { if (alive) setMsgs(d); });
+    apiFetch(`/conversations/${selected}/notes`).then((d) => { if (alive) setNotes(d); }).catch(() => setNotes([]));
     return () => { alive = false; };
   }, [selected]);
 
@@ -42,13 +57,72 @@ export function InboxView() {
     } finally { setSending(false); }
   }
 
+  async function assign(assigneeId: string | null) {
+    if (!selected) return;
+    await apiFetch(`/conversations/${selected}`, { method: "PATCH", body: JSON.stringify({ assigneeId }) });
+    await loadConvs();
+  }
+
+  async function changeStatus(status: ConvStatus) {
+    if (!selected) return;
+    await apiFetch(`/conversations/${selected}`, { method: "PATCH", body: JSON.stringify({ status }) });
+    await loadConvs();
+  }
+
+  async function addNote(body: string) {
+    if (!selected) return;
+    const n: ConversationNote = await apiFetch(`/conversations/${selected}/notes`, {
+      method: "POST", body: JSON.stringify({ body }),
+    });
+    setNotes((prev) => [...prev, n]);
+  }
+
+  async function togglePin() {
+    if (!current) return;
+    await apiFetch(`/conversations/${current.id}`, { method: "PATCH", body: JSON.stringify({ pinned: !current.pinned }) });
+    await loadConvs();
+  }
+
+  async function changeTags(tags: string[]) {
+    if (!current) return;
+    await apiFetch(`/contacts/${current.contact.id}`, { method: "PATCH", body: JSON.stringify({ tags }) });
+    await loadConvs();
+  }
+
+  function applyView(v: SavedView) {
+    setFilter((v.filters.status as ConvStatus | "all") ?? "all");
+    setAssignFilter((v.filters.assignFilter as AssignFilter) ?? "all");
+    setTagFilter(v.filters.tag ?? null);
+  }
+
+  async function saveView(name: string) {
+    await apiFetch("/saved-views", {
+      method: "POST",
+      body: JSON.stringify({ name, filters: { status: filter, assignFilter, tag: tagFilter ?? undefined } }),
+    });
+    await loadViews();
+  }
+
+  async function deleteView(id: string) {
+    await apiFetch(`/saved-views/${id}`, { method: "DELETE" });
+    await loadViews();
+  }
+
   const current = convs.find((c) => c.id === selected) ?? null;
 
   return (
     <div className="-m-6 flex h-screen">
-      <ConversationList items={convs} selectedId={selected} filter={filter} onFilter={setFilter} onSelect={setSelected} />
+      <ConversationList
+        items={convs} selectedId={selected}
+        filter={filter} assignFilter={assignFilter} tagFilter={tagFilter}
+        onFilter={setFilter} onAssignFilter={setAssignFilter} onTagFilter={setTagFilter}
+        onSelect={setSelected}
+        views={views} onApplyView={applyView} onSaveView={saveView} onDeleteView={deleteView}
+      />
       {current ? (
-        <Thread conversation={current} messages={msgs} onSend={send} sending={sending} />
+        <Thread conversation={current} messages={msgs} onSend={send} sending={sending}
+          members={members} notes={notes} canned={canned}
+          onAssign={assign} onStatusChange={changeStatus} onAddNote={addNote} onTagsChange={changeTags} onTogglePin={togglePin} />
       ) : (
         <div className="flex flex-1 items-center justify-center text-sm text-zinc-400">Select a conversation</div>
       )}

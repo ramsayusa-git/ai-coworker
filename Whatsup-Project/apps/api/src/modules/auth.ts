@@ -4,9 +4,10 @@ import { randomBytes } from "node:crypto";
 import { eq, and, isNull } from "drizzle-orm";
 import { db, withOrgDb } from "../db/client.js";
 import { users, orgMembers, orgs, partners, invites } from "../db/schema.js";
+import { ACCESS_TOKEN_TTL, issueRefreshFamily, rotateRefreshToken, revokeRefreshToken } from "../auth-tokens.js";
 
 function signSession(app: FastifyInstance, userId: string, orgId: string, role: string, email: string) {
-  return app.jwt.sign({ userId, orgId, role, email }, { expiresIn: "7d" });
+  return app.jwt.sign({ userId, orgId, role, email }, { expiresIn: ACCESS_TOKEN_TTL });
 }
 
 export async function authRoutes(app: FastifyInstance) {
@@ -25,10 +26,43 @@ export async function authRoutes(app: FastifyInstance) {
     if (!membership) return reply.status(403).send({ error: "User has no organization" });
 
     const token = signSession(app, user.id, membership.orgId, membership.role, user.email);
+    const refreshToken = await issueRefreshFamily(user.id);
     return reply.send({
-      token,
+      token, refreshToken,
       user: { id: user.id, email: user.email, name: user.name, orgId: membership.orgId, orgName: membership.orgName, role: membership.role },
     });
+  });
+
+  // Access tokens are short-lived (15m); the frontend calls this silently when one expires.
+  // Rotates the refresh token on every use and detects replay of an already-used token by
+  // killing the whole family (see auth-tokens.ts) — a stolen refresh token stops working the
+  // moment the legitimate client uses its own copy again.
+  app.post("/auth/refresh", async (req, reply) => {
+    const { refreshToken } = req.body as { refreshToken?: string };
+    if (!refreshToken) return reply.status(400).send({ error: "refreshToken required" });
+
+    const result = await rotateRefreshToken(refreshToken);
+    if (!result) return reply.status(401).send({ error: "Invalid or expired refresh token" });
+    if ("reused" in result) return reply.status(401).send({ error: "Refresh token already used — session revoked, please log in again" });
+
+    const [user] = await db.select().from(users).where(eq(users.id, result.userId));
+    if (!user) return reply.status(401).send({ error: "Invalid refresh token" });
+    const [membership] = await db.select({ role: orgMembers.role, orgId: orgs.id, orgName: orgs.name })
+      .from(orgMembers).innerJoin(orgs, eq(orgMembers.orgId, orgs.id))
+      .where(eq(orgMembers.userId, user.id)).limit(1);
+    if (!membership) return reply.status(403).send({ error: "User has no organization" });
+
+    const token = signSession(app, user.id, membership.orgId, membership.role, user.email);
+    return reply.send({
+      token, refreshToken: result.token,
+      user: { id: user.id, email: user.email, name: user.name, orgId: membership.orgId, orgName: membership.orgName, role: membership.role },
+    });
+  });
+
+  app.post("/auth/logout", async (req, reply) => {
+    const { refreshToken } = req.body as { refreshToken?: string };
+    if (refreshToken) await revokeRefreshToken(refreshToken);
+    return reply.send({ ok: true });
   });
 
   // Self-serve signup: creates a brand-new org + its owner user. No invite needed.
@@ -51,8 +85,9 @@ export async function authRoutes(app: FastifyInstance) {
     await db.insert(orgMembers).values({ orgId: org.id, userId: user.id, role: "org_owner", status: "active" });
 
     const token = signSession(app, user.id, org.id, "org_owner", user.email);
+    const refreshToken = await issueRefreshFamily(user.id);
     return reply.status(201).send({
-      token, user: { id: user.id, email: user.email, name: user.name, orgId: org.id, orgName: org.name, role: "org_owner" },
+      token, refreshToken, user: { id: user.id, email: user.email, name: user.name, orgId: org.id, orgName: org.name, role: "org_owner" },
     });
   });
 
@@ -117,8 +152,10 @@ export async function authRoutes(app: FastifyInstance) {
 
     const [org] = await db.select().from(orgs).where(eq(orgs.id, invite.orgId));
     const token2 = signSession(app, user.id, invite.orgId, invite.role, user.email);
+    const refreshToken = await issueRefreshFamily(user.id);
     return reply.send({
-      token: token2, user: { id: user.id, email: user.email, name: user.name, orgId: invite.orgId, orgName: org?.name, role: invite.role },
+      token: token2, refreshToken,
+      user: { id: user.id, email: user.email, name: user.name, orgId: invite.orgId, orgName: org?.name, role: invite.role },
     });
   });
 }

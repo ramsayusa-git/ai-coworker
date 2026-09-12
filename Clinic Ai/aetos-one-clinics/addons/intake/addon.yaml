@@ -1,0 +1,26 @@
+slug: intake
+name: Pre-visit Intake
+version: "0.1.0"
+description: WhatsApp-driven conversational intake — collects complaints, duration, and vitals before the visit.
+icon: message-circle
+category: engagement
+coreApiCompat: "^0.1.0"
+port: 8103
+healthPath: /health
+configSchema:
+  - key: llm_provider
+    label: LLM provider
+    type: select
+    options: ["anthropic"]
+    default: "anthropic"
+    required: true
+  - key: anthropic_api_key
+    label: Anthropic API key
+    type: secret
+    required: true
+  - key: whatsapp_business_token
+    label: WhatsApp Business API token
+    type: secret
+    required: true
+subscribesTo: ["appointment.created"]
+publishes: ["intake.completed"]

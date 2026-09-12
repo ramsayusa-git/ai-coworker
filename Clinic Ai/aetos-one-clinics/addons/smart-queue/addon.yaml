@@ -1,0 +1,12 @@
+slug: smart-queue
+name: Smart Queue
+version: "0.1.0"
+description: Reorders the day's queue by clinical urgency derived from intake data; front desk can always override.
+icon: list-ordered
+category: clinical
+coreApiCompat: "^0.1.0"
+port: 8104
+healthPath: /health
+configSchema: []
+subscribesTo: ["intake.completed", "appointment.created"]
+publishes: ["queue.triage-scored"]

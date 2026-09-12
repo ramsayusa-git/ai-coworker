@@ -17,6 +17,12 @@ export const partners = pgTable("partners", {
   slug: text("slug").notNull().unique(),
   brand: jsonb("brand").$type<Record<string, unknown>>().default({}),
   customDomain: text("custom_domain"),
+  // Domain verification state machine: unset -> pending (instructions issued, not yet checked
+  // ok) -> verified (both TXT ownership proof and CNAME target resolve correctly via live DNS
+  // lookups — see partners.ts verify-domain route) or failed (checked, one or both missing).
+  customDomainStatus: text("custom_domain_status").default("unset"),
+  domainVerificationToken: text("domain_verification_token"),
+  domainVerifiedAt: timestamp("domain_verified_at"),
   billingMode: text("billing_mode").default("direct"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -134,6 +140,56 @@ export const conversations = pgTable("conversations", {
   lastMessage: text("last_message"),
   lastMessageAt: timestamp("last_message_at").defaultNow(),
   serviceWindowExpiresAt: timestamp("service_window_expires_at"),
+  // Gallabox-style "pin high-intent conversations" — kept at the top of the inbox
+  // independent of status/assignment filters.
+  pinned: boolean("pinned").default(false),
+});
+
+// Org-shared canned-response library (Wati/Gallabox pattern): static, agent-authored quick
+// replies inserted via a "/" shortcut in the composer — distinct from AI-drafted suggestions,
+// no LLM cost, and shared across the whole team.
+export const cannedResponses = pgTable("canned_responses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  shortcut: text("shortcut").notNull(),
+  body: text("body").notNull(),
+  createdBy: uuid("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.orgId, t.shortcut)]);
+
+// Refresh-token rotation: each login/refresh issues one row. `family` links every token
+// descended from the same login so reuse of an already-rotated (revoked) token can revoke
+// the whole chain — the standard rotation-detection pattern for stolen refresh tokens.
+export const refreshTokens = pgTable("refresh_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  family: uuid("family").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  revokedAt: timestamp("revoked_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Saved "Team Views" in the Inbox — a shared, named combination of filters (status,
+// assignment scope, tag) the whole org's team can reuse, per Gallabox's "Team Views"
+// pattern. Shared rather than per-user: anyone on the team can see and apply a view;
+// only its creator or an org_admin+ can delete it (enforced in the route, not here).
+export const savedViews = pgTable("saved_views", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  filters: jsonb("filters").$type<{ status?: string; assignFilter?: string; tag?: string }>().notNull().default({}),
+  createdBy: uuid("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const conversationNotes = pgTable("conversation_notes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  conversationId: uuid("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id").references(() => users.id),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const messages = pgTable("messages", {

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECG2 Monitor</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eef1f5; --border: #d9dee6;
+    --text: #1c2330; --text-2: #5a6472; --text-3: #8a93a1;
+    --accent: #273a80; --accent-2: #e6701c;
+    --trace: #1c2330; --trace-raw: #b8c0cc; --grid: #e3e7ee; --grid-major: #cfd5de;
+    --good: #1f8a4c; --warn: #b7791f; --bad: #c43a3a; --info: #2b6cb0;
+    --beat: #e6701c;
+    --radius: 12px; --shadow: 0 1px 2px rgba(20,30,50,.06), 0 4px 16px rgba(20,30,50,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f141b; --surface: #171d26; --surface-2: #1f2733; --border: #2a3340;
+      --text: #e8ecf1; --text-2: #a5afbc; --text-3: #6f7a88;
+      --trace: #7ee2a8; --trace-raw: #3a4757; --grid: #1c2430; --grid-major: #283344;
+      --good: #4fcf84; --warn: #e0a940; --bad: #ef6b6b; --info: #6aa9f0;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 16px; }
+  .wrap { max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; }
+  header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 650; letter-spacing: .01em; }
+  header .sub { color: var(--text-2); font-size: 13px; }
+  header .spacer { flex: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 12px; color: var(--text-2); }
+  .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); }
+  .pill.on .dot { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 25%, transparent); }
+  .pill.err .dot { background: var(--bad); }
+  .pill.wait .dot { background: var(--warn); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 320px 1fr; } }
+
+  /* guided steps */
+  .steps { padding: 16px; }
+  .steps h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); margin: 0 0 12px; font-weight: 600; }
+  .step { display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--border); align-items: start; }
+  .step:last-child { border-bottom: 0; }
+  .step .n { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); color: var(--text-3); font-size: 12px; display: grid; place-items: center; font-weight: 600; }
+  .step .t { font-weight: 600; color: var(--text-3); }
+  .step .d { color: var(--text-3); font-size: 12.5px; display: none; }
+  .step.done .n { background: var(--good); border-color: var(--good); color: #fff; }
+  .step.done .t { color: var(--text-2); }
+  .step.active .n { border-color: var(--accent-2); color: var(--accent-2); animation: pulse 1.4s ease-in-out infinite; }
+  .step.active .t { color: var(--text); }
+  .step.active .d { display: block; color: var(--text-2); margin-top: 2px; }
+  .step.active.error .n { border-color: var(--bad); color: var(--bad); }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) 40%, transparent);} 50% { box-shadow: 0 0 0 6px transparent;} }
+  .detail { margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); color: var(--text-2); font-size: 12.5px; min-height: 38px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  button { font: inherit; font-weight: 600; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); cursor: pointer; }
+  button:hover { border-color: var(--text-3); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.rec { background: var(--bad); border-color: var(--bad); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+
+  /* tiles */
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 600px) { .tiles { grid-template-columns: repeat(4, 1fr); } }
+  .tile { padding: 14px 16px; }
+  .tile .k { font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .tile .v { font-size: 32px; font-weight: 700; line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tile .u { font-size: 13px; color: var(--text-2); font-weight: 500; margin-left: 4px; }
+  .tile .s { font-size: 12px; color: var(--text-2); margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+  .tile.hr .v { color: var(--text); }
+  .heart { display: inline-block; width: 14px; height: 14px; color: var(--beat); transition: transform .08s; vertical-align: -1px; }
+  .heart.beat { transform: scale(1.5); }
+  .bar { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .bar i { display: block; height: 100%; background: var(--good); width: 0; transition: width .4s; }
+  .q-good { color: var(--good); } .q-fair { color: var(--warn); } .q-noisy, .q-flat, .q-saturated { color: var(--bad); } .q-warming { color: var(--text-3); }
+
+  /* trace */
+  .trace { padding: 12px 12px 8px; position: relative; }
+  .trace .hdr { display: flex; align-items: center; gap: 12px; font-size: 12.5px; color: var(--text-2); margin: 0 4px 6px; flex-wrap: wrap; }
+  .trace .hdr .spacer { flex: 1; }
+  .trace label { display: inline-flex; gap: 5px; align-items: center; cursor: pointer; }
+  canvas { width: 100%; height: 300px; display: block; border-radius: 8px; background: var(--surface); }
+  .overlay { position: absolute; inset: 44px 12px 8px; display: grid; place-items: center; color: var(--text-3); font-size: 15px; pointer-events: none; text-align: center; padding: 20px; }
+  .overlay.hidden { display: none; }
+
+  /* sessions */
+  .sessions { padding: 16px; }
+  .sessions h2, .log h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); margin: 0 0 10px; font-weight: 600; display: flex; align-items: center; }
+  .sessions h2 .spacer, .log h2 .spacer { flex: 1; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--text-3); font-weight: 600; font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  td { padding: 7px 8px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: 0; }
+  td a { color: var(--info); text-decoration: none; font-weight: 600; }
+  td button { padding: 3px 8px; font-size: 12px; }
+  .empty { color: var(--text-3); padding: 8px; }
+  .log { padding: 16px; }
+  .log pre { margin: 0; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text-2); max-height: 180px; overflow: auto; white-space: pre-wrap; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 12.5px; color: var(--text-2); margin-top: 10px; }
+  .kv b { color: var(--text-3); font-weight: 600; }
+  .recdot { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); display: inline-block; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: .2; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent-2)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2-6 3 12 3-9 2 3h6"/></svg>
+    <div><h1>ECG2 Monitor</h1><div class="sub">ikinloop ecg2 · <span id="devinfo">—</span></div></div>
+    <div class="spacer"></div>
+    <span class="pill" id="pill-conn"><span class="dot"></span><span>Disconnected</span></span>
+    <span class="pill" id="pill-src"><span class="dot"></span><span>Source: none</span></span>
+    <span class="pill" id="pill-rec" style="display:none"><span class="recdot"></span><span>REC <span id="rec-t">0 s</span></span></span>
+  </header>
+
+  <div class="grid">
+    <aside class="card steps">
+      <h2>Guided connection</h2>
+      <div id="steps"></div>
+      <div class="detail" id="detail">Waiting for the add-on…</div>
+      <div class="actions">
+        <button class="primary" id="btn-start">Start</button>
+        <button id="btn-stop">Stop Bluetooth</button>
+        <button id="btn-reconnect">Reconnect</button>
+      </div>
+      <div class="kv">
+        <b>Attempts</b><span id="attempts">0</span>
+        <b>Packets</b><span id="packets">0</span>
+        <b>Dropped</b><span id="dropped">0</span>
+        <b>Sample rate</b><span id="fs">—</span>
+        <b>Uptime</b><span id="uptime">—</span>
+      </div>
+    </aside>
+
+    <main style="display:grid; gap:16px; min-width:0">
+      <div class="tiles">
+        <div class="card tile hr"><div class="k">Heart rate</div><div class="v"><span id="hr">--</span><span class="u">bpm</span></div>
+          <div class="s"><svg class="heart" id="heart" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.6-9.1C.9 8.3 3 5 6.4 5c2 0 3.4 1.2 4.1 2.4C11.7 6.2 13.1 5 15.1 5c3.4 0 5.5 3.3 4 6.9C19.5 16.4 12 21 12 21z"/></svg><span>RR <span id="rr">--</span> ms · device <span id="hrdev">--</span></span></div></div>
+        <div class="card tile"><div class="k">Battery</div><div class="v"><span id="batt">--</span><span class="u">%</span></div><div class="bar"><i id="battbar"></i></div></div>
+        <div class="card tile"><div class="k">Skin contact</div><div class="v" id="contact" style="font-size:22px; margin-top:8px">—</div><div class="s" id="contact-s">No data</div></div>
+        <div class="card tile"><div class="k">Signal</div><div class="v" id="quality" style="font-size:22px; margin-top:8px">—</div><div class="s" id="quality-s">Warming up</div></div>
+      </div>
+
+      <div class="card trace">
+        <div class="hdr">
+          <span><b style="color:var(--text)">Live ECG</b> · 10 s window · 25 mm/s style grid</span>
+          <div class="spacer"></div>
+          <label><input type="checkbox" id="showraw"> raw</label>
+          <label><input type="checkbox" id="showfilt" checked> filtered</label>
+          <label>gain <input type="range" id="gain" min="0.2" max="5" step="0.1" value="1" style="width:90px"></label>
+          <button id="btn-rec" class="rec" disabled>● Record</button>
+        </div>
+        <canvas id="ecg"></canvas>
+        <div class="overlay" id="overlay">No signal yet — follow the guided steps on the left.</div>
+      </div>
+
+      <div class="card sessions">
+        <h2>Recorded sessions <span class="spacer"></span><button id="btn-refresh" style="font-weight:500;font-size:12px;padding:4px 10px">Refresh</button></h2>
+        <div id="sessions"><div class="empty">No recordings yet.</div></div>
+      </div>
+
+      <div class="card log">
+        <h2>Event log</h2>
+        <pre id="log"></pre>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---- ingress-safe base URL: everything is relative to the page URL
+  const base = location.pathname.endsWith('/') ? location.pathname : location.pathname.replace(/[^/]*$/, '');
+  const api = p => base + 'api/' + p;
+  const STEPS = ['wake','scanning','connecting','checking','contact','signal','live'];
+  const LABELS = {wake:'Turn on device', scanning:'Scanning', connecting:'Connecting', checking:'Checking device', contact:'Skin contact', signal:'Signal check', live:'Live'};
+  const $ = id => document.getElementById(id);
+
+  // ---- steps panel
+  const stepsEl = $('steps');
+  stepsEl.innerHTML = STEPS.map((s,i) => `<div class="step" data-s="${s}"><div class="n">${i+1}</div><div><div class="t">${LABELS[s]}</div><div class="d"></div></div></div>`).join('');
+
+  let status = null, lastStep = null;
+  function renderStatus(st) {
+    status = st;
+    const idx = st.step_index;
+    const err = st.step === 'error';
+    const mqttWait = st.step === 'mqtt_wait';
+    document.querySelectorAll('.step').forEach((el,i) => {
+      el.classList.toggle('done', idx >= 0 ? i < idx : (err || mqttWait ? false : false));
+      el.classList.toggle('active', (idx >= 0 && i === idx) || (err && i === 0) || (mqttWait && i === 4) || (st.step==='idle' && i===0));
+      el.classList.toggle('error', err && i === 0);
+      el.querySelector('.d').textContent = (i === idx || (err&&i===0) || (mqttWait&&i===4) || (st.step==='idle'&&i===0)) ? st.hint : '';
+    });
+    $('detail').textContent = (st.title ? st.title + (st.detail ? ' — ' + st.detail : '') : '') || 'Waiting…';
+    $('attempts').textContent = st.attempts; $('packets').textContent = st.packets; $('dropped').textContent = st.dropped;
+    $('fs').textContent = st.fs ? st.fs.toFixed(0) + ' Hz' : '—';
+    $('uptime').textContent = fmtDur(st.uptime_s);
+    $('hr').textContent = st.hr ? Math.round(st.hr) : '--';
+    $('rr').textContent = st.rr_ms ?? '--'; $('hrdev').textContent = st.hr_device ?? '--';
+    $('batt').textContent = st.battery ?? '--';
+    const bb = $('battbar'); bb.style.width = (st.battery ?? 0) + '%';
+    bb.style.background = st.battery == null ? 'var(--text-3)' : st.battery < 20 ? 'var(--bad)' : st.battery < 40 ? 'var(--warn)' : 'var(--good)';
+    $('contact').textContent = st.connected ? (st.contact ? 'On skin' : 'Off') : '—';
+    $('contact').style.color = st.contact ? 'var(--good)' : 'var(--text-2)';
+    $('contact-s').textContent = st.connected ? (st.contact ? 'Electrodes detected' : 'Place electrodes on skin') : 'Not connected';
+    const q = st.quality || 'warming';
+    $('quality').textContent = q === 'warming' ? '—' : q[0].toUpperCase() + q.slice(1);
+    $('quality').className = 'v q-' + q; $('quality').style.cssText = 'font-size:22px;margin-top:8px';
+    $('quality-s').textContent = {good:'Clean trace', fair:'Usable, some noise', noisy:'Check electrode contact / movement', flat:'No signal — contact?', saturated:'Clipping — loosen strap', warming:'Warming up'}[q] || q;
+    const pc = $('pill-conn'); pc.className = 'pill ' + (st.connected ? 'on' : (err ? 'err' : 'wait'));
+    pc.lastElementChild.textContent = st.connected ? 'Connected' : (st.step === 'idle' ? 'Stopped' : st.title || 'Disconnected');
+    const ps = $('pill-src'); ps.className = 'pill ' + (st.source !== 'none' ? 'on' : ''); ps.lastElementChild.textContent = 'Source: ' + st.source;
+    $('devinfo').textContent = [st.model, st.firmware && ('FW ' + st.firmware), st.address].filter(Boolean).join(' · ') || '—';
+    $('pill-rec').style.display = st.recording ? '' : 'none'; $('rec-t').textContent = fmtDur(st.recording_seconds);
+    const br = $('btn-rec'); br.disabled = !st.connected; br.textContent = st.recording ? '■ Stop recording' : '● Record';
+    $('log').textContent = (st.log || []).slice().reverse().join('\n');
+    $('overlay').classList.toggle('hidden', st.step === 'live' || st.step === 'signal' || (st.last_packet_age != null && st.last_packet_age < 2));
+    $('overlay').textContent = st.step === 'contact' ? 'Connected — place the electrodes on your skin.' : st.step === 'mqtt_wait' ? st.hint : 'No signal yet — follow the guided steps on the left.';
+    if (st.step !== lastStep) { lastStep = st.step; if (st.step === 'live') loadSessions(); }
+  }
+  function fmtDur(s) { if (s == null) return '—'; s = Math.round(s); return s < 60 ? s + ' s' : s < 3600 ? Math.floor(s/60) + 'm ' + (s%60) + 's' : Math.floor(s/3600) + 'h ' + Math.floor(s%3600/60) + 'm'; }
+
+  // ---- ECG canvas (sweep style, like a bedside monitor)
+  const cv = $('ecg'), ctx = cv.getContext('2d');
+  const WIN_S = 10; let fs = 530; let buf = new Float32Array(fs * WIN_S), raw = new Float32Array(fs * WIN_S), head = 0, filled = 0;
+  let gain = 1, showRaw = false, showFilt = true, dpr = 1;
+  function resize() { dpr = window.devicePixelRatio || 1; const r = cv.getBoundingClientRect(); cv.width = r.width * dpr; cv.height = r.height * dpr; }
+  window.addEventListener('resize', resize); resize();
+  function push(samples) {
+    for (const [r, f] of samples) { raw[head] = r; buf[head] = f; head = (head + 1) % buf.length; if (filled < buf.length) filled++; }
+  }
+  let scaleEst = 400; // adaptive amplitude -> updated from recent filtered samples
+  function draw() {
+    requestAnimationFrame(draw);
+    const W = cv.width, H = cv.height; const css = getComputedStyle(document.documentElement);
+    ctx.fillStyle = css.getPropertyValue('--surface'); ctx.fillRect(0, 0, W, H);
+    // grid: 1 mm = 0.04 s -> 250 small squares across 10 s; draw every 5th darker
+    const pxPerS = W / WIN_S, small = pxPerS * 0.04 * 5; // draw 0.2 s squares (large) only + light small
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = css.getPropertyValue('--grid'); ctx.beginPath();
+    for (let x = 0; x < W; x += small / 5) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (let y = 0; y < H; y += small / 5) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+    ctx.strokeStyle = css.getPropertyValue('--grid-major'); ctx.beginPath();
+    for (let x = 0; x < W; x += small) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (let y = 0; y < H; y += small) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+    if (!filled) return;
+    // adaptive scale from filtered signal p95
+    if (head % 64 === 0) { let m = 0; for (let i = 0; i < filled; i += 4) { const a = Math.abs(buf[i]); if (a > m) m = a; } if (m > 1) scaleEst = scaleEst * 0.9 + m * 0.1; }
+    const mid = H * 0.5, amp = (H * 0.42) / scaleEst * gain;
+    const n = buf.length, xs = W / n;
+    const series = [];
+    if (showRaw) series.push([raw, css.getPropertyValue('--trace-raw'), 1, true]);
+    if (showFilt) series.push([buf, css.getPropertyValue('--trace'), 2 * dpr, false]);
+    for (const [arr, color, lw, center] of series) {
+      let off = 0; if (center) { let s = 0, c = 0; for (let i = 0; i < filled; i += 8) { s += arr[i]; c++; } off = s / c; }
+      ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineJoin = 'round'; ctx.beginPath();
+      // sweep: index i maps to x = i*xs; the write head is the "erase bar"
+      for (let i = 0; i < n; i++) {
+        const v = arr[i]; if (i >= filled && filled < n) break;
+        const y = mid - (v - off) * amp;
+        if (i === 0 || i === head) ctx.moveTo(i * xs, y); else ctx.lineTo(i * xs, y);
+      }
+      ctx.stroke();
+    }
+    // erase bar
+    ctx.fillStyle = css.getPropertyValue('--surface'); ctx.fillRect(head * xs, 0, Math.max(8 * dpr, xs * 20), H);
+    ctx.fillStyle = css.getPropertyValue('--accent-2'); ctx.fillRect(head * xs, 0, 2 * dpr, H);
+  }
+  draw();
+  $('showraw').onchange = e => showRaw = e.target.checked; $('showfilt').onchange = e => showFilt = e.target.checked;
+  $('gain').oninput = e => gain = +e.target.value;
+
+  // ---- websocket
+  let ws, beatTimer;
+  function connect() {
+    const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+    ws = new WebSocket(proto + location.host + api('ws'));
+    ws.onmessage = ev => {
+      const m = JSON.parse(ev.data);
+      if (m.type === 'status') renderStatus(m.data);
+      else if (m.type === 'ecg') {
+        if (m.fs && m.fs !== fs) { fs = m.fs; buf = new Float32Array(fs * WIN_S); raw = new Float32Array(fs * WIN_S); head = filled = 0; }
+        if (m.history) { head = filled = 0; }
+        push(m.s);
+        if (m.beats) { const h = $('heart'); h.classList.add('beat'); clearTimeout(beatTimer); beatTimer = setTimeout(() => h.classList.remove('beat'), 120); }
+        if (m.hr && status) { $('hr').textContent = Math.round(m.hr); }
+      }
+    };
+    ws.onclose = () => { $('detail').textContent = 'Lost connection to add-on — reconnecting…'; setTimeout(connect, 2000); };
+    ws.onerror = () => ws.close();
+  }
+  connect();
+  setInterval(() => { if (ws && ws.readyState === 1) ws.send('ping'); }, 15000);
+
+  // ---- controls
+  const post = a => fetch(api('control/' + a), {method:'POST'}).then(r => r.json()).then(j => j.status && renderStatus(j.status)).catch(()=>{});
+  $('btn-start').onclick = () => post('ble_start');
+  $('btn-stop').onclick = () => post('ble_stop');
+  $('btn-reconnect').onclick = () => post('reconnect');
+  $('btn-rec').onclick = () => post(status && status.recording ? 'record_stop' : 'record_start').then(loadSessions);
+  $('btn-refresh').onclick = loadSessions;
+
+  // ---- sessions
+  function loadSessions() {
+    fetch(api('sessions')).then(r => r.json()).then(list => {
+      const el = $('sessions');
+      if (!list.length) { el.innerHTML = '<div class="empty">No recordings yet. Press ● Record while live.</div>'; return; }
+      el.innerHTML = '<table><thead><tr><th>File</th><th>Length</th><th>Samples</th><th>HR</th><th>Size</th><th></th></tr></thead><tbody>' +
+        list.map(s => `<tr><td><a href="${api('sessions/' + encodeURIComponent(s.file))}" download>${s.file}</a></td><td>${s.seconds != null ? fmtDur(s.seconds) : '—'}</td><td>${s.samples ?? '—'}</td><td>${s.hr_last ? Math.round(s.hr_last) + ' bpm' : '—'}</td><td>${(s.bytes/1024).toFixed(0)} KB</td><td><button data-del="${s.file}">Delete</button></td></tr>`).join('') + '</tbody></table>';
+      el.querySelectorAll('[data-del]').forEach(b => b.onclick = () => fetch(api('sessions/' + encodeURIComponent(b.dataset.del)), {method:'DELETE'}).then(loadSessions));
+    }).catch(()=>{});
+  }
+  loadSessions();
+  setInterval(() => { if (status && status.recording) { status.recording_seconds += 1; $('rec-t').textContent = fmtDur(status.recording_seconds); } }, 1000);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+slug: med-safety
+name: Medication Safety Check
+version: "0.1.0"
+description: >
+  Deterministic interaction/allergy/dose-range rule engine, with an LLM used only
+  to explain a rule hit in plain language — the LLM can never suppress a finding.
+icon: shield-alert
+category: clinical
+coreApiCompat: "^0.1.0"
+port: 8101
+healthPath: /health
+configSchema:
+  - key: llm_provider
+    label: LLM provider for explanations
+    type: select
+    options: ["anthropic", "none"]
+    default: "anthropic"
+    required: true
+  - key: anthropic_api_key
+    label: Anthropic API key
+    type: secret
+    required: false
+    help: Required only if llm_provider is "anthropic"
+subscribesTo: []
+publishes: ["medication.safety-checked"]

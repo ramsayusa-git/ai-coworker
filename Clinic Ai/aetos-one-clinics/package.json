@@ -1,0 +1,19 @@
+{
+  "name": "aetos-one-clinics",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Aetos One Clinics — AI-powered clinic management platform (Arogyam.ai-class), FHIR-native core with a Home-Assistant-style AI add-on system",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev:api": "npm run start:dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

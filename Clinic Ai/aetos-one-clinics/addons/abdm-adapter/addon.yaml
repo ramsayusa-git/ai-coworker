@@ -1,0 +1,29 @@
+slug: abdm-adapter
+name: ABDM Adapter (HIP/HIU)
+version: "0.1.0"
+description: >
+  ABHA create/verify, consent management, and FHIR bundle exchange with the
+  NHA ABDM gateway. Wraps either Bahmni's BahmniIndiaDistro HIP/HIU services
+  or NHA's ABDM-wrapper — see docs/architecture.md section 3.4.
+icon: shield-check
+category: compliance
+coreApiCompat: "^0.1.0"
+port: 8107
+healthPath: /health
+configSchema:
+  - key: abdm_client_id
+    label: ABDM client ID (NHA sandbox/prod)
+    type: string
+    required: true
+  - key: abdm_client_secret
+    label: ABDM client secret
+    type: secret
+    required: true
+  - key: abdm_environment
+    label: Environment
+    type: select
+    options: ["sandbox", "production"]
+    default: "sandbox"
+    required: true
+subscribesTo: ["patient.created", "encounter.finished"]
+publishes: ["abdm.linked", "abdm.consent-received"]

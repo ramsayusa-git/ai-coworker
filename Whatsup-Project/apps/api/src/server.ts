@@ -8,7 +8,7 @@ import { meRoutes } from "./modules/me.js";
 import { partnersRoutes } from "./modules/partners.js";
 import { contactsRoutes } from "./modules/contacts.js";
 import { channelsRoutes } from "./modules/channels.js";
-import { conversationsRoutes } from "./modules/conversations.js";
+import { conversationsRoutes, savedViewsRoutes, cannedResponsesRoutes } from "./modules/conversations.js";
 import { templatesRoutes } from "./modules/templates.js";
 import { campaignsRoutes } from "./modules/campaigns.js";
 import { botsRoutes } from "./modules/bots.js";
@@ -42,6 +42,8 @@ await app.register(async (scoped) => {
   await scoped.register(contactsRoutes);
   await scoped.register(channelsRoutes);
   await scoped.register(conversationsRoutes);
+  await scoped.register(savedViewsRoutes);
+  await scoped.register(cannedResponsesRoutes);
   await scoped.register(templatesRoutes);
   await scoped.register(campaignsRoutes);
   await scoped.register(botsRoutes);

@@ -1,0 +1,41 @@
+slug: ai-scribe
+name: AI Scribe
+version: "0.1.0"
+description: >
+  Streaming Indic ASR + LLM structuring of a consultation into a draft SOAP note
+  and draft FHIR-lite Condition/MedicationRequest resources. Doctor review and
+  save is mandatory — nothing from this add-on is persisted as final.
+icon: mic
+category: clinical
+coreApiCompat: "^0.1.0"
+port: 8102
+healthPath: /health
+configSchema:
+  - key: llm_provider
+    label: LLM provider
+    type: select
+    options: ["anthropic"]
+    default: "anthropic"
+    required: true
+  - key: anthropic_api_key
+    label: Anthropic API key
+    type: secret
+    required: true
+  - key: asr_provider
+    label: ASR provider
+    type: select
+    options: ["sarvam", "ai4bharat", "vertex"]
+    default: "sarvam"
+    required: true
+  - key: asr_api_key
+    label: ASR provider API key
+    type: secret
+    required: true
+  - key: language
+    label: Default consultation language
+    type: select
+    options: ["hi", "en", "te", "ta", "kn"]
+    default: "en"
+    required: false
+subscribesTo: []
+publishes: ["encounter.scribe-draft-ready"]

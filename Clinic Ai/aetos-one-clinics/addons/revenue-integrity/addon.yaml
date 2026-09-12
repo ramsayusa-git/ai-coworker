@@ -1,0 +1,12 @@
+slug: revenue-integrity
+name: Revenue Integrity
+version: "0.1.0"
+description: Diffs procedures/observations against invoice line items and flags unbilled work.
+icon: receipt-search
+category: revenue
+coreApiCompat: "^0.1.0"
+port: 8106
+healthPath: /health
+configSchema: []
+subscribesTo: ["encounter.finished"]
+publishes: ["revenue.unbilled-flagged"]

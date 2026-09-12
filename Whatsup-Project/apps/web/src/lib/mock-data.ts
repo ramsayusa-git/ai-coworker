@@ -16,16 +16,16 @@ const meta = { id: "ch1", name: "Aetos Store (Official)", provider: "meta" as co
 const whapi = { id: "ch2", name: "Sales +91 90000 00001", provider: "whapi" as const };
 
 export const conversations: Conversation[] = [
-  { id: "v1", contact: contacts[0], channel: meta, status: "open", assignee: null, unread: 2,
-    lastMessage: "Is the 2kW inverter in stock?", lastMessageAt: ago(3), serviceWindowExpiresAt: ahead(23) },
-  { id: "v2", contact: contacts[1], channel: whapi, status: "open", assignee: "Ramsay", unread: 0,
-    lastMessage: "Thanks, order placed.", lastMessageAt: ago(41), serviceWindowExpiresAt: ahead(22) },
-  { id: "v3", contact: contacts[2], channel: meta, status: "pending", assignee: "Ramsay", unread: 1,
-    lastMessage: "Can you share the GST invoice?", lastMessageAt: ago(120), serviceWindowExpiresAt: ahead(20) },
-  { id: "v4", contact: contacts[3], channel: whapi, status: "snoozed", assignee: null, unread: 0,
-    lastMessage: "Will call back tomorrow", lastMessageAt: ago(900), serviceWindowExpiresAt: ahead(-2) },
-  { id: "v5", contact: contacts[4], channel: meta, status: "resolved", assignee: "Support", unread: 0,
-    lastMessage: "Resolved, thank you!", lastMessageAt: ago(2000), serviceWindowExpiresAt: ahead(-10) },
+  { id: "v1", contact: contacts[0], channel: meta, status: "open", assigneeId: null, assigneeName: null, unread: 2,
+    lastMessage: "Is the 2kW inverter in stock?", lastMessageAt: ago(3), serviceWindowExpiresAt: ahead(23), pinned: false },
+  { id: "v2", contact: contacts[1], channel: whapi, status: "open", assigneeId: "u1", assigneeName: "Ramsay", unread: 0,
+    lastMessage: "Thanks, order placed.", lastMessageAt: ago(41), serviceWindowExpiresAt: ahead(22), pinned: false },
+  { id: "v3", contact: contacts[2], channel: meta, status: "pending", assigneeId: "u1", assigneeName: "Ramsay", unread: 1,
+    lastMessage: "Can you share the GST invoice?", lastMessageAt: ago(120), serviceWindowExpiresAt: ahead(20), pinned: false },
+  { id: "v4", contact: contacts[3], channel: whapi, status: "snoozed", assigneeId: null, assigneeName: null, unread: 0,
+    lastMessage: "Will call back tomorrow", lastMessageAt: ago(900), serviceWindowExpiresAt: ahead(-2), pinned: false },
+  { id: "v5", contact: contacts[4], channel: meta, status: "resolved", assigneeId: "u2", assigneeName: "Support", unread: 0,
+    lastMessage: "Resolved, thank you!", lastMessageAt: ago(2000), serviceWindowExpiresAt: ahead(-10), pinned: false },
 ];
 
 export const messages: Message[] = [
@@ -154,5 +154,11 @@ export const analyticsSummary: AnalyticsSummary = {
     { name: "Diwali Sale Blast", delivered: 4690, read: 3102, ctr: 0.14 },
     { name: "Cart Recovery — Sep", delivered: 165, read: 90, ctr: 0.22 },
     { name: "VIP Early Access", delivered: 58, read: 51, ctr: 0.31 },
+  ],
+  newContacts: 34,
+  statusBreakdown: { open: 18, pending: 9, snoozed: 4, resolved: 61 },
+  agentLeaderboard: [
+    { name: "Ramsay", assigned: 22, resolved: 14 },
+    { name: "Support", assigned: 15, resolved: 12 },
   ],
 };

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
+import dns from "node:dns/promises";
 import { and, eq, isNull } from "drizzle-orm";
 import { db, withOrgDb } from "../db/client.js";
 import { partners, partnerMembers, partnerInvites, orgs, orgMembers, users, conversations, contacts } from "../db/schema.js";
@@ -70,10 +71,74 @@ export async function partnersRoutes(app: FastifyInstance) {
     const { brand, customDomain } = req.body as { brand?: Record<string, unknown>; customDomain?: string };
     const [current] = await db.select().from(partners).where(eq(partners.id, partnerId));
     if (!current) return reply.status(404).send({ error: "not found" });
-    const [updated] = await db.update(partners)
-      .set({ brand: { ...(current.brand as object), ...(brand ?? {}) }, customDomain: customDomain ?? current.customDomain })
-      .where(eq(partners.id, partnerId)).returning();
+
+    const patch: Record<string, unknown> = { brand: { ...(current.brand as object), ...(brand ?? {}) } };
+    if (customDomain !== undefined) {
+      const normalized = customDomain.trim().toLowerCase();
+      if (normalized !== (current.customDomain ?? "")) {
+        // A new/changed domain always restarts verification — never carry over a stale
+        // "verified" status onto a domain that was never actually checked.
+        patch.customDomain = normalized || null;
+        patch.customDomainStatus = normalized ? "pending" : "unset";
+        patch.domainVerificationToken = normalized ? randomBytes(12).toString("hex") : null;
+        patch.domainVerifiedAt = null;
+      }
+    }
+    const [updated] = await db.update(partners).set(patch).where(eq(partners.id, partnerId)).returning();
     return updated;
+  });
+
+  // Real DNS-based domain verification — no paid Cloudflare/registrar API needed. The partner
+  // adds a TXT record proving ownership and a CNAME pointing their domain at Whatsup's edge;
+  // this does the actual live lookups rather than trusting a form submission.
+  app.get("/partners/:partnerId/domain-instructions", async (req, reply) => {
+    if (!(await requirePartnerMember(app, req, reply))) return;
+    const { partnerId } = req.params as { partnerId: string };
+    const [p] = await db.select().from(partners).where(eq(partners.id, partnerId));
+    if (!p) return reply.status(404).send({ error: "not found" });
+    if (!p.customDomain) return reply.status(400).send({ error: "No custom domain set — save one on the Branding tab first" });
+    return {
+      domain: p.customDomain,
+      status: p.customDomainStatus,
+      records: [
+        { type: "TXT", host: `_whatsup-verify.${p.customDomain}`, value: p.domainVerificationToken },
+        { type: "CNAME", host: p.customDomain, value: `${p.slug}.edge.whatsup.app` },
+      ],
+    };
+  });
+
+  app.post("/partners/:partnerId/domain-verify", async (req, reply) => {
+    if (!(await requirePartnerMember(app, req, reply, { adminOnly: true }))) return;
+    const { partnerId } = req.params as { partnerId: string };
+    const [p] = await db.select().from(partners).where(eq(partners.id, partnerId));
+    if (!p) return reply.status(404).send({ error: "not found" });
+    if (!p.customDomain || !p.domainVerificationToken) {
+      return reply.status(400).send({ error: "No custom domain pending verification" });
+    }
+
+    const expectedCname = `${p.slug}.edge.whatsup.app`;
+    let ownershipOk = false;
+    let cnameOk = false;
+    let error: string | undefined;
+    try {
+      const txtRecords = await dns.resolveTxt(`_whatsup-verify.${p.customDomain}`);
+      ownershipOk = txtRecords.some((rec) => rec.join("").trim() === p.domainVerificationToken);
+    } catch (err) {
+      error = `TXT lookup failed: ${err instanceof Error ? err.message : String(err)}`;
+    }
+    try {
+      const cnameRecords = await dns.resolveCname(p.customDomain);
+      cnameOk = cnameRecords.some((rec) => rec.replace(/\.$/, "") === expectedCname);
+    } catch (err) {
+      error = [error, `CNAME lookup failed: ${err instanceof Error ? err.message : String(err)}`].filter(Boolean).join("; ");
+    }
+
+    const status = ownershipOk && cnameOk ? "verified" : "failed";
+    const [updated] = await db.update(partners)
+      .set({ customDomainStatus: status, domainVerifiedAt: status === "verified" ? new Date() : null })
+      .where(eq(partners.id, partnerId)).returning();
+
+    return { status: updated.customDomainStatus, ownershipOk, cnameOk, expectedCname, error };
   });
 
   app.get("/partners/:partnerId/members", async (req, reply) => {
@@ -190,5 +255,27 @@ export async function partnersRoutes(app: FastifyInstance) {
     await db.insert(orgMembers).values({ orgId: org.id, userId: owner.id, role: "org_owner", status: "active" })
       .onConflictDoNothing();
     return reply.status(201).send({ id: org.id, name: org.name, ownerEmail: owner.email });
+  });
+
+  // Unauthenticated white-label lookup for pre-login screens (login/register/accept-invite)
+  // and for setting the browser tab favicon before we know who's signing in. Matched by the
+  // custom domain the request came in on — falls back to the platform default brand when no
+  // partner owns that host (or none was supplied, e.g. local dev on localhost:3000).
+  app.get("/public/branding", async (req) => {
+    const host = ((req.query as { host?: string })?.host || (req.headers.host as string) || "")
+      .split(":")[0].trim().toLowerCase();
+    type Brand = { brandName: string; logoUrl: string | null; faviconUrl: string | null; footerText: string | null; primaryColor: string };
+    const DEFAULT_BRAND: Brand = { brandName: "Aetos One Chat", logoUrl: null, faviconUrl: null, footerText: null, primaryColor: "#059669" };
+    if (!host) return DEFAULT_BRAND;
+    const [partner] = await db.select().from(partners).where(eq(partners.customDomain, host));
+    if (!partner || partner.customDomainStatus !== "verified") return DEFAULT_BRAND;
+    const brand = (partner.brand as Record<string, unknown>) ?? {};
+    return {
+      brandName: (brand.brandName as string) || partner.name || DEFAULT_BRAND.brandName,
+      logoUrl: (brand.logoUrl as string) || null,
+      faviconUrl: (brand.faviconUrl as string) || null,
+      footerText: (brand.footerText as string) || null,
+      primaryColor: (brand.primaryColor as string) || DEFAULT_BRAND.primaryColor,
+    };
   });
 }
