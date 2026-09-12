@@ -1,0 +1,24 @@
+{% extends "base.html.j2" %}
+{% block title %}Sign in — {{ app_name }}{% endblock %}
+{% block body %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="brand brand-center">
+      <span class="brand-dot"></span>
+      <div>
+        <div class="brand-name">Aetos Voice</div>
+        <div class="brand-sub">AI Dashboard</div>
+      </div>
+    </div>
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+    <form method="post" action="/login" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ login_csrf }}">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required>
+      <button class="btn btn-primary" type="submit">Sign in</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

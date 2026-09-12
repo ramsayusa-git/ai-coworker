@@ -1,0 +1,104 @@
+{% extends "base.html.j2" %}
+{% block title %}Test Call — {{ app_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Test Call</h1>
+  <div class="whoami">Browser sandbox — audio only</div>
+</header>
+
+{% if not livekit_ready %}
+<div class="alert alert-warn">LiveKit is not configured — set <code>APP_LIVEKIT_URL</code>,
+  <code>APP_LIVEKIT_API_KEY</code>, <code>APP_LIVEKIT_API_SECRET</code> and restart.</div>
+{% elif not agents %}
+<div class="alert alert-warn">No active agents. <a href="/agents/new">Create one</a> first.</div>
+{% else %}
+<section class="card">
+  <div class="grid-2">
+    <label>Agent
+      <select id="agent-select">
+        {% for agent in agents %}<option value="{{ agent.id }}">{{ agent.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <div class="form-actions" style="align-items:flex-end">
+      <button class="btn btn-primary" id="btn-start">Start call</button>
+      <button class="btn btn-danger" id="btn-stop" disabled>Hang up</button>
+    </div>
+  </div>
+  <div id="call-status" class="callstatus">Idle. The agent worker must be running (<code>bash run_worker.sh</code>)
+      for an agent to pick up.</div>
+  <div id="call-room" class="sub mono"></div>
+</section>
+<section class="card">
+  <h2>Event log</h2>
+  <pre id="call-log" class="prompt-body" style="min-height:120px">—</pre>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+<script>
+(function () {
+  var room = null;
+  var startBtn = document.getElementById("btn-start");
+  var stopBtn = document.getElementById("btn-stop");
+  var statusEl = document.getElementById("call-status");
+  var roomEl = document.getElementById("call-room");
+  var logEl = document.getElementById("call-log");
+
+  function log(msg) {
+    var ts = new Date().toLocaleTimeString();
+    logEl.textContent = (logEl.textContent === "—" ? "" : logEl.textContent) + "[" + ts + "] " + msg + "\n";
+  }
+  function setStatus(text) { statusEl.textContent = text; }
+
+  async function start() {
+    startBtn.disabled = true;
+    try {
+      var agentId = document.getElementById("agent-select").value;
+      var body = new URLSearchParams({ agent_id: agentId, csrf_token: "{{ session.csrf }}" });
+      var resp = await fetch("/test-call/token", { method: "POST", body: body });
+      if (!resp.ok) { throw new Error("token endpoint: HTTP " + resp.status); }
+      var data = await resp.json();
+      log("Token OK for room " + data.room);
+      roomEl.textContent = "room: " + data.room;
+
+      room = new LivekitClient.Room();
+      room.on(LivekitClient.RoomEvent.TrackSubscribed, function (track, pub, participant) {
+        if (track.kind === "audio") {
+          var el = track.attach();
+          document.body.appendChild(el);
+          log("Audio from " + participant.identity + " — you should hear the agent.");
+        }
+      });
+      room.on(LivekitClient.RoomEvent.ParticipantConnected, function (p) { log("Joined: " + p.identity); });
+      room.on(LivekitClient.RoomEvent.ParticipantDisconnected, function (p) { log("Left: " + p.identity); });
+      room.on(LivekitClient.RoomEvent.Disconnected, function () { setStatus("Call ended."); cleanup(); });
+
+      await room.connect(data.url, data.token);
+      log("Connected to LiveKit as " + room.localParticipant.identity);
+      await room.localParticipant.setMicrophoneEnabled(true);
+      log("Microphone on. Waiting for agent \"" + data.agent + "\"…");
+      setStatus("In call with " + data.agent + ". Speak!");
+      stopBtn.disabled = false;
+    } catch (err) {
+      log("ERROR: " + (err && err.message ? err.message : err));
+      setStatus("Failed to start call.");
+      startBtn.disabled = false;
+    }
+  }
+
+  function cleanup() {
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    roomEl.textContent = "";
+    room = null;
+  }
+
+  startBtn.addEventListener("click", start);
+  stopBtn.addEventListener("click", function () {
+    if (room) { room.disconnect(); }
+    setStatus("Call ended.");
+    cleanup();
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

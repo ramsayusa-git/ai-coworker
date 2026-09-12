@@ -1,0 +1,44 @@
+{% extends "base.html.j2" %}
+{% block title %}Agents — {{ app_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Agents</h1>
+  <a class="btn btn-primary" href="/agents/new">+ New agent</a>
+</header>
+
+{% if agents %}
+<table class="table">
+  <thead>
+    <tr><th>Name</th><th>Status</th><th>LLM</th><th>STT</th><th>TTS</th><th>Prompt</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for agent in agents %}
+    <tr>
+      <td><a href="/agents/{{ agent.id }}"><strong>{{ agent.name }}</strong></a>
+          <div class="sub mono">{{ agent.id }}</div></td>
+      <td>{% if agent.active %}<span class="pill pill-ok">active</span>{% else %}<span class="pill">inactive</span>{% endif %}</td>
+      <td>{{ agent.llm.provider }} · {{ agent.llm.model }}</td>
+      <td>{{ agent.stt.provider }} · {{ agent.stt.model }}</td>
+      <td>{{ agent.tts.provider }} · {{ agent.tts.voice }}</td>
+      <td>v{{ agent.prompt_version }} <a class="sub" href="/agents/{{ agent.id }}/history">history</a></td>
+      <td class="row-actions">
+        <a class="btn btn-ghost btn-sm" href="/agents/{{ agent.id }}">Edit</a>
+        <form method="post" action="/agents/{{ agent.id }}/delete"
+              onsubmit="return confirm('Delete agent {{ agent.name }}?');">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf }}">
+          <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<section class="placeholder">
+  <h2>No agents yet</h2>
+  <p>Create your first voice agent — pick the models, write the system prompt,
+     then talk to it from the <a href="/test-call">Test Call</a> page.</p>
+  <a class="btn btn-primary" href="/agents/new">Create an agent</a>
+</section>
+{% endif %}
+{% endblock %}

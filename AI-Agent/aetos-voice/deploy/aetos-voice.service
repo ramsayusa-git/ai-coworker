@@ -1,0 +1,19 @@
+# systemd unit — optional, for running the dashboard as a service on aiserver.
+# Install:
+#   sudo cp deploy/aetos-voice.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now aetos-voice
+[Unit]
+Description=Aetos Voice AI Dashboard
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+User=krishna
+WorkingDirectory=/home/krishna/ai-work-space/ai-coworker/AI-Agent/aetos-voice
+ExecStart=/home/krishna/ai-work-space/ai-coworker/AI-Agent/aetos-voice/.venv/bin/python -m app
+Restart=always
+RestartSec=3
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,70 @@
+{% extends "base.html.j2" %}
+{% block title %}Dashboard — {{ app_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Dashboard</h1>
+  <div class="whoami">Signed in as <strong>{{ session.u }}</strong></div>
+</header>
+
+{% if insecure_defaults %}
+<div class="alert alert-warn">
+  Default credentials/secrets in use: <strong>{{ insecure_defaults | join(', ') }}</strong>.
+  Set real values in <code>.env</code> before exposing this service.
+</div>
+{% endif %}
+
+<section class="tiles">
+  <div class="tile">
+    <div class="tile-label">Service</div>
+    <div class="tile-value ok">Running</div>
+    <div class="tile-sub">v{{ health.version }} · up {{ (health.uptime_seconds // 60) }} min</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Redis</div>
+    {% if health.redis.connected %}
+      <div class="tile-value ok">Connected</div>
+      <div class="tile-sub">{{ health.redis.namespaced_keys }} keys under <code>{{ health.redis.prefix }}:*</code></div>
+    {% else %}
+      <div class="tile-value bad">Offline</div>
+      <div class="tile-sub">Check <code>APP_REDIS_URL</code></div>
+    {% endif %}
+  </div>
+  <div class="tile">
+    <div class="tile-label">Memory</div>
+    {% if health.host.memory %}
+      <div class="tile-value">{{ health.host.memory.percent }}%</div>
+      <div class="tile-sub">{{ health.host.memory.used_mb }} / {{ health.host.memory.total_mb }} MB</div>
+    {% else %}
+      <div class="tile-value">–</div>
+    {% endif %}
+  </div>
+  <div class="tile">
+    <div class="tile-label">Disk</div>
+    <div class="tile-value">{{ health.host.disk.percent }}%</div>
+    <div class="tile-sub">{{ health.host.disk.used_gb }} / {{ health.host.disk.total_gb }} GB</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Load</div>
+    <div class="tile-value">{{ health.host.load[0] if health.host.load else '–' }}</div>
+    <div class="tile-sub">{{ health.host.load | join(' · ') }}</div>
+  </div>
+</section>
+
+<section class="tiles">
+  <div class="tile">
+    <div class="tile-label">Agents</div>
+    <div class="tile-value">{{ agents_active }}<span class="sub"> / {{ agents_total }}</span></div>
+    <div class="tile-sub"><a href="/agents">active / total</a></div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Calls today</div>
+    <div class="tile-value">{{ call_stats.total }}</div>
+    <div class="tile-sub"><a href="/calls">{{ call_stats.active }} active now</a></div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Talk time today</div>
+    <div class="tile-value">{{ call_stats.total_minutes }}m</div>
+    <div class="tile-sub">summed call duration</div>
+  </div>
+</section>
+{% endblock %}

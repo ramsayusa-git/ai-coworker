@@ -1,0 +1,134 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ 'New agent' if is_new else agent.name }} — {{ app_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>{{ 'New agent' if is_new else agent.name }}</h1>
+  {% if not is_new %}
+  <div class="row-actions">
+    <a class="btn btn-ghost btn-sm" href="/agents/{{ agent.id }}/history">Prompt history (v{{ agent.prompt_version }})</a>
+    <a class="btn btn-ghost btn-sm" href="/test-call">Test call</a>
+  </div>
+  {% endif %}
+</header>
+
+{% if error %}<div class="alert alert-warn">{{ error }}</div>{% endif %}
+{% if saved %}<div class="alert alert-ok">Saved.</div>{% endif %}
+
+<form method="post" action="{{ '/agents/new' if is_new else '/agents/' + agent.id }}" class="form">
+  <input type="hidden" name="csrf_token" value="{{ session.csrf }}">
+
+  <section class="card">
+    <h2>Identity</h2>
+    <div class="grid-2">
+      <label>Name
+        <input name="name" value="{{ agent.name }}" required maxlength="80" placeholder="Support agent">
+      </label>
+      <label class="check">
+        <input type="checkbox" name="active" {{ 'checked' if agent.active else '' }}> Active
+      </label>
+    </div>
+    <label>System prompt
+      <textarea name="system_prompt" rows="8" required>{{ agent.system_prompt }}</textarea>
+    </label>
+    <label>Greeting (spoken when the call starts)
+      <input name="greeting" value="{{ agent.greeting }}" maxlength="300">
+    </label>
+  </section>
+
+  <section class="card">
+    <h2>Models</h2>
+    <div class="grid-3">
+      <label>LLM provider
+        <select name="llm_provider" data-defaults='{{ default_models["llm"] | tojson }}' data-target="llm_model">
+          {% for p in llm_providers %}<option value="{{ p }}" {{ 'selected' if agent.llm.provider == p else '' }}>{{ p }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>LLM model
+        <input name="llm_model" id="llm_model" value="{{ agent.llm.model }}">
+      </label>
+      <label>Temperature
+        <input name="llm_temperature" type="number" step="0.05" min="0" max="2" value="{{ agent.llm.temperature }}">
+      </label>
+    </div>
+    <div class="grid-3">
+      <label>STT provider
+        <select name="stt_provider" data-defaults='{{ default_models["stt"] | tojson }}' data-target="stt_model">
+          {% for p in stt_providers %}<option value="{{ p }}" {{ 'selected' if agent.stt.provider == p else '' }}>{{ p }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>STT model
+        <input name="stt_model" id="stt_model" value="{{ agent.stt.model }}">
+      </label>
+      <label>Language
+        <input name="stt_language" value="{{ agent.stt.language }}" maxlength="8">
+      </label>
+    </div>
+    <div class="grid-3">
+      <label>TTS provider
+        <select name="tts_provider" data-defaults='{{ default_models["tts"] | tojson }}' data-target="tts_model"
+                data-voice-defaults='{{ default_voices | tojson }}' data-voice-target="tts_voice">
+          {% for p in tts_providers %}<option value="{{ p }}" {{ 'selected' if agent.tts.provider == p else '' }}>{{ p }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>TTS model
+        <input name="tts_model" id="tts_model" value="{{ agent.tts.model }}">
+      </label>
+      <label>Voice
+        <input name="tts_voice" id="tts_voice" value="{{ agent.tts.voice }}">
+      </label>
+    </div>
+    <p class="sub">Phase 1 worker speaks the <strong>openai</strong> stack end-to-end (needs <code>OPENAI_API_KEY</code>
+       in the worker environment). Other providers save fine but need their plugin + key wired into the worker.</p>
+  </section>
+
+  <section class="card">
+    <h2>Turn taking</h2>
+    <div class="grid-3">
+      <label>Turn detection
+        <select name="turn_mode">
+          {% for m in turn_modes %}<option value="{{ m }}" {{ 'selected' if agent.turn.mode == m else '' }}>{{ m }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>End-of-turn silence (s)
+        <input name="vad_min_silence" type="number" step="0.05" min="0.1" max="5" value="{{ agent.turn.vad_min_silence }}">
+      </label>
+      <label>VAD activation threshold
+        <input name="vad_activation_threshold" type="number" step="0.05" min="0.05" max="1" value="{{ agent.turn.vad_activation_threshold }}">
+      </label>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="allow_interruptions" {{ 'checked' if agent.turn.allow_interruptions else '' }}>
+      Caller can interrupt the agent
+    </label>
+  </section>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{{ 'Create agent' if is_new else 'Save changes' }}</button>
+    <a class="btn btn-ghost" href="/agents">Cancel</a>
+  </div>
+</form>
+
+<script>
+// Provider-aware defaults: switching provider fills the model/voice field
+// with that provider's default (only if the field held the previous default
+// or is empty — hand-typed values are kept).
+document.querySelectorAll("select[data-defaults]").forEach(function (sel) {
+  var defaults = JSON.parse(sel.dataset.defaults);
+  var target = document.getElementById(sel.dataset.target);
+  var voiceDefaults = sel.dataset.voiceDefaults ? JSON.parse(sel.dataset.voiceDefaults) : null;
+  var voiceTarget = sel.dataset.voiceTarget ? document.getElementById(sel.dataset.voiceTarget) : null;
+  var known = Object.values(defaults);
+  sel.addEventListener("change", function () {
+    if (!target.value || known.indexOf(target.value) !== -1) {
+      target.value = defaults[sel.value] || "";
+    }
+    if (voiceTarget && voiceDefaults) {
+      var knownVoices = Object.values(voiceDefaults);
+      if (!voiceTarget.value || knownVoices.indexOf(voiceTarget.value) !== -1) {
+        voiceTarget.value = voiceDefaults[sel.value] || "";
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

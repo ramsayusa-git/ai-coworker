@@ -1,0 +1,38 @@
+[project]
+name = "aetos-voice"
+version = "0.1.0"
+description = "Aetos Voice AI Dashboard — clean-room, self-hosted voice agent dashboard (Phase 1: agents, rooms, browser calls)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "jinja2>=3.1",
+    "itsdangerous>=2.2",
+    "redis>=5.0",
+    "pydantic-settings>=2.4",
+    "python-multipart>=0.0.9",
+    "livekit-api>=1.0",
+]
+
+[project.optional-dependencies]
+worker = [
+    "livekit-agents[openai,silero]>=1.0",
+    "python-dotenv>=1.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "fakeredis>=2.23",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = { find = { include = ["app*"] } }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

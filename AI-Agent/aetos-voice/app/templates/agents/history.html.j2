@@ -1,0 +1,41 @@
+{% extends "base.html.j2" %}
+{% block title %}Prompt history — {{ agent.name }} — {{ app_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Prompt history — {{ agent.name }}</h1>
+  <a class="btn btn-ghost btn-sm" href="/agents/{{ agent.id }}">Back to editor</a>
+</header>
+
+{% if entries %}
+<div class="history">
+  {% for entry in entries %}
+  <section class="card">
+    <div class="history-head">
+      <div>
+        <strong>v{{ entry.v }}</strong>
+        <span class="pill {{ 'pill-ok' if entry.v == agent.prompt_version else '' }}">
+          {{ 'current' if entry.v == agent.prompt_version else entry.source }}</span>
+      </div>
+      <div class="row-actions">
+        <span class="sub" data-ts="{{ entry.ts }}"></span>
+        {% if entry.v != agent.prompt_version %}
+        <form method="post" action="/agents/{{ agent.id }}/history/{{ entry.v }}/restore">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf }}">
+          <button class="btn btn-ghost btn-sm" type="submit">Restore</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    <pre class="prompt-body">{{ entry.prompt }}</pre>
+  </section>
+  {% endfor %}
+</div>
+<script>
+document.querySelectorAll("[data-ts]").forEach(function (el) {
+  el.textContent = new Date(parseFloat(el.dataset.ts) * 1000).toLocaleString();
+});
+</script>
+{% else %}
+<section class="placeholder"><p>No history yet — edit the system prompt to create version entries.</p></section>
+{% endif %}
+{% endblock %}

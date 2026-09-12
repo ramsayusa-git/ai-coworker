@@ -1,0 +1,19 @@
+# systemd unit — agent worker (optional; needs sudo to install).
+#   sudo cp deploy/aetos-agents.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now aetos-agents
+[Unit]
+Description=Aetos Voice agent worker (livekit-agents)
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+User=krishna
+WorkingDirectory=/home/krishna/ai-work-space/ai-coworker/AI-Agent/aetos-voice
+ExecStart=/home/krishna/ai-work-space/ai-coworker/AI-Agent/aetos-voice/.venv/bin/python scripts/run_agents.py start
+Restart=always
+RestartSec=5
+MemoryMax=1G
+CPUQuota=150%
+
+[Install]
+WantedBy=multi-user.target

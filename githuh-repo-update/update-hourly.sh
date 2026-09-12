@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# Hourly GitHub two-way sync: pull GitHub -> local, then commit & push local -> GitHub
-# Also merges the 'master' branch (Windows machine sync) into 'main' so all
-# machines converge on one branch. Exclusions live in .gitignore.
+# Hourly GitHub two-way sync (aiserver <-> GitHub <-> Windows machine)
+# Order: fetch -> commit local -> merge origin/main -> merge origin/master -> push.
+# Merges auto-resolve conflicts keeping the local (aiserver) version, so the
+# sync never stalls even after a force-push from another machine.
+# Exclusions live in .gitignore + .git/info/exclude.
 
 SCRIPT_DIR="/home/krishna/ai-work-space/ai-coworker/githuh-repo-update"
 REPO_DIR="/home/krishna/ai-work-space/ai-coworker"
@@ -35,6 +37,7 @@ fi
 git config user.email "ramsay.usa@gmail.com"
 git config user.name "GitHub Automation"
 git config core.safecrlf false
+git config pull.rebase false
 
 # Clean up leftovers from previously killed runs
 if [ -f .git/index.lock ] && ! pgrep -x git >/dev/null 2>&1; then
@@ -45,17 +48,9 @@ rm -f .git/gc.log
 
 log "Starting hourly sync..."
 
-# 1) FETCH + PULL: bring all GitHub changes (all folders/files, new and updated) down
+# 1) FETCH everything from GitHub
 log "Fetching from GitHub..."
 git fetch origin --prune 2>&1 | grep -v "^hint:" >> "$LOG_FILE" || true
-log "Pulling latest main..."
-git pull origin main --no-edit --allow-unrelated-histories 2>&1 | grep -v "^hint:" >> "$LOG_FILE" || true
-if [ -n "$(git ls-files -u)" ]; then
-    log "WARNING: pull produced conflicts - keeping local versions"
-    git checkout --ours . 2>/dev/null
-    git add -A . 2>/dev/null
-    git commit --no-verify -m "Auto-resolve pull conflicts (kept local): $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE" 2>&1 || git merge --abort 2>/dev/null
-fi
 
 # Update timestamp file
 {
@@ -73,7 +68,8 @@ fi
     grep -qxF "$f" .git/info/exclude 2>/dev/null || { echo "$f" >> .git/info/exclude; log "Excluded (oversize/unreadable): $f"; }
 done
 
-# 2) STAGE + COMMIT all local changes, new folders and subfolders included
+# 2) COMMIT all local changes FIRST (new folders/subfolders/files included),
+#    so merges never collide with uncommitted or untracked files
 log "Staging changes..."
 timeout 900 git add -A . 2>&1 | head -5 >> "$LOG_FILE"
 if [ "${PIPESTATUS[0]}" = "124" ]; then
@@ -87,23 +83,36 @@ else
     log "Local changes committed"
 fi
 
-# 3) MERGE the Windows 'master' branch into main (self-healing, runs until converged)
-if git rev-parse --verify -q origin/master >/dev/null; then
-    if git merge-base --is-ancestor origin/master HEAD 2>/dev/null; then
-        log "master already merged into main"
-    else
-        log "Merging origin/master (Windows sync) into main..."
-        if git merge origin/master --allow-unrelated-histories -X ours --no-edit \
-             -m "Merge master (Windows sync) into main: $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE" 2>&1; then
-            log "master merged into main"
+# 3) MERGE origin/main (handles normal updates AND force-pushed rewrites;
+#    conflicting hunks keep the local version so the sync never stalls)
+merge_branch() {
+    ref="$1"
+    if git rev-parse --verify -q "$ref" >/dev/null; then
+        if git merge-base --is-ancestor "$ref" HEAD 2>/dev/null; then
+            log "$ref already contained in local main"
         else
-            log "WARNING: master merge failed - aborting merge"
-            git merge --abort 2>/dev/null
+            log "Merging $ref into local main..."
+            if git merge "$ref" --allow-unrelated-histories -X ours --no-edit \
+                 -m "Merge $ref: $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE" 2>&1; then
+                log "$ref merged"
+            else
+                log "WARNING: $ref merge failed - resolving by keeping local versions"
+                git checkout --ours . 2>/dev/null
+                git add -A . 2>/dev/null
+                if git commit --no-verify -m "Merge $ref (kept local on conflict): $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE" 2>&1; then
+                    log "$ref merge conflicts resolved (local kept)"
+                else
+                    git merge --abort 2>/dev/null
+                    log "WARNING: $ref merge aborted"
+                fi
+            fi
         fi
     fi
-fi
+}
+merge_branch origin/main
+merge_branch origin/master
 
-# 4) PUSH main, and keep master pointed at the same content so Windows converges
+# 4) PUSH main, and keep master pointed at the same content so all machines converge
 log "Pushing to GitHub..."
 if git push origin main --no-verify >> "$LOG_FILE" 2>&1; then
     log "Successfully pushed main"

@@ -1,0 +1,59 @@
+{% extends "base.html.j2" %}
+{% block title %}Rooms — {{ app_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Rooms</h1>
+  <div class="whoami mono">{{ livekit_url }}</div>
+</header>
+
+{% if not overview.available %}
+<div class="alert alert-warn">LiveKit offline — {{ overview.error }}</div>
+{% endif %}
+
+<section class="tiles">
+  <div class="tile">
+    <div class="tile-label">LiveKit</div>
+    <div class="tile-value {{ 'ok' if overview.available else 'bad' }}">{{ 'Online' if overview.available else 'Offline' }}</div>
+    <div class="tile-sub">{{ overview.rooms | length }} active room{{ '' if overview.rooms | length == 1 else 's' }}</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Redis</div>
+    <div class="tile-value {{ 'ok' if health.redis.connected else 'bad' }}">{{ 'Connected' if health.redis.connected else 'Offline' }}</div>
+    <div class="tile-sub">{{ health.redis.namespaced_keys }} keys</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Load</div>
+    <div class="tile-value">{{ health.host.load[0] if health.host.load else '–' }}</div>
+    <div class="tile-sub">{{ health.host.load | join(' · ') }}</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Memory</div>
+    <div class="tile-value">{{ health.host.memory.percent if health.host.memory else '–' }}%</div>
+    <div class="tile-sub">{{ health.host.memory.used_mb }} / {{ health.host.memory.total_mb }} MB</div>
+  </div>
+</section>
+
+{% if overview.rooms %}
+<table class="table">
+  <thead><tr><th>Room</th><th>Participants</th><th>Age</th><th>Who's inside</th></tr></thead>
+  <tbody>
+    {% for room in overview.rooms %}
+    <tr>
+      <td class="mono">{{ room.name }}</td>
+      <td>{{ room.num_participants }}</td>
+      <td>{{ (room.age_seconds // 60) }}m {{ room.age_seconds % 60 }}s</td>
+      <td>
+        {% for p in room.participants %}
+          <span class="pill {{ 'pill-ok' if p.is_agent else '' }}">{{ p.identity }}{{ ' (agent)' if p.is_agent else '' }}</span>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% elif overview.available %}
+<section class="placeholder">
+  <p>No active rooms. Start one from the <a href="/test-call">Test Call</a> page.</p>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+{% block body %}
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <div>
+        <div class="brand-name">Aetos Voice</div>
+        <div class="brand-sub">AI Dashboard</div>
+      </div>
+    </div>
+    <nav>
+      <a href="/" class="{{ 'active' if active_nav == 'dashboard' else '' }}">Dashboard</a>
+      <a href="/agents" class="{{ 'active' if active_nav == 'agents' else '' }}">Agents</a>
+      <a href="/rooms" class="{{ 'active' if active_nav == 'rooms' else '' }}">Rooms</a>
+      <a href="/test-call" class="{{ 'active' if active_nav == 'testcall' else '' }}">Test Call</a>
+      <a href="/calls" class="{{ 'active' if active_nav == 'calls' else '' }}">Calls</a>
+      <a class="disabled" title="Phase 4">Knowledge Base</a>
+    </nav>
+    <div class="sidebar-footer">
+      <form method="post" action="/logout">
+        <button class="btn btn-ghost" type="submit">Sign out</button>
+      </form>
+      <div class="version">v{{ app_version }}</div>
+    </div>
+  </aside>
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}
+</body>
+</html>

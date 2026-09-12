@@ -1,0 +1,54 @@
+{% extends "base.html.j2" %}
+{% block title %}Call {{ call.id }} — {{ app_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1 class="mono" style="font-size:18px">{{ call.id }}</h1>
+  <a class="btn btn-ghost btn-sm" href="/calls">Back to calls</a>
+</header>
+
+<section class="tiles">
+  <div class="tile">
+    <div class="tile-label">Agent</div>
+    <div class="tile-value" style="font-size:18px">{{ call.agent_name or '—' }}</div>
+    <div class="tile-sub mono">{{ call.agent_id or '' }}</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Status</div>
+    <div class="tile-value {{ 'ok' if call.status == 'active' else '' }}">{{ call.status }}</div>
+    <div class="tile-sub"><span data-ts="{{ call.started_at }}"></span></div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Duration</div>
+    <div class="tile-value">{% if call.duration_seconds is not none %}{{ call.duration_seconds // 60 }}m {{ call.duration_seconds % 60 }}s{% else %}—{% endif %}</div>
+    <div class="tile-sub">{{ call.direction }}</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Participants</div>
+    <div class="tile-value">{{ call.participants | length }}</div>
+    <div class="tile-sub">{{ call.participants | join(', ') }}</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Transcript</h2>
+  {% if transcript %}
+  <div class="transcript">
+    {% for turn in transcript %}
+    <div class="turn turn-{{ 'agent' if turn.role == 'assistant' else 'user' }}">
+      <div class="turn-meta">{{ 'Agent' if turn.role == 'assistant' else 'Caller' }}
+        · <span data-ts="{{ turn.ts }}"></span></div>
+      <div class="turn-text">{{ turn.text }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="sub">No transcript captured for this call{{ ' yet' if call.status == 'active' else '' }}.</p>
+  {% endif %}
+</section>
+
+<script>
+document.querySelectorAll("[data-ts]").forEach(function (el) {
+  el.textContent = new Date(parseFloat(el.dataset.ts) * 1000).toLocaleTimeString();
+});
+</script>
+{% endblock %}
