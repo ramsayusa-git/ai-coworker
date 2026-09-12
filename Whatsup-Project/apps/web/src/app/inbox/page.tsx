@@ -1,10 +1,5 @@
-export default function Page() {
-  return (
-    <div>
-      <h1 className="mb-4 text-2xl font-semibold">Inbox</h1>
-      <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-10 text-center text-sm text-zinc-500">
-        Inbox module — coming soon
-      </div>
-    </div>
-  );
+import { InboxView } from "@/components/inbox/inbox-view";
+
+export default function InboxPage() {
+  return <InboxView />;
 }

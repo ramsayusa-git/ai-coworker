@@ -1,0 +1,49 @@
+{
+  "dxt_version": "0.1",
+  "name": "whatsup",
+  "display_name": "Whatsup",
+  "version": "0.1.0",
+  "description": "Manage the Whatsup WhatsApp business messaging platform: contacts, channels, conversations, templates, and broadcast campaigns.",
+  "author": { "name": "Aetos Tech Labs" },
+  "server": {
+    "type": "node",
+    "entry_point": "src/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/src/index.js"],
+      "env": {
+        "WHATSUP_API_URL": "http://localhost:4000",
+        "WHATSUP_EMAIL": "${user_config.whatsup_email}",
+        "WHATSUP_PASSWORD": "${user_config.whatsup_password}"
+      }
+    }
+  },
+  "user_config": {
+    "whatsup_email": {
+      "type": "string",
+      "title": "Whatsup login email",
+      "description": "The email address of your Whatsup account (e.g. an org_owner or org_admin).",
+      "required": true
+    },
+    "whatsup_password": {
+      "type": "string",
+      "title": "Whatsup password",
+      "description": "Password for the account above. Stored locally by Claude Desktop, sent only to your own Whatsup API to sign in.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "tools": [
+    { "name": "whatsup_get_org", "description": "Get the current org" },
+    { "name": "whatsup_list_contacts", "description": "List contacts" },
+    { "name": "whatsup_add_contact", "description": "Add a contact" },
+    { "name": "whatsup_list_channels", "description": "List channels" },
+    { "name": "whatsup_list_conversations", "description": "List conversations" },
+    { "name": "whatsup_get_conversation_messages", "description": "Get messages in a conversation" },
+    { "name": "whatsup_send_message", "description": "Send a message in a conversation" },
+    { "name": "whatsup_list_templates", "description": "List message templates" },
+    { "name": "whatsup_create_template", "description": "Create a message template" },
+    { "name": "whatsup_list_campaigns", "description": "List broadcast campaigns" },
+    { "name": "whatsup_create_campaign", "description": "Create a broadcast campaign" }
+  ]
+}

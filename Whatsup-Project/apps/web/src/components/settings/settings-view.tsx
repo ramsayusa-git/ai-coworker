@@ -1,0 +1,217 @@
+"use client";
+import { useCallback, useEffect, useState } from "react";
+import { apiFetch, getCachedMe } from "@/lib/api";
+
+const tabs = ["Organization", "Branding", "Team & Roles", "Billing", "API & Webhooks"] as const;
+type Tab = (typeof tabs)[number];
+
+type Member = { userId: string; name: string | null; email: string; role: string; status: string };
+type Invite = { id: string; email: string; role: string; acceptUrl?: string; token: string; expiresAt: string };
+
+function Field({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div>
+      <label className="block text-xs text-zinc-500">{label}</label>
+      <input defaultValue={value} className="mt-1 w-full max-w-md rounded-md border border-zinc-300 px-2 py-1.5 text-sm" />
+      {hint && <p className="mt-1 text-xs text-zinc-400">{hint}</p>}
+    </div>
+  );
+}
+
+function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: () => void }) {
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("agent");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [link, setLink] = useState<string | null>(null);
+
+  async function submit() {
+    if (!email.trim()) { setError("Email is required"); return; }
+    setSaving(true);
+    setError(null);
+    try {
+      const invite: Invite = await apiFetch("/invites", { method: "POST", body: JSON.stringify({ email: email.trim(), role }) });
+      const base = typeof window !== "undefined" ? window.location.origin : "";
+      setLink(`${base}${invite.acceptUrl}`);
+      onInvited();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to send invite");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/30">
+      <div className="w-[380px] rounded-lg bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Invite a team member</h2>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600">✕</button>
+        </div>
+
+        {!link ? (
+          <div className="space-y-3">
+            <label className="block text-xs font-medium text-zinc-600">
+              Email
+              <input className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm" value={email}
+                onChange={(e) => setEmail(e.target.value)} placeholder="teammate@company.com" />
+            </label>
+            <label className="block text-xs font-medium text-zinc-600">
+              Role
+              <select className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm" value={role}
+                onChange={(e) => setRole(e.target.value)}>
+                <option value="agent">Agent</option>
+                <option value="org_admin">Org Admin</option>
+                <option value="org_owner">Org Owner</option>
+              </select>
+            </label>
+            {error && <p className="text-xs text-red-600">{error}</p>}
+            <div className="flex items-center justify-between pt-1">
+              <button onClick={onClose} className="text-xs text-zinc-400 hover:underline">Cancel</button>
+              <button onClick={submit} disabled={saving}
+                className="rounded-md bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                {saving ? "Sending…" : "Send invite"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-zinc-600">No email service is wired up yet — share this link with them directly:</p>
+            <code className="block break-all rounded-md bg-zinc-50 p-2 text-xs">{link}</code>
+            <button onClick={onClose} className="w-full rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white">Done</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function SettingsView() {
+  const [tab, setTab] = useState<Tab>("Organization");
+  const [members, setMembers] = useState<Member[]>([]);
+  const [invites, setInvites] = useState<Invite[]>([]);
+  const [showInvite, setShowInvite] = useState(false);
+  const me = getCachedMe();
+
+  const loadTeam = useCallback(async () => {
+    const [m, i] = await Promise.all([apiFetch("/members"), apiFetch("/invites")]);
+    setMembers(m);
+    setInvites(i);
+  }, []);
+
+  useEffect(() => { if (tab === "Team & Roles") loadTeam(); }, [tab, loadTeam]);
+
+  return (
+    <div>
+      <h1 className="mb-4 text-2xl font-semibold">Settings</h1>
+      <div className="mb-4 flex gap-1 border-b border-zinc-200">
+        {tabs.map((t) => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`-mb-px border-b-2 px-3 py-2 text-sm ${tab === t ? "border-emerald-600 font-medium text-emerald-700" : "border-transparent text-zinc-500 hover:text-zinc-700"}`}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {tab === "Organization" && (
+        <div className="max-w-md space-y-4 rounded-lg border border-zinc-200 bg-white p-4">
+          <Field label="Organization name" value={me?.orgName ?? ""} />
+          <Field label="Timezone" value="Asia/Kolkata" />
+          <Field label="Default language" value="en" />
+          <div>
+            <label className="block text-xs text-zinc-500">Plan</label>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="rounded bg-emerald-100 px-2 py-1 text-sm font-medium text-emerald-700">Growth</span>
+              <button className="text-xs text-emerald-600 hover:underline">Upgrade</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === "Branding" && (
+        <div className="max-w-md space-y-4 rounded-lg border border-zinc-200 bg-white p-4">
+          <p className="text-xs text-zinc-400">White-label settings apply when this org is under a partner/reseller brand.</p>
+          <Field label="Brand name" value={me?.orgName ?? ""} />
+          <Field label="Custom domain" value="" hint="CNAME → Cloudflare for SaaS. Not yet verified." />
+          <Field label="Support email" value="" />
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-zinc-100 text-xs text-zinc-400">Logo</div>
+            <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50">Upload</button>
+          </div>
+        </div>
+      )}
+
+      {tab === "Team & Roles" && (
+        <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
+          <table className="w-full text-sm">
+            <thead className="bg-zinc-50 text-left text-xs text-zinc-500">
+              <tr><th className="px-4 py-2 font-medium">User</th><th className="px-4 py-2 font-medium">Role</th><th className="px-4 py-2 font-medium">Status</th></tr>
+            </thead>
+            <tbody>
+              {members.map((r) => (
+                <tr key={r.userId} className="border-t border-zinc-100">
+                  <td className="px-4 py-2 font-medium">{r.name || r.email}{r.userId === me?.userId ? " (you)" : ""}</td>
+                  <td className="px-4 py-2 font-mono text-xs text-zinc-600">{r.role}</td>
+                  <td className="px-4 py-2"><span className="text-xs text-emerald-600">{r.status}</span></td>
+                </tr>
+              ))}
+              {invites.map((inv) => (
+                <tr key={inv.id} className="border-t border-zinc-100">
+                  <td className="px-4 py-2 font-medium text-zinc-500">{inv.email}</td>
+                  <td className="px-4 py-2 font-mono text-xs text-zinc-600">{inv.role}</td>
+                  <td className="px-4 py-2"><span className="text-xs text-amber-600">invited</span></td>
+                </tr>
+              ))}
+              {members.length === 0 && invites.length === 0 && (
+                <tr><td colSpan={3} className="px-4 py-6 text-center text-xs text-zinc-400">Loading…</td></tr>
+              )}
+            </tbody>
+          </table>
+          <div className="border-t border-zinc-200 p-3">
+            <button onClick={() => setShowInvite(true)}
+              className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
+              + Invite member
+            </button>
+          </div>
+        </div>
+      )}
+
+      {tab === "Billing" && (
+        <div className="max-w-lg space-y-4">
+          <div className="rounded-lg border border-zinc-200 bg-white p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-zinc-500">Wallet balance</div>
+                <div className="text-2xl font-semibold">₹4,280.00</div>
+              </div>
+              <button className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">Top up</button>
+            </div>
+          </div>
+          <div className="rounded-lg border border-zinc-200 bg-white p-4">
+            <div className="text-sm font-medium">Growth plan</div>
+            <div className="text-xs text-zinc-500">₹2,999/mo · 5 seats · 2 channels · 10k AI tokens included</div>
+            <div className="mt-2 flex gap-2">
+              <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs hover:bg-zinc-50">Change plan</button>
+              <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs hover:bg-zinc-50">Download GST invoices</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === "API & Webhooks" && (
+        <div className="max-w-lg space-y-4 rounded-lg border border-zinc-200 bg-white p-4">
+          <div>
+            <label className="block text-xs text-zinc-500">API key</label>
+            <div className="mt-1 flex items-center gap-2">
+              <code className="flex-1 rounded-md bg-zinc-100 px-2 py-1.5 text-xs">wu_live_••••••••••••3f2a</code>
+              <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-50">Rotate</button>
+            </div>
+          </div>
+          <Field label="Outbound webhook URL" value="" hint="Signed with HMAC-SHA256; verify X-Whatsup-Signature." />
+        </div>
+      )}
+
+      {showInvite && <InviteModal onClose={() => setShowInvite(false)} onInvited={loadTeam} />}
+    </div>
+  );
+}
