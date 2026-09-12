@@ -73,6 +73,25 @@ export async function acceptInvite(input: { token: string; password: string; nam
   return user;
 }
 
+export async function acceptPartnerInvite(input: { token: string; password: string; name?: string }) {
+  const res = await fetch(`${API_BASE}/v1/auth/accept-partner-invite`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Could not accept invite (${res.status})`);
+  }
+  const { token, user } = await res.json();
+  // Partner-team members have no org yet, so we can't populate the normal Me/session shape.
+  // Just stash the token; the console reads /partners/mine to figure out where to send them.
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+  } catch { /* ignore */ }
+  return user;
+}
+
 export async function getOrgId(): Promise<string> {
   const me = getCachedMe();
   if (me) return me.orgId;

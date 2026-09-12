@@ -6,6 +6,8 @@ type PartnerRef = { id: string; name: string; slug: string; role: string };
 type Partner = { id: string; name: string; slug: string; brand: Record<string, any>; customDomain: string | null };
 type ClientOrg = { id: string; name: string; planId: string; walletPaise: number; partnerAccess: string; createdAt: string };
 type PartnerMember = { userId: string; name: string | null; email: string; role: string; status: string };
+type PartnerInvite = { id: string; email: string; role: string; acceptUrl?: string };
+type ClientConversation = { id: string; status: string; unread: number; lastMessageAt: string; lastMessage?: string; contactName: string; contactPhone: string };
 
 const inputCls = "mt-1 w-full max-w-md rounded-md border border-zinc-300 px-2 py-1.5 text-sm";
 
@@ -128,12 +130,129 @@ function NewOrgModal({ partnerId, onClose, onCreated }: { partnerId: string; onC
   );
 }
 
+function InviteTeammateModal({ partnerId, onClose, onInvited }: { partnerId: string; onClose: () => void; onInvited: () => void }) {
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("partner_support");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [link, setLink] = useState<string | null>(null);
+
+  async function submit() {
+    if (!email.trim()) { setError("Email is required"); return; }
+    setSaving(true);
+    setError(null);
+    try {
+      const invite: PartnerInvite = await partnerFetch(`/partners/${partnerId}/invites`, {
+        method: "POST", body: JSON.stringify({ email: email.trim(), role }),
+      });
+      const base = typeof window !== "undefined" ? window.location.origin : "";
+      setLink(`${base}${invite.acceptUrl}`);
+      onInvited();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to send invite");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/30">
+      <div className="w-[380px] rounded-lg bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Invite a partner teammate</h2>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600">✕</button>
+        </div>
+        {!link ? (
+          <div className="space-y-3">
+            <label className="block text-xs font-medium text-zinc-600">
+              Email
+              <input className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm" value={email}
+                onChange={(e) => setEmail(e.target.value)} placeholder="teammate@aetostechlabs.com" />
+            </label>
+            <label className="block text-xs font-medium text-zinc-600">
+              Role
+              <select className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm" value={role}
+                onChange={(e) => setRole(e.target.value)}>
+                <option value="partner_support">Partner Support (read-only)</option>
+                <option value="partner_admin">Partner Admin (full control)</option>
+              </select>
+            </label>
+            {error && <p className="text-xs text-red-600">{error}</p>}
+            <div className="flex items-center justify-between pt-1">
+              <button onClick={onClose} className="text-xs text-zinc-400 hover:underline">Cancel</button>
+              <button onClick={submit} disabled={saving}
+                className="rounded-md bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                {saving ? "Sending…" : "Send invite"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-zinc-600">No email service is wired up yet — share this link with them directly:</p>
+            <code className="block break-all rounded-md bg-zinc-50 p-2 text-xs">{link}</code>
+            <button onClick={onClose} className="w-full rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white">Done</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ClientConversationsModal({ partnerId, org, onClose }: { partnerId: string; org: ClientOrg; onClose: () => void }) {
+  const [rows, setRows] = useState<ClientConversation[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    partnerFetch(`/partners/${partnerId}/orgs/${org.id}/conversations`)
+      .then(setRows)
+      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"));
+  }, [partnerId, org.id]);
+
+  return (
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/30">
+      <div className="max-h-[80vh] w-[560px] overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">{org.name} — conversations</h2>
+            <p className="text-xs text-zinc-500">Your access: {org.partnerAccess}</p>
+          </div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600">✕</button>
+        </div>
+        {error && <p className="text-sm text-amber-600">{error}</p>}
+        {!error && rows === null && <p className="text-sm text-zinc-400">Loading…</p>}
+        {!error && rows && rows.length === 0 && <p className="text-sm text-zinc-400">No conversations yet.</p>}
+        {!error && rows && rows.length > 0 && (
+          <div className="space-y-2">
+            {rows.map((c) => (
+              <div key={c.id} className="rounded-md border border-zinc-200 p-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{c.contactName}</span>
+                  <span className="text-xs text-zinc-400">{c.status}</span>
+                </div>
+                <div className="text-xs text-zinc-500">{c.contactPhone}</div>
+                {c.lastMessage !== undefined ? (
+                  <p className="mt-1 text-zinc-600">{c.lastMessage}</p>
+                ) : (
+                  <p className="mt-1 text-xs italic text-zinc-400">Message content hidden (metadata-only access)</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Console({ partnerRef }: { partnerRef: PartnerRef }) {
   const [tab, setTab] = useState<"Clients" | "Branding" | "Team">("Clients");
   const [partner, setPartner] = useState<Partner | null>(null);
   const [clientOrgs, setClientOrgs] = useState<ClientOrg[]>([]);
   const [members, setMembers] = useState<PartnerMember[]>([]);
+  const [invites, setInvites] = useState<PartnerInvite[]>([]);
   const [showNewOrg, setShowNewOrg] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [viewingOrg, setViewingOrg] = useState<ClientOrg | null>(null);
   const isAdmin = partnerRef.role === "partner_owner" || partnerRef.role === "partner_admin";
 
   const [brandName, setBrandName] = useState("");
@@ -143,14 +262,16 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
   const [savingBrand, setSavingBrand] = useState(false);
 
   const load = useCallback(async () => {
-    const [p, orgsRows, mems] = await Promise.all([
+    const [p, orgsRows, mems, invs] = await Promise.all([
       partnerFetch(`/partners/${partnerRef.id}`),
       partnerFetch(`/partners/${partnerRef.id}/orgs`),
       partnerFetch(`/partners/${partnerRef.id}/members`),
+      partnerFetch(`/partners/${partnerRef.id}/invites`),
     ]);
     setPartner(p);
     setClientOrgs(orgsRows);
     setMembers(mems);
+    setInvites(invs);
     setBrandName(p.brand?.brandName ?? "");
     setPrimaryColor(p.brand?.primaryColor ?? "#059669");
     setSupportEmail(p.brand?.supportEmail ?? "");
@@ -207,6 +328,7 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
                   <th className="px-4 py-2 font-medium">Plan</th>
                   <th className="px-4 py-2 font-medium">Wallet</th>
                   <th className="px-4 py-2 font-medium">Your access</th>
+                  <th className="px-4 py-2 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -216,10 +338,17 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
                     <td className="px-4 py-2 text-zinc-600">{o.planId}</td>
                     <td className="px-4 py-2 text-zinc-600">₹{(o.walletPaise / 100).toFixed(2)}</td>
                     <td className="px-4 py-2 text-xs text-zinc-500">{o.partnerAccess}</td>
+                    <td className="px-4 py-2 text-right">
+                      {o.partnerAccess !== "none" ? (
+                        <button onClick={() => setViewingOrg(o)} className="text-xs text-emerald-600 hover:underline">View</button>
+                      ) : (
+                        <span className="text-xs text-zinc-300">no access granted</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
                 {clientOrgs.length === 0 && (
-                  <tr><td colSpan={4} className="px-4 py-6 text-center text-xs text-zinc-400">No client orgs yet.</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-6 text-center text-xs text-zinc-400">No client orgs yet.</td></tr>
                 )}
               </tbody>
             </table>
@@ -275,15 +404,29 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
                   <td className="px-4 py-2 text-xs text-emerald-600">{m.status}</td>
                 </tr>
               ))}
+              {invites.map((inv) => (
+                <tr key={inv.id} className="border-t border-zinc-100">
+                  <td className="px-4 py-2 font-medium text-zinc-500">{inv.email}</td>
+                  <td className="px-4 py-2 font-mono text-xs text-zinc-600">{inv.role}</td>
+                  <td className="px-4 py-2 text-xs text-amber-600">invited</td>
+                </tr>
+              ))}
             </tbody>
           </table>
-          <p className="border-t border-zinc-200 p-3 text-xs text-zinc-400">
-            Inviting additional partner team members isn't wired up yet — for now, ask them to log in and be added directly.
-          </p>
+          {isAdmin && (
+            <div className="border-t border-zinc-200 p-3">
+              <button onClick={() => setShowInvite(true)}
+                className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
+                + Invite team member
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {showNewOrg && <NewOrgModal partnerId={partnerRef.id} onClose={() => setShowNewOrg(false)} onCreated={load} />}
+      {showInvite && <InviteTeammateModal partnerId={partnerRef.id} onClose={() => setShowInvite(false)} onInvited={load} />}
+      {viewingOrg && <ClientConversationsModal partnerId={partnerRef.id} org={viewingOrg} onClose={() => setViewingOrg(null)} />}
     </div>
   );
 }
