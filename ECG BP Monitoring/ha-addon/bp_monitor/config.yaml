@@ -1,0 +1,48 @@
+name: BP Monitor
+version: "1.1.1"
+slug: bp_monitor
+description: Guided Bluetooth blood-pressure dashboard for the RBP1711150377 (ISSC BT5050) BLE cuff
+url: https://aetostechlabs.com
+arch:
+  - aarch64
+  - amd64
+  - armv7
+startup: application
+boot: auto
+init: false
+ingress: true
+ingress_port: 8100
+ingress_stream: true
+panel_icon: mdi:pulse
+panel_title: BP Monitor
+host_dbus: true
+hassio_api: true
+hassio_role: default
+services:
+  - mqtt:want
+map:
+  - share:rw
+options:
+  source: ble
+  device_address: "88:1B:99:10:44:D8"
+  device_name: RBP
+  scan_timeout: 30
+  mqtt_raw_topic: bp/raw
+  mqtt_host: ""
+  mqtt_port: 1883
+  mqtt_user: ""
+  mqtt_password: ""
+  discovery_prefix: homeassistant
+  log_level: info
+schema:
+  source: list(auto|ble|mqtt|replay)
+  device_address: str
+  device_name: str
+  scan_timeout: int(5,300)
+  mqtt_raw_topic: str
+  mqtt_host: str?
+  mqtt_port: port
+  mqtt_user: str?
+  mqtt_password: password?
+  discovery_prefix: str
+  log_level: list(debug|info|warning|error)

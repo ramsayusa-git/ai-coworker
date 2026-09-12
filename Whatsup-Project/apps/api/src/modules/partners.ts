@@ -82,6 +82,9 @@ export async function partnersRoutes(app: FastifyInstance) {
         patch.customDomainStatus = normalized ? "pending" : "unset";
         patch.domainVerificationToken = normalized ? randomBytes(12).toString("hex") : null;
         patch.domainVerifiedAt = null;
+        // A new/changed domain always starts inactive — re-verifying doesn't imply the admin
+        // wants it live again, especially if this changed because the old one broke.
+        patch.customDomainActive = false;
       }
     }
     const [updated] = await db.update(partners).set(patch).where(eq(partners.id, partnerId)).returning();
@@ -139,6 +142,23 @@ export async function partnersRoutes(app: FastifyInstance) {
       .where(eq(partners.id, partnerId)).returning();
 
     return { status: updated.customDomainStatus, ownershipOk, cnameOk, expectedCname, error };
+  });
+
+  // Explicit go-live switch, separate from verification: a DNS-verified domain isn't served
+  // to real visitors (see GET /public/branding below) until an admin flips this on. Lets a
+  // partner verify ahead of time or pause a live domain without losing the DNS check state.
+  app.post("/partners/:partnerId/domain-activate", async (req, reply) => {
+    if (!(await requirePartnerMember(app, req, reply, { adminOnly: true }))) return;
+    const { partnerId } = req.params as { partnerId: string };
+    const { active } = req.body as { active?: boolean };
+    const [p] = await db.select().from(partners).where(eq(partners.id, partnerId));
+    if (!p) return reply.status(404).send({ error: "not found" });
+    if (active && p.customDomainStatus !== "verified") {
+      return reply.status(400).send({ error: "Domain must be verified before it can be activated" });
+    }
+    const [updated] = await db.update(partners).set({ customDomainActive: !!active })
+      .where(eq(partners.id, partnerId)).returning();
+    return { customDomainActive: updated.customDomainActive };
   });
 
   app.get("/partners/:partnerId/members", async (req, reply) => {
@@ -268,7 +288,7 @@ export async function partnersRoutes(app: FastifyInstance) {
     const DEFAULT_BRAND: Brand = { brandName: "Aetos One Chat", logoUrl: null, faviconUrl: null, footerText: null, primaryColor: "#059669" };
     if (!host) return DEFAULT_BRAND;
     const [partner] = await db.select().from(partners).where(eq(partners.customDomain, host));
-    if (!partner || partner.customDomainStatus !== "verified") return DEFAULT_BRAND;
+    if (!partner || partner.customDomainStatus !== "verified" || !partner.customDomainActive) return DEFAULT_BRAND;
     const brand = (partner.brand as Record<string, unknown>) ?? {};
     return {
       brandName: (brand.brandName as string) || partner.name || DEFAULT_BRAND.brandName,

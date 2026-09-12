@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECG Monitor</title>
+<style>
+:root{
+  --brand:#273A80; --brand-2:#3b52a8; --accent:#E6701C;
+  --hr:#e11d48; --rr:#2563eb; --batt:#10b981; --qual:#8b5cf6;
+  --ok:#10b981; --warn:#f59e0b; --bad:#ef4444;
+  --bg:#f4f6fb; --bg-2:#eaeef7; --card:#ffffff; --card-2:#fbfcfe;
+  --ink:#101728; --ink-2:#4a5570; --ink-3:#8b94ab;
+  --line:#e2e7f0; --line-2:#eef1f7;
+  --shadow:0 1px 2px rgba(16,23,40,.04),0 8px 24px -12px rgba(16,23,40,.18);
+  --r:14px; --r-sm:10px;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  /* ECG paper */
+  --ecg-bg:#fffafb; --ecg-grid:#ffd3da; --ecg-grid-2:#ffaeb9;
+  --ecg-trace:#0f9b6c; --ecg-glow:rgba(15,155,108,.35);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --brand:#4c68c9; --brand-2:#6a83dd; --accent:#ff8a3d;
+    --hr:#fb7185; --rr:#60a5fa; --batt:#34d399; --qual:#a78bfa;
+    --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+    --bg:#0b0f1a; --bg-2:#070a12; --card:#121829; --card-2:#161d32;
+    --ink:#eef2fb; --ink-2:#a9b3cc; --ink-3:#6d7794;
+    --line:#232c45; --line-2:#1b2338;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+    --ecg-bg:#0a0d16; --ecg-grid:#2b1a26; --ecg-grid-2:#43202f;
+    --ecg-trace:#34d399; --ecg-glow:rgba(52,211,153,.45);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif;
+  background:
+    radial-gradient(1100px 520px at 88% -8%, color-mix(in srgb,var(--brand) 14%, transparent), transparent 70%),
+    radial-gradient(900px 460px at -6% 4%, color-mix(in srgb,var(--accent) 10%, transparent), transparent 72%),
+    var(--bg);
+  color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+
+/* ---------------------------------------------------------- top bar */
+.topbar{position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--card) 82%, transparent);
+  backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 16px}
+.brandrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{width:38px;height:38px;border-radius:11px;flex:0 0 auto;
+  background:linear-gradient(145deg,var(--brand),var(--brand-2) 60%,var(--accent));
+  display:grid;place-items:center;color:#fff;box-shadow:var(--shadow)}
+.logo svg{width:22px;height:22px;display:block}
+.titles{min-width:0;margin-right:auto}
+.titles h1{margin:0;font-size:16px;font-weight:700;letter-spacing:-.2px;line-height:1.2}
+.titles p{margin:1px 0 0;font-size:11.5px;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+
+.pill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;
+  font-size:12.5px;font-weight:650;border:1px solid var(--line);background:var(--card-2);
+  color:var(--ink-2);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:0 0 auto}
+.pill.live{border-color:color-mix(in srgb,var(--ok) 45%,var(--line));
+  background:color-mix(in srgb,var(--ok) 12%,var(--card));color:var(--ok)}
+.pill.live .dot{background:var(--ok);animation:pulse 2s infinite}
+.pill.busy{border-color:color-mix(in srgb,var(--warn) 45%,var(--line));
+  background:color-mix(in srgb,var(--warn) 12%,var(--card));color:var(--warn)}
+.pill.busy .dot{background:var(--warn);animation:pulse 1.2s infinite}
+.pill.off{border-color:color-mix(in srgb,var(--bad) 40%,var(--line));
+  background:color-mix(in srgb,var(--bad) 10%,var(--card));color:var(--bad)}
+.pill.off .dot{background:var(--bad)}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 55%,transparent)}
+  70%{box-shadow:0 0 0 7px transparent} 100%{box-shadow:0 0 0 0 transparent}
+}
+
+nav.tabs{display:flex;gap:4px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{appearance:none;border:0;background:transparent;cursor:pointer;
+  font:inherit;font-weight:650;font-size:13.5px;color:var(--ink-3);
+  padding:9px 14px 11px;border-radius:var(--r-sm) var(--r-sm) 0 0;
+  border-bottom:2.5px solid transparent;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:7px;transition:color .15s,background .15s}
+nav.tabs button:hover{color:var(--ink-2);background:var(--line-2)}
+nav.tabs button[aria-selected="true"]{color:var(--brand);border-bottom-color:var(--brand)}
+nav.tabs .badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;
+  background:var(--line);color:var(--ink-2)}
+nav.tabs button[aria-selected="true"] .badge{
+  background:color-mix(in srgb,var(--brand) 16%,transparent);color:var(--brand)}
+
+/* ---------------------------------------------------------- layout */
+main{max-width:1180px;margin:0 auto;padding:18px 16px 56px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.card>header{padding:13px 16px;border-bottom:1px solid var(--line-2);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card>header h2{margin:0;font-size:13px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-2)}
+.card>header .sub{font-size:12px;color:var(--ink-3);margin-left:auto}
+.card .body{padding:16px}
+.stack{display:grid;gap:14px}
+
+/* ---------------------------------------------------------- stepper */
+.stepper{display:flex;padding:16px;overflow-x:auto;scrollbar-width:thin;
+  background:linear-gradient(180deg,var(--card-2),var(--card))}
+.stepper::-webkit-scrollbar{height:5px}
+.stepper::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+.step{display:flex;align-items:center;flex:0 0 auto}
+.step .node{display:flex;flex-direction:column;align-items:center;gap:7px;
+  min-width:92px;padding:0 4px}
+.step .ring{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  border:2px solid var(--line);background:var(--card);font-size:12.5px;font-weight:750;
+  color:var(--ink-3);transition:all .28s cubic-bezier(.4,0,.2,1)}
+.step .lbl{font-size:11.5px;font-weight:650;color:var(--ink-3);text-align:center;
+  line-height:1.25;transition:color .2s}
+.step .bar{width:30px;height:2.5px;border-radius:2px;background:var(--line);
+  margin:0 2px 22px;transition:background .3s}
+.step.done .ring{border-color:var(--ok);background:var(--ok);color:#fff}
+.step.done .lbl{color:var(--ink-2)}
+.step.done .bar{background:var(--ok)}
+.step.now .ring{border-color:var(--brand);background:var(--brand);color:#fff;
+  transform:scale(1.14);box-shadow:0 0 0 5px color-mix(in srgb,var(--brand) 16%,transparent)}
+.step.now .lbl{color:var(--brand);font-weight:750}
+.step.err .ring{border-color:var(--bad);background:var(--bad);color:#fff}
+.step.err .lbl{color:var(--bad)}
+.step .ring svg{width:16px;height:16px}
+
+.now-panel{padding:16px;border-top:1px solid var(--line-2);
+  background:color-mix(in srgb,var(--brand) 4%,var(--card))}
+.now-panel h3{margin:0 0 5px;font-size:17px;font-weight:700;letter-spacing:-.2px;
+  display:flex;align-items:center;gap:9px}
+.now-panel .hint{margin:0;color:var(--ink-2);font-size:13.5px;max-width:76ch}
+.now-panel .detail{margin:11px 0 0;padding:10px 12px;border-radius:var(--r-sm);
+  background:var(--card);border:1px solid var(--line);
+  font:12.5px/1.5 var(--mono);color:var(--ink-2);word-break:break-word}
+.now-panel .detail b{color:var(--ink);font-weight:650}
+.spinner{width:15px;height:15px;border-radius:50%;flex:0 0 auto;
+  border:2.5px solid color-mix(in srgb,var(--brand) 25%,transparent);
+  border-top-color:var(--brand);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------------------------------------------------------- waveform */
+.trace-card{overflow:hidden}
+.trace-head{display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line-2)}
+.bignum{display:flex;align-items:baseline;gap:8px}
+.bignum .n{font:750 46px/1 system-ui,sans-serif;letter-spacing:-2px;color:var(--hr);
+  font-variant-numeric:tabular-nums}
+.bignum .n.na{color:var(--ink-3);font-size:32px;letter-spacing:-.5px}
+.bignum .u{font-size:12.5px;font-weight:700;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.08em}
+.heart{width:18px;height:18px;color:var(--hr);flex:0 0 auto}
+.heart.beat{animation:beat .5s ease-out}
+@keyframes beat{0%{transform:scale(1)}28%{transform:scale(1.42)}100%{transform:scale(1)}}
+.tags{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.tag{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;
+  border:1px solid var(--line);background:var(--card-2);color:var(--ink-2);white-space:nowrap}
+.tag.good{border-color:color-mix(in srgb,var(--ok) 45%,var(--line));
+  background:color-mix(in srgb,var(--ok) 12%,var(--card));color:var(--ok)}
+.tag.fair{border-color:color-mix(in srgb,var(--warn) 45%,var(--line));
+  background:color-mix(in srgb,var(--warn) 12%,var(--card));color:var(--warn)}
+.tag.noisy,.tag.bad{border-color:color-mix(in srgb,var(--bad) 45%,var(--line));
+  background:color-mix(in srgb,var(--bad) 10%,var(--card));color:var(--bad)}
+.trace-box{position:relative;background:var(--ecg-bg);
+  border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+canvas#trace{display:block;width:100%;height:250px}
+.trace-note{position:absolute;inset:0;display:grid;place-items:center;
+  font-size:13.5px;font-weight:600;color:var(--ink-3);text-align:center;padding:16px;
+  background:color-mix(in srgb,var(--ecg-bg) 78%,transparent)}
+.scale{display:flex;gap:16px;padding:9px 16px;font:11.5px var(--mono);color:var(--ink-3)}
+
+/* ---------------------------------------------------------- tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.tile{position:relative;padding:16px;border-radius:var(--r);background:var(--card);
+  border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
+.tile::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--c)}
+.tile .k{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.tile .k i{width:7px;height:7px;border-radius:2px;background:var(--c);display:inline-block}
+.tile .v{font:750 28px/1.1 system-ui,sans-serif;letter-spacing:-1px;margin:8px 0 2px;
+  font-variant-numeric:tabular-nums}
+.tile .v.na{color:var(--ink-3);font-size:22px;letter-spacing:-.3px}
+.tile .u{font-size:11.5px;color:var(--ink-3);font-weight:600}
+.t-rr{--c:var(--rr)} .t-batt{--c:var(--batt)} .t-qual{--c:var(--qual)}
+.t-dev{--c:var(--hr)} .t-pkt{--c:var(--ink-3)} .t-sess{--c:var(--accent)}
+
+/* ---------------------------------------------------------- charts */
+.chart-wrap{position:relative;width:100%;overflow-x:auto}
+svg.chart{display:block;width:100%;height:auto;min-width:320px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:0 16px 14px;font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:600}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.empty{padding:40px 16px;text-align:center;color:var(--ink-3)}
+.empty .big{font-size:15px;font-weight:650;color:var(--ink-2);margin-bottom:5px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{padding:13px 14px;border-radius:var(--r-sm);background:var(--card-2);
+  border:1px solid var(--line-2)}
+.stat .k{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3)}
+.stat .v{font:750 21px/1.2 system-ui,sans-serif;margin-top:5px;
+  font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.stat .m{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+/* ---------------------------------------------------------- tables */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:600px}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);
+  background:var(--card-2)}
+td{padding:11px 14px;border-bottom:1px solid var(--line-2);
+  font-variant-numeric:tabular-nums;vertical-align:middle}
+tbody tr:hover{background:var(--line-2)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.open{background:color-mix(in srgb,var(--brand) 6%,transparent)}
+td.num{font-weight:700}
+td .raw{font:11.5px var(--mono);color:var(--ink-3)}
+tr.sess{cursor:pointer}
+tr.detail td{background:var(--card-2);padding:0}
+.chip{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;
+  font-weight:700;background:color-mix(in srgb,var(--cc,var(--ink-3)) 14%,transparent);
+  color:var(--cc,var(--ink-2));white-space:nowrap}
+.chip.good{--cc:var(--ok)} .chip.fair{--cc:var(--warn)}
+.chip.noisy{--cc:var(--bad)} .chip.warming{--cc:var(--ink-3)}
+.iconbtn{appearance:none;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-3);cursor:pointer;border-radius:8px;padding:5px 8px;font:inherit;
+  font-size:12px;line-height:1;transition:all .15s}
+.iconbtn:hover{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,var(--line));
+  background:color-mix(in srgb,var(--bad) 8%,var(--card))}
+.pager{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  border-top:1px solid var(--line-2);font-size:13px;color:var(--ink-3)}
+.pager button{appearance:none;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-2);font:inherit;font-weight:600;padding:6px 13px;border-radius:8px;
+  cursor:pointer;transition:all .15s}
+.pager button:hover:not(:disabled){border-color:var(--brand);color:var(--brand);
+  background:color-mix(in srgb,var(--brand) 7%,var(--card))}
+.pager button:disabled{opacity:.42;cursor:not-allowed}
+.pager .grow{margin-left:auto}
+a.dl{color:var(--brand);font-weight:650;font-size:12.5px;text-decoration:none;
+  border:1px solid color-mix(in srgb,var(--brand) 35%,var(--line));padding:5px 11px;
+  border-radius:8px;transition:background .15s;white-space:nowrap}
+a.dl:hover{background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;
+  background:var(--line-2);margin:0}
+.kv div{background:var(--card);padding:12px 14px}
+.kv dt{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3);margin:0}
+.kv dd{margin:4px 0 0;font-size:13.5px;font-weight:600;word-break:break-all}
+.kv dd.mono{font-family:var(--mono);font-size:12.5px;font-weight:500}
+pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
+  font:12px/1.65 var(--mono);color:var(--ink-2);background:var(--bg-2);
+  white-space:pre-wrap;word-break:break-word}
+.note{margin:0;padding:12px 14px;border-radius:var(--r-sm);font-size:12.5px;line-height:1.6;
+  background:color-mix(in srgb,var(--warn) 9%,var(--card));
+  border:1px solid color-mix(in srgb,var(--warn) 32%,var(--line));color:var(--ink-2)}
+.note b{color:var(--ink)}
+
+@media (max-width:560px){
+  canvas#trace{height:200px}
+  .bignum .n{font-size:38px}
+  .tags{margin-left:0;width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brandrow">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12h4l2-7 3.5 14L15 9l2 3h5"/>
+        </svg>
+      </div>
+      <div class="titles">
+        <h1>ECG Monitor</h1>
+        <p id="devline">Aetos Tech Labs · ikinloop ecg2</p>
+      </div>
+      <span class="pill" id="statepill"><i class="dot"></i><span id="statetext">Starting…</span></span>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-view="live">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round"><path d="M3 12h4l2-6 3 12 2.5-8 1.5 2H21"/></svg>
+        Live
+      </button>
+      <button role="tab" aria-selected="false" data-view="history">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+        History <span class="badge" id="sessbadge">0</span>
+      </button>
+      <button role="tab" aria-selected="false" data-view="device">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg>
+        Device
+      </button>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <!-- ============================================ LIVE -->
+  <section class="stack" id="view-live">
+    <div class="card">
+      <div class="stepper" id="stepper"></div>
+      <div class="now-panel">
+        <h3><span id="nowspin"></span><span id="nowtitle">Starting…</span></h3>
+        <p class="hint" id="nowhint">Bringing the Bluetooth link up.</p>
+        <p class="detail" id="nowdetail" hidden></p>
+      </div>
+    </div>
+
+    <div class="card trace-card">
+      <div class="trace-head">
+        <svg class="heart" id="heart" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 21s-8-4.9-8-11a4.8 4.8 0 018-3.4A4.8 4.8 0 0120 10c0 6.1-8 11-8 11z"/>
+        </svg>
+        <div class="bignum">
+          <span class="n na" id="hr">—</span><span class="u">bpm</span>
+        </div>
+        <div class="tags">
+          <span class="tag" id="tag-qual">signal —</span>
+          <span class="tag" id="tag-contact">no contact</span>
+          <span class="tag" id="tag-rec" hidden>capturing</span>
+        </div>
+      </div>
+      <div class="trace-box">
+        <canvas id="trace"></canvas>
+        <div class="trace-note" id="tracenote">Waiting for the ECG stream…</div>
+      </div>
+      <div class="scale">
+        <span>25 mm/s</span><span>10 mm/mV</span><span id="fsinfo">— Hz</span>
+        <span id="sessinfo"></span>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile t-rr">
+        <div class="k"><i></i>RR interval</div>
+        <div class="v na" id="v-rr">—</div><div class="u">ms between beats</div>
+      </div>
+      <div class="tile t-dev">
+        <div class="k"><i></i>Device HR</div>
+        <div class="v na" id="v-dev">—</div><div class="u">bpm, from the ecg2 itself</div>
+      </div>
+      <div class="tile t-batt">
+        <div class="k"><i></i>Battery</div>
+        <div class="v na" id="v-batt">—</div><div class="u">percent</div>
+      </div>
+      <div class="tile t-qual">
+        <div class="k"><i></i>Signal score</div>
+        <div class="v na" id="v-qual">—</div><div class="u" id="u-qual">quality index</div>
+      </div>
+      <div class="tile t-pkt">
+        <div class="k"><i></i>Packets</div>
+        <div class="v na" id="v-pkt">—</div><div class="u" id="u-pkt">received</div>
+      </div>
+      <div class="tile t-sess">
+        <div class="k"><i></i>This session</div>
+        <div class="v na" id="v-sess">—</div><div class="u">being saved to history</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <header><h2>Heart rate — last 24 h</h2><span class="sub" id="trendsub"></span></header>
+      <div class="chart-wrap" id="livechart-wrap"></div>
+      <div class="legend"><span><i style="background:var(--hr)"></i>Heart rate (bpm)</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================ HISTORY -->
+  <section class="stack" id="view-history" hidden>
+    <div class="card">
+      <header><h2>Summary</h2><span class="sub" id="statsub"></span></header>
+      <div class="body"><div class="stats" id="stats"></div></div>
+    </div>
+
+    <div class="card">
+      <header><h2>Heart-rate trend</h2><span class="sub">last 24 hours, all sessions</span></header>
+      <div class="chart-wrap" id="histchart-wrap"></div>
+      <div class="legend"><span><i style="background:var(--hr)"></i>Heart rate (bpm)</span></div>
+    </div>
+
+    <div class="card">
+      <header>
+        <h2>Recorded sessions</h2>
+        <span class="sub"><a class="dl" href="api/sessions.csv">Export CSV</a></span>
+      </header>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Started</th><th>Duration</th><th>Avg HR</th><th>Min</th><th>Max</th>
+            <th>Signal</th><th>Source</th><th></th>
+          </tr></thead>
+          <tbody id="sessrows"></tbody>
+        </table>
+      </div>
+      <div id="sessempty" class="empty" hidden>
+        <div class="big">No sessions recorded yet</div>
+        Every wear is saved automatically once the stream goes live —
+        put the device on and the session appears here.
+      </div>
+      <div class="pager">
+        <span id="pageinfo">—</span>
+        <span class="grow"></span>
+        <button id="prev" disabled>← Newer</button>
+        <button id="next" disabled>Older →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <header><h2>Raw waveform captures</h2>
+        <span class="sub">via the Home Assistant “Recording” switch</span></header>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>File</th><th>Length</th><th>Size</th><th></th></tr></thead>
+          <tbody id="recrows"></tbody>
+        </table>
+      </div>
+      <div id="recempty" class="empty" hidden>
+        <div class="big">No waveform captures</div>
+        Turn on the “Recording” switch in Home Assistant to capture the
+        full-resolution waveform as CSV.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ DEVICE -->
+  <section class="stack" id="view-device" hidden>
+    <div class="card"><header><h2>Device</h2></header><dl class="kv" id="devkv"></dl></div>
+    <div class="card"><header><h2>Storage</h2></header><dl class="kv" id="dbkv"></dl></div>
+    <div class="card">
+      <header><h2>Activity log</h2><span class="sub">newest last</span></header>
+      <pre class="log" id="log">—</pre>
+    </div>
+    <div class="card">
+      <header><h2>Clinical notice</h2></header>
+      <div class="body">
+        <p class="note"><b>Not a medical device.</b> This dashboard is for
+        monitoring and experimentation. The heart rate shown is computed by this
+        add-on's own QRS detector; the device's own reported HR is displayed
+        separately and is unreliable when the signal is noisy. Do not use any of
+        it for diagnosis — check the signal quality tag before reading anything
+        into a number.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+
+const STEPS = [
+  ["wake",       "Turn on device"],
+  ["scanning",   "Scanning"],
+  ["connecting", "Connecting"],
+  ["checking",   "Checking"],
+  ["contact",    "Skin contact"],
+  ["signal",     "Signal check"],
+  ["live",       "Live"],
+];
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"'
+            + ' stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const BANG  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"'
+            + ' stroke-linecap="round"><path d="M12 7v7"/><path d="M12 17.5v.5"/></svg>';
+
+let status = {}, stats = {}, trend = [], fs = 530;
+let page = 0, pageSize = 25, total = 0, view = "live", openSession = null;
+
+/* ---------------------------------------------------------- helpers */
+function escapeHtml(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g,
+    c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function fmtTime(ts){
+  if(!ts) return "—";
+  const d = new Date(ts * 1000);
+  const t = d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  return d.toDateString() === new Date().toDateString()
+    ? t : d.toLocaleDateString([], {day:"2-digit", month:"short"}) + " " + t;
+}
+function dur(s){
+  if(!s) return "—";
+  s = Math.round(s);
+  if(s < 60) return s + "s";
+  const m = Math.floor(s / 60);
+  return m < 60 ? m + "m " + (s % 60) + "s"
+                : Math.floor(m / 60) + "h " + (m % 60) + "m";
+}
+
+function buildStepper(){
+  $("stepper").innerHTML = STEPS.map((s, i) =>
+    `<div class="step" data-step="${s[0]}">`
+    + (i ? `<div class="bar"></div>` : ``)
+    + `<div class="node"><div class="ring">${i + 1}</div><div class="lbl">${s[1]}</div></div>`
+    + `</div>`).join("");
+}
+
+/* ---------------------------------------------------------- waveform */
+const cv = $("trace"), ctx = cv.getContext("2d");
+let buf = new Float32Array(0), bufLen = 0, dpr = 1;
+const SECONDS = 6;
+
+function sizeCanvas(){
+  dpr = window.devicePixelRatio || 1;
+  const r = cv.getBoundingClientRect();
+  cv.width = Math.max(320, Math.round(r.width * dpr));
+  cv.height = Math.round(r.height * dpr);
+  drawTrace();
+}
+window.addEventListener("resize", sizeCanvas);
+
+function pushSamples(arr){
+  const cap = Math.round(fs * SECONDS);
+  if(buf.length !== cap){
+    const nb = new Float32Array(cap);
+    const keep = Math.min(bufLen, cap);
+    if(keep) nb.set(buf.subarray(bufLen - keep, bufLen), 0);
+    buf = nb; bufLen = keep;
+  }
+  for(let i = 0; i < arr.length; i++){
+    const v = arr[i][1];
+    if(bufLen < cap) buf[bufLen++] = v;
+    else { buf.copyWithin(0, 1); buf[cap - 1] = v; }
+  }
+}
+
+function css(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function drawTrace(){
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = css("--ecg-bg"); ctx.fillRect(0, 0, W, H);
+
+  // ECG paper: 1 mm minor, 5 mm major at 25 mm/s over SECONDS of trace
+  const mm = W / (25 * SECONDS);
+  ctx.lineWidth = 1;
+  for(let pass = 0; pass < 2; pass++){
+    const step = pass ? mm * 5 : mm;
+    ctx.strokeStyle = pass ? css("--ecg-grid-2") : css("--ecg-grid");
+    ctx.beginPath();
+    for(let x = 0; x <= W + .5; x += step){
+      ctx.moveTo(Math.round(x) + .5, 0); ctx.lineTo(Math.round(x) + .5, H);
+    }
+    for(let y = H / 2; y >= 0; y -= step){
+      ctx.moveTo(0, Math.round(y) + .5); ctx.lineTo(W, Math.round(y) + .5);
+    }
+    for(let y = H / 2; y <= H; y += step){
+      ctx.moveTo(0, Math.round(y) + .5); ctx.lineTo(W, Math.round(y) + .5);
+    }
+    ctx.stroke();
+  }
+
+  if(bufLen < 8) return;
+  // autoscale on a robust span so one spike doesn't flatten the trace
+  let lo = Infinity, hi = -Infinity;
+  for(let i = 0; i < bufLen; i++){ const v = buf[i]; if(v < lo) lo = v; if(v > hi) hi = v; }
+  let span = Math.max(hi - lo, 1e-6);
+  const mid = (hi + lo) / 2;
+  span *= 1.25;
+  const Y = v => H / 2 - (v - mid) / span * H * 0.92;
+
+  // min/max envelope per pixel column — keeps QRS spikes at any width
+  const cols = W;
+  ctx.strokeStyle = css("--ecg-trace");
+  ctx.lineWidth = Math.max(1.4, 1.9 * dpr);
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  ctx.shadowColor = css("--ecg-glow");
+  ctx.shadowBlur = 7 * dpr;
+  ctx.beginPath();
+  for(let c = 0; c < cols; c++){
+    const a = Math.floor(c * bufLen / cols), b = Math.max(a + 1, Math.floor((c + 1) * bufLen / cols));
+    let mn = Infinity, mx = -Infinity;
+    for(let i = a; i < b && i < bufLen; i++){
+      const v = buf[i]; if(v < mn) mn = v; if(v > mx) mx = v;
+    }
+    if(mn === Infinity) continue;
+    const y1 = Y(mx), y2 = Y(mn);
+    if(c === 0) ctx.moveTo(c + .5, y1);
+    else ctx.lineTo(c + .5, y1);
+    if(y2 !== y1) ctx.lineTo(c + .5, y2);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+/* ---------------------------------------------------------- render */
+function renderStatus(){
+  const st = status, step = st.step || "idle";
+  const idx = STEPS.findIndex(s => s[0] === step);
+  const err = step === "error" || step === "mqtt_wait";
+
+  document.querySelectorAll(".step").forEach((el, i) => {
+    el.classList.remove("done", "now", "err");
+    const ring = el.querySelector(".ring");
+    if(err && i === Math.max(0, idx)){ el.classList.add("err"); ring.innerHTML = BANG; }
+    else if(idx >= 0 && i < idx){ el.classList.add("done"); ring.innerHTML = CHECK; }
+    else if(i === idx){ el.classList.add("now"); ring.textContent = String(i + 1); }
+    else ring.textContent = String(i + 1);
+  });
+
+  $("nowtitle").textContent = st.title || "Starting…";
+  $("nowhint").textContent = st.hint || "";
+  const d = $("nowdetail");
+  if(st.detail){ d.hidden = false; d.innerHTML = "<b>Status:</b> " + escapeHtml(st.detail); }
+  else d.hidden = true;
+  $("nowspin").innerHTML = ["wake","scanning","connecting","checking","signal"].includes(step)
+    ? '<span class="spinner"></span>' : "";
+
+  const pill = $("statepill");
+  const liveNow = step === "live";
+  pill.className = "pill " + (liveNow ? "live" : err ? "off" : "busy");
+  $("statetext").textContent = liveNow ? "Live · streaming"
+    : err ? "Not connected" : (st.title || "Working…");
+
+  $("devline").textContent = "Aetos Tech Labs · "
+    + (st.model ? "ikinloop " + st.model : "ikinloop ecg2")
+    + (st.address ? " · " + st.address : "");
+
+  // headline HR
+  const hrEl = $("hr");
+  if(st.hr){ hrEl.textContent = Math.round(st.hr); hrEl.classList.remove("na"); }
+  else { hrEl.textContent = "—"; hrEl.classList.add("na"); }
+
+  const q = st.quality || "warming";
+  const qt = $("tag-qual");
+  qt.textContent = "signal " + q;
+  qt.className = "tag " + (["good","fair","noisy"].includes(q) ? q : "");
+  const ct = $("tag-contact");
+  ct.textContent = st.contact ? "contact ok" : "no contact";
+  ct.className = "tag " + (st.contact ? "good" : "");
+  const rt = $("tag-rec");
+  rt.hidden = !st.recording;
+  rt.className = "tag fair";
+  rt.textContent = "capturing " + (st.recording_file || "");
+
+  tile("v-rr", st.rr_ms);
+  tile("v-dev", st.hr_device);
+  tile("v-batt", st.battery, "%");
+  tile("v-qual", st.quality_score ? st.quality_score.toFixed(2) : null);
+  tile("v-pkt", st.packets || null);
+  $("u-pkt").textContent = st.dropped ? st.dropped + " dropped" : "received";
+  $("u-qual").textContent = q;
+  tile("v-sess", st.session_id ? dur(st.session_seconds) : null);
+  $("sessinfo").textContent = st.session_id
+    ? "session #" + st.session_id + " recording" : "";
+  $("fsinfo").textContent = (st.fs ? Math.round(st.fs) : "—") + " Hz";
+  if(st.fs) fs = st.fs;
+
+  const note = $("tracenote");
+  if(step === "live" || (step === "signal" && bufLen > 8)) note.hidden = true;
+  else {
+    note.hidden = false;
+    note.textContent = err ? (st.title + " — " + (st.detail || "retrying"))
+      : (st.hint || "Waiting for the ECG stream…");
+  }
+
+  $("log").textContent = (st.log || []).join("\n") || "—";
+  renderDevice();
+}
+
+function tile(id, val, suffix){
+  const el = $(id);
+  if(val === null || val === undefined || val === ""){
+    el.textContent = "—"; el.classList.add("na");
+  } else {
+    el.textContent = val + (suffix || ""); el.classList.remove("na");
+  }
+}
+
+function renderDevice(){
+  const st = status;
+  const rows = [
+    ["Model",        st.model || "—"],
+    ["Address",      st.address || "—", true],
+    ["Firmware",     st.firmware || "—", true],
+    ["Hardware",     st.hardware || "—", true],
+    ["Source",       st.source || "—"],
+    ["Link",         st.connected ? "Connected" : "Not connected"],
+    ["Skin contact", st.contact ? "Yes" : "No"],
+    ["Sample rate",  st.fs ? Math.round(st.fs) + " Hz" : "—"],
+    ["Packets",      st.packets == null ? "—" : st.packets
+                      + (st.dropped ? " (" + st.dropped + " dropped)" : "")],
+    ["Connect tries",st.attempts == null ? "—" : st.attempts],
+    ["Add-on uptime",st.uptime_s ? Math.floor(st.uptime_s / 60) + " min" : "—"],
+  ];
+  $("devkv").innerHTML = rows.map(r =>
+    `<div><dt>${r[0]}</dt><dd class="${r[2] ? "mono" : ""}">${escapeHtml(r[1])}</dd></div>`).join("");
+
+  const db = [
+    ["Sessions stored", stats.sessions == null ? 0 : stats.sessions],
+    ["Recorded time",   dur(stats.total_seconds)],
+    ["HR samples",      stats.all_time ? stats.all_time.samples : 0],
+    ["Database size",   stats.db_bytes ? (stats.db_bytes / 1024).toFixed(1) + " KB" : "—"],
+    ["Database file",   stats.db_path || "—", true],
+  ];
+  $("dbkv").innerHTML = db.map(r =>
+    `<div><dt>${r[0]}</dt><dd class="${r[2] ? "mono" : ""}">${escapeHtml(r[1])}</dd></div>`).join("");
+}
+
+/* ---------------------------------------------------------- chart */
+function lineChart(data, height, color){
+  const W = 760, H = height || 230, P = {t:14, r:14, b:26, l:38};
+  if(!data.length) return "";
+  let lo = Infinity, hi = -Infinity;
+  data.forEach(d => { if(d.v < lo) lo = d.v; if(d.v > hi) hi = d.v; });
+  if(lo === hi){ lo -= 5; hi += 5; }
+  const pad = (hi - lo) * 0.16; lo = Math.max(0, lo - pad); hi = hi + pad;
+  const t0 = data[0].t, t1 = data[data.length - 1].t;
+  const X = t => P.l + (t1 === t0 ? (W - P.l - P.r) / 2
+                                  : (t - t0) / (t1 - t0) * (W - P.l - P.r));
+  const Y = v => P.t + (1 - (v - lo) / (hi - lo)) * (H - P.t - P.b);
+
+  let grid = "", labels = "";
+  for(let i = 0; i <= 4; i++){
+    const v = lo + (hi - lo) * i / 4, y = Y(v);
+    grid += `<line x1="${P.l}" y1="${y.toFixed(1)}" x2="${W - P.r}" y2="${y.toFixed(1)}"
+      stroke="var(--line)" stroke-width="1" ${i ? 'stroke-dasharray="3 4"' : ''}/>`;
+    labels += `<text x="${P.l - 7}" y="${(y + 3.5).toFixed(1)}" text-anchor="end"
+      font-size="10.5" fill="var(--ink-3)">${Math.round(v)}</text>`;
+  }
+  let xt = "";
+  [0, Math.floor((data.length - 1) / 2), data.length - 1].forEach((i, k, arr) => {
+    if(arr.indexOf(i) !== k || !data[i]) return;
+    const dt = new Date(data[i].t * 1000);
+    xt += `<text x="${X(data[i].t).toFixed(1)}" y="${H - 8}" text-anchor="middle"
+      font-size="10.5" fill="var(--ink-3)">${
+        dt.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}</text>`;
+  });
+
+  const path = data.map((d, i) =>
+    (i ? "L" : "M") + X(d.t).toFixed(1) + " " + Y(d.v).toFixed(1)).join(" ");
+  const last = data[data.length - 1];
+  const area = `<path d="${path} L ${X(last.t).toFixed(1)} ${Y(lo).toFixed(1)}
+    L ${X(data[0].t).toFixed(1)} ${Y(lo).toFixed(1)} Z" fill="url(#hrg)" opacity=".22"/>`;
+  const dots = data.length <= 60 ? data.map(d =>
+    `<circle cx="${X(d.t).toFixed(1)}" cy="${Y(d.v).toFixed(1)}" r="2.6"
+      fill="var(--card)" stroke="${color}" stroke-width="2"/>`).join("") : "";
+
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Heart-rate trend">
+    <defs><linearGradient id="hrg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${color}" stop-opacity=".85"/>
+      <stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    ${grid}${labels}${xt}${area}
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2.4"
+      stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg>`;
+}
+
+function renderCharts(){
+  const data = trend.filter(r => r.hr != null).map(r => ({t: r.ts, v: r.hr}));
+  const empty = `<div class="empty"><div class="big">No heart-rate history yet</div>
+    Wear the device — samples are stored every 2 seconds while the stream is live.</div>`;
+  $("livechart-wrap").innerHTML = data.length
+    ? lineChart(data, 230, "var(--hr)") : empty;
+  $("histchart-wrap").innerHTML = data.length
+    ? lineChart(data, 260, "var(--hr)") : empty;
+  $("trendsub").textContent = data.length ? data.length + " samples" : "no data yet";
+}
+
+function renderStats(){
+  const box = (label, s, extra) => {
+    if(!s || !s.samples) return `<div class="stat"><div class="k">${label}</div>
+      <div class="v">—</div><div class="m">no samples</div></div>`;
+    return `<div class="stat"><div class="k">${label}</div>
+      <div class="v">${Math.round(s.hr_avg)}<span style="font-size:13px;color:var(--ink-3)"> bpm</span></div>
+      <div class="m">${extra || (Math.round(s.hr_min) + "–" + Math.round(s.hr_max) + " bpm")}</div></div>`;
+  };
+  $("stats").innerHTML =
+    `<div class="stat"><div class="k">Sessions</div>
+      <div class="v">${stats.sessions || 0}</div>
+      <div class="m">${dur(stats.total_seconds)} recorded</div></div>`
+    + box("Last 24 h", stats.day)
+    + box("Last 7 days", stats.week)
+    + box("All time", stats.all_time);
+  $("statsub").textContent = stats.last_session
+    ? "latest " + fmtTime(stats.last_session.started) : "";
+  $("sessbadge").textContent = stats.sessions || 0;
+}
+
+/* ---------------------------------------------------------- history */
+async function loadSessions(){
+  const d = await fetch(`api/sessions?limit=${pageSize}&offset=${page * pageSize}`)
+    .then(r => r.json());
+  total = d.total;
+  const rows = d.rows || [];
+  $("sessempty").hidden = rows.length > 0;
+  $("sessrows").innerHTML = rows.map(r => {
+    const q = r.quality || "warming";
+    return `<tr class="sess" data-sid="${r.id}">
+      <td>${escapeHtml(fmtTime(r.started))}
+        <div class="raw">#${r.id}${r.ended ? "" : " · running"}</div></td>
+      <td>${dur(r.seconds)}</td>
+      <td class="num" style="color:var(--hr)">${r.hr_avg == null ? "—" : Math.round(r.hr_avg)}</td>
+      <td>${r.hr_min == null ? "—" : Math.round(r.hr_min)}</td>
+      <td>${r.hr_max == null ? "—" : Math.round(r.hr_max)}</td>
+      <td><span class="chip ${escapeHtml(q)}">${escapeHtml(q)}</span></td>
+      <td>${escapeHtml(r.source || "—")}</td>
+      <td style="text-align:right"><button class="iconbtn" data-del="${r.id}">Delete</button></td>
+    </tr>
+    <tr class="detail" data-for="${r.id}" hidden><td colspan="8"><div
+      class="chart-wrap" id="sesschart-${r.id}"></div></td></tr>`;
+  }).join("");
+
+  const from = total ? page * pageSize + 1 : 0;
+  const to = Math.min(total, (page + 1) * pageSize);
+  $("pageinfo").textContent = total ? `${from}–${to} of ${total}` : "No sessions";
+  $("prev").disabled = page === 0;
+  $("next").disabled = to >= total;
+
+  $("sessrows").querySelectorAll("tr.sess").forEach(tr => {
+    tr.onclick = async ev => {
+      if(ev.target.dataset.del) return;
+      const sid = tr.dataset.sid;
+      const det = $("sessrows").querySelector(`tr.detail[data-for="${sid}"]`);
+      const show = det.hidden;
+      $("sessrows").querySelectorAll("tr.detail").forEach(x => { x.hidden = true; });
+      $("sessrows").querySelectorAll("tr.sess").forEach(x => x.classList.remove("open"));
+      if(show){
+        det.hidden = false; tr.classList.add("open");
+        const t = await fetch(`api/sessions/${sid}/trend`).then(r => r.json());
+        const data = (t.trend || []).filter(r => r.hr != null).map(r => ({t: r.ts, v: r.hr}));
+        $("sesschart-" + sid).innerHTML = data.length
+          ? lineChart(data, 200, "var(--hr)")
+          : `<div class="empty">No heart-rate samples in this session.</div>`;
+      }
+    };
+  });
+  $("sessrows").querySelectorAll("[data-del]").forEach(b => {
+    b.onclick = async ev => {
+      ev.stopPropagation();
+      b.disabled = true;
+      await fetch("api/sessions/" + b.dataset.del, {method:"DELETE"});
+      await Promise.all([loadSessions(), loadStats()]);
+    };
+  });
+}
+
+async function loadRecordings(){
+  const rows = await fetch("api/recordings").then(r => r.json());
+  $("recempty").hidden = rows.length > 0;
+  $("recrows").innerHTML = rows.map(r => `<tr>
+      <td>${escapeHtml(r.file)}</td>
+      <td>${r.seconds ? dur(r.seconds) : "—"}</td>
+      <td>${(r.bytes / 1024).toFixed(0)} KB</td>
+      <td style="text-align:right">
+        <a class="dl" href="api/recordings/${encodeURIComponent(r.file)}">Download</a>
+        <button class="iconbtn" data-delrec="${escapeHtml(r.file)}">Delete</button></td>
+    </tr>`).join("");
+  $("recrows").querySelectorAll("[data-delrec]").forEach(b => {
+    b.onclick = async () => {
+      b.disabled = true;
+      await fetch("api/recordings/" + encodeURIComponent(b.dataset.delrec),
+                  {method:"DELETE"});
+      loadRecordings();
+    };
+  });
+}
+
+async function loadStats(){
+  const res = await Promise.all([
+    fetch("api/stats").then(r => r.json()),
+    fetch("api/trend?hours=24").then(r => r.json()),
+  ]);
+  stats = res[0]; trend = res[1].trend || [];
+  renderStats(); renderCharts(); renderDevice();
+}
+
+/* ---------------------------------------------------------- tabs */
+document.querySelectorAll("nav.tabs button").forEach(b => {
+  b.onclick = () => {
+    view = b.dataset.view;
+    document.querySelectorAll("nav.tabs button").forEach(x =>
+      x.setAttribute("aria-selected", String(x === b)));
+    ["live", "history", "device"].forEach(v => { $("view-" + v).hidden = v !== view; });
+    if(view === "history"){ loadSessions(); loadRecordings(); }
+    if(view === "live") sizeCanvas();
+  };
+});
+$("prev").onclick = () => { if(page > 0){ page--; loadSessions(); } };
+$("next").onclick = () => { page++; loadSessions(); };
+
+/* ---------------------------------------------------------- socket */
+function connect(){
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  const base = location.pathname.replace(/\/+$/, "");
+  const ws = new WebSocket(`${proto}//${location.host}${base}/api/ws`);
+  ws.onmessage = ev => {
+    let m;
+    try { m = JSON.parse(ev.data); } catch(e) { return; }
+    if(m.type === "status"){ status = m.data; renderStatus(); }
+    else if(m.type === "ecg"){
+      if(m.fs) fs = m.fs;
+      if(m.s && m.s.length){
+        pushSamples(m.s);
+        if(view === "live") drawTrace();
+        $("tracenote").hidden = true;
+      }
+      if(m.beats){
+        const h = $("heart");
+        h.classList.remove("beat");
+        void h.offsetWidth;
+        h.classList.add("beat");
+      }
+    }
+    else if(m.type === "db"){
+      stats = m.stats || {}; trend = m.trend || [];
+      renderStats(); renderCharts();
+      if(view === "history") loadSessions();
+    }
+  };
+  ws.onclose = () => {
+    $("statepill").className = "pill off";
+    $("statetext").textContent = "Dashboard disconnected — retrying";
+    setTimeout(connect, 2500);
+  };
+}
+
+buildStepper();
+sizeCanvas();
+renderStatus();
+fetch("api/status").then(r => r.json()).then(d => { status = d; renderStatus(); });
+loadStats();
+connect();
+</script>
+</body>
+</html>

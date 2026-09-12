@@ -1,0 +1,17 @@
+slug: lab-insights
+name: Lab Insights
+version: "0.1.0"
+description: Reads uploaded lab reports, extracts markers, and flags out-of-range results against reference ranges.
+icon: flask
+category: clinical
+coreApiCompat: "^0.1.0"
+port: 8108
+healthPath: /health
+configSchema:
+  - key: llm_provider
+    label: LLM provider for report parsing
+    type: select
+    options: ["anthropic"]
+    default: "anthropic"
+subscribesTo: ["labreport.uploaded"]
+publishes: ["labreport.parsed", "labreport.flagged"]

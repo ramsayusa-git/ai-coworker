@@ -10,6 +10,10 @@ import { BillingModule } from './billing/billing.module';
 import { AddonsModule } from './addons/addons.module';
 import { AuthModule } from './auth/auth.module';
 import { BrandingModule } from './branding/branding.module';
+import { VisitTemplatesModule } from './visit-templates/visit-templates.module';
+import { CommandCenterModule } from './command-center/command-center.module';
+import { PatientConciergeModule } from './patient-concierge/patient-concierge.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -24,6 +28,10 @@ import { BrandingModule } from './branding/branding.module';
     PrescriptionsModule,
     BillingModule,
     AddonsModule,
+    VisitTemplatesModule,
+    CommandCenterModule,
+    PatientConciergeModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

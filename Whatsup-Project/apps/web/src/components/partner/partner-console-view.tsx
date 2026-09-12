@@ -6,6 +6,7 @@ type PartnerRef = { id: string; name: string; slug: string; role: string };
 type Partner = {
   id: string; name: string; slug: string; brand: Record<string, any>;
   customDomain: string | null; customDomainStatus: "unset" | "pending" | "verified" | "failed";
+  customDomainActive: boolean;
 };
 type DomainRecord = { type: string; host: string; value: string | null };
 type VerifyResult = { status: string; ownershipOk: boolean; cnameOk: boolean; expectedCname: string; error?: string };
@@ -271,6 +272,7 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
   const [domainRecords, setDomainRecords] = useState<DomainRecord[]>([]);
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<VerifyResult | null>(null);
+  const [activating, setActivating] = useState(false);
 
   const load = useCallback(async () => {
     const [p, orgsRows, mems, invs] = await Promise.all([
@@ -322,6 +324,18 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
       await load();
     } finally {
       setVerifying(false);
+    }
+  }
+
+  async function toggleActive(next: boolean) {
+    setActivating(true);
+    try {
+      await partnerFetch(`/partners/${partnerRef.id}/domain-activate`, {
+        method: "POST", body: JSON.stringify({ active: next }),
+      });
+      await load();
+    } finally {
+      setActivating(false);
     }
   }
 
@@ -450,11 +464,39 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
                   {partner.customDomainStatus}
                 </span>
               )}
+              {partner?.customDomain && (
+                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                  partner.customDomainActive ? "bg-sky-100 text-sky-700" : "bg-zinc-100 text-zinc-500"}`}>
+                  {partner.customDomainActive ? "active" : "inactive"}
+                </span>
+              )}
             </div>
+            {!partner?.customDomain && isAdmin && (
+              <p className="mt-1 text-[11px] text-amber-600">
+                Type a domain above, then click <span className="font-mono">Save branding</span> at the bottom of this tab — that generates your DNS records and unlocks the Verify/Activate buttons below.
+              </p>
+            )}
           </label>
-          {domainRecords.length > 0 && (
-            <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-xs">
-              <p className="mb-2 text-zinc-500">Add these DNS records at your domain registrar, then verify — this does a real live DNS lookup, no manual approval needed:</p>
+
+          {/* Always visible once a domain exists in the field (typed or saved), so the
+              walkthrough and the fact that Verify/Activate are one Save away isn't a mystery. */}
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-xs">
+            <p className="mb-2 text-zinc-500">
+              {domainRecords.length > 0
+                ? "Add these DNS records at your domain registrar, then verify — this does a real live DNS lookup, no manual approval needed:"
+                : "How connecting a subdomain works — save a domain above to generate your real records:"}
+            </p>
+            <div className="mb-3 rounded border border-dashed border-zinc-300 bg-white p-2 text-[11px] text-zinc-500">
+              <p className="mb-1 font-medium text-zinc-600">Example — connecting a subdomain like <span className="font-mono">app.{partner?.slug ?? "yourbrand"}.com</span>:</p>
+              <ol className="list-decimal space-y-0.5 pl-4">
+                <li>Log into wherever <span className="font-mono">{(customDomain || partner?.customDomain || "yourbrand.com").split(".").slice(-2).join(".")}</span> is registered (GoDaddy, Namecheap, Cloudflare, etc.) and open its DNS settings.</li>
+                <li>Add a <span className="font-mono">TXT</span> record — Host: <span className="font-mono">_whatsup-verify.{customDomain || partner?.customDomain || "app.yourbrand.com"}</span>, Value: {domainRecords.find((r) => r.type === "TXT")?.value ?? "(shown here once you Save branding)"}.</li>
+                <li>Add a <span className="font-mono">CNAME</span> record — Host: <span className="font-mono">{(customDomain || partner?.customDomain || "app.yourbrand.com").split(".")[0]}</span> (just the subdomain part, e.g. &quot;app&quot;), Value: <span className="font-mono">{partner?.slug ?? "yourbrand"}.edge.whatsup.app</span>.</li>
+                <li>DNS changes can take a few minutes up to ~24h to propagate. Click <span className="font-mono">Verify domain</span> below once you&apos;ve added both — it does a live lookup, so it&apos;ll fail cleanly if not ready yet, just try again.</li>
+                <li>Once verified, click <span className="font-mono">Activate domain</span> to actually start serving your branding on it — verifying alone doesn&apos;t make it live.</li>
+              </ol>
+            </div>
+            {domainRecords.length > 0 && (
               <table className="w-full font-mono text-[11px]">
                 <tbody>
                   {domainRecords.map((r) => (
@@ -466,21 +508,37 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
                   ))}
                 </tbody>
               </table>
-              {isAdmin && (
-                <button onClick={verifyDomain} disabled={verifying}
-                  className="mt-2 rounded-md border border-zinc-300 bg-white px-3 py-1 text-xs font-medium hover:bg-zinc-100 disabled:opacity-50">
-                  {verifying ? "Checking DNS…" : "Verify domain"}
-                </button>
+            )}
+            {domainRecords.length === 0 && (
+              <p className="text-[11px] text-zinc-400">No domain saved yet — the Verify and Activate buttons appear here once you save one above.</p>
+            )}
+            {domainRecords.length > 0 && isAdmin && (
+                <div className="mt-2 flex items-center gap-2">
+                  <button onClick={verifyDomain} disabled={verifying}
+                    className="rounded-md border border-zinc-300 bg-white px-3 py-1 text-xs font-medium hover:bg-zinc-100 disabled:opacity-50">
+                    {verifying ? "Checking DNS…" : "Verify domain"}
+                  </button>
+                  <button
+                    onClick={() => toggleActive(!partner?.customDomainActive)}
+                    disabled={activating || (!partner?.customDomainActive && partner?.customDomainStatus !== "verified")}
+                    title={!partner?.customDomainActive && partner?.customDomainStatus !== "verified" ? "Verify the domain first" : undefined}
+                    className={`rounded-md px-3 py-1 text-xs font-medium disabled:opacity-50 ${
+                      partner?.customDomainActive
+                        ? "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                        : "border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100"
+                    }`}>
+                    {activating ? "Working…" : partner?.customDomainActive ? "Deactivate domain" : "Activate domain"}
+                  </button>
+                </div>
               )}
-              {verifyResult && (
-                <p className={`mt-2 ${verifyResult.status === "verified" ? "text-emerald-700" : "text-red-700"}`}>
-                  {verifyResult.status === "verified"
-                    ? "Verified — both records resolved correctly."
-                    : `Not verified yet — TXT ${verifyResult.ownershipOk ? "ok" : "missing"}, CNAME ${verifyResult.cnameOk ? "ok" : "missing"}.${verifyResult.error ? ` (${verifyResult.error})` : ""}`}
-                </p>
-              )}
-            </div>
-          )}
+            {verifyResult && (
+              <p className={`mt-2 ${verifyResult.status === "verified" ? "text-emerald-700" : "text-red-700"}`}>
+                {verifyResult.status === "verified"
+                  ? "Verified — both records resolved correctly."
+                  : `Not verified yet — TXT ${verifyResult.ownershipOk ? "ok" : "missing"}, CNAME ${verifyResult.cnameOk ? "ok" : "missing"}.${verifyResult.error ? ` (${verifyResult.error})` : ""}`}
+              </p>
+            )}
+          </div>
           {isAdmin && (
             <button onClick={saveBranding} disabled={savingBrand}
               className="rounded-md bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">

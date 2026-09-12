@@ -1,0 +1,17 @@
+slug: patient-concierge
+name: Patient Concierge
+version: "0.1.0"
+description: Drafts replies to routine patient questions (hours, directions, prep instructions, billing) for staff to review and send.
+icon: chat-question
+category: engagement
+coreApiCompat: "^0.1.0"
+port: 8110
+healthPath: /health
+configSchema:
+  - key: llm_provider
+    label: LLM provider for reply drafting
+    type: select
+    options: ["anthropic"]
+    default: "anthropic"
+subscribesTo: ["patient.inquiry"]
+publishes: ["patient.inquiry-drafted"]

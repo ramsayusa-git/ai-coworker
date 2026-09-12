@@ -25,8 +25,35 @@ model Organization {
   users     User[]
   addons    AddonInstallation[]
   branding  Branding?
+  visitTemplates VisitTemplate[]
 
   @@map("organizations")
+}
+
+// 1-click visit templates: organizationId = null means a built-in template
+// shipped with the platform (seeded, shared by every clinic); a non-null
+// organizationId is a clinic's own AI-drafted or customized template. See
+// gap analysis vs arogyam.ai's "1-Click Visit Templates" feature.
+model VisitTemplate {
+  id               String        @id @default(uuid())
+  organizationId   String?
+  organization     Organization? @relation(fields: [organizationId], references: [id])
+  name             String
+  category         String
+  icd10Code        String?
+  chiefComplaint   String
+  diagnosisDisplay String
+  medicationsJson  Json          // [{ medicationName, dosageText, frequency, durationDays }]
+  testsJson        Json          @default("[]") // string[]
+  advice           String        @default("")
+  followUpDays     Int?
+  language         String        @default("en")
+  aiGenerated      Boolean       @default(false)
+  encounters       Encounter[]
+  createdAt        DateTime      @default(now())
+
+  @@index([organizationId])
+  @@map("visit_templates")
 }
 
 // White-labeling: every clinic/reseller can present the product under its own
@@ -44,8 +71,10 @@ model Branding {
   primaryColor    String       @default("#1F3A5F")
   accentColor     String       @default("#2F855A")
   customDomain    String?      @unique
+  subdomain       String?      @unique // free "<slug>.aetosone.clinics" every clinic gets by default
   supportEmail    String?
   supportPhone    String?
+  footerText      String?
   hidePoweredBy   Boolean      @default(false) // reseller/white-label plans only
   updatedAt       DateTime     @updatedAt
 
@@ -147,6 +176,7 @@ model Encounter {
   appointment    Appointment? @relation(fields: [appointmentId], references: [id])
   status         String       @default("planned")
   visitTemplateId String?
+  visitTemplate  VisitTemplate? @relation(fields: [visitTemplateId], references: [id])
   soapNoteJson   Json?        // { subjective, objective, assessment, plan, generatedBy }
   observations   Observation[]
   conditions     Condition[]

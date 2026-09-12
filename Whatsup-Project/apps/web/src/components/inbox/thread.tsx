@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CannedResponse, Conversation, ConversationNote, ConvStatus, Message, OrgMember } from "@/lib/types";
 import { apiFetch } from "@/lib/api";
+import { useResizableWidth } from "@/lib/use-resizable-width";
+import { useResizableHeight } from "@/lib/use-resizable-height";
 
 const statusIcon: Record<Message["status"], string> = { sent: "✓", delivered: "✓✓", read: "✓✓", failed: "!" };
 const statuses: ConvStatus[] = ["open", "pending", "snoozed", "resolved"];
@@ -34,6 +36,9 @@ export function Thread({
     return canned.filter((c) => c.shortcut.startsWith(slashQuery.toLowerCase())).slice(0, 6);
   }, [slashQuery, canned]);
   const [showDetails, setShowDetails] = useState(true);
+  const [notesOpen, setNotesOpen] = useState(true);
+  const { width: detailsWidth, startDrag: startDetailsDrag } = useResizableWidth("thread_details_width", { min: 220, max: 460, default: 288, edge: "left" });
+  const { height: notesHeight, startDrag: startNotesDrag } = useResizableHeight("thread_notes_height", { min: 80, max: 320, default: 160, edge: "top" });
   const [noteDraft, setNoteDraft] = useState("");
   const [tagDraft, setTagDraft] = useState("");
   const [drafting, setDrafting] = useState(false);
@@ -146,7 +151,9 @@ export function Thread({
       </div>
 
       {showDetails && (
-        <div className="flex h-full w-72 shrink-0 flex-col overflow-y-auto border-l border-zinc-200 bg-white p-4">
+        <div style={{ width: detailsWidth }} className="relative flex h-full shrink-0 flex-col overflow-y-auto border-l border-zinc-200 bg-white p-4">
+          <div onPointerDown={startDetailsDrag} title="Drag to resize"
+            className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-emerald-200/60" />
           <div className="mb-4">
             <div className="mb-1 text-xs font-semibold uppercase text-zinc-400">Assigned to</div>
             <select value={conversation.assigneeId ?? ""} onChange={(e) => onAssign(e.target.value || null)}
@@ -180,26 +187,36 @@ export function Thread({
             </div>
           </div>
 
-          <div className="flex-1">
-            <div className="mb-1 text-xs font-semibold uppercase text-zinc-400">Internal notes</div>
-            <div className="mb-2 text-[11px] text-zinc-400">Only visible to your team, never sent to the customer.</div>
-            <div className="mb-2 space-y-2">
-              {notes.length === 0 && <div className="text-xs text-zinc-400">No notes yet.</div>}
-              {notes.map((n) => (
-                <div key={n.id} className="rounded bg-amber-50 p-2 text-xs text-amber-900">
-                  <div>{n.body}</div>
-                  <div className="mt-1 text-[10px] text-amber-600">{n.authorName ?? "Agent"} · {new Date(n.createdAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
-                </div>
-              ))}
-            </div>
-            <textarea value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} rows={2}
-              placeholder="Leave a note for the team…"
-              className="w-full resize-none rounded border border-zinc-300 px-2 py-1.5 text-xs focus:border-amber-400 focus:outline-none" />
-            <button
-              onClick={async () => { if (!noteDraft.trim()) return; await onAddNote(noteDraft.trim()); setNoteDraft(""); }}
-              className="mt-1 w-full rounded bg-amber-500 px-2 py-1 text-xs font-medium text-white hover:bg-amber-600">
-              Add note
+          <div className="mt-auto border-t border-zinc-100 pt-3">
+            <button onClick={() => setNotesOpen((v) => !v)}
+              className="mb-1 flex w-full items-center justify-between text-xs font-semibold uppercase text-zinc-400 hover:text-zinc-600">
+              <span>Internal notes {notes.length > 0 && `(${notes.length})`}</span>
+              <span className="text-[10px]">{notesOpen ? "▾ fold" : "▸ unfold"}</span>
             </button>
+            {notesOpen && (
+              <>
+                <div className="mb-2 text-[11px] text-zinc-400">Only visible to your team, never sent to the customer.</div>
+                <div onPointerDown={startNotesDrag} title="Drag to resize"
+                  className="mb-1 h-1.5 cursor-row-resize rounded bg-zinc-100 hover:bg-emerald-200/60" />
+                <div style={{ height: notesHeight }} className="mb-2 space-y-2 overflow-y-auto">
+                  {notes.length === 0 && <div className="text-xs text-zinc-400">No notes yet.</div>}
+                  {notes.map((n) => (
+                    <div key={n.id} className="rounded bg-amber-50 p-2 text-xs text-amber-900">
+                      <div>{n.body}</div>
+                      <div className="mt-1 text-[10px] text-amber-600">{n.authorName ?? "Agent"} · {new Date(n.createdAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+                    </div>
+                  ))}
+                </div>
+                <textarea value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} rows={2}
+                  placeholder="Leave a note for the team…"
+                  className="w-full resize-none rounded border border-zinc-300 px-2 py-1.5 text-xs focus:border-amber-400 focus:outline-none" />
+                <button
+                  onClick={async () => { if (!noteDraft.trim()) return; await onAddNote(noteDraft.trim()); setNoteDraft(""); }}
+                  className="mt-1 w-full rounded bg-amber-500 px-2 py-1 text-xs font-medium text-white hover:bg-amber-600">
+                  Add note
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

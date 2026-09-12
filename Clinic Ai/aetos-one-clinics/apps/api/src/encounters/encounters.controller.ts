@@ -26,4 +26,19 @@ export class EncountersController {
   finalize(@Req() req: TenantRequest, @Param('id') id: string) {
     return this.encounters.finalize(req.organizationId!, id);
   }
+
+  @Post(':id/observations')
+  addObservation(@Req() req: TenantRequest, @Param('id') id: string, @Body() body: Record<string, unknown>) {
+    return this.encounters.addObservation(req.organizationId!, id, body);
+  }
+
+  @Post(':id/lab-report')
+  labReport(
+    @Req() req: TenantRequest,
+    @Param('id') id: string,
+    @Body('reportText') reportText: string,
+    @Body('patientId') patientId: string,
+  ) {
+    return this.encounters.requestLabInsights(req.organizationId!, id, patientId, reportText);
+  }
 }

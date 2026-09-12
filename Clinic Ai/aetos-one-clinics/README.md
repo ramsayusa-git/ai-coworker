@@ -50,7 +50,7 @@ npm install
 cp .env.example .env        # fill in DB/Keycloak/LLM credentials
 npm run typecheck           # verify the whole workspace compiles
 docker compose -f infra/docker-compose.yml up -d postgres redis keycloak
-npm run dev:api             # http://localhost:3000
+npm run dev:api             # http://localhost:3001
 npm run dev:web             # http://localhost:5173
 ```
 

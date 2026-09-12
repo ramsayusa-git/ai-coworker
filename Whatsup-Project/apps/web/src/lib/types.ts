@@ -30,6 +30,8 @@ export interface Conversation {
   lastMessageAt: string;
   serviceWindowExpiresAt: string;
   pinned: boolean;
+  pendingReply: boolean;
+  slaBreached: boolean;
 }
 
 export interface CannedResponse {

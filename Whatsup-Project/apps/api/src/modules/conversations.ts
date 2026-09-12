@@ -6,13 +6,24 @@ import { getAdapter } from "../adapters/index.js";
 import { requireCapability } from "../rbac.js";
 import { draftReply, isAiConfigured } from "../ai.js";
 
+// A conversation is "pending your reply" (Gallabox's SLA-flag pattern) when the customer
+// spoke last and it's still open — no per-conversation SLA config exists yet, so a fixed
+// 30-minute threshold marks it breached. Computed from data already on the row; no extra query.
+const PENDING_SLA_MINUTES = 30;
+function withPendingFlag<T extends { status: string | null; lastMessageDirection: string | null; lastMessageAt: Date | string | null }>(c: T) {
+  const pending = c.status === "open" && c.lastMessageDirection === "in";
+  const ageMin = c.lastMessageAt ? (Date.now() - new Date(c.lastMessageAt).getTime()) / 60_000 : 0;
+  return { ...c, pendingReply: pending, slaBreached: pending && ageMin > PENDING_SLA_MINUTES };
+}
+
 export async function conversationsRoutes(app: FastifyInstance) {
   app.get("/orgs/:orgId/conversations", async (req) => {
     const { orgId } = req.params as { orgId: string };
-    return withOrgDb(orgId, (db) =>
+    const rows = await withOrgDb(orgId, (db) =>
       db.select({
         id: conversations.id, status: conversations.status, unread: conversations.unread,
         lastMessage: conversations.lastMessage, lastMessageAt: conversations.lastMessageAt,
+        lastMessageDirection: conversations.lastMessageDirection,
         serviceWindowExpiresAt: conversations.serviceWindowExpiresAt,
         assigneeId: conversations.assigneeId, assigneeName: users.name,
         pinned: conversations.pinned,
@@ -27,6 +38,7 @@ export async function conversationsRoutes(app: FastifyInstance) {
         // within each group — independent of whatever status/assignment filter is applied.
         .orderBy(desc(conversations.pinned), desc(conversations.lastMessageAt))
     );
+    return rows.map(withPendingFlag);
   });
 
   app.patch("/orgs/:orgId/conversations/:id", async (req, reply) => {
@@ -156,7 +168,7 @@ export async function conversationsRoutes(app: FastifyInstance) {
         body: body.trim(), status, providerMsgId, errorMessage,
       }).returning();
 
-      await db.update(conversations).set({ lastMessage: body.trim(), lastMessageAt: new Date(), unread: 0 })
+      await db.update(conversations).set({ lastMessage: body.trim(), lastMessageAt: new Date(), lastMessageDirection: "out", unread: 0 })
         .where(eq(conversations.id, id));
 
       return msg;

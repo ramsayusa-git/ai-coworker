@@ -18,7 +18,7 @@ Add to your MCP config (e.g. `claude_desktop_config.json` or a Claude Code
       "command": "node",
       "args": ["/absolute/path/to/apps/mcp-server/dist/index.js"],
       "env": {
-        "AETOS_API_BASE_URL": "http://localhost:3000",
+        "AETOS_API_BASE_URL": "http://localhost:3001",
         "AETOS_ORG_ID": "<your organization id>",
         "AETOS_SERVICE_TOKEN": "<a service-role bearer token>"
       }
@@ -35,7 +35,7 @@ Codex CLI reads MCP servers from `~/.codex/config.toml`:
 [mcp_servers.aetos-one-clinics]
 command = "node"
 args = ["/absolute/path/to/apps/mcp-server/dist/index.js"]
-env = { AETOS_API_BASE_URL = "http://localhost:3000", AETOS_ORG_ID = "<org id>", AETOS_SERVICE_TOKEN = "<token>" }
+env = { AETOS_API_BASE_URL = "http://localhost:3001", AETOS_ORG_ID = "<org id>", AETOS_SERVICE_TOKEN = "<token>" }
 ```
 
 ## Tools exposed

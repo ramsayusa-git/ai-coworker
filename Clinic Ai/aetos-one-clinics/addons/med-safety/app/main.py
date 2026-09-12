@@ -16,7 +16,7 @@ import httpx
 
 from .rules import check
 
-API_BASE_URL = os.environ.get("API_BASE_URL", "http://api:3000")
+API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:3001")
 
 app = FastAPI(title="Aetos One Clinics — Medication Safety Add-on")
 

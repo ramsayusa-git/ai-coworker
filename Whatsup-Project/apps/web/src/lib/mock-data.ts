@@ -17,15 +17,15 @@ const whapi = { id: "ch2", name: "Sales +91 90000 00001", provider: "whapi" as c
 
 export const conversations: Conversation[] = [
   { id: "v1", contact: contacts[0], channel: meta, status: "open", assigneeId: null, assigneeName: null, unread: 2,
-    lastMessage: "Is the 2kW inverter in stock?", lastMessageAt: ago(3), serviceWindowExpiresAt: ahead(23), pinned: false },
+    lastMessage: "Is the 2kW inverter in stock?", lastMessageAt: ago(3), serviceWindowExpiresAt: ahead(23), pinned: false, pendingReply: false, slaBreached: false },
   { id: "v2", contact: contacts[1], channel: whapi, status: "open", assigneeId: "u1", assigneeName: "Ramsay", unread: 0,
-    lastMessage: "Thanks, order placed.", lastMessageAt: ago(41), serviceWindowExpiresAt: ahead(22), pinned: false },
+    lastMessage: "Thanks, order placed.", lastMessageAt: ago(41), serviceWindowExpiresAt: ahead(22), pinned: false, pendingReply: false, slaBreached: false },
   { id: "v3", contact: contacts[2], channel: meta, status: "pending", assigneeId: "u1", assigneeName: "Ramsay", unread: 1,
-    lastMessage: "Can you share the GST invoice?", lastMessageAt: ago(120), serviceWindowExpiresAt: ahead(20), pinned: false },
+    lastMessage: "Can you share the GST invoice?", lastMessageAt: ago(120), serviceWindowExpiresAt: ahead(20), pinned: false, pendingReply: false, slaBreached: false },
   { id: "v4", contact: contacts[3], channel: whapi, status: "snoozed", assigneeId: null, assigneeName: null, unread: 0,
-    lastMessage: "Will call back tomorrow", lastMessageAt: ago(900), serviceWindowExpiresAt: ahead(-2), pinned: false },
+    lastMessage: "Will call back tomorrow", lastMessageAt: ago(900), serviceWindowExpiresAt: ahead(-2), pinned: false, pendingReply: false, slaBreached: false },
   { id: "v5", contact: contacts[4], channel: meta, status: "resolved", assigneeId: "u2", assigneeName: "Support", unread: 0,
-    lastMessage: "Resolved, thank you!", lastMessageAt: ago(2000), serviceWindowExpiresAt: ahead(-10), pinned: false },
+    lastMessage: "Resolved, thank you!", lastMessageAt: ago(2000), serviceWindowExpiresAt: ahead(-10), pinned: false, pendingReply: false, slaBreached: false },
 ];
 
 export const messages: Message[] = [

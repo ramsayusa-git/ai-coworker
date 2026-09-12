@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BP Monitor</title>
+<style>
+:root{
+  --brand:#273A80; --brand-2:#3b52a8; --accent:#E6701C;
+  --sys:#e11d48; --dia:#2563eb; --pulse:#f59e0b; --map:#8b5cf6;
+  --ok:#10b981; --warn:#f59e0b; --bad:#ef4444; --crit:#b91c1c;
+  --bg:#f4f6fb; --bg-2:#eaeef7; --card:#ffffff; --card-2:#fbfcfe;
+  --ink:#101728; --ink-2:#4a5570; --ink-3:#8b94ab;
+  --line:#e2e7f0; --line-2:#eef1f7;
+  --shadow:0 1px 2px rgba(16,23,40,.04),0 8px 24px -12px rgba(16,23,40,.18);
+  --r:14px; --r-sm:10px;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --brand:#4c68c9; --brand-2:#6a83dd; --accent:#ff8a3d;
+    --sys:#fb7185; --dia:#60a5fa; --pulse:#fbbf24; --map:#a78bfa;
+    --ok:#34d399; --warn:#fbbf24; --bad:#f87171; --crit:#ef4444;
+    --bg:#0b0f1a; --bg-2:#070a12; --card:#121829; --card-2:#161d32;
+    --ink:#eef2fb; --ink-2:#a9b3cc; --ink-3:#6d7794;
+    --line:#232c45; --line-2:#1b2338;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif;
+  background:
+    radial-gradient(1100px 520px at 88% -8%, color-mix(in srgb,var(--brand) 14%, transparent), transparent 70%),
+    radial-gradient(900px 460px at -6% 4%, color-mix(in srgb,var(--accent) 10%, transparent), transparent 72%),
+    var(--bg);
+  color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+
+/* ---------------------------------------------------------- top bar */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  background:color-mix(in srgb,var(--card) 82%, transparent);
+  backdrop-filter:saturate(1.6) blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 16px}
+.brandrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{
+  width:38px;height:38px;border-radius:11px;flex:0 0 auto;
+  background:linear-gradient(145deg,var(--brand),var(--brand-2) 60%,var(--accent));
+  display:grid;place-items:center;color:#fff;box-shadow:var(--shadow);
+}
+.logo svg{width:22px;height:22px;display:block}
+.titles{min-width:0;margin-right:auto}
+.titles h1{margin:0;font-size:16px;font-weight:700;letter-spacing:-.2px;line-height:1.2}
+.titles p{margin:1px 0 0;font-size:11.5px;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+
+.pill{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:650;
+  border:1px solid var(--line);background:var(--card-2);color:var(--ink-2);
+  white-space:nowrap;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:0 0 auto}
+.pill.live{border-color:color-mix(in srgb,var(--ok) 45%,var(--line));
+  background:color-mix(in srgb,var(--ok) 12%,var(--card));color:var(--ok)}
+.pill.live .dot{background:var(--ok);animation:pulse 2s infinite}
+.pill.busy{border-color:color-mix(in srgb,var(--warn) 45%,var(--line));
+  background:color-mix(in srgb,var(--warn) 12%,var(--card));color:var(--warn)}
+.pill.busy .dot{background:var(--warn);animation:pulse 1.2s infinite}
+.pill.off{border-color:color-mix(in srgb,var(--bad) 40%,var(--line));
+  background:color-mix(in srgb,var(--bad) 10%,var(--card));color:var(--bad)}
+.pill.off .dot{background:var(--bad)}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 55%,transparent)}
+  70%{box-shadow:0 0 0 7px transparent} 100%{box-shadow:0 0 0 0 transparent}
+}
+
+/* top navigation — replaces the old left-hand menu */
+nav.tabs{display:flex;gap:4px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{
+  appearance:none;border:0;background:transparent;cursor:pointer;
+  font:inherit;font-weight:650;font-size:13.5px;color:var(--ink-3);
+  padding:9px 14px 11px;border-radius:var(--r-sm) var(--r-sm) 0 0;
+  border-bottom:2.5px solid transparent;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:7px;transition:color .15s,background .15s;
+}
+nav.tabs button:hover{color:var(--ink-2);background:var(--line-2)}
+nav.tabs button[aria-selected="true"]{color:var(--brand);border-bottom-color:var(--brand)}
+nav.tabs .badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;
+  background:var(--line);color:var(--ink-2)}
+nav.tabs button[aria-selected="true"] .badge{
+  background:color-mix(in srgb,var(--brand) 16%,transparent);color:var(--brand)}
+
+/* ---------------------------------------------------------- layout */
+main{max-width:1180px;margin:0 auto;padding:18px 16px 56px}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.card>header{padding:13px 16px;border-bottom:1px solid var(--line-2);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card>header h2{margin:0;font-size:13px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-2)}
+.card>header .sub{font-size:12px;color:var(--ink-3);margin-left:auto}
+.card .body{padding:16px}
+.stack{display:grid;gap:14px}
+
+/* ---------------------------------------------------------- stepper */
+.stepper{display:flex;padding:16px;overflow-x:auto;scrollbar-width:thin;
+  background:linear-gradient(180deg,var(--card-2),var(--card))}
+.stepper::-webkit-scrollbar{height:5px}
+.stepper::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+.step{display:flex;align-items:center;flex:0 0 auto}
+.step .node{display:flex;flex-direction:column;align-items:center;gap:7px;
+  min-width:96px;padding:0 4px}
+.step .ring{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  border:2px solid var(--line);background:var(--card);
+  font-size:12.5px;font-weight:750;color:var(--ink-3);
+  transition:all .28s cubic-bezier(.4,0,.2,1);
+}
+.step .lbl{font-size:11.5px;font-weight:650;color:var(--ink-3);text-align:center;
+  line-height:1.25;transition:color .2s}
+.step .bar{width:34px;height:2.5px;border-radius:2px;background:var(--line);
+  margin:0 2px 22px;transition:background .3s}
+.step.done .ring{border-color:var(--ok);background:var(--ok);color:#fff}
+.step.done .lbl{color:var(--ink-2)}
+.step.done .bar{background:var(--ok)}
+.step.now .ring{border-color:var(--brand);background:var(--brand);color:#fff;
+  transform:scale(1.14);box-shadow:0 0 0 5px color-mix(in srgb,var(--brand) 16%,transparent)}
+.step.now .lbl{color:var(--brand);font-weight:750}
+.step.err .ring{border-color:var(--bad);background:var(--bad);color:#fff}
+.step.err .lbl{color:var(--bad)}
+.step .ring svg{width:16px;height:16px}
+
+/* the current step, explained in full */
+.now-panel{padding:16px;border-top:1px solid var(--line-2);
+  background:color-mix(in srgb,var(--brand) 4%,var(--card))}
+.now-panel h3{margin:0 0 5px;font-size:17px;font-weight:700;letter-spacing:-.2px;
+  display:flex;align-items:center;gap:9px}
+.now-panel .hint{margin:0;color:var(--ink-2);font-size:13.5px;max-width:76ch}
+.now-panel .detail{margin:11px 0 0;padding:10px 12px;border-radius:var(--r-sm);
+  background:var(--card);border:1px solid var(--line);
+  font:12.5px/1.5 var(--mono);color:var(--ink-2);word-break:break-word}
+.now-panel .detail b{color:var(--ink);font-weight:650}
+.spinner{width:15px;height:15px;border-radius:50%;flex:0 0 auto;
+  border:2.5px solid color-mix(in srgb,var(--brand) 25%,transparent);
+  border-top-color:var(--brand);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------------------------------------------------------- readings */
+.readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ro{position:relative;padding:18px 16px;border-radius:var(--r);
+  background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+  overflow:hidden}
+.ro::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--c)}
+.ro::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;
+  border-radius:50%;background:var(--c);opacity:.07}
+.ro .k{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.ro .k i{width:7px;height:7px;border-radius:2px;background:var(--c);display:inline-block}
+.ro .v{font:750 40px/1.06 system-ui,sans-serif;letter-spacing:-1.6px;
+  margin:8px 0 2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ro .v.na{color:var(--ink-3);font-size:30px;letter-spacing:-.5px}
+.ro .u{font-size:12px;color:var(--ink-3);font-weight:600}
+.ro.sys{--c:var(--sys)} .ro.dia{--c:var(--dia)} .ro.pul{--c:var(--pulse)}
+
+.verdict{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r);
+  border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);
+  border-left:4px solid var(--cc,var(--ink-3))}
+.verdict .vbadge{font-size:12px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;
+  padding:5px 11px;border-radius:999px;white-space:nowrap;
+  background:color-mix(in srgb,var(--cc,var(--ink-3)) 14%,transparent);color:var(--cc,var(--ink-2))}
+.verdict .vtext{font-size:13px;color:var(--ink-2);min-width:0}
+.verdict .vmeta{margin-left:auto;font:12.5px/1.4 var(--mono);color:var(--ink-3);
+  text-align:right;white-space:nowrap}
+.c-normal{--cc:var(--ok)} .c-elevated{--cc:var(--warn)}
+.c-stage1{--cc:#f97316} .c-stage2{--cc:var(--bad)} .c-crisis{--cc:var(--crit)}
+
+/* ---------------------------------------------------------- charts */
+.chart-wrap{position:relative;width:100%;overflow-x:auto}
+svg.chart{display:block;width:100%;height:auto;min-width:320px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:0 16px 14px;font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:600}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.empty{padding:40px 16px;text-align:center;color:var(--ink-3)}
+.empty .big{font-size:15px;font-weight:650;color:var(--ink-2);margin-bottom:5px}
+
+/* ---------------------------------------------------------- stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{padding:13px 14px;border-radius:var(--r-sm);background:var(--card-2);
+  border:1px solid var(--line-2)}
+.stat .k{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3)}
+.stat .v{font:750 21px/1.2 system-ui,sans-serif;margin-top:5px;
+  font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.stat .m{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+/* ---------------------------------------------------------- tables */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1px solid var(--line);background:var(--card-2)}
+td{padding:11px 14px;border-bottom:1px solid var(--line-2);
+  font-variant-numeric:tabular-nums;vertical-align:middle}
+tbody tr:hover{background:var(--line-2)}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-weight:700}
+td .raw{font:11.5px var(--mono);color:var(--ink-3)}
+.chip{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;
+  font-weight:700;background:color-mix(in srgb,var(--cc,var(--ink-3)) 14%,transparent);
+  color:var(--cc,var(--ink-2));white-space:nowrap}
+.iconbtn{appearance:none;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-3);cursor:pointer;border-radius:8px;padding:5px 8px;
+  font:inherit;font-size:12px;line-height:1;transition:all .15s}
+.iconbtn:hover{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,var(--line));
+  background:color-mix(in srgb,var(--bad) 8%,var(--card))}
+.pager{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  border-top:1px solid var(--line-2);font-size:13px;color:var(--ink-3)}
+.pager button{appearance:none;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-2);font:inherit;font-weight:600;padding:6px 13px;border-radius:8px;
+  cursor:pointer;transition:all .15s}
+.pager button:hover:not(:disabled){border-color:var(--brand);color:var(--brand);
+  background:color-mix(in srgb,var(--brand) 7%,var(--card))}
+.pager button:disabled{opacity:.42;cursor:not-allowed}
+.pager .grow{margin-left:auto}
+a.dl{color:var(--brand);font-weight:650;font-size:12.5px;text-decoration:none;
+  border:1px solid color-mix(in srgb,var(--brand) 35%,var(--line));
+  padding:5px 11px;border-radius:8px;transition:background .15s}
+a.dl:hover{background:color-mix(in srgb,var(--brand) 9%,var(--card))}
+
+/* ---------------------------------------------------------- device */
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;
+  background:var(--line-2);margin:0}
+.kv div{background:var(--card);padding:12px 14px}
+.kv dt{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3);margin:0}
+.kv dd{margin:4px 0 0;font-size:13.5px;font-weight:600;word-break:break-all}
+.kv dd.mono{font-family:var(--mono);font-size:12.5px;font-weight:500}
+pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
+  font:12px/1.65 var(--mono);color:var(--ink-2);background:var(--bg-2);
+  white-space:pre-wrap;word-break:break-word}
+.note{margin:0;padding:12px 14px;border-radius:var(--r-sm);font-size:12.5px;line-height:1.6;
+  background:color-mix(in srgb,var(--warn) 9%,var(--card));
+  border:1px solid color-mix(in srgb,var(--warn) 32%,var(--line));color:var(--ink-2)}
+.note b{color:var(--ink)}
+.note code{font:12px var(--mono);background:var(--line-2);padding:1px 5px;border-radius:5px}
+
+@media (max-width:560px){
+  .readouts{grid-template-columns:1fr}
+  .ro .v{font-size:34px}
+  .verdict{flex-wrap:wrap}
+  .verdict .vmeta{margin-left:0;text-align:left;width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brandrow">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12h3l2-5 3 10 2.5-7 1.8 4H21"/>
+        </svg>
+      </div>
+      <div class="titles">
+        <h1>Blood Pressure Monitor</h1>
+        <p id="devline">Aetos Tech Labs · RBP cuff</p>
+      </div>
+      <span class="pill" id="statepill"><i class="dot"></i><span id="statetext">Starting…</span></span>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-view="live">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round"><path d="M3 12h4l2-6 3 12 2.5-8 1.5 2H21"/></svg>
+        Live
+      </button>
+      <button role="tab" aria-selected="false" data-view="history">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+        History <span class="badge" id="histbadge">0</span>
+      </button>
+      <button role="tab" aria-selected="false" data-view="device">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg>
+        Device
+      </button>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <!-- ============================================ LIVE -->
+  <section class="stack" id="view-live">
+    <div class="card">
+      <div class="stepper" id="stepper"></div>
+      <div class="now-panel">
+        <h3><span id="nowspin"></span><span id="nowtitle">Starting…</span></h3>
+        <p class="hint" id="nowhint">Bringing the Bluetooth link up.</p>
+        <p class="detail" id="nowdetail" hidden></p>
+      </div>
+    </div>
+
+    <div class="readouts">
+      <div class="ro sys">
+        <div class="k"><i></i>Systolic</div>
+        <div class="v na" id="v-sys">—</div>
+        <div class="u">mmHg · upper</div>
+      </div>
+      <div class="ro dia">
+        <div class="k"><i></i>Diastolic</div>
+        <div class="v na" id="v-dia">—</div>
+        <div class="u">mmHg · lower</div>
+      </div>
+      <div class="ro pul">
+        <div class="k"><i></i>Pulse</div>
+        <div class="v na" id="v-pul">—</div>
+        <div class="u">bpm</div>
+      </div>
+    </div>
+
+    <div class="verdict" id="verdict">
+      <span class="vbadge" id="vbadge">No reading yet</span>
+      <span class="vtext" id="vtext">Take a measurement on the cuff — it appears here
+        automatically and is saved to the local database.</span>
+      <span class="vmeta" id="vmeta"></span>
+    </div>
+
+    <div class="card">
+      <header><h2>Recent trend</h2><span class="sub" id="trendsub">last 30 days</span></header>
+      <div class="chart-wrap" id="livechart-wrap"></div>
+      <div class="legend">
+        <span><i style="background:var(--sys)"></i>Systolic</span>
+        <span><i style="background:var(--dia)"></i>Diastolic</span>
+        <span><i style="background:var(--pulse)"></i>Pulse</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ HISTORY -->
+  <section class="stack" id="view-history" hidden>
+    <div class="card">
+      <header><h2>Averages</h2><span class="sub" id="statsub"></span></header>
+      <div class="body"><div class="stats" id="stats"></div></div>
+    </div>
+
+    <div class="card">
+      <header><h2>Trend</h2><span class="sub">last 30 days</span></header>
+      <div class="chart-wrap" id="histchart-wrap"></div>
+      <div class="legend">
+        <span><i style="background:var(--sys)"></i>Systolic</span>
+        <span><i style="background:var(--dia)"></i>Diastolic</span>
+        <span><i style="background:var(--pulse)"></i>Pulse</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <header>
+        <h2>All readings</h2>
+        <span class="sub"><a class="dl" href="api/history.csv">Export CSV</a></span>
+      </header>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>When</th><th>Systolic</th><th>Diastolic</th><th>Pulse</th>
+            <th>MAP</th><th>Category</th><th></th>
+          </tr></thead>
+          <tbody id="histrows"></tbody>
+        </table>
+      </div>
+      <div id="histempty" class="empty" hidden>
+        <div class="big">No readings stored yet</div>
+        Completed measurements are written to the SQLite database and listed here.
+      </div>
+      <div class="pager">
+        <span id="pageinfo">—</span>
+        <span class="grow"></span>
+        <button id="prev" disabled>← Newer</button>
+        <button id="next" disabled>Older →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ DEVICE -->
+  <section class="stack" id="view-device" hidden>
+    <div class="card">
+      <header><h2>Cuff</h2></header>
+      <dl class="kv" id="devkv"></dl>
+    </div>
+    <div class="card">
+      <header><h2>Storage</h2></header>
+      <dl class="kv" id="dbkv"></dl>
+    </div>
+    <div class="card">
+      <header><h2>Activity log</h2><span class="sub">newest last</span></header>
+      <pre class="log" id="log">—</pre>
+    </div>
+    <div class="card">
+      <header><h2>Accuracy notice</h2></header>
+      <div class="body">
+        <p class="note"><b>Verify against the cuff's own screen.</b> This cuff does not use
+        the standard Bluetooth Blood Pressure Profile — its frame format was reverse-engineered
+        from a captured sample, so the systolic / diastolic / pulse positions have not yet been
+        confirmed against a known-good on-arm reading. Compare the numbers shown here with the
+        display on the cuff itself; if they differ, the byte offsets in
+        <code>app/protocol.py</code> need adjusting.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+
+const STEPS = [
+  ["wake",       "Turn on cuff"],
+  ["scanning",   "Scanning"],
+  ["connecting", "Connecting"],
+  ["checking",   "Checking"],
+  ["ready",      "Ready"],
+  ["result",     "Reading"],
+];
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"'
+            + ' stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const BANG  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"'
+            + ' stroke-linecap="round"><path d="M12 7v7"/><path d="M12 17.5v.5"/></svg>';
+
+const CAT = {
+  normal:   ["Normal",       "Below 120 / 80 mmHg."],
+  elevated: ["Elevated",     "Systolic 120–129 with diastolic under 80."],
+  stage1:   ["Stage 1 high", "Systolic 130–139 or diastolic 80–89."],
+  stage2:   ["Stage 2 high", "Systolic 140 or above, or diastolic 90 or above."],
+  crisis:   ["Very high",    "Systolic 180+ or diastolic 120+ — seek medical advice."],
+};
+
+let status = {}, trend = [], stats = {};
+let page = 0, pageSize = 25, total = 0, view = "live";
+
+function buildStepper(){
+  $("stepper").innerHTML = STEPS.map(([k, label], i) =>
+    `<div class="step" data-step="${k}">`
+    + (i ? `<div class="bar"></div>` : ``)
+    + `<div class="node"><div class="ring">${i + 1}</div><div class="lbl">${label}</div></div>`
+    + `</div>`).join("");
+}
+
+function escapeHtml(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g,
+    c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function fmtTime(ts){
+  if(!ts) return "—";
+  const d = new Date(ts * 1000);
+  const t = d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  if(Date.now()/1000 - ts < 60) return "just now";
+  return d.toDateString() === new Date().toDateString()
+    ? t : d.toLocaleDateString([], {day:"2-digit", month:"short"}) + " " + t;
+}
+function ago(ts){
+  if(!ts) return "";
+  const s = Math.max(0, Math.floor(Date.now()/1000 - ts));
+  if(s < 60) return s + "s ago";
+  if(s < 3600) return Math.floor(s/60) + "m ago";
+  if(s < 86400) return Math.floor(s/3600) + "h ago";
+  return Math.floor(s/86400) + "d ago";
+}
+
+function renderStatus(){
+  const st = status, step = st.step || "idle";
+  const idx = STEPS.findIndex(s => s[0] === step);
+  const err = step === "error" || step === "mqtt_wait";
+
+  document.querySelectorAll(".step").forEach((el, i) => {
+    el.classList.remove("done", "now", "err");
+    const ring = el.querySelector(".ring");
+    if(err && i === Math.max(0, idx)){ el.classList.add("err"); ring.innerHTML = BANG; }
+    else if(idx >= 0 && i < idx){ el.classList.add("done"); ring.innerHTML = CHECK; }
+    else if(i === idx){ el.classList.add("now"); ring.textContent = String(i + 1); }
+    else ring.textContent = String(i + 1);
+  });
+
+  $("nowtitle").textContent = st.title || "Starting…";
+  $("nowhint").textContent = st.hint || "";
+  const d = $("nowdetail");
+  if(st.detail){ d.hidden = false; d.innerHTML = "<b>Status:</b> " + escapeHtml(st.detail); }
+  else d.hidden = true;
+  $("nowspin").innerHTML = ["wake","scanning","connecting","checking"].includes(step)
+    ? '<span class="spinner"></span>' : "";
+
+  const pill = $("statepill");
+  pill.className = "pill " + (st.connected ? "live" : err ? "off" : "busy");
+  $("statetext").textContent = st.connected
+    ? (step === "ready" ? "Connected · waiting for measurement" : "Connected")
+    : err ? "Not connected" : (st.title || "Working…");
+
+  const name = [st.manufacturer, st.model].filter(Boolean).join(" ") || "RBP cuff";
+  $("devline").textContent = "Aetos Tech Labs · " + name + (st.address ? " · " + st.address : "");
+
+  setReadout("v-sys", st.systolic);
+  setReadout("v-dia", st.diastolic);
+  setReadout("v-pul", st.pulse);
+
+  const v = $("verdict");
+  if(st.systolic && st.diastolic){
+    const c = st.category || "normal";
+    const pair = CAT[c] || [c, ""];
+    v.className = "verdict c-" + c;
+    $("vbadge").textContent = pair[0];
+    $("vtext").textContent = pair[1];
+    $("vmeta").innerHTML = (st.map_calc ? "MAP " + st.map_calc + " mmHg<br>" : "")
+      + escapeHtml(fmtTime(st.reading_time)) + " · " + escapeHtml(ago(st.reading_time));
+  } else {
+    v.className = "verdict";
+    $("vbadge").textContent = "No reading yet";
+    $("vtext").textContent = "Take a measurement on the cuff — it appears here "
+      + "automatically and is saved to the local database.";
+    $("vmeta").textContent = "";
+  }
+
+  $("log").textContent = (st.log || []).join("\n") || "—";
+  renderDevice();
+}
+
+function setReadout(id, val){
+  const el = $(id);
+  if(val === null || val === undefined){ el.textContent = "—"; el.classList.add("na"); }
+  else { el.textContent = val; el.classList.remove("na"); }
+}
+
+function renderDevice(){
+  const st = status;
+  const rows = [
+    ["Name",          st.model ? ((st.manufacturer || "") + " " + st.model).trim() : "—"],
+    ["Address",       st.address || "—", true],
+    ["Serial",        st.serial || "—", true],
+    ["Firmware",      st.firmware || "—", true],
+    ["Hardware",      st.hardware || "—", true],
+    ["Software",      st.software || "—", true],
+    ["Source",        st.source || "—"],
+    ["Link",          st.connected ? "Connected" : "Not connected"],
+    ["Connect tries", st.attempts == null ? "—" : st.attempts],
+    ["Add-on uptime", st.uptime_s ? Math.floor(st.uptime_s / 60) + " min" : "—"],
+  ];
+  $("devkv").innerHTML = rows.map(r =>
+    `<div><dt>${r[0]}</dt><dd class="${r[2] ? "mono" : ""}">${escapeHtml(r[1])}</dd></div>`).join("");
+
+  const db = [
+    ["Readings stored", stats.all_time ? stats.all_time.count : 0],
+    ["Unknown frames",  stats.unknown_frames == null ? 0 : stats.unknown_frames],
+    ["Database size",   stats.db_bytes ? (stats.db_bytes / 1024).toFixed(1) + " KB" : "—"],
+    ["Database file",   stats.db_path || "—", true],
+  ];
+  $("dbkv").innerHTML = db.map(r =>
+    `<div><dt>${r[0]}</dt><dd class="${r[2] ? "mono" : ""}">${escapeHtml(r[1])}</dd></div>`).join("");
+}
+
+/* ---------------------------------------------------------- chart */
+function lineChart(series, height){
+  const W = 760, H = height || 230, P = {t:14, r:14, b:26, l:38};
+  const pts = series.filter(s => s.data.length);
+  if(!pts.length) return "";
+  let lo = Infinity, hi = -Infinity, xs = [];
+  pts.forEach(s => s.data.forEach(d => {
+    if(d.v < lo) lo = d.v; if(d.v > hi) hi = d.v; xs.push(d.t);
+  }));
+  if(lo === hi){ lo -= 10; hi += 10; }
+  const pad = (hi - lo) * 0.14; lo = Math.max(0, lo - pad); hi = hi + pad;
+  const t0 = Math.min.apply(null, xs), t1 = Math.max.apply(null, xs);
+  const X = t => P.l + (t1 === t0 ? (W - P.l - P.r) / 2
+                                  : (t - t0) / (t1 - t0) * (W - P.l - P.r));
+  const Y = v => P.t + (1 - (v - lo) / (hi - lo)) * (H - P.t - P.b);
+
+  let grid = "", labels = "";
+  for(let i = 0; i <= 4; i++){
+    const v = lo + (hi - lo) * i / 4, y = Y(v);
+    grid += `<line x1="${P.l}" y1="${y.toFixed(1)}" x2="${W - P.r}" y2="${y.toFixed(1)}"
+      stroke="var(--line)" stroke-width="1" ${i ? 'stroke-dasharray="3 4"' : ''}/>`;
+    labels += `<text x="${P.l - 7}" y="${(y + 3.5).toFixed(1)}" text-anchor="end"
+      font-size="10.5" fill="var(--ink-3)">${Math.round(v)}</text>`;
+  }
+  const base = pts[0].data, n = base.length;
+  let xtexts = "";
+  [0, Math.floor((n - 1) / 2), n - 1].forEach((i, k, arr) => {
+    if(arr.indexOf(i) !== k || i < 0 || !base[i]) return;
+    const dt = new Date(base[i].t * 1000);
+    xtexts += `<text x="${X(base[i].t).toFixed(1)}" y="${H - 8}" text-anchor="middle"
+      font-size="10.5" fill="var(--ink-3)">${
+        dt.toLocaleDateString([], {day:"2-digit", month:"short"})}</text>`;
+  });
+
+  let defs = "", body = "";
+  pts.forEach(s => {
+    const path = s.data.map((d, i) =>
+      (i ? "L" : "M") + X(d.t).toFixed(1) + " " + Y(d.v).toFixed(1)).join(" ");
+    if(s.fill){
+      defs += `<linearGradient id="g-${s.key}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${s.color}" stop-opacity=".85"/>
+        <stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`;
+      const last = s.data[s.data.length - 1];
+      body += `<path d="${path} L ${X(last.t).toFixed(1)} ${Y(lo).toFixed(1)}
+        L ${X(s.data[0].t).toFixed(1)} ${Y(lo).toFixed(1)} Z"
+        fill="url(#g-${s.key})" opacity=".2"/>`;
+    }
+    body += `<path d="${path}" fill="none" stroke="${s.color}" stroke-width="2.4"
+      stroke-linecap="round" stroke-linejoin="round"/>`;
+    if(s.data.length <= 40){
+      body += s.data.map(d => `<circle cx="${X(d.t).toFixed(1)}" cy="${Y(d.v).toFixed(1)}"
+        r="3" fill="var(--card)" stroke="${s.color}" stroke-width="2"/>`).join("");
+    }
+  });
+
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+    aria-label="Blood pressure trend"><defs>${defs}</defs>${grid}${labels}${xtexts}${body}</svg>`;
+}
+
+function renderCharts(){
+  const mk = (key, color, field, fill) => ({
+    key: key, color: color, fill: fill,
+    data: trend.filter(r => r[field] != null).map(r => ({t: r.ts, v: r[field]})),
+  });
+  const series = [
+    mk("sys", "var(--sys)", "systolic", true),
+    mk("dia", "var(--dia)", "diastolic", true),
+    mk("pul", "var(--pulse)", "pulse", false),
+  ];
+  const empty = `<div class="empty"><div class="big">No readings yet</div>
+    The chart fills in as measurements are taken.</div>`;
+  $("livechart-wrap").innerHTML = trend.length ? lineChart(series, 230) : empty;
+  $("histchart-wrap").innerHTML = trend.length ? lineChart(series, 260) : empty;
+  $("trendsub").textContent = trend.length
+    ? trend.length + (trend.length === 1 ? " reading" : " readings") + " · last 30 days"
+    : "no data yet";
+}
+
+function renderStats(){
+  const box = (label, s) => {
+    if(!s || !s.count) return `<div class="stat"><div class="k">${label}</div>
+      <div class="v">—</div><div class="m">no readings</div></div>`;
+    return `<div class="stat"><div class="k">${label}</div>
+      <div class="v">${Math.round(s.systolic)}<span style="color:var(--ink-3)">/</span>${
+        Math.round(s.diastolic)}</div>
+      <div class="m">${s.count} reading${s.count === 1 ? "" : "s"}${
+        s.pulse ? " · pulse " + Math.round(s.pulse) : ""}</div></div>`;
+  };
+  $("stats").innerHTML = box("Last 7 days", stats.week)
+    + box("Last 30 days", stats.month)
+    + box("All time", stats.all_time)
+    + (stats.all_time && stats.all_time.count
+        ? `<div class="stat"><div class="k">Systolic range</div>
+           <div class="v">${stats.all_time.systolic_min}–${stats.all_time.systolic_max}</div>
+           <div class="m">mmHg, all time</div></div>` : "");
+  $("statsub").textContent = stats.last ? "latest " + fmtTime(stats.last.ts) : "";
+  $("histbadge").textContent = stats.all_time ? stats.all_time.count : 0;
+}
+
+async function loadHistory(){
+  const d = await fetch(`api/history?limit=${pageSize}&offset=${page * pageSize}`)
+    .then(r => r.json());
+  total = d.total;
+  const rows = d.rows || [];
+  $("histempty").hidden = rows.length > 0;
+  $("histrows").innerHTML = rows.map(r => {
+    const label = (CAT[r.category] || [r.category || "—"])[0];
+    return `<tr>
+      <td>${escapeHtml(fmtTime(r.ts))}<div class="raw">${escapeHtml(ago(r.ts))}</div></td>
+      <td class="num" style="color:var(--sys)">${r.systolic}</td>
+      <td class="num" style="color:var(--dia)">${r.diastolic}</td>
+      <td class="num" style="color:var(--pulse)">${r.pulse == null ? "—" : r.pulse}</td>
+      <td>${r.map_calc == null ? "—" : r.map_calc}</td>
+      <td><span class="chip c-${escapeHtml(r.category || "")}">${escapeHtml(label)}</span></td>
+      <td style="text-align:right"><button class="iconbtn" data-del="${r.id}">Delete</button></td>
+    </tr>`;
+  }).join("");
+  const from = total ? page * pageSize + 1 : 0;
+  const to = Math.min(total, (page + 1) * pageSize);
+  $("pageinfo").textContent = total ? `${from}–${to} of ${total}` : "No readings";
+  $("prev").disabled = page === 0;
+  $("next").disabled = to >= total;
+  $("histrows").querySelectorAll("[data-del]").forEach(b => {
+    b.onclick = async () => {
+      b.disabled = true;
+      await fetch("api/history/" + b.dataset.del, {method:"DELETE"});
+      await Promise.all([loadHistory(), loadStats()]);
+    };
+  });
+}
+
+async function loadStats(){
+  const res = await Promise.all([
+    fetch("api/stats").then(r => r.json()),
+    fetch("api/trend?days=30").then(r => r.json()),
+  ]);
+  stats = res[0]; trend = res[1].trend || [];
+  renderStats(); renderCharts(); renderDevice();
+}
+
+document.querySelectorAll("nav.tabs button").forEach(b => {
+  b.onclick = () => {
+    view = b.dataset.view;
+    document.querySelectorAll("nav.tabs button").forEach(x =>
+      x.setAttribute("aria-selected", String(x === b)));
+    ["live", "history", "device"].forEach(v => { $("view-" + v).hidden = v !== view; });
+    if(view === "history") loadHistory();
+  };
+});
+$("prev").onclick = () => { if(page > 0){ page--; loadHistory(); } };
+$("next").onclick = () => { page++; loadHistory(); };
+
+function connect(){
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  const base = location.pathname.replace(/\/+$/, "");
+  const ws = new WebSocket(`${proto}//${location.host}${base}/api/ws`);
+  ws.onmessage = ev => {
+    let m;
+    try { m = JSON.parse(ev.data); } catch(e) { return; }
+    if(m.type === "status"){ status = m.data; renderStatus(); }
+    else if(m.type === "history"){
+      trend = m.trend || []; stats = m.stats || {};
+      renderStats(); renderCharts();
+      if(view === "history") loadHistory();
+    }
+  };
+  ws.onclose = () => {
+    $("statepill").className = "pill off";
+    $("statetext").textContent = "Dashboard disconnected — retrying";
+    setTimeout(connect, 2500);
+  };
+}
+
+buildStepper();
+renderStatus();
+fetch("api/status").then(r => r.json()).then(d => { status = d; renderStatus(); });
+loadStats();
+connect();
+setInterval(() => { if(status.reading_time) renderStatus(); }, 30000);
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ import axios, { AxiosInstance } from 'axios';
  * security) apply no matter which MCP client (Claude, Codex, ...) is calling.
  */
 export function createApiClient(): AxiosInstance {
-  const baseURL = process.env.AETOS_API_BASE_URL ?? 'http://localhost:3000';
+  const baseURL = process.env.AETOS_API_BASE_URL ?? 'http://localhost:3001';
   const orgId = process.env.AETOS_ORG_ID;
   const token = process.env.AETOS_SERVICE_TOKEN;
   if (!orgId) {

@@ -127,8 +127,18 @@ export function ConversationList({
             <button onClick={() => onSelect(c.id)}
               className={`flex w-full flex-col gap-0.5 border-b border-zinc-100 px-4 py-3 text-left hover:bg-zinc-50 ${selectedId === c.id ? "bg-emerald-50" : ""}`}>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{c.contact.name}</span>
-                <span className="text-xs text-zinc-400">{timeAgo(c.lastMessageAt)}</span>
+                <span className="flex items-center gap-1 text-sm font-medium">
+                  {c.pinned && <span title="Pinned">📌</span>}
+                  {c.contact.name}
+                </span>
+                <span className="flex items-center gap-1">
+                  {c.slaBreached && (
+                    <span title={`Pending your reply for over 30 min`} className="rounded-full bg-red-100 px-1.5 text-[10px] font-semibold text-red-700">
+                      SLA
+                    </span>
+                  )}
+                  <span className="text-xs text-zinc-400">{timeAgo(c.lastMessageAt)}</span>
+                </span>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate text-xs text-zinc-500">{c.lastMessage}</span>

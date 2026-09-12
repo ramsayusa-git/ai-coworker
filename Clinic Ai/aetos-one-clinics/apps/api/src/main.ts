@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.enableCors();
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
   await app.listen(port);
   // eslint-disable-next-line no-console
   console.log(`Aetos One Clinics API listening on :${port}`);

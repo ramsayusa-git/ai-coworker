@@ -20,11 +20,11 @@ async function ingestInbound(orgId: string, channelId: string, evt: NormalizedIn
   if (!conv) {
     [conv] = await db.insert(conversations).values({
       orgId, channelId, contactId: contact.id, status: "open", unread: 1,
-      lastMessage: evt.body, lastMessageAt: now, serviceWindowExpiresAt: windowExpires,
+      lastMessage: evt.body, lastMessageAt: now, lastMessageDirection: "in", serviceWindowExpiresAt: windowExpires,
     }).returning();
   } else {
     await db.update(conversations).set({
-      lastMessage: evt.body, lastMessageAt: now, serviceWindowExpiresAt: windowExpires,
+      lastMessage: evt.body, lastMessageAt: now, lastMessageDirection: "in", serviceWindowExpiresAt: windowExpires,
       unread: (conv.unread ?? 0) + 1, status: conv.status === "resolved" ? "open" : conv.status,
     }).where(eq(conversations.id, conv.id));
   }

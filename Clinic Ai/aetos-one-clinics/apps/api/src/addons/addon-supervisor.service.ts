@@ -22,7 +22,7 @@ export class AddonSupervisorService {
   async listForOrg(organizationId: string) {
     const prisma = await this.prisma.forTenant(organizationId);
     const installed = await prisma.addonInstallation.findMany({ where: { organizationId } });
-    const installedBySlug = new Map(installed.map((i) => [i.slug, i]));
+    const installedBySlug = new Map(installed.map((i: (typeof installed)[number]) => [i.slug, i]));
     return this.registry.list().map((manifest) => ({
       manifest,
       state: installedBySlug.get(manifest.slug) ?? {

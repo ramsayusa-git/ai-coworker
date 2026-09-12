@@ -23,6 +23,10 @@ export const partners = pgTable("partners", {
   customDomainStatus: text("custom_domain_status").default("unset"),
   domainVerificationToken: text("domain_verification_token"),
   domainVerifiedAt: timestamp("domain_verified_at"),
+  // Verified (DNS resolves) and active (admin has switched it live) are separate on purpose —
+  // an admin can verify a domain ahead of time, or pause a live one, without losing the DNS
+  // check state. Public branding lookups require both.
+  customDomainActive: boolean("custom_domain_active").default(false),
   billingMode: text("billing_mode").default("direct"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -139,6 +143,9 @@ export const conversations = pgTable("conversations", {
   unread: integer("unread").default(0),
   lastMessage: text("last_message"),
   lastMessageAt: timestamp("last_message_at").defaultNow(),
+  // Direction of the most recent message — drives the "pending your reply" SLA flag below
+  // without a per-message lookup on every inbox render.
+  lastMessageDirection: directionEnum("last_message_direction"),
   serviceWindowExpiresAt: timestamp("service_window_expires_at"),
   // Gallabox-style "pin high-intent conversations" — kept at the top of the inbox
   // independent of status/assignment filters.
