@@ -26,6 +26,7 @@ export async function conversationsRoutes(app: FastifyInstance) {
         lastMessageDirection: conversations.lastMessageDirection,
         serviceWindowExpiresAt: conversations.serviceWindowExpiresAt,
         assigneeId: conversations.assigneeId, assigneeName: users.name,
+        assignedTeamId: conversations.assignedTeamId,
         pinned: conversations.pinned,
         contact: { id: contacts.id, name: contacts.name, phone: contacts.phoneE164, tags: contacts.tags },
         channel: { id: channels.id, name: channels.displayName, provider: channels.provider },
@@ -43,12 +44,17 @@ export async function conversationsRoutes(app: FastifyInstance) {
 
   app.patch("/orgs/:orgId/conversations/:id", async (req, reply) => {
     const { orgId, id } = req.params as { orgId: string; id: string };
-    const { assigneeId, status, pinned } = req.body as { assigneeId?: string | null; status?: string; pinned?: boolean };
+    const { assigneeId, assignedTeamId, status, pinned } = req.body as {
+      assigneeId?: string | null; assignedTeamId?: string | null; status?: string; pinned?: boolean;
+    };
     // Reassigning a conversation is a supervisor+ action; just moving your own conversation's
     // status (open/pending/snoozed/resolved) is something agents do all day — gate each field
     // by its own capability rather than the whole route.
     const role = req.authUser?.role;
     if (assigneeId !== undefined && !["org_owner", "org_admin", "supervisor"].includes(role ?? "")) {
+      return reply.status(403).send({ error: "Forbidden — requires role: org_owner, org_admin, supervisor" });
+    }
+    if (assignedTeamId !== undefined && !["org_owner", "org_admin", "supervisor"].includes(role ?? "")) {
       return reply.status(403).send({ error: "Forbidden — requires role: org_owner, org_admin, supervisor" });
     }
     if (status !== undefined && !["org_owner", "org_admin", "supervisor", "agent"].includes(role ?? "")) {
@@ -61,6 +67,7 @@ export async function conversationsRoutes(app: FastifyInstance) {
     }
     const patch: Record<string, unknown> = {};
     if (assigneeId !== undefined) patch.assigneeId = assigneeId;
+    if (assignedTeamId !== undefined) patch.assignedTeamId = assignedTeamId;
     if (status !== undefined) patch.status = status;
     if (pinned !== undefined) patch.pinned = pinned;
     if (Object.keys(patch).length === 0) return reply.status(400).send({ error: "nothing to update" });

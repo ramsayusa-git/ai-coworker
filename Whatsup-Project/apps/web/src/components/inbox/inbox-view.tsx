@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import type { CannedResponse, Conversation, ConversationNote, ConvStatus, Message, OrgMember, SavedView } from "@/lib/types";
+import type { CannedResponse, Conversation, ConversationNote, ConvStatus, Message, OrgMember, SavedView, Team } from "@/lib/types";
 import { ConversationList, type AssignFilter } from "./conversation-list";
 import { Thread } from "./thread";
 import { apiFetch } from "@/lib/api";
@@ -19,6 +19,7 @@ export function InboxView() {
   const [msgs, setMsgs] = useState<Message[]>([]);
   const [notes, setNotes] = useState<ConversationNote[]>([]);
   const [members, setMembers] = useState<OrgMember[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [canned, setCanned] = useState<CannedResponse[]>([]);
   const [sending, setSending] = useState(false);
 
@@ -35,6 +36,7 @@ export function InboxView() {
   useEffect(() => { loadConvs(); }, [loadConvs]);
   useEffect(() => { loadViews(); }, [loadViews]);
   useEffect(() => { apiFetch("/members").then(setMembers).catch(() => setMembers([])); }, []);
+  useEffect(() => { apiFetch("/teams").then(setTeams).catch(() => setTeams([])); }, []);
   useEffect(() => { apiFetch("/canned-responses").then(setCanned).catch(() => setCanned([])); }, []);
 
   useEffect(() => {
@@ -60,6 +62,12 @@ export function InboxView() {
   async function assign(assigneeId: string | null) {
     if (!selected) return;
     await apiFetch(`/conversations/${selected}`, { method: "PATCH", body: JSON.stringify({ assigneeId }) });
+    await loadConvs();
+  }
+
+  async function assignTeam(assignedTeamId: string | null) {
+    if (!selected) return;
+    await apiFetch(`/conversations/${selected}`, { method: "PATCH", body: JSON.stringify({ assignedTeamId }) });
     await loadConvs();
   }
 
@@ -121,8 +129,8 @@ export function InboxView() {
       />
       {current ? (
         <Thread conversation={current} messages={msgs} onSend={send} sending={sending}
-          members={members} notes={notes} canned={canned}
-          onAssign={assign} onStatusChange={changeStatus} onAddNote={addNote} onTagsChange={changeTags} onTogglePin={togglePin} />
+          members={members} teams={teams} notes={notes} canned={canned}
+          onAssign={assign} onAssignTeam={assignTeam} onStatusChange={changeStatus} onAddNote={addNote} onTagsChange={changeTags} onTogglePin={togglePin} />
       ) : (
         <div className="flex flex-1 items-center justify-center text-sm text-zinc-400">Select a conversation</div>
       )}

@@ -25,6 +25,9 @@ addons/         Each AI capability is an independently deployable service with i
   follow-up/         Chronic-care recall engine
   revenue-integrity/ Unbilled-procedure detection
   abdm-adapter/      ABDM HIP/HIU adapter (ABHA, consent, FHIR bundles to NHA gateway)
+  lab-insights/      Lab report marker extraction vs. reference ranges → Observation records
+  command-center/    Ops-oversight aggregation (queue, revenue, add-on health)
+  patient-concierge/ Patient-facing support chat drafting (defers clinical questions to staff)
 packages/
   shared-types/  FHIR-lite TypeScript types + Zod schemas shared by api and web
 infra/

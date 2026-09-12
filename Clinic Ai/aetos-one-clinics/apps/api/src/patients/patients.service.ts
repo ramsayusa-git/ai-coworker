@@ -46,4 +46,13 @@ export class PatientsService {
       take: 20,
     });
   }
+
+  /** Records a patient-portal/kiosk sign-in timestamp (separate from createdAt,
+   * which is registration date). No portal exists yet — call this once one does. */
+  async recordSignIn(organizationId: string, id: string) {
+    const prisma = await this.prisma.forTenant(organizationId);
+    const patient = await prisma.patient.findUnique({ where: { id } });
+    if (!patient) throw new NotFoundException(`Patient ${id} not found`);
+    return prisma.patient.update({ where: { id }, data: { lastSignInAt: new Date() } });
+  }
 }

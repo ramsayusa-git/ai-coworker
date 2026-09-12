@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from '../common/prisma.service';
 import { AddonRegistryService } from './addon-registry.service';
+import { resolveAddonHost } from './addon-host.util';
 
 /**
  * Per-organization add-on state: enable/disable, store config (API keys, provider
@@ -73,7 +74,7 @@ export class AddonSupervisorService {
   async checkHealth(organizationId: string, slug: string) {
     const manifest = this.registry.get(slug);
     if (!manifest) throw new Error(`Unknown add-on: ${slug}`);
-    const url = `http://${slug}:${manifest.port}${manifest.healthPath}`;
+    const url = `http://${resolveAddonHost(slug)}:${manifest.port}${manifest.healthPath}`;
     const prisma = await this.prisma.forTenant(organizationId);
     try {
       const res = await axios.get(url, { timeout: 3000 });

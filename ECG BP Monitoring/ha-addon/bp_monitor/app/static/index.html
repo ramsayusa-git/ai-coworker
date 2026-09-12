@@ -98,6 +98,79 @@ nav.tabs .badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999
 nav.tabs button[aria-selected="true"] .badge{
   background:color-mix(in srgb,var(--brand) 16%,transparent);color:var(--brand)}
 
+/* ---------------------------------------------------- profile control */
+.who{display:inline-flex;align-items:center;gap:7px;padding:5px 8px 5px 11px;
+  border-radius:999px;border:1px solid var(--line);background:var(--card-2);
+  font-size:12.5px;font-weight:650;color:var(--ink-2);white-space:nowrap}
+.who svg{width:14px;height:14px;opacity:.6;flex:0 0 auto}
+.who select{appearance:none;border:0;background:transparent;font:inherit;
+  font-weight:700;color:var(--brand);cursor:pointer;padding:0 16px 0 0;
+  max-width:150px;text-overflow:ellipsis;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+    linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:right 6px center,right 2px center;
+  background-size:4px 4px,4px 4px;background-repeat:no-repeat}
+.who select:focus{outline:2px solid color-mix(in srgb,var(--brand) 40%,transparent);
+  outline-offset:2px;border-radius:4px}
+.calflag{font-size:11px;font-weight:750;padding:3px 8px;border-radius:999px;
+  background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);
+  white-space:nowrap}
+
+/* profile cards */
+.plist{display:grid;gap:1px;background:var(--line-2)}
+.pcard{background:var(--card);padding:14px 16px;display:flex;align-items:center;
+  gap:12px;flex-wrap:wrap}
+.pcard.is-active{background:color-mix(in srgb,var(--brand) 6%,var(--card));
+  box-shadow:inset 3px 0 0 var(--brand)}
+.pcard .pn{font-weight:700;font-size:14.5px}
+.pcard .pmeta{font-size:12px;color:var(--ink-3)}
+.pcard .pacts{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.btn{appearance:none;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-2);font:inherit;font-size:12.5px;font-weight:650;
+  padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s}
+.btn:hover{border-color:var(--brand);color:var(--brand);
+  background:color-mix(in srgb,var(--brand) 8%,var(--card))}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{filter:brightness(1.1);color:#fff}
+.btn.danger:hover{border-color:color-mix(in srgb,var(--bad) 50%,var(--line));
+  color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--card))}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.badge-active{font-size:10.5px;font-weight:750;letter-spacing:.05em;
+  text-transform:uppercase;padding:3px 8px;border-radius:999px;
+  background:color-mix(in srgb,var(--brand) 15%,transparent);color:var(--brand)}
+.addrow{display:flex;gap:10px;padding:14px 16px;flex-wrap:wrap;
+  border-top:1px solid var(--line-2)}
+input[type=text]{font:inherit;font-size:13.5px;padding:8px 11px;border-radius:8px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);min-width:0}
+input[type=text]:focus{outline:none;border-color:var(--brand);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 15%,transparent)}
+input[type=text].grow{flex:1 1 170px}
+
+/* calibration steppers */
+.calgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:14px;padding:16px}
+.cal{padding:14px;border-radius:var(--r-sm);background:var(--card-2);
+  border:1px solid var(--line-2)}
+.cal .ck{font-size:11.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.cal .ck i{width:7px;height:7px;border-radius:2px;background:var(--c);display:inline-block}
+.cal.c-sys{--c:var(--sys)} .cal.c-dia{--c:var(--dia)} .cal.c-pul{--c:var(--pulse)}
+.stepper-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.stepbtn{appearance:none;width:38px;height:38px;flex:0 0 auto;border-radius:10px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  font:700 19px/1 system-ui,sans-serif;cursor:pointer;transition:all .14s;
+  display:grid;place-items:center}
+.stepbtn:hover{border-color:var(--c);color:var(--c);
+  background:color-mix(in srgb,var(--c) 10%,var(--card));transform:translateY(-1px)}
+.stepbtn:active{transform:translateY(0)}
+.stepbtn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.offval{flex:1;text-align:center;font:750 22px/1 system-ui,sans-serif;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+.offval.zero{color:var(--ink-3)}
+.cal .cpreview{margin-top:9px;font:11.5px/1.5 var(--mono);color:var(--ink-3);
+  text-align:center}
+.cal .cpreview b{color:var(--ink-2)}
+
 /* ---------------------------------------------------------- layout */
 main{max-width:1180px;margin:0 auto;padding:18px 16px 56px}
 .card{
@@ -277,6 +350,13 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
         <h1>Blood Pressure Monitor</h1>
         <p id="devline">Aetos Tech Labs · RBP cuff</p>
       </div>
+      <span class="who">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg>
+        <select id="whosel" aria-label="Reading is recorded for"></select>
+      </span>
+      <span class="calflag" id="calflag" hidden>calibrated</span>
       <span class="pill" id="statepill"><i class="dot"></i><span id="statetext">Starting…</span></span>
     </div>
 
@@ -291,6 +371,13 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
         History <span class="badge" id="histbadge">0</span>
+      </button>
+      <button role="tab" aria-selected="false" data-view="profiles">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="8" r="3.2"/><path d="M2.5 19a6.5 6.5 0 0113 0"/>
+          <path d="M16 5.5a3 3 0 010 5.6M17.5 19a6.6 6.6 0 00-2-4.7"/></svg>
+        Profiles <span class="badge" id="profbadge">0</span>
       </button>
       <button role="tab" aria-selected="false" data-view="device">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -370,12 +457,19 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
     <div class="card">
       <header>
         <h2>All readings</h2>
-        <span class="sub"><a class="dl" href="api/history.csv">Export CSV</a></span>
+        <span class="who" style="margin-left:auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 5h16M7 12h10M10 19h4"/></svg>
+          <select id="histfilter" aria-label="Filter history by profile"></select>
+        </span>
+        <span class="sub" style="margin-left:0"><a class="dl" id="csvlink"
+          href="api/history.csv">Export CSV</a></span>
       </header>
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>When</th><th>Systolic</th><th>Diastolic</th><th>Pulse</th>
+            <th>When</th><th>Profile</th><th>Systolic</th><th>Diastolic</th><th>Pulse</th>
             <th>MAP</th><th>Category</th><th></th>
           </tr></thead>
           <tbody id="histrows"></tbody>
@@ -390,6 +484,43 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
         <span class="grow"></span>
         <button id="prev" disabled>← Newer</button>
         <button id="next" disabled>Older →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ PROFILES -->
+  <section class="stack" id="view-profiles" hidden>
+    <div class="card">
+      <header><h2>Profiles</h2>
+        <span class="sub">new readings are recorded for the selected profile</span>
+      </header>
+      <div class="plist" id="plist"></div>
+      <div class="addrow">
+        <input type="text" id="pname" class="grow" placeholder="Name" maxlength="60">
+        <input type="text" id="pnote" class="grow" placeholder="Note (optional)" maxlength="140">
+        <button class="btn primary" id="padd">Add profile</button>
+      </div>
+      <div class="body" id="perr" hidden></div>
+    </div>
+
+    <div class="card">
+      <header>
+        <h2>Calibration</h2>
+        <span class="sub" id="calfor"></span>
+      </header>
+      <div class="body" style="padding-bottom:0">
+        <p class="note"><b>Align the add-on with the cuff's own screen.</b> Take a
+        measurement, compare it with what the cuff displays, and nudge each value
+        until they match. The offset is stored <b>per profile</b> and applied when a
+        reading is displayed or published — the database always keeps the raw value
+        the cuff sent, so changing the offset later re-aligns your whole history
+        instead of corrupting it.</p>
+      </div>
+      <div class="calgrid" id="calgrid"></div>
+      <div class="addrow" style="justify-content:flex-end">
+        <span class="sub" style="margin-right:auto;font-size:12px;color:var(--ink-3)"
+          id="calhint"></span>
+        <button class="btn" id="calreset">Reset to zero</button>
       </div>
     </div>
   </section>
@@ -447,8 +578,200 @@ const CAT = {
   crisis:   ["Very high",    "Systolic 180+ or diastolic 120+ — seek medical advice."],
 };
 
-let status = {}, trend = [], stats = {};
+let status = {}, trend = [], stats = {}, profiles = [], calibration = {};
 let page = 0, pageSize = 25, total = 0, view = "live";
+let histFilter = "all";          // "all" | "none" | profile id as string
+
+const CAL_FIELDS = [
+  ["systolic",  "Systolic",  "c-sys", "mmHg"],
+  ["diastolic", "Diastolic", "c-dia", "mmHg"],
+  ["pulse",     "Pulse",     "c-pul", "bpm"],
+];
+
+/* ---------------------------------------------------------- profiles */
+function activeProfile(){ return profiles.find(p => p.active) || null; }
+
+function renderProfiles(){
+  $("profbadge").textContent = profiles.length;
+
+  // top-bar selector
+  const sel = $("whosel");
+  const cur = String(status.profile_id == null ? "none" : status.profile_id);
+  sel.innerHTML = profiles.map(p =>
+      `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")
+    + `<option value="none">Unassigned</option>`;
+  sel.value = cur;
+
+  const cal = calibration || {};
+  const on = CAL_FIELDS.some(f => cal[f[0]]);
+  $("calflag").hidden = !on;
+  if(on) $("calflag").textContent = "calibrated "
+    + CAL_FIELDS.filter(f => cal[f[0]])
+        .map(f => (cal[f[0]] > 0 ? "+" : "") + cal[f[0]]).join(" / ");
+
+  // profile cards
+  if(!profiles.length){
+    $("plist").innerHTML = `<div class="pcard"><div>
+      <div class="pn">No profiles yet</div>
+      <div class="pmeta">Add one below — readings taken before a profile exists
+      stay listed as Unassigned and can be assigned later.</div></div></div>`;
+  } else {
+    $("plist").innerHTML = profiles.map(p => {
+      const calOn = p.cal_sys || p.cal_dia || p.cal_pulse;
+      const bits = [];
+      bits.push(p.readings + (p.readings === 1 ? " reading" : " readings"));
+      if(p.last_reading) bits.push("last " + fmtTime(p.last_reading));
+      if(calOn) bits.push("calibration "
+        + [p.cal_sys, p.cal_dia, p.cal_pulse].map(v => (v > 0 ? "+" : "") + v).join("/"));
+      if(p.note) bits.push(escapeHtml(p.note));
+      return `<div class="pcard ${p.active ? "is-active" : ""}">
+        <div style="min-width:0">
+          <div class="pn">${escapeHtml(p.name)}
+            ${p.active ? '<span class="badge-active">recording</span>' : ""}</div>
+          <div class="pmeta">${bits.join(" · ")}</div>
+        </div>
+        <div class="pacts">
+          ${p.active ? "" : `<button class="btn" data-sel="${p.id}">Select</button>`}
+          <button class="btn" data-ren="${p.id}">Rename</button>
+          <button class="btn danger" data-del="${p.id}">Delete</button>
+        </div></div>`;
+    }).join("");
+  }
+
+  $("plist").querySelectorAll("[data-sel]").forEach(b => {
+    b.onclick = () => selectProfile(b.dataset.sel);
+  });
+  $("plist").querySelectorAll("[data-ren]").forEach(b => {
+    b.onclick = async () => {
+      const p = profiles.find(x => String(x.id) === b.dataset.ren);
+      const name = prompt("Rename profile", p ? p.name : "");
+      if(name === null) return;
+      const r = await postJSON("api/profiles/" + b.dataset.ren, {name: name});
+      if(r && r.error) showPErr(r.error); else loadProfiles();
+    };
+  });
+  $("plist").querySelectorAll("[data-del]").forEach(b => {
+    b.onclick = async () => {
+      const p = profiles.find(x => String(x.id) === b.dataset.del);
+      const n = p ? p.readings : 0;
+      if(!confirm(`Delete profile "${p ? p.name : ""}"?`
+        + (n ? `\n\nIts ${n} reading${n === 1 ? "" : "s"} are kept and become Unassigned.`
+             : ""))) return;
+      await fetch("api/profiles/" + b.dataset.del, {method: "DELETE"});
+      loadProfiles(); loadStats();
+    };
+  });
+
+  renderCalibration();
+  renderHistFilter();
+}
+
+function showPErr(msg){
+  const e = $("perr");
+  e.hidden = false;
+  e.innerHTML = `<p class="note">${escapeHtml(msg)}</p>`;
+  setTimeout(() => { e.hidden = true; }, 6000);
+}
+
+async function postJSON(url, body){
+  const r = await fetch(url, {method: "POST",
+    headers: {"Content-Type": "application/json"}, body: JSON.stringify(body || {})});
+  try { return await r.json(); } catch(e) { return null; }
+}
+
+async function selectProfile(id){
+  await postJSON(`api/profiles/${id}/select`, {});
+  await Promise.all([loadProfiles(), loadStats()]);
+  if(view === "history") loadHistory();
+}
+
+async function loadProfiles(){
+  const d = await fetch("api/profiles").then(r => r.json());
+  profiles = d.profiles || [];
+  const c = await fetch("api/calibration").then(r => r.json());
+  calibration = c.calibration || {};
+  renderProfiles();
+}
+
+/* ---------------------------------------------------------- calibration */
+function renderCalibration(){
+  const p = activeProfile();
+  $("calfor").textContent = p ? "for " + p.name : "for unassigned readings";
+  $("calhint").textContent = p
+    ? "Applies to " + p.name + "'s readings only."
+    : "No profile selected — this offset applies to unassigned readings.";
+  const cal = calibration || {};
+  $("calgrid").innerHTML = CAL_FIELDS.map(f => {
+    const key = f[0], v = cal[key] || 0;
+    const raw = status["raw_" + key] != null ? status["raw_" + key]
+              : (status[key] != null ? status[key] - v : null);
+    const preview = raw != null
+      ? `raw <b>${raw}</b> → shown <b>${Math.max(0, raw + v)}</b> ${f[3]}`
+      : `applied to every ${f[1].toLowerCase()} reading`;
+    return `<div class="cal ${f[2]}">
+      <div class="ck"><i></i>${f[1]}</div>
+      <div class="stepper-row">
+        <button class="stepbtn" data-cal="${key}" data-d="-1"
+          aria-label="Decrease ${f[1]} offset">−</button>
+        <span class="offval ${v ? "" : "zero"}">${v > 0 ? "+" : ""}${v}</span>
+        <button class="stepbtn" data-cal="${key}" data-d="1"
+          aria-label="Increase ${f[1]} offset">+</button>
+      </div>
+      <div class="cpreview">${preview}</div></div>`;
+  }).join("");
+
+  $("calgrid").querySelectorAll("[data-cal]").forEach(b => {
+    b.onclick = async () => {
+      const key = b.dataset.cal, d = parseInt(b.dataset.d, 10);
+      // send the new ABSOLUTE value, so a double-tap can't double-apply
+      const next = (calibration[key] || 0) + d;
+      $("calgrid").querySelectorAll("[data-cal]").forEach(x => x.disabled = true);
+      const body = {}; body[key] = next;
+      const r = await postJSON("api/calibration", body);
+      if(r && r.calibration) calibration = r.calibration;
+      await loadStats();
+      renderCalibration();
+      loadProfiles();
+      if(view === "history") loadHistory();
+    };
+  });
+}
+
+$("calreset").onclick = async () => {
+  if(!confirm("Reset calibration offsets to zero?")) return;
+  const r = await postJSON("api/calibration/reset", {});
+  if(r && r.calibration) calibration = r.calibration;
+  await Promise.all([loadStats(), loadProfiles()]);
+  if(view === "history") loadHistory();
+};
+
+$("padd").onclick = async () => {
+  const name = $("pname").value.trim();
+  if(!name){ showPErr("A profile needs a name."); return; }
+  const r = await postJSON("api/profiles",
+    {name: name, note: $("pnote").value.trim()});
+  if(r && r.error){ showPErr(r.error); return; }
+  $("pname").value = ""; $("pnote").value = "";
+  await Promise.all([loadProfiles(), loadStats()]);
+};
+$("pname").addEventListener("keydown", e => { if(e.key === "Enter") $("padd").click(); });
+
+$("whosel").onchange = e => selectProfile(e.target.value);
+
+function renderHistFilter(){
+  const sel = $("histfilter");
+  sel.innerHTML = `<option value="all">All profiles</option>`
+    + profiles.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")
+    + `<option value="none">Unassigned${
+        stats.unassigned ? " (" + stats.unassigned + ")" : ""}</option>`;
+  sel.value = histFilter;
+  $("csvlink").href = "api/history.csv"
+    + (histFilter === "all" ? "" : "?profile=" + encodeURIComponent(histFilter));
+}
+$("histfilter").onchange = e => {
+  histFilter = e.target.value; page = 0;
+  renderHistFilter(); loadHistory();
+};
 
 function buildStepper(){
   $("stepper").innerHTML = STEPS.map(([k, label], i) =>
@@ -668,16 +991,25 @@ function renderStats(){
 }
 
 async function loadHistory(){
-  const d = await fetch(`api/history?limit=${pageSize}&offset=${page * pageSize}`)
-    .then(r => r.json());
+  const q = `api/history?limit=${pageSize}&offset=${page * pageSize}`
+    + (histFilter === "all" ? "" : "&profile=" + encodeURIComponent(histFilter));
+  const d = await fetch(q).then(r => r.json());
   total = d.total;
   const rows = d.rows || [];
   $("histempty").hidden = rows.length > 0;
+  const opts = pid => `<option value="none"${pid == null ? " selected" : ""}>Unassigned</option>`
+    + profiles.map(p => `<option value="${p.id}"${p.id === pid ? " selected" : ""}>`
+        + escapeHtml(p.name) + `</option>`).join("");
   $("histrows").innerHTML = rows.map(r => {
     const label = (CAT[r.category] || [r.category || "—"])[0];
+    const calNote = r.calibrated
+      ? `<div class="raw">raw ${r.raw_systolic}/${r.raw_diastolic}</div>` : "";
     return `<tr>
       <td>${escapeHtml(fmtTime(r.ts))}<div class="raw">${escapeHtml(ago(r.ts))}</div></td>
-      <td class="num" style="color:var(--sys)">${r.systolic}</td>
+      <td><span class="who" style="padding:3px 6px 3px 8px">
+        <select data-assign="${r.id}" aria-label="Profile for this reading"
+          style="max-width:110px">${opts(r.profile_id)}</select></span></td>
+      <td class="num" style="color:var(--sys)">${r.systolic}${calNote}</td>
       <td class="num" style="color:var(--dia)">${r.diastolic}</td>
       <td class="num" style="color:var(--pulse)">${r.pulse == null ? "—" : r.pulse}</td>
       <td>${r.map_calc == null ? "—" : r.map_calc}</td>
@@ -685,6 +1017,13 @@ async function loadHistory(){
       <td style="text-align:right"><button class="iconbtn" data-del="${r.id}">Delete</button></td>
     </tr>`;
   }).join("");
+  $("histrows").querySelectorAll("[data-assign]").forEach(s => {
+    s.onchange = async () => {
+      await postJSON("api/history/" + s.dataset.assign + "/profile",
+                     {profile_id: s.value === "none" ? null : parseInt(s.value, 10)});
+      await Promise.all([loadHistory(), loadStats(), loadProfiles()]);
+    };
+  });
   const from = total ? page * pageSize + 1 : 0;
   const to = Math.min(total, (page + 1) * pageSize);
   $("pageinfo").textContent = total ? `${from}–${to} of ${total}` : "No readings";
@@ -713,8 +1052,10 @@ document.querySelectorAll("nav.tabs button").forEach(b => {
     view = b.dataset.view;
     document.querySelectorAll("nav.tabs button").forEach(x =>
       x.setAttribute("aria-selected", String(x === b)));
-    ["live", "history", "device"].forEach(v => { $("view-" + v).hidden = v !== view; });
+    ["live", "history", "profiles", "device"].forEach(v => {
+      $("view-" + v).hidden = v !== view; });
     if(view === "history") loadHistory();
+    if(view === "profiles") loadProfiles();
   };
 });
 $("prev").onclick = () => { if(page > 0){ page--; loadHistory(); } };
@@ -730,7 +1071,9 @@ function connect(){
     if(m.type === "status"){ status = m.data; renderStatus(); }
     else if(m.type === "history"){
       trend = m.trend || []; stats = m.stats || {};
-      renderStats(); renderCharts();
+      if(m.profiles) profiles = m.profiles;
+      if(m.stats && m.stats.calibration) calibration = m.stats.calibration;
+      renderStats(); renderCharts(); renderProfiles();
       if(view === "history") loadHistory();
     }
   };
@@ -745,6 +1088,7 @@ buildStepper();
 renderStatus();
 fetch("api/status").then(r => r.json()).then(d => { status = d; renderStatus(); });
 loadStats();
+loadProfiles();
 connect();
 setInterval(() => { if(status.reading_time) renderStatus(); }, 30000);
 </script>

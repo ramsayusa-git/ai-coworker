@@ -48,6 +48,7 @@ class Reading:
     raw_hex: str
     category: str = ""
     map_calc: float = 0.0
+    profile_name: str = ""
 
 
 @dataclass
@@ -65,6 +66,13 @@ class Status:
     category: str = ""
     map_calc: float | None = None
     reading_time: float | None = None
+    profile_id: int | None = None
+    profile_name: str = ""
+    raw_systolic: int | None = None
+    raw_diastolic: int | None = None
+    raw_pulse: int | None = None
+    calibrated: bool = False
+    calibration: dict = field(default_factory=dict)
     manufacturer: str = ""
     model: str = ""
     serial: str = ""
@@ -125,6 +133,14 @@ class Engine:
         st = self.status
         st.uptime_s = round(time.time() - self.started, 1)
         st.source = self._active_source
+        try:
+            prof = self.store.active_profile()
+            st.profile_id = prof["id"] if prof else None
+            st.profile_name = prof["name"] if prof else ""
+            st.calibration = self.store.calibration(st.profile_id)
+            st.calibrated = any(st.calibration.values())
+        except Exception:
+            pass
         return asdict(st)
 
     # ------------------------------------------------------------ sources
@@ -150,23 +166,49 @@ class Engine:
         st = self.status
         if isinstance(pkt, BpReading):
             ts = time.time()
-            cat = classify(pkt.systolic, pkt.diastolic)
-            mp = mean_arterial(pkt.systolic, pkt.diastolic)
-            reading = Reading(ts=ts, systolic=pkt.systolic, diastolic=pkt.diastolic,
-                              pulse=pkt.pulse, raw_hex=pkt.raw_hex,
-                              category=cat, map_calc=mp)
-            st.systolic, st.diastolic, st.pulse = pkt.systolic, pkt.diastolic, pkt.pulse
-            st.category, st.map_calc = cat, mp
-            st.reading_time = ts
-            st.readings_count += 1
+            # 1. who is this reading for
+            prof = None
+            try:
+                prof = self.store.active_profile()
+            except Exception:
+                log.exception("failed to read active profile")
+            pid = prof["id"] if prof else None
+            who = prof["name"] if prof else "unassigned"
+
+            # 2. store the RAW decode — the database always holds what the cuff sent
             try:
                 self.store.add_reading(ts, pkt.systolic, pkt.diastolic, pkt.pulse,
-                                       source, pkt.raw_hex)
+                                       source, pkt.raw_hex, profile_id=pid)
             except Exception:
                 log.exception("failed to store reading")
-            self._log(f"Reading: {pkt.systolic}/{pkt.diastolic} mmHg, pulse "
-                      f"{pkt.pulse} bpm, {cat}  (raw {pkt.raw_hex})")
-            self.set_step("result", f"{pkt.systolic}/{pkt.diastolic} mmHg · {pkt.pulse} bpm")
+
+            # 3. show and publish the CALIBRATED values
+            c = self.store.apply_calibration(pkt.systolic, pkt.diastolic,
+                                             pkt.pulse, pid)
+            reading = Reading(ts=ts, systolic=c["systolic"], diastolic=c["diastolic"],
+                              pulse=c["pulse"], raw_hex=pkt.raw_hex,
+                              category=c["category"], map_calc=c["map_calc"],
+                              profile_name=who)
+            st.systolic, st.diastolic, st.pulse = \
+                c["systolic"], c["diastolic"], c["pulse"]
+            st.category, st.map_calc = c["category"], c["map_calc"]
+            st.raw_systolic, st.raw_diastolic, st.raw_pulse = \
+                pkt.systolic, pkt.diastolic, pkt.pulse
+            st.calibrated = c["calibrated"]
+            st.reading_time = ts
+            st.readings_count += 1
+            st.profile_id, st.profile_name = pid, (prof["name"] if prof else "")
+
+            cal_note = ""
+            if c["calibrated"]:
+                cal_note = (f"  (raw {pkt.systolic}/{pkt.diastolic}/{pkt.pulse},"
+                            f" calibration {c['calibration']})")
+            self._log(f"Reading for {who}: {c['systolic']}/{c['diastolic']} mmHg, "
+                      f"pulse {c['pulse']} bpm, {c['category']}"
+                      f"{cal_note}  (frame {pkt.raw_hex})")
+            self.set_step("result",
+                          f"{c['systolic']}/{c['diastolic']} mmHg · {c['pulse']} bpm"
+                          + (" · calibrated" if c["calibrated"] else ""))
             self._broadcast_history()
             for cb in self.on_reading:
                 try:
@@ -186,22 +228,26 @@ class Engine:
         self.loop.call_soon_threadsafe(self.handle_frame, pkt, source)
 
     # ------------------------------------------------------------ history
-    def list_history(self, limit: int = 50, offset: int = 0) -> dict:
-        return self.store.list_readings(limit, offset)
+    def list_history(self, limit: int = 50, offset: int = 0, profile_id=None) -> dict:
+        return self.store.list_readings(limit, offset, profile_id)
 
-    def trend(self, days: int = 30) -> list[dict]:
-        return self.store.trend(days)
+    def trend(self, days: int = 30, profile_id=None) -> list[dict]:
+        return self.store.trend(days, profile_id=profile_id)
 
-    def stats(self) -> dict:
-        return self.store.stats()
+    def stats(self, profile_id=None) -> dict:
+        return self.store.stats(profile_id)
 
     def history_message(self) -> str:
-        """Sent on WS connect and after every new reading, so the chart and
-        the table update without the page polling."""
+        """Sent on WS connect and after every new reading, so the chart, the
+        table and the profile list update without the page polling. Scoped to
+        the active profile — that is what the dashboard is showing."""
+        prof = self.store.active_profile()
+        pid = prof["id"] if prof else None
         return json.dumps({"type": "history",
-                           "trend": self.store.trend(30),
-                           "stats": self.store.stats(),
-                           "recent": self.store.list_readings(10, 0)["rows"]})
+                           "trend": self.store.trend(30, profile_id=pid),
+                           "stats": self.store.stats(pid),
+                           "profiles": self.store.list_profiles(),
+                           "recent": self.store.list_readings(10, 0, pid)["rows"]})
 
     def _broadcast_history(self):
         try:

@@ -10,8 +10,9 @@ import { contactsRoutes } from "./modules/contacts.js";
 import { channelsRoutes } from "./modules/channels.js";
 import { conversationsRoutes, savedViewsRoutes, cannedResponsesRoutes } from "./modules/conversations.js";
 import { templatesRoutes } from "./modules/templates.js";
-import { campaignsRoutes } from "./modules/campaigns.js";
+import { campaignsRoutes, processCampaigns } from "./modules/campaigns.js";
 import { botsRoutes } from "./modules/bots.js";
+import { teamsRoutes } from "./modules/teams.js";
 import { analyticsRoutes } from "./modules/analytics.js";
 
 const app = Fastify({
@@ -47,10 +48,16 @@ await app.register(async (scoped) => {
   await scoped.register(templatesRoutes);
   await scoped.register(campaignsRoutes);
   await scoped.register(botsRoutes);
+  await scoped.register(teamsRoutes);
   await scoped.register(analyticsRoutes);
 }, { prefix: "/v1" });
 
 const port = Number(process.env.PORT ?? 4000);
 app.listen({ port, host: "0.0.0.0" }).then(() => {
   app.log.info(`Whatsup API listening on :${port}`);
+  // Real campaign sender tick — see processCampaigns() for what "real" means here
+  // (actual adapter sends respecting each campaign's daily cap, no simulated progress).
+  setInterval(() => {
+    processCampaigns().catch((err) => app.log.error({ err }, "processCampaigns tick failed"));
+  }, 45_000);
 });

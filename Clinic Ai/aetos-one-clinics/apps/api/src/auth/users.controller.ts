@@ -29,4 +29,11 @@ export class UsersController {
   updateRole(@Req() req: TenantRequest, @Param('id') id: string, @Body('role') role: 'OWNER' | 'ADMIN' | 'DOCTOR' | 'FRONT_DESK') {
     return this.users.updateRole(req.organizationId!, id, role);
   }
+
+  /** Records a sign-in timestamp. No auth check beyond tenant context — call this
+   * from wherever sign-in actually happens once Keycloak (or the dev login) is wired. */
+  @Patch(':id/sign-in')
+  recordSignIn(@Req() req: TenantRequest, @Param('id') id: string) {
+    return this.users.recordSignIn(req.organizationId!, id);
+  }
 }

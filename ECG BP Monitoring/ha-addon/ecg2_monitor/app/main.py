@@ -51,11 +51,128 @@ def build_app(engine: Engine, ble: BleSource | None) -> web.Application:
             engine.clients.discard(ws)
         return ws
 
+    def want_profile(request):
+        """?profile=<id> scopes to one profile, ?profile=none to unassigned,
+        ?profile=all (or absent) to everything."""
+        v = request.query.get("profile")
+        if v in (None, "", "all"):
+            return None
+        if v == "none":
+            return "none"
+        try:
+            return int(v)
+        except ValueError:
+            return None
+
+    def cal_target(request):
+        v = request.query.get("profile")
+        if v in (None, "", "active"):
+            p = engine.store.active_profile()
+            return p["id"] if p else None
+        if v in ("none", "global"):
+            return None
+        try:
+            return int(v)
+        except ValueError:
+            return None
+
+    # ---------------------------------------------------------- profiles
+    async def profiles_list(request):
+        return web.json_response({
+            "profiles": engine.store.list_profiles(),
+            "active": engine.store.active_profile(),
+            "unassigned": engine.store.stats()["unassigned"]})
+
+    async def profiles_add(request):
+        try:
+            body = await request.json()
+        except Exception:
+            raise web.HTTPBadRequest(reason="expected JSON")
+        try:
+            prof = engine.store.add_profile(body.get("name", ""), body.get("note", ""))
+        except ValueError as e:
+            return web.json_response({"ok": False, "error": str(e)}, status=400)
+        engine.refresh_calibration()
+        # the very first profile auto-becomes active; if a wear is already in
+        # progress it should belong to them, not stay unassigned
+        engine.reattribute_open_session()
+        engine._broadcast_status()
+        engine._broadcast_db()
+        return web.json_response({"ok": True, "profile": prof})
+
+    async def profiles_update(request):
+        pid = int(request.match_info["pid"])
+        try:
+            body = await request.json()
+        except Exception:
+            raise web.HTTPBadRequest(reason="expected JSON")
+        try:
+            ok = engine.store.update_profile(pid, body.get("name"), body.get("note"))
+        except ValueError as e:
+            return web.json_response({"ok": False, "error": str(e)}, status=400)
+        engine._broadcast_db()
+        return web.json_response({"ok": ok})
+
+    async def profiles_delete(request):
+        ok = engine.store.delete_profile(int(request.match_info["pid"]))
+        engine.refresh_calibration()
+        engine._broadcast_status()
+        engine._broadcast_db()
+        return web.json_response({"ok": ok})
+
+    async def profiles_select(request):
+        raw = request.match_info["pid"]
+        pid = None if raw in ("none", "0") else int(raw)
+        ok = engine.set_active_profile(pid)
+        return web.json_response({"ok": ok, "active": engine.store.active_profile()})
+
+    async def session_assign(request):
+        sid = int(request.match_info["sid"])
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        raw = body.get("profile_id")
+        pid = None if raw in (None, "", "none", 0, "0") else int(raw)
+        ok = engine.store.assign_session(sid, pid)
+        engine._broadcast_db()
+        return web.json_response({"ok": ok})
+
+    # -------------------------------------------------------- calibration
+    async def calibration_get(request):
+        pid = cal_target(request)
+        return web.json_response({"profile_id": pid,
+                                  "calibration": engine.store.calibration(pid),
+                                  "limit": engine.store.CAL_LIMIT})
+
+    async def calibration_set(request):
+        """Absolute offset: {"hr": -5}. The +/- buttons send the new absolute
+        value, so a double-tap can never double-apply."""
+        pid = cal_target(request)
+        try:
+            body = await request.json()
+        except Exception:
+            raise web.HTTPBadRequest(reason="expected JSON")
+        cal = engine.store.set_calibration(pid, body or {})
+        engine.refresh_calibration()
+        engine._broadcast_status()
+        engine._broadcast_db()
+        return web.json_response({"ok": True, "profile_id": pid, "calibration": cal})
+
+    async def calibration_reset(request):
+        pid = cal_target(request)
+        cal = engine.store.set_calibration(pid, {"hr": 0})
+        engine.refresh_calibration()
+        engine._broadcast_status()
+        engine._broadcast_db()
+        return web.json_response({"ok": True, "profile_id": pid, "calibration": cal})
+
     # ---------------------------------------------------------- history (DB)
     async def sessions(request):
         limit = max(1, min(int(request.query.get("limit", 25)), 500))
         offset = max(0, int(request.query.get("offset", 0)))
-        return web.json_response(engine.list_sessions(limit, offset))
+        return web.json_response(
+            engine.list_sessions(limit, offset, want_profile(request)))
 
     async def session_trend(request):
         try:
@@ -73,14 +190,17 @@ def build_app(engine: Engine, ble: BleSource | None) -> web.Application:
         return web.json_response({"ok": engine.delete_session(sid)})
 
     async def stats(request):
-        return web.json_response(engine.stats())
+        return web.json_response(engine.stats(want_profile(request)))
 
     async def trend(request):
         hours = max(1, min(int(request.query.get("hours", 24)), 24 * 90))
-        return web.json_response({"hours": hours, "trend": engine.recent_hr(hours)})
+        return web.json_response({"hours": hours,
+                                  "trend": engine.recent_hr(hours,
+                                                            want_profile(request))})
 
     async def sessions_csv(request):
-        return web.Response(body=engine.store.csv().encode(), headers={
+        body = engine.store.csv(want_profile(request))
+        return web.Response(body=body.encode(), headers={
             "Content-Type": "text/csv",
             "Content-Disposition": 'attachment; filename="ecg_sessions.csv"'})
 
@@ -111,8 +231,17 @@ def build_app(engine: Engine, ble: BleSource | None) -> web.Application:
     app.router.add_get("/api/sessions.csv", sessions_csv)
     app.router.add_get("/api/sessions/{sid}/trend", session_trend)
     app.router.add_delete("/api/sessions/{sid}", session_delete)
+    app.router.add_post("/api/sessions/{sid}/profile", session_assign)
     app.router.add_get("/api/stats", stats)
     app.router.add_get("/api/trend", trend)
+    app.router.add_get("/api/profiles", profiles_list)
+    app.router.add_post("/api/profiles", profiles_add)
+    app.router.add_post("/api/profiles/{pid}", profiles_update)
+    app.router.add_delete("/api/profiles/{pid}", profiles_delete)
+    app.router.add_post("/api/profiles/{pid}/select", profiles_select)
+    app.router.add_get("/api/calibration", calibration_get)
+    app.router.add_post("/api/calibration", calibration_set)
+    app.router.add_post("/api/calibration/reset", calibration_reset)
     app.router.add_get("/api/recordings", recordings)
     app.router.add_get("/api/recordings/{name}", recording_file)
     app.router.add_delete("/api/recordings/{name}", recording_delete)

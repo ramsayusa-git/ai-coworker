@@ -25,6 +25,7 @@ export interface Conversation {
   status: ConvStatus;
   assigneeId: string | null;
   assigneeName: string | null;
+  assignedTeamId: string | null;
   unread: number;
   lastMessage: string;
   lastMessageAt: string;
@@ -106,6 +107,13 @@ export interface Template {
 
 export type BroadcastStatus = "draft" | "scheduled" | "sending" | "completed" | "paused";
 
+export interface CampaignStep {
+  id?: string;
+  stepIndex: number;
+  templateId: string;
+  delayHours: number;
+}
+
 export interface Broadcast {
   id: string;
   name: string;
@@ -115,7 +123,27 @@ export interface Broadcast {
   status: BroadcastStatus;
   scheduledAt: string | null;
   stats: { sent: number; delivered: number; read: number; failed: number };
+  dailyLimit: number;
+  channelId: string | null;
+  funnel: { sent: number; delivered: number; read: number; failed: number; queued: number };
+  kind: "single" | "drip";
+  smsFallback: boolean;
+  steps: CampaignStep[];
   createdAt: string;
+}
+
+export interface TeamMember {
+  userId: string;
+  name: string | null;
+  email: string;
+}
+
+export interface Team {
+  id: string;
+  orgId: string;
+  name: string;
+  createdAt: string;
+  members: TeamMember[];
 }
 
 export type BotNodeType = "trigger" | "message" | "condition" | "ai" | "handoff";

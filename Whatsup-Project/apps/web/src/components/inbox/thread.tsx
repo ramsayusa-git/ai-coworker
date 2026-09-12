@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { CannedResponse, Conversation, ConversationNote, ConvStatus, Message, OrgMember } from "@/lib/types";
+import type { CannedResponse, Conversation, ConversationNote, ConvStatus, Message, OrgMember, Team } from "@/lib/types";
 import { apiFetch } from "@/lib/api";
 import { useResizableWidth } from "@/lib/use-resizable-width";
 import { useResizableHeight } from "@/lib/use-resizable-height";
@@ -17,11 +17,12 @@ function windowLabel(iso: string) {
 }
 
 export function Thread({
-  conversation, messages, onSend, sending, members, notes, canned, onAssign, onStatusChange, onAddNote, onTagsChange, onTogglePin,
+  conversation, messages, onSend, sending, members, teams, notes, canned, onAssign, onAssignTeam, onStatusChange, onAddNote, onTagsChange, onTogglePin,
 }: {
   conversation: Conversation; messages: Message[]; onSend: (body: string) => Promise<void>; sending: boolean;
-  members: OrgMember[]; notes: ConversationNote[]; canned?: CannedResponse[];
+  members: OrgMember[]; teams?: Team[]; notes: ConversationNote[]; canned?: CannedResponse[];
   onAssign: (assigneeId: string | null) => void;
+  onAssignTeam?: (assignedTeamId: string | null) => void;
   onStatusChange: (status: ConvStatus) => void;
   onAddNote: (body: string) => Promise<void>;
   onTagsChange: (tags: string[]) => void;
@@ -162,6 +163,17 @@ export function Thread({
               {members.map((m) => <option key={m.userId} value={m.userId}>{m.name ?? m.email}</option>)}
             </select>
           </div>
+
+          {!!teams && (
+            <div className="mb-4">
+              <div className="mb-1 text-xs font-semibold uppercase text-zinc-400">Team</div>
+              <select value={conversation.assignedTeamId ?? ""} onChange={(e) => onAssignTeam?.(e.target.value || null)}
+                className="w-full rounded border border-zinc-300 px-2 py-1.5 text-sm">
+                <option value="">No team</option>
+                {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+          )}
 
           <div className="mb-4">
             <div className="mb-1 text-xs font-semibold uppercase text-zinc-400">Contact</div>

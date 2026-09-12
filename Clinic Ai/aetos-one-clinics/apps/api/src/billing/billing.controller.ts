@@ -21,4 +21,10 @@ export class BillingController {
   findForPatient(@Req() req: TenantRequest, @Query('patientId') patientId: string) {
     return this.billing.findForPatient(req.organizationId!, patientId);
   }
+
+  /** Powers the revenue-integrity add-on's unbilled-item detection. */
+  @Get('unbilled-candidates/:encounterId')
+  unbilledCandidates(@Req() req: TenantRequest, @Param('encounterId') encounterId: string) {
+    return this.billing.findUnbilledCandidates(req.organizationId!, encounterId);
+  }
 }

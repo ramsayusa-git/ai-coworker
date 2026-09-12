@@ -104,6 +104,7 @@ model User {
   keycloakSub    String       @unique // subject claim from Keycloak OIDC token
   name           String
   role           UserRole
+  lastSignInAt   DateTime?    // set on each successful sign-in; null until the first one
   createdAt      DateTime     @default(now())
 
   @@index([organizationId])
@@ -134,6 +135,7 @@ model Patient {
   phone            String
   preferredLanguage String       @default("en")
   addressJson      Json?
+  lastSignInAt     DateTime?    // last patient-portal/kiosk sign-in; distinct from createdAt (registration)
   appointments     Appointment[]
   encounters       Encounter[]
   invoices         Invoice[]

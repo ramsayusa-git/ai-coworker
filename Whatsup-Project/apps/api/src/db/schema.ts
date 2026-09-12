@@ -88,6 +88,22 @@ export const orgMembers = pgTable("org_members", {
   status: text("status").default("active"), // "invited" | "active"
 }, (t) => [unique().on(t.orgId, t.userId)]);
 
+// Wati-style agent grouping, separate from an individual's role — lets a conversation or
+// a routing rule be handed to "Billing Team" instead of naming one agent.
+export const teams = pgTable("teams", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.orgId, t.name)]);
+
+export const teamMembers = pgTable("team_members", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  teamId: uuid("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+}, (t) => [unique().on(t.teamId, t.userId)]);
+
 export const invites = pgTable("invites", {
   id: uuid("id").primaryKey().defaultRandom(),
   orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
@@ -140,6 +156,7 @@ export const conversations = pgTable("conversations", {
   contactId: uuid("contact_id").notNull().references(() => contacts.id),
   status: convStatusEnum("status").default("open"),
   assigneeId: uuid("assignee_id").references(() => users.id),
+  assignedTeamId: uuid("assigned_team_id").references(() => teams.id),
   unread: integer("unread").default(0),
   lastMessage: text("last_message"),
   lastMessageAt: timestamp("last_message_at").defaultNow(),
@@ -248,7 +265,40 @@ export const campaigns = pgTable("campaigns", {
   audienceCount: integer("audience_count").default(0),
   status: text("status").default("draft"),
   scheduledAt: timestamp("scheduled_at"),
+  channelId: uuid("channel_id").references(() => channels.id),
+  dailyLimit: integer("daily_limit").default(250),
+  // "single" = the original one-message blast; "drip" = a real multi-step sequence,
+  // each step its own template + delay, driven by campaignSteps below.
+  kind: text("kind").default("single"),
+  // Wati-style: if a real SMS gateway is configured (see adapters/sms.ts) and a step's
+  // WhatsApp send fails, retry that recipient over SMS instead of just marking it failed.
+  smsFallback: boolean("sms_fallback").default(false),
   stats: jsonb("stats").$type<{ sent: number; delivered: number; read: number; failed: number }>()
     .default({ sent: 0, delivered: 0, read: 0, failed: 0 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const campaignSteps = pgTable("campaign_steps", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  campaignId: uuid("campaign_id").notNull().references(() => campaigns.id, { onDelete: "cascade" }),
+  stepIndex: integer("step_index").notNull(),
+  templateId: uuid("template_id").notNull().references(() => templates.id),
+  // Hours after the PREVIOUS step (0 for step 0 — sends immediately when the recipient is due).
+  delayHours: integer("delay_hours").default(0),
+}, (t) => [unique().on(t.campaignId, t.stepIndex)]);
+
+// One row per audience member per campaign — this is what makes a drip sequence and the
+// "pause automation when the contact replies" behavior possible without re-scanning
+// `messages` on every tick. currentStep/nextSendAt track where this recipient is in the
+// sequence; status "paused" is set the moment they reply mid-sequence (see webhooks.ts).
+export const campaignRecipients = pgTable("campaign_recipients", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id").notNull().references(() => campaigns.id, { onDelete: "cascade" }),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  contactId: uuid("contact_id").notNull().references(() => contacts.id, { onDelete: "cascade" }),
+  currentStep: integer("current_step").default(0),
+  nextSendAt: timestamp("next_send_at").defaultNow(),
+  status: text("status").default("active"), // active | paused | completed
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.campaignId, t.contactId)]);

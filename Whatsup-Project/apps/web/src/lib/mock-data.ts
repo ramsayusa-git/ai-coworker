@@ -16,15 +16,15 @@ const meta = { id: "ch1", name: "Aetos Store (Official)", provider: "meta" as co
 const whapi = { id: "ch2", name: "Sales +91 90000 00001", provider: "whapi" as const };
 
 export const conversations: Conversation[] = [
-  { id: "v1", contact: contacts[0], channel: meta, status: "open", assigneeId: null, assigneeName: null, unread: 2,
+  { id: "v1", contact: contacts[0], channel: meta, status: "open", assigneeId: null, assigneeName: null, assignedTeamId: null, unread: 2,
     lastMessage: "Is the 2kW inverter in stock?", lastMessageAt: ago(3), serviceWindowExpiresAt: ahead(23), pinned: false, pendingReply: false, slaBreached: false },
-  { id: "v2", contact: contacts[1], channel: whapi, status: "open", assigneeId: "u1", assigneeName: "Ramsay", unread: 0,
+  { id: "v2", contact: contacts[1], channel: whapi, status: "open", assigneeId: "u1", assigneeName: "Ramsay", assignedTeamId: null, unread: 0,
     lastMessage: "Thanks, order placed.", lastMessageAt: ago(41), serviceWindowExpiresAt: ahead(22), pinned: false, pendingReply: false, slaBreached: false },
-  { id: "v3", contact: contacts[2], channel: meta, status: "pending", assigneeId: "u1", assigneeName: "Ramsay", unread: 1,
+  { id: "v3", contact: contacts[2], channel: meta, status: "pending", assigneeId: "u1", assigneeName: "Ramsay", assignedTeamId: null, unread: 1,
     lastMessage: "Can you share the GST invoice?", lastMessageAt: ago(120), serviceWindowExpiresAt: ahead(20), pinned: false, pendingReply: false, slaBreached: false },
-  { id: "v4", contact: contacts[3], channel: whapi, status: "snoozed", assigneeId: null, assigneeName: null, unread: 0,
+  { id: "v4", contact: contacts[3], channel: whapi, status: "snoozed", assigneeId: null, assigneeName: null, assignedTeamId: null, unread: 0,
     lastMessage: "Will call back tomorrow", lastMessageAt: ago(900), serviceWindowExpiresAt: ahead(-2), pinned: false, pendingReply: false, slaBreached: false },
-  { id: "v5", contact: contacts[4], channel: meta, status: "resolved", assigneeId: "u2", assigneeName: "Support", unread: 0,
+  { id: "v5", contact: contacts[4], channel: meta, status: "resolved", assigneeId: "u2", assigneeName: "Support", assignedTeamId: null, unread: 0,
     lastMessage: "Resolved, thank you!", lastMessageAt: ago(2000), serviceWindowExpiresAt: ahead(-10), pinned: false, pendingReply: false, slaBreached: false },
 ];
 
@@ -78,13 +78,21 @@ export const templates: Template[] = [
 
 export const broadcasts: Broadcast[] = [
   { id: "b1", name: "Diwali Sale Blast", templateId: "t2", segment: "All opted-in contacts", audienceCount: 4820,
-    status: "completed", scheduledAt: ago(60 * 24 * 3), stats: { sent: 4820, delivered: 4690, read: 3102, failed: 130 }, createdAt: ago(60 * 24 * 4) },
+    status: "completed", scheduledAt: ago(60 * 24 * 3), stats: { sent: 4820, delivered: 4690, read: 3102, failed: 130 },
+    dailyLimit: 250, channelId: null, funnel: { sent: 4820, delivered: 4690, read: 3102, failed: 130, queued: 0 },
+    kind: "single", smsFallback: false, steps: [], createdAt: ago(60 * 24 * 4) },
   { id: "b2", name: "Cart Recovery — Sep", templateId: "t4", segment: "Cart abandoned (7d)", audienceCount: 312,
-    status: "sending", scheduledAt: ago(30), stats: { sent: 180, delivered: 165, read: 90, failed: 6 }, createdAt: ago(60) },
+    status: "sending", scheduledAt: ago(30), stats: { sent: 180, delivered: 165, read: 90, failed: 6 },
+    dailyLimit: 250, channelId: null, funnel: { sent: 180, delivered: 165, read: 90, failed: 6, queued: 132 },
+    kind: "single", smsFallback: false, steps: [], createdAt: ago(60) },
   { id: "b3", name: "New Stock Announcement", templateId: "t2", segment: "Delhi leads", audienceCount: 240,
-    status: "scheduled", scheduledAt: new Date(Date.now() + 3600_000 * 20).toISOString(), stats: { sent: 0, delivered: 0, read: 0, failed: 0 }, createdAt: ago(120) },
+    status: "scheduled", scheduledAt: new Date(Date.now() + 3600_000 * 20).toISOString(), stats: { sent: 0, delivered: 0, read: 0, failed: 0 },
+    dailyLimit: 250, channelId: null, funnel: { sent: 0, delivered: 0, read: 0, failed: 0, queued: 240 },
+    kind: "single", smsFallback: false, steps: [], createdAt: ago(120) },
   { id: "b4", name: "VIP Early Access", templateId: "t2", segment: "VIP customers", audienceCount: 58,
-    status: "draft", scheduledAt: null, stats: { sent: 0, delivered: 0, read: 0, failed: 0 }, createdAt: ago(200) },
+    status: "draft", scheduledAt: null, stats: { sent: 0, delivered: 0, read: 0, failed: 0 },
+    dailyLimit: 250, channelId: null, funnel: { sent: 0, delivered: 0, read: 0, failed: 0, queued: 58 },
+    kind: "single", smsFallback: false, steps: [], createdAt: ago(200) },
 ];
 
 import type { Bot, AnalyticsSummary } from "./types";

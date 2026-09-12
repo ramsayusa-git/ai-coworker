@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.2.0 — 2026-09-12
+**Profiles.** The cuff is normally shared, so every reading is now attributed
+to a profile. A selector in the top bar sets who the next measurement is for;
+the new Profiles tab adds, renames, selects and deletes them. Deleting a
+profile **keeps** its readings (they become Unassigned) rather than destroying
+them. History can be filtered per profile, any past reading can be reassigned
+from its row, and averages/trends/CSV are all profile-aware.
+
+**Calibration.** Plus/minus steppers per value (systolic, diastolic, pulse),
+stored per profile, to align the add-on with the cuff's own screen. The
+database always stores **exactly what the cuff sent** — offsets are applied
+when a value is displayed or published. So recalibrating later re-aligns the
+whole history instead of baking a guess into the data, and the CSV export
+carries both the raw and the calibrated columns. Offsets are clamped to
++/-40 and the +/- buttons send the new absolute value, so a double-tap can
+never double-apply.
+
+Aggregates stay exact across profiles with different offsets: each row is
+shifted by its own profile's offset inside the SQL, not afterwards.
+
+Existing databases migrate in place — `readings.profile_id` and the profile
+calibration columns are added on first start, and the readings already stored
+are preserved and left Unassigned.
+
 ## 1.1.1 — 2026-09-12
 **Actually fixes the connect.** v1.1.0 moved to raw D-Bus but still failed with
 `org.bluez.Error.BREDR.ProfileUnavailable`, because the problem was never which

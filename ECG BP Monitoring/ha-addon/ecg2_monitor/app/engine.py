@@ -84,6 +84,11 @@ class Status:
     recording_seconds: float = 0.0
     session_id: int | None = None
     session_seconds: float = 0.0
+    profile_id: int | None = None
+    profile_name: str = ""
+    hr_raw: float | None = None
+    calibrated: bool = False
+    calibration: dict = field(default_factory=dict)
     uptime_s: float = 0.0
     last_packet_age: float | None = None
     attempts: int = 0
@@ -124,6 +129,22 @@ class Engine:
         self._session_started: float | None = None
         self._session_samples: int = 0
         self._last_hr_log: float = 0.0
+        self._hr_offset: float = 0.0
+        self.refresh_calibration()
+
+    def refresh_calibration(self):
+        """Cache the active profile's HR offset — the beat path reads it far
+        too often to hit the database each time."""
+        try:
+            prof = self.store.active_profile()
+            cal = self.store.calibration(prof["id"] if prof else None)
+            self._hr_offset = float(cal.get("hr", 0) or 0)
+            self.status.calibration = cal
+            self.status.calibrated = bool(self._hr_offset)
+            self.status.profile_id = prof["id"] if prof else None
+            self.status.profile_name = prof["name"] if prof else ""
+        except Exception:
+            log.exception("failed to refresh calibration")
 
     # ------------------------------------------------------------ status
     def _log(self, msg: str):
@@ -175,6 +196,30 @@ class Engine:
         st.source = self._active_source
         return asdict(st)
 
+    def set_active_profile(self, pid):
+        ok = self.store.set_active_profile(pid)
+        self.refresh_calibration()
+        self.reattribute_open_session()
+        self._broadcast_status()
+        self._broadcast_db()
+        return ok
+
+    def reattribute_open_session(self):
+        """If a wear is already in progress when the profile changes — or when
+        the first profile is created mid-session — move the open session to it.
+        Otherwise the live view would show one person's calibrated heart rate
+        while the stored session belonged to nobody."""
+        if self._session_id is None:
+            return
+        try:
+            prof = self.store.active_profile()
+            pid = prof["id"] if prof else None
+            self.store.assign_session(self._session_id, pid)
+            self._log(f"Session #{self._session_id} now recording for "
+                      f"{prof['name'] if prof else 'nobody'}")
+        except Exception:
+            log.exception("failed to re-attribute open session")
+
     # ------------------------------------------------------------ sources
     def source_claims(self, name: str) -> bool:
         """A source calls this before handing over packets. BLE always wins;
@@ -201,8 +246,16 @@ class Engine:
         if self._session_id is not None:
             return
         try:
-            self._session_id = self.store.start_session(self._active_source,
-                                                        self.status.battery)
+            prof = None
+            try:
+                prof = self.store.active_profile()
+            except Exception:
+                log.exception("failed to read active profile")
+            self.status.profile_id = prof["id"] if prof else None
+            self.status.profile_name = prof["name"] if prof else ""
+            self._session_id = self.store.start_session(
+                self._active_source, self.status.battery,
+                profile_id=prof["id"] if prof else None)
             self._session_started = time.time()
             self._session_samples = 0
             self._last_hr_log = 0.0
@@ -237,7 +290,8 @@ class Engine:
             return
         self._last_hr_log = now
         try:
-            self.store.add_hr_sample(self._session_id, self.status.hr,
+            # store the RAW heart rate; calibration is applied on read
+            self.store.add_hr_sample(self._session_id, self.status.hr_raw,
                                      self.status.rr_ms, self.status.quality,
                                      self.status.quality_score)
         except Exception:
@@ -294,7 +348,14 @@ class Engine:
                 self._rec_index += 1
         if beats:
             self._pending_beats += beats
-            st.hr = round(self._qrs.hr_bpm, 1) if self._qrs.hr_bpm else None
+            # hr_raw is what the detector measured and what gets stored;
+            # st.hr is the calibrated value shown in the UI and published to HA.
+            raw = round(self._qrs.hr_bpm, 1) if self._qrs.hr_bpm else None
+            st.hr_raw = raw
+            st.hr = (max(0.0, round(raw + self._hr_offset, 1))
+                     if raw is not None else None)
+            st.calibrated = bool(self._hr_offset)
+            # RR is a measured interval, so it stays uncalibrated
             st.rr_ms = round(60000 / self._qrs.hr_bpm) if self._qrs.hr_bpm else None
             for cb in self.on_beat:
                 try:
@@ -363,17 +424,18 @@ class Engine:
         return name
 
     # ------------------------------------------------------------ history
-    def list_sessions(self, limit: int = 25, offset: int = 0) -> dict:
-        return self.store.list_sessions(limit, offset)
+    def list_sessions(self, limit: int = 25, offset: int = 0,
+                      profile_id=None) -> dict:
+        return self.store.list_sessions(limit, offset, profile_id)
 
     def session_trend(self, sid: int) -> list[dict]:
         return self.store.session_trend(sid)
 
-    def stats(self) -> dict:
-        return self.store.stats()
+    def stats(self, profile_id=None) -> dict:
+        return self.store.stats(profile_id)
 
-    def recent_hr(self, hours: int = 24) -> list[dict]:
-        return self.store.recent_hr(hours)
+    def recent_hr(self, hours: int = 24, profile_id=None) -> list[dict]:
+        return self.store.recent_hr(hours, profile_id=profile_id)
 
     def list_recordings(self) -> list[dict]:
         """Raw waveform CSV captures on disk (from the HA Recording switch)."""
@@ -474,15 +536,20 @@ class Engine:
                            "history": True})
 
     def db_message(self) -> str:
-        """Stored history: session list, HR trend and aggregate stats."""
+        """Stored history: session list, HR trend, stats and the profile list,
+        scoped to the active profile — that is what the dashboard shows."""
         try:
+            prof = self.store.active_profile()
+            pid = prof["id"] if prof else None
             return json.dumps({"type": "db",
-                               "stats": self.store.stats(),
-                               "sessions": self.store.list_sessions(10, 0)["rows"],
-                               "trend": self.store.recent_hr(24)})
+                               "stats": self.store.stats(pid),
+                               "profiles": self.store.list_profiles(),
+                               "sessions": self.store.list_sessions(10, 0, pid)["rows"],
+                               "trend": self.store.recent_hr(24, profile_id=pid)})
         except Exception:
             log.exception("db_message")
-            return json.dumps({"type": "db", "stats": {}, "sessions": [], "trend": []})
+            return json.dumps({"type": "db", "stats": {}, "profiles": [],
+                               "sessions": [], "trend": []})
 
     def _broadcast_db(self):
         try:

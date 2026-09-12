@@ -2,6 +2,7 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import axios from 'axios';
 import { AddonRegistryService } from './addon-registry.service';
 import { AddonSupervisorService } from './addon-supervisor.service';
+import { resolveAddonHost } from './addon-host.util';
 
 /**
  * Synchronous request/response calls into an add-on (as opposed to the
@@ -20,7 +21,7 @@ export class AddonProxyService {
     if (!manifest) throw new ServiceUnavailableException(`Unknown add-on: ${slug}`);
     const enabled = await this.supervisor.isEnabled(organizationId, slug);
     if (!enabled) throw new ServiceUnavailableException(`Add-on "${slug}" is not enabled for this clinic`);
-    const url = `http://${slug}:${manifest.port}${requestPath}`;
+    const url = `http://${resolveAddonHost(slug)}:${manifest.port}${requestPath}`;
     const res = await axios.post(url, { organizationId, ...(body as object) }, { timeout: 20000 });
     return res.data as T;
   }

@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch, getCachedMe } from "@/lib/api";
+import type { Team } from "@/lib/types";
 
 const tabs = ["Organization", "Branding", "Team & Roles", "Roles & Permissions", "Billing", "API & Webhooks"] as const;
 
@@ -100,6 +101,99 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
   );
 }
 
+function TeamsPanel({ members }: { members: Member[] }) {
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [newTeamName, setNewTeamName] = useState("");
+  const [addingTo, setAddingTo] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => { setTeams(await apiFetch("/teams")); }, []);
+  useEffect(() => { load(); }, [load]);
+
+  async function createTeam() {
+    if (!newTeamName.trim()) return;
+    setSaving(true);
+    try {
+      await apiFetch("/teams", { method: "POST", body: JSON.stringify({ name: newTeamName.trim() }) });
+      setNewTeamName("");
+      await load();
+    } finally { setSaving(false); }
+  }
+
+  async function deleteTeam(id: string) {
+    await apiFetch(`/teams/${id}`, { method: "DELETE" });
+    await load();
+  }
+
+  async function addMember(teamId: string) {
+    if (!selectedUser) return;
+    await apiFetch(`/teams/${teamId}/members`, { method: "POST", body: JSON.stringify({ userId: selectedUser }) });
+    setAddingTo(null);
+    setSelectedUser("");
+    await load();
+  }
+
+  async function removeMember(teamId: string, userId: string) {
+    await apiFetch(`/teams/${teamId}/members/${userId}`, { method: "DELETE" });
+    await load();
+  }
+
+  return (
+    <div className="mt-6 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-zinc-700">Teams</h2>
+        <p className="text-xs text-zinc-400">Named groups for routing conversations — separate from individual roles.</p>
+      </div>
+      <div className="space-y-3">
+        {teams.map((t) => {
+          const memberIds = new Set(t.members.map((m) => m.userId));
+          const eligible = members.filter((m) => !memberIds.has(m.userId));
+          return (
+            <div key={t.id} className="rounded-lg border border-zinc-200 bg-white p-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">{t.name}</div>
+                <button onClick={() => deleteTeam(t.id)} className="text-xs text-red-500 hover:underline">Delete team</button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {t.members.map((m) => (
+                  <span key={m.userId} className="flex items-center gap-1 rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600">
+                    {m.name || m.email}
+                    <button onClick={() => removeMember(t.id, m.userId)} className="text-zinc-400 hover:text-red-500">✕</button>
+                  </span>
+                ))}
+                {t.members.length === 0 && <span className="text-xs text-zinc-400">No members yet.</span>}
+              </div>
+              {addingTo === t.id ? (
+                <div className="mt-2 flex items-center gap-2">
+                  <select value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}
+                    className="rounded-md border border-zinc-300 px-2 py-1 text-xs">
+                    <option value="">Select member…</option>
+                    {eligible.map((m) => <option key={m.userId} value={m.userId}>{m.name || m.email}</option>)}
+                  </select>
+                  <button onClick={() => addMember(t.id)} className="text-xs text-emerald-600 hover:underline">Add</button>
+                  <button onClick={() => { setAddingTo(null); setSelectedUser(""); }} className="text-xs text-zinc-400 hover:underline">Cancel</button>
+                </div>
+              ) : (
+                <button onClick={() => setAddingTo(t.id)} className="mt-2 text-xs text-emerald-600 hover:underline">+ Add member</button>
+              )}
+            </div>
+          );
+        })}
+        {teams.length === 0 && <p className="text-xs text-zinc-400">No teams yet.</p>}
+      </div>
+      <div className="flex items-center gap-2">
+        <input value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} placeholder="e.g. Support Tier 1"
+          className="rounded-md border border-zinc-300 px-2 py-1.5 text-sm" />
+        <button onClick={createTeam} disabled={saving || !newTeamName.trim()}
+          className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40">
+          + New team
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function SettingsView() {
   const [tab, setTab] = useState<Tab>("Organization");
   const [members, setMembers] = useState<Member[]>([]);
@@ -189,6 +283,8 @@ export function SettingsView() {
           </div>
         </div>
       )}
+
+      {tab === "Team & Roles" && <TeamsPanel members={members} />}
 
       {tab === "Roles & Permissions" && (
         <div className="max-w-2xl">

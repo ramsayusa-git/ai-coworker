@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { TenantRequest } from '../tenancy/tenant.middleware';
@@ -21,5 +21,10 @@ export class PatientsController {
   @Get(':id')
   findOne(@Req() req: TenantRequest, @Param('id') id: string) {
     return this.patients.findOne(req.organizationId!, id);
+  }
+
+  @Patch(':id/sign-in')
+  recordSignIn(@Req() req: TenantRequest, @Param('id') id: string) {
+    return this.patients.recordSignIn(req.organizationId!, id);
   }
 }

@@ -14,6 +14,7 @@ import { VisitTemplatesModule } from './visit-templates/visit-templates.module';
 import { CommandCenterModule } from './command-center/command-center.module';
 import { PatientConciergeModule } from './patient-concierge/patient-concierge.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     CommandCenterModule,
     PatientConciergeModule,
     AnalyticsModule,
+    OrganizationsModule,
   ],
 })
 export class AppModule {}

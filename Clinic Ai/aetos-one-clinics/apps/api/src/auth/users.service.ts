@@ -24,4 +24,10 @@ export class UsersService {
     const prisma = await this.prisma.forTenant(organizationId);
     return prisma.user.update({ where: { id: userId }, data: { role } });
   }
+
+  /** Called on each successful sign-in (dev header auth today, Keycloak later). */
+  async recordSignIn(organizationId: string, userId: string) {
+    const prisma = await this.prisma.forTenant(organizationId);
+    return prisma.user.update({ where: { id: userId }, data: { lastSignInAt: new Date() } });
+  }
 }

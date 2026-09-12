@@ -12,6 +12,7 @@ table. This is advisory only — never a diagnosis, always says so.
 """
 import os
 import json
+import re
 from fastapi import FastAPI
 from pydantic import BaseModel
 import httpx
@@ -58,15 +59,23 @@ async def health():
 
 
 def _extract_markers_heuristic(report_text: str) -> list[dict]:
-    """Fallback extraction with no LLM configured: looks for "<name>: <value> <unit>"
-    style lines for the markers we have reference ranges for. Deliberately dumb —
-    the LLM path below is what production would use."""
+    """Fallback extraction with no LLM configured: for each marker name we have a
+    reference range for, finds the label in the text and pulls the first number
+    that follows it (handles "Hemoglobin 10.2 g/dL", "Hemoglobin: 10.2", "Hemoglobin - 10.2 g/dL").
+    Simple regex, not real NLP — the LLM path above is what production would use
+    for messy/OCR'd reports — but it's enough to make the no-API-key path return
+    real values instead of a value-less placeholder."""
     markers = []
     lowered = report_text.lower()
     for key in REFERENCE_RANGES:
         label = key.replace("_", " ")
-        if label in lowered:
-            markers.append({"name": key, "value": None, "unit": REFERENCE_RANGES[key]["unit"]})
+        idx = lowered.find(label)
+        if idx == -1:
+            continue
+        tail = report_text[idx + len(label): idx + len(label) + 40]
+        match = re.search(r"[:\-]?\s*(\d+(?:\.\d+)?)", tail)
+        value = float(match.group(1)) if match else None
+        markers.append({"name": key, "value": value, "unit": REFERENCE_RANGES[key]["unit"]})
     return markers
 
 

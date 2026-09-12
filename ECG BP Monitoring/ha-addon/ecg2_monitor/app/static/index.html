@@ -92,6 +92,79 @@ nav.tabs .badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999
 nav.tabs button[aria-selected="true"] .badge{
   background:color-mix(in srgb,var(--brand) 16%,transparent);color:var(--brand)}
 
+/* ---------------------------------------------------- profile control */
+.who{display:inline-flex;align-items:center;gap:7px;padding:5px 8px 5px 11px;
+  border-radius:999px;border:1px solid var(--line);background:var(--card-2);
+  font-size:12.5px;font-weight:650;color:var(--ink-2);white-space:nowrap}
+.who svg{width:14px;height:14px;opacity:.6;flex:0 0 auto}
+.who select{appearance:none;border:0;background:transparent;font:inherit;
+  font-weight:700;color:var(--brand);cursor:pointer;padding:0 16px 0 0;
+  max-width:150px;text-overflow:ellipsis;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+    linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:right 6px center,right 2px center;
+  background-size:4px 4px,4px 4px;background-repeat:no-repeat}
+.who select:focus{outline:2px solid color-mix(in srgb,var(--brand) 40%,transparent);
+  outline-offset:2px;border-radius:4px}
+.calflag{font-size:11px;font-weight:750;padding:3px 8px;border-radius:999px;
+  background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);
+  white-space:nowrap}
+
+/* profile cards */
+.plist{display:grid;gap:1px;background:var(--line-2)}
+.pcard{background:var(--card);padding:14px 16px;display:flex;align-items:center;
+  gap:12px;flex-wrap:wrap}
+.pcard.is-active{background:color-mix(in srgb,var(--brand) 6%,var(--card));
+  box-shadow:inset 3px 0 0 var(--brand)}
+.pcard .pn{font-weight:700;font-size:14.5px}
+.pcard .pmeta{font-size:12px;color:var(--ink-3)}
+.pcard .pacts{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.btn{appearance:none;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-2);font:inherit;font-size:12.5px;font-weight:650;
+  padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s}
+.btn:hover{border-color:var(--brand);color:var(--brand);
+  background:color-mix(in srgb,var(--brand) 8%,var(--card))}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{filter:brightness(1.1);color:#fff}
+.btn.danger:hover{border-color:color-mix(in srgb,var(--bad) 50%,var(--line));
+  color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--card))}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.badge-active{font-size:10.5px;font-weight:750;letter-spacing:.05em;
+  text-transform:uppercase;padding:3px 8px;border-radius:999px;
+  background:color-mix(in srgb,var(--brand) 15%,transparent);color:var(--brand)}
+.addrow{display:flex;gap:10px;padding:14px 16px;flex-wrap:wrap;
+  border-top:1px solid var(--line-2)}
+input[type=text]{font:inherit;font-size:13.5px;padding:8px 11px;border-radius:8px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);min-width:0}
+input[type=text]:focus{outline:none;border-color:var(--brand);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 15%,transparent)}
+input[type=text].grow{flex:1 1 170px}
+
+/* calibration steppers */
+.calgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:14px;padding:16px}
+.cal{padding:14px;border-radius:var(--r-sm);background:var(--card-2);
+  border:1px solid var(--line-2)}
+.cal .ck{font-size:11.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.cal .ck i{width:7px;height:7px;border-radius:2px;background:var(--c);display:inline-block}
+.cal.c-sys{--c:var(--sys)} .cal.c-dia{--c:var(--dia)} .cal.c-pul{--c:var(--pulse)}
+.stepper-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.stepbtn{appearance:none;width:38px;height:38px;flex:0 0 auto;border-radius:10px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  font:700 19px/1 system-ui,sans-serif;cursor:pointer;transition:all .14s;
+  display:grid;place-items:center}
+.stepbtn:hover{border-color:var(--c);color:var(--c);
+  background:color-mix(in srgb,var(--c) 10%,var(--card));transform:translateY(-1px)}
+.stepbtn:active{transform:translateY(0)}
+.stepbtn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.offval{flex:1;text-align:center;font:750 22px/1 system-ui,sans-serif;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+.offval.zero{color:var(--ink-3)}
+.cal .cpreview{margin-top:9px;font:11.5px/1.5 var(--mono);color:var(--ink-3);
+  text-align:center}
+.cal .cpreview b{color:var(--ink-2)}
+
 /* ---------------------------------------------------------- layout */
 main{max-width:1180px;margin:0 auto;padding:18px 16px 56px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
@@ -172,6 +245,34 @@ canvas#trace{display:block;width:100%;height:250px}
   font-size:13.5px;font-weight:600;color:var(--ink-3);text-align:center;padding:16px;
   background:color-mix(in srgb,var(--ecg-bg) 78%,transparent)}
 .scale{display:flex;gap:16px;padding:9px 16px;font:11.5px var(--mono);color:var(--ink-3)}
+
+/* ------------------------------------------- hero readouts (as on BP) */
+.readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ro{position:relative;padding:18px 16px;border-radius:var(--r);background:var(--card);
+  border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
+.ro::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--c)}
+.ro::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;
+  border-radius:50%;background:var(--c);opacity:.07}
+.ro .k{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.ro .k i{width:7px;height:7px;border-radius:2px;background:var(--c);display:inline-block}
+.ro .v{font:750 40px/1.06 system-ui,sans-serif;letter-spacing:-1.6px;margin:8px 0 2px;
+  color:var(--ink);font-variant-numeric:tabular-nums}
+.ro .v.na{color:var(--ink-3);font-size:30px;letter-spacing:-.5px}
+.ro .u{font-size:12px;color:var(--ink-3);font-weight:600}
+.ro.r-hr{--c:var(--hr)} .ro.r-rr{--c:var(--rr)} .ro.r-batt{--c:var(--batt)}
+
+.verdict{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r);
+  border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);
+  border-left:4px solid var(--cc,var(--ink-3))}
+.verdict .vbadge{font-size:12px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;
+  padding:5px 11px;border-radius:999px;white-space:nowrap;
+  background:color-mix(in srgb,var(--cc,var(--ink-3)) 14%,transparent);color:var(--cc,var(--ink-2))}
+.verdict .vtext{font-size:13px;color:var(--ink-2);min-width:0}
+.verdict .vmeta{margin-left:auto;font:12.5px/1.4 var(--mono);color:var(--ink-3);
+  text-align:right;white-space:nowrap}
+.z-low{--cc:var(--rr)} .z-normal{--cc:var(--ok)}
+.z-elevated{--cc:var(--warn)} .z-high{--cc:var(--bad)} .z-none{--cc:var(--ink-3)}
 
 /* ---------------------------------------------------------- tiles */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
@@ -264,6 +365,10 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
   canvas#trace{height:200px}
   .bignum .n{font-size:38px}
   .tags{margin-left:0;width:100%}
+  .readouts{grid-template-columns:1fr}
+  .ro .v{font-size:34px}
+  .verdict{flex-wrap:wrap}
+  .verdict .vmeta{margin-left:0;text-align:left;width:100%}
 }
 </style>
 </head>
@@ -282,6 +387,13 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
         <h1>ECG Monitor</h1>
         <p id="devline">Aetos Tech Labs · ikinloop ecg2</p>
       </div>
+      <span class="who">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg>
+        <select id="whosel" aria-label="Session is recorded for"></select>
+      </span>
+      <span class="calflag" id="calflag" hidden>calibrated</span>
       <span class="pill" id="statepill"><i class="dot"></i><span id="statetext">Starting…</span></span>
     </div>
 
@@ -296,6 +408,13 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
         History <span class="badge" id="sessbadge">0</span>
+      </button>
+      <button role="tab" aria-selected="false" data-view="profiles">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="8" r="3.2"/><path d="M2.5 19a6.5 6.5 0 0113 0"/>
+          <path d="M16 5.5a3 3 0 010 5.6M17.5 19a6.6 6.6 0 00-2-4.7"/></svg>
+        Profiles <span class="badge" id="profbadge">0</span>
       </button>
       <button role="tab" aria-selected="false" data-view="device">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -317,6 +436,31 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
         <p class="hint" id="nowhint">Bringing the Bluetooth link up.</p>
         <p class="detail" id="nowdetail" hidden></p>
       </div>
+    </div>
+
+    <div class="readouts">
+      <div class="ro r-hr">
+        <div class="k"><i></i>Heart rate</div>
+        <div class="v na" id="v-hr">—</div>
+        <div class="u">bpm · detected from the waveform</div>
+      </div>
+      <div class="ro r-rr">
+        <div class="k"><i></i>RR interval</div>
+        <div class="v na" id="v-rr">—</div>
+        <div class="u">ms between beats</div>
+      </div>
+      <div class="ro r-batt">
+        <div class="k"><i></i>Battery</div>
+        <div class="v na" id="v-batt">—</div>
+        <div class="u">percent</div>
+      </div>
+    </div>
+
+    <div class="verdict" id="verdict">
+      <span class="vbadge" id="vbadge">No signal yet</span>
+      <span class="vtext" id="vtext">Put the device on — the heart rate appears here once a
+        clean signal is detected, and the wear is saved to the local database.</span>
+      <span class="vmeta" id="vmeta"></span>
     </div>
 
     <div class="card trace-card">
@@ -344,17 +488,9 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
     </div>
 
     <div class="tiles">
-      <div class="tile t-rr">
-        <div class="k"><i></i>RR interval</div>
-        <div class="v na" id="v-rr">—</div><div class="u">ms between beats</div>
-      </div>
       <div class="tile t-dev">
         <div class="k"><i></i>Device HR</div>
         <div class="v na" id="v-dev">—</div><div class="u">bpm, from the ecg2 itself</div>
-      </div>
-      <div class="tile t-batt">
-        <div class="k"><i></i>Battery</div>
-        <div class="v na" id="v-batt">—</div><div class="u">percent</div>
       </div>
       <div class="tile t-qual">
         <div class="k"><i></i>Signal score</div>
@@ -393,13 +529,20 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
     <div class="card">
       <header>
         <h2>Recorded sessions</h2>
-        <span class="sub"><a class="dl" href="api/sessions.csv">Export CSV</a></span>
+        <span class="who" style="margin-left:auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 5h16M7 12h10M10 19h4"/></svg>
+          <select id="histfilter" aria-label="Filter sessions by profile"></select>
+        </span>
+        <span class="sub" style="margin-left:0"><a class="dl" id="csvlink"
+          href="api/sessions.csv">Export CSV</a></span>
       </header>
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>Started</th><th>Duration</th><th>Avg HR</th><th>Min</th><th>Max</th>
-            <th>Signal</th><th>Source</th><th></th>
+            <th>Started</th><th>Profile</th><th>Duration</th><th>Avg HR</th>
+            <th>Min</th><th>Max</th><th>Signal</th><th></th>
           </tr></thead>
           <tbody id="sessrows"></tbody>
         </table>
@@ -430,6 +573,42 @@ pre.log{margin:0;padding:14px 16px;max-height:380px;overflow:auto;
         <div class="big">No waveform captures</div>
         Turn on the “Recording” switch in Home Assistant to capture the
         full-resolution waveform as CSV.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ PROFILES -->
+  <section class="stack" id="view-profiles" hidden>
+    <div class="card">
+      <header><h2>Profiles</h2>
+        <span class="sub">each wear is recorded for the selected profile</span>
+      </header>
+      <div class="plist" id="plist"></div>
+      <div class="addrow">
+        <input type="text" id="pname" class="grow" placeholder="Name" maxlength="60">
+        <input type="text" id="pnote" class="grow" placeholder="Note (optional)" maxlength="140">
+        <button class="btn primary" id="padd">Add profile</button>
+      </div>
+      <div class="body" id="perr" hidden></div>
+    </div>
+
+    <div class="card">
+      <header><h2>Calibration</h2><span class="sub" id="calfor"></span></header>
+      <div class="body" style="padding-bottom:0">
+        <p class="note"><b>Align the heart rate with a reference.</b> Compare the
+        rate shown here against a reading you trust — a pulse oximeter, a manual
+        count over 60 seconds — and nudge the offset until they agree. It is stored
+        <b>per profile</b> and applied when a value is displayed or published; the
+        database always keeps the rate the detector actually measured, so changing
+        the offset later re-aligns your whole history rather than corrupting it.
+        The RR interval is left uncalibrated, because it is a directly measured
+        time between beats.</p>
+      </div>
+      <div class="calgrid" id="calgrid"></div>
+      <div class="addrow" style="justify-content:flex-end">
+        <span class="sub" style="margin-right:auto;font-size:12px;color:var(--ink-3)"
+          id="calhint"></span>
+        <button class="btn" id="calreset">Reset to zero</button>
       </div>
     </div>
   </section>
@@ -475,7 +654,172 @@ const BANG  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
             + ' stroke-linecap="round"><path d="M12 7v7"/><path d="M12 17.5v.5"/></svg>';
 
 let status = {}, stats = {}, trend = [], fs = 530;
+let profiles = [], calibration = {};
 let page = 0, pageSize = 25, total = 0, view = "live", openSession = null;
+let histFilter = "all";
+
+const CAL_FIELDS = [["hr", "Heart rate", "c-sys", "bpm"]];
+
+/* ---------------------------------------------------------- profiles */
+function activeProfile(){ return profiles.find(p => p.active) || null; }
+
+async function postJSON(url, body){
+  const r = await fetch(url, {method: "POST",
+    headers: {"Content-Type": "application/json"}, body: JSON.stringify(body || {})});
+  try { return await r.json(); } catch(e) { return null; }
+}
+function showPErr(msg){
+  const e = $("perr");
+  e.hidden = false;
+  e.innerHTML = `<p class="note">${escapeHtml(msg)}</p>`;
+  setTimeout(() => { e.hidden = true; }, 6000);
+}
+
+function renderProfiles(){
+  $("profbadge").textContent = profiles.length;
+  const sel = $("whosel");
+  sel.innerHTML = profiles.map(p =>
+      `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")
+    + `<option value="none">Unassigned</option>`;
+  sel.value = String(status.profile_id == null ? "none" : status.profile_id);
+
+  const off = (calibration || {}).hr || 0;
+  $("calflag").hidden = !off;
+  if(off) $("calflag").textContent = "calibrated " + (off > 0 ? "+" : "") + off + " bpm";
+
+  if(!profiles.length){
+    $("plist").innerHTML = `<div class="pcard"><div>
+      <div class="pn">No profiles yet</div>
+      <div class="pmeta">Add one below — wears recorded before a profile exists
+      stay listed as Unassigned and can be assigned afterwards.</div></div></div>`;
+  } else {
+    $("plist").innerHTML = profiles.map(p => {
+      const bits = [p.sessions + (p.sessions === 1 ? " session" : " sessions")];
+      if(p.total_seconds) bits.push(dur(p.total_seconds) + " recorded");
+      if(p.last_session) bits.push("last " + fmtTime(p.last_session));
+      if(p.cal_hr) bits.push("calibration " + (p.cal_hr > 0 ? "+" : "") + p.cal_hr + " bpm");
+      if(p.note) bits.push(escapeHtml(p.note));
+      return `<div class="pcard ${p.active ? "is-active" : ""}">
+        <div style="min-width:0">
+          <div class="pn">${escapeHtml(p.name)}
+            ${p.active ? '<span class="badge-active">recording</span>' : ""}</div>
+          <div class="pmeta">${bits.join(" · ")}</div></div>
+        <div class="pacts">
+          ${p.active ? "" : `<button class="btn" data-sel="${p.id}">Select</button>`}
+          <button class="btn" data-ren="${p.id}">Rename</button>
+          <button class="btn danger" data-del="${p.id}">Delete</button>
+        </div></div>`;
+    }).join("");
+  }
+  $("plist").querySelectorAll("[data-sel]").forEach(b => {
+    b.onclick = () => selectProfile(b.dataset.sel); });
+  $("plist").querySelectorAll("[data-ren]").forEach(b => {
+    b.onclick = async () => {
+      const p = profiles.find(x => String(x.id) === b.dataset.ren);
+      const name = prompt("Rename profile", p ? p.name : "");
+      if(name === null) return;
+      const r = await postJSON("api/profiles/" + b.dataset.ren, {name: name});
+      if(r && r.error) showPErr(r.error); else loadProfiles();
+    };
+  });
+  $("plist").querySelectorAll("[data-del]").forEach(b => {
+    b.onclick = async () => {
+      const p = profiles.find(x => String(x.id) === b.dataset.del);
+      const n = p ? p.sessions : 0;
+      if(!confirm(`Delete profile "${p ? p.name : ""}"?`
+        + (n ? `\n\nIts ${n} session${n === 1 ? "" : "s"} are kept and become Unassigned.`
+             : ""))) return;
+      await fetch("api/profiles/" + b.dataset.del, {method: "DELETE"});
+      loadProfiles(); loadStats();
+    };
+  });
+  renderCalibration();
+  renderHistFilter();
+}
+
+async function selectProfile(id){
+  await postJSON(`api/profiles/${id}/select`, {});
+  await Promise.all([loadProfiles(), loadStats()]);
+  if(view === "history") loadSessions();
+}
+
+async function loadProfiles(){
+  const d = await fetch("api/profiles").then(r => r.json());
+  profiles = d.profiles || [];
+  const c = await fetch("api/calibration").then(r => r.json());
+  calibration = c.calibration || {};
+  renderProfiles();
+}
+
+/* ---------------------------------------------------------- calibration */
+function renderCalibration(){
+  const p = activeProfile();
+  $("calfor").textContent = p ? "for " + p.name : "for unassigned sessions";
+  $("calhint").textContent = p
+    ? "Applies to " + p.name + "'s heart rate only."
+    : "No profile selected — this offset applies to unassigned sessions.";
+  const v = (calibration || {}).hr || 0;
+  const raw = status.hr_raw != null ? status.hr_raw
+            : (status.hr != null ? status.hr - v : null);
+  const preview = raw != null
+    ? `measured <b>${Math.round(raw)}</b> → shown <b>${Math.max(0, Math.round(raw + v))}</b> bpm`
+    : `applied to every heart-rate value`;
+  $("calgrid").innerHTML = `<div class="cal c-sys">
+      <div class="ck"><i></i>Heart rate</div>
+      <div class="stepper-row">
+        <button class="stepbtn" data-cal="hr" data-d="-1"
+          aria-label="Decrease heart-rate offset">−</button>
+        <span class="offval ${v ? "" : "zero"}">${v > 0 ? "+" : ""}${v}</span>
+        <button class="stepbtn" data-cal="hr" data-d="1"
+          aria-label="Increase heart-rate offset">+</button>
+      </div>
+      <div class="cpreview">${preview}</div></div>`;
+  $("calgrid").querySelectorAll("[data-cal]").forEach(b => {
+    b.onclick = async () => {
+      const next = ((calibration || {}).hr || 0) + parseInt(b.dataset.d, 10);
+      $("calgrid").querySelectorAll("[data-cal]").forEach(x => x.disabled = true);
+      const r = await postJSON("api/calibration", {hr: next});
+      if(r && r.calibration) calibration = r.calibration;
+      await loadStats();
+      renderCalibration(); loadProfiles();
+      if(view === "history") loadSessions();
+    };
+  });
+}
+
+$("calreset").onclick = async () => {
+  if(!confirm("Reset the heart-rate offset to zero?")) return;
+  const r = await postJSON("api/calibration/reset", {});
+  if(r && r.calibration) calibration = r.calibration;
+  await Promise.all([loadStats(), loadProfiles()]);
+  if(view === "history") loadSessions();
+};
+
+$("padd").onclick = async () => {
+  const name = $("pname").value.trim();
+  if(!name){ showPErr("A profile needs a name."); return; }
+  const r = await postJSON("api/profiles", {name: name, note: $("pnote").value.trim()});
+  if(r && r.error){ showPErr(r.error); return; }
+  $("pname").value = ""; $("pnote").value = "";
+  await Promise.all([loadProfiles(), loadStats()]);
+};
+$("pname").addEventListener("keydown", e => { if(e.key === "Enter") $("padd").click(); });
+$("whosel").onchange = e => selectProfile(e.target.value);
+
+function renderHistFilter(){
+  const sel = $("histfilter");
+  sel.innerHTML = `<option value="all">All profiles</option>`
+    + profiles.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")
+    + `<option value="none">Unassigned${
+        stats.unassigned ? " (" + stats.unassigned + ")" : ""}</option>`;
+  sel.value = histFilter;
+  $("csvlink").href = "api/sessions.csv"
+    + (histFilter === "all" ? "" : "?profile=" + encodeURIComponent(histFilter));
+}
+$("histfilter").onchange = e => {
+  histFilter = e.target.value; page = 0;
+  renderHistFilter(); loadSessions();
+};
 
 /* ---------------------------------------------------------- helpers */
 function escapeHtml(s){
@@ -629,10 +973,12 @@ function renderStatus(){
     + (st.model ? "ikinloop " + st.model : "ikinloop ecg2")
     + (st.address ? " · " + st.address : "");
 
-  // headline HR
+  // headline HR — in the trace header and the hero readout
   const hrEl = $("hr");
   if(st.hr){ hrEl.textContent = Math.round(st.hr); hrEl.classList.remove("na"); }
   else { hrEl.textContent = "—"; hrEl.classList.add("na"); }
+  tile("v-hr", st.hr ? Math.round(st.hr) : null);
+  renderVerdict();
 
   const q = st.quality || "warming";
   const qt = $("tag-qual");
@@ -648,7 +994,7 @@ function renderStatus(){
 
   tile("v-rr", st.rr_ms);
   tile("v-dev", st.hr_device);
-  tile("v-batt", st.battery, "%");
+  tile("v-batt", st.battery, st.battery == null ? "" : "%");
   tile("v-qual", st.quality_score ? st.quality_score.toFixed(2) : null);
   tile("v-pkt", st.packets || null);
   $("u-pkt").textContent = st.dropped ? st.dropped + " dropped" : "received";
@@ -669,6 +1015,41 @@ function renderStatus(){
 
   $("log").textContent = (st.log || []).join("\n") || "—";
   renderDevice();
+}
+
+/* Heart-rate zone for the verdict banner. Reference ranges only — the
+   Clinical notice tab is explicit that none of this is diagnostic, and a noisy
+   signal is called out rather than dressed up as a finding. */
+function hrZone(hr){
+  if(hr < 50)  return ["z-low",      "Low",      "Below 50 bpm. Common in trained athletes at rest; otherwise worth noting."];
+  if(hr < 60)  return ["z-normal",   "Resting",  "50–60 bpm — typical resting rate for a fit adult."];
+  if(hr <= 100) return ["z-normal",  "Normal",   "The usual resting reference range for adults is 60–100 bpm."];
+  if(hr <= 120) return ["z-elevated","Elevated", "Above the resting reference range — expected after movement or stress."];
+  return ["z-high", "High", "Above 120 bpm. Expected during exertion; unexpected at rest."];
+}
+
+function renderVerdict(){
+  const st = status, v = $("verdict");
+  const q = st.quality || "warming";
+  if(!st.hr){
+    v.className = "verdict z-none";
+    $("vbadge").textContent = st.contact ? "Waiting for a clean signal" : "No signal yet";
+    $("vtext").textContent = st.contact
+      ? "Electrodes are in contact — hold still while the beat detector locks on."
+      : "Put the device on — the heart rate appears here once a clean signal is "
+        + "detected, and the wear is saved to the local database.";
+    $("vmeta").textContent = "";
+    return;
+  }
+  const z = hrZone(st.hr);
+  v.className = "verdict " + z[0];
+  $("vbadge").textContent = z[1];
+  $("vtext").textContent = q === "noisy"
+    ? "Signal is noisy — treat this number as unreliable and check the electrode contact."
+    : z[2];
+  $("vmeta").innerHTML = (st.rr_ms ? "RR " + st.rr_ms + " ms<br>" : "")
+    + (st.session_id ? "session #" + st.session_id + " · " + dur(st.session_seconds)
+                     : "not recording");
 }
 
 function tile(id, val, suffix){
@@ -791,27 +1172,45 @@ function renderStats(){
 
 /* ---------------------------------------------------------- history */
 async function loadSessions(){
-  const d = await fetch(`api/sessions?limit=${pageSize}&offset=${page * pageSize}`)
-    .then(r => r.json());
+  const q0 = `api/sessions?limit=${pageSize}&offset=${page * pageSize}`
+    + (histFilter === "all" ? "" : "&profile=" + encodeURIComponent(histFilter));
+  const d = await fetch(q0).then(r => r.json());
   total = d.total;
   const rows = d.rows || [];
   $("sessempty").hidden = rows.length > 0;
+  const opts = pid => `<option value="none"${pid == null ? " selected" : ""}>Unassigned</option>`
+    + profiles.map(p => `<option value="${p.id}"${p.id === pid ? " selected" : ""}>`
+        + escapeHtml(p.name) + `</option>`).join("");
   $("sessrows").innerHTML = rows.map(r => {
     const q = r.quality || "warming";
+    const calNote = r.calibrated && r.raw_hr_avg != null
+      ? `<div class="raw">measured ${Math.round(r.raw_hr_avg)}</div>` : "";
     return `<tr class="sess" data-sid="${r.id}">
       <td>${escapeHtml(fmtTime(r.started))}
         <div class="raw">#${r.id}${r.ended ? "" : " · running"}</div></td>
+      <td><span class="who" style="padding:3px 6px 3px 8px">
+        <select data-assign="${r.id}" aria-label="Profile for this session"
+          style="max-width:110px">${opts(r.profile_id)}</select></span></td>
       <td>${dur(r.seconds)}</td>
-      <td class="num" style="color:var(--hr)">${r.hr_avg == null ? "—" : Math.round(r.hr_avg)}</td>
+      <td class="num" style="color:var(--hr)">${
+        r.hr_avg == null ? "—" : Math.round(r.hr_avg)}${calNote}</td>
       <td>${r.hr_min == null ? "—" : Math.round(r.hr_min)}</td>
       <td>${r.hr_max == null ? "—" : Math.round(r.hr_max)}</td>
       <td><span class="chip ${escapeHtml(q)}">${escapeHtml(q)}</span></td>
-      <td>${escapeHtml(r.source || "—")}</td>
       <td style="text-align:right"><button class="iconbtn" data-del="${r.id}">Delete</button></td>
     </tr>
     <tr class="detail" data-for="${r.id}" hidden><td colspan="8"><div
       class="chart-wrap" id="sesschart-${r.id}"></div></td></tr>`;
   }).join("");
+  $("sessrows").querySelectorAll("[data-assign]").forEach(s => {
+    s.onclick = ev => ev.stopPropagation();
+    s.onchange = async ev => {
+      ev.stopPropagation();
+      await postJSON("api/sessions/" + s.dataset.assign + "/profile",
+                     {profile_id: s.value === "none" ? null : parseInt(s.value, 10)});
+      await Promise.all([loadSessions(), loadStats(), loadProfiles()]);
+    };
+  });
 
   const from = total ? page * pageSize + 1 : 0;
   const to = Math.min(total, (page + 1) * pageSize);
@@ -883,8 +1282,10 @@ document.querySelectorAll("nav.tabs button").forEach(b => {
     view = b.dataset.view;
     document.querySelectorAll("nav.tabs button").forEach(x =>
       x.setAttribute("aria-selected", String(x === b)));
-    ["live", "history", "device"].forEach(v => { $("view-" + v).hidden = v !== view; });
+    ["live", "history", "profiles", "device"].forEach(v => {
+      $("view-" + v).hidden = v !== view; });
     if(view === "history"){ loadSessions(); loadRecordings(); }
+    if(view === "profiles") loadProfiles();
     if(view === "live") sizeCanvas();
   };
 });
@@ -916,7 +1317,9 @@ function connect(){
     }
     else if(m.type === "db"){
       stats = m.stats || {}; trend = m.trend || [];
-      renderStats(); renderCharts();
+      if(m.profiles) profiles = m.profiles;
+      if(m.stats && m.stats.calibration) calibration = m.stats.calibration;
+      renderStats(); renderCharts(); renderProfiles();
       if(view === "history") loadSessions();
     }
   };
@@ -932,6 +1335,7 @@ sizeCanvas();
 renderStatus();
 fetch("api/status").then(r => r.json()).then(d => { status = d; renderStatus(); });
 loadStats();
+loadProfiles();
 connect();
 </script>
 </body>

@@ -20,6 +20,12 @@ export async function POST(req: Request) {
     status: body.scheduledAt ? "scheduled" : "draft",
     scheduledAt: body.scheduledAt ?? null,
     stats: { sent: 0, delivered: 0, read: 0, failed: 0 },
+    dailyLimit: body.dailyLimit ?? 250,
+    channelId: null,
+    funnel: { sent: 0, delivered: 0, read: 0, failed: 0, queued: body.audienceCount ?? 0 },
+    kind: body.kind ?? "single",
+    smsFallback: body.smsFallback ?? false,
+    steps: body.steps ?? [],
     createdAt: new Date().toISOString(),
   };
   broadcasts.unshift(b);

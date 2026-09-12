@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { eq, and } from "drizzle-orm";
 import { db } from "../db/client.js";
-import { channels, contacts, conversations, messages } from "../db/schema.js";
+import { channels, contacts, conversations, messages, campaignRecipients } from "../db/schema.js";
 import { getAdapter, type NormalizedInboundMessage } from "../adapters/index.js";
 
 async function ingestInbound(orgId: string, channelId: string, evt: NormalizedInboundMessage) {
@@ -33,6 +33,32 @@ async function ingestInbound(orgId: string, channelId: string, evt: NormalizedIn
     orgId, conversationId: conv.id, channelId, direction: "in",
     body: evt.body, status: "read", providerMsgId: evt.providerMsgId,
   });
+
+  // Wati's "what should happen when someone replies" — the honest, always-on version of it:
+  // a reply mid-sequence pauses that contact's remaining campaign steps rather than talking
+  // over them. A human (or a future rule) can resume the recipient explicitly later.
+  await db.update(campaignRecipients).set({ status: "paused", updatedAt: new Date() })
+    .where(and(eq(campaignRecipients.orgId, orgId), eq(campaignRecipients.contactId, contact.id), eq(campaignRecipients.status, "active")));
+}
+
+// Meta sends delivery receipts ("statuses": sent/delivered/read/failed) on the same
+// webhook as inbound messages, keyed by the message id we stored as providerMsgId when
+// we sent it. This is what turns a campaign's funnel from "sent" into real
+// delivered/read/failed counts instead of a number that never changes.
+const META_STATUS_TO_DB: Record<string, "sent" | "delivered" | "read" | "failed"> = {
+  sent: "sent", delivered: "delivered", read: "read", failed: "failed",
+};
+async function applyDeliveryStatuses(payload: unknown) {
+  const entries = (payload as any)?.entry ?? [];
+  for (const entry of entries) {
+    for (const change of entry.changes ?? []) {
+      for (const st of change.value?.statuses ?? []) {
+        const mapped = META_STATUS_TO_DB[st.status as string];
+        if (!mapped || !st.id) continue;
+        await db.update(messages).set({ status: mapped }).where(eq(messages.providerMsgId, st.id));
+      }
+    }
+  }
 }
 
 export async function webhookRoutes(app: FastifyInstance) {
@@ -62,6 +88,7 @@ export async function webhookRoutes(app: FastifyInstance) {
       if (!channel) continue;
       for (const evt of events) await ingestInbound(channel.orgId, channel.id, evt);
     }
+    await applyDeliveryStatuses(req.body);
     return reply.status(200).send("EVENT_RECEIVED");
   });
 
