@@ -79,6 +79,32 @@ export async function getOrgId(): Promise<string> {
   throw new Error("Not signed in");
 }
 
+// For /v1/partners/... routes, which are scoped by :partnerId rather than the cached
+// org — used by the Partner Console (multi-vendor/reseller management, white-label).
+export async function partnerFetch(path: string, init?: RequestInit) {
+  const token = getToken();
+  const url = `${API_BASE}/v1${path}`;
+  const res = await fetch(url, {
+    ...init,
+    cache: "no-store",
+    headers: {
+      "content-type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers ?? {}),
+    },
+  });
+  if (res.status === 401) {
+    clearSession();
+    if (typeof window !== "undefined") window.location.href = "/login";
+    throw new Error("Session expired — please sign in again");
+  }
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`API ${res.status}: ${body}`);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
 export async function apiFetch(path: string, init?: RequestInit) {
   const token = getToken();
   const orgId = await getOrgId();

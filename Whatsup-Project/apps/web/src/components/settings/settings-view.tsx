@@ -2,7 +2,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch, getCachedMe } from "@/lib/api";
 
-const tabs = ["Organization", "Branding", "Team & Roles", "Billing", "API & Webhooks"] as const;
+const tabs = ["Organization", "Branding", "Team & Roles", "Roles & Permissions", "Billing", "API & Webhooks"] as const;
+
+const RBAC_MATRIX: Array<{ role: string; scope: string; can: string }> = [
+  { role: "platform_admin", scope: "Platform", can: "Full access across every partner and org (Whatsup ops team only)." },
+  { role: "partner_owner", scope: "Partner", can: "Full control of the partner account: branding, billing, client orgs, other partner members." },
+  { role: "partner_admin", scope: "Partner", can: "Same as partner_owner except cannot remove the owner or change billing mode." },
+  { role: "partner_support", scope: "Partner", can: "Read-only: view client orgs and health, no branding/billing edits, no client data unless the org grants access." },
+  { role: "org_owner", scope: "Org", can: "Full control of one org: billing, channels, team, settings, all data." },
+  { role: "org_admin", scope: "Org", can: "Manage channels, team, templates, campaigns. Cannot change billing or delete the org." },
+  { role: "supervisor", scope: "Org", can: "Manage inbox assignment, view all conversations/analytics, cannot manage billing or channels." },
+  { role: "agent", scope: "Org", can: "Handle assigned/open conversations, use templates, cannot manage settings or see billing." },
+  { role: "viewer", scope: "Org", can: "Read-only across inbox and analytics — for auditors or stakeholders." },
+];
 type Tab = (typeof tabs)[number];
 
 type Member = { userId: string; name: string | null; email: string; role: string; status: string };
@@ -60,7 +72,9 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
               Role
               <select className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm" value={role}
                 onChange={(e) => setRole(e.target.value)}>
+                <option value="viewer">Viewer</option>
                 <option value="agent">Agent</option>
+                <option value="supervisor">Supervisor</option>
                 <option value="org_admin">Org Admin</option>
                 <option value="org_owner">Org Owner</option>
               </select>
@@ -172,6 +186,33 @@ export function SettingsView() {
               className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
               + Invite member
             </button>
+          </div>
+        </div>
+      )}
+
+      {tab === "Roles & Permissions" && (
+        <div className="max-w-2xl">
+          <p className="mb-3 text-xs text-zinc-500">
+            Full role set across the platform. Invites here only offer org-scoped roles (viewer through org_owner) —
+            partner_owner/admin/support are granted from the Partner Console, platform_admin is Whatsup-internal.
+            Enforcement today covers billing/channel/invite actions for org_owner vs org_admin; the finer per-role
+            gates (supervisor/agent/viewer) are the target from the architecture doc and are being rolled out route by route.
+          </p>
+          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
+            <table className="w-full text-sm">
+              <thead className="bg-zinc-50 text-left text-xs text-zinc-500">
+                <tr><th className="px-4 py-2 font-medium">Role</th><th className="px-4 py-2 font-medium">Scope</th><th className="px-4 py-2 font-medium">Can</th></tr>
+              </thead>
+              <tbody>
+                {RBAC_MATRIX.map((r) => (
+                  <tr key={r.role} className="border-t border-zinc-100 align-top">
+                    <td className="px-4 py-2 font-mono text-xs text-zinc-700">{r.role}</td>
+                    <td className="px-4 py-2 text-xs text-zinc-500">{r.scope}</td>
+                    <td className="px-4 py-2 text-zinc-600">{r.can}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

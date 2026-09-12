@@ -21,9 +21,37 @@ export const partners = pgTable("partners", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Partner-level team: users who manage a partner's client orgs (multi-vendor/reseller
+// management + white-label). Distinct from org_members — a partner_owner/admin does not
+// automatically get access to a client org's data; that's governed separately (see the
+// architecture doc's partner_access flag), only to the roster of orgs under the partner.
+export const partnerMembers = pgTable("partner_members", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  partnerId: uuid("partner_id").notNull().references(() => partners.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  role: roleEnum("role").notNull().default("partner_admin"), // partner_owner | partner_admin | partner_support
+  status: text("status").default("active"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.partnerId, t.userId)]);
+
+export const partnerInvites = pgTable("partner_invites", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  partnerId: uuid("partner_id").notNull().references(() => partners.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  role: roleEnum("role").notNull().default("partner_admin"), // partner_owner | partner_admin | partner_support
+  token: text("token").notNull().unique(),
+  invitedBy: uuid("invited_by").references(() => users.id),
+  acceptedAt: timestamp("accepted_at"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const orgs = pgTable("orgs", {
   id: uuid("id").primaryKey().defaultRandom(),
   partnerId: uuid("partner_id").references(() => partners.id),
+  // How much this org's data the owning partner can see: none | metadata | full. Explicit
+  // per-org grant per the architecture doc — a partner does NOT get org data access by default.
+  partnerAccess: text("partner_access").default("none"),
   name: text("name").notNull(),
   planId: text("plan_id").default("free"),
   walletPaise: integer("wallet_paise").default(0),

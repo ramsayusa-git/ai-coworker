@@ -5,6 +5,7 @@ import authPlugin from "./plugins/auth.js";
 import { authRoutes } from "./modules/auth.js";
 import { webhookRoutes } from "./modules/webhooks.js";
 import { meRoutes } from "./modules/me.js";
+import { partnersRoutes } from "./modules/partners.js";
 import { contactsRoutes } from "./modules/contacts.js";
 import { channelsRoutes } from "./modules/channels.js";
 import { conversationsRoutes } from "./modules/conversations.js";
@@ -27,6 +28,9 @@ await app.register(authRoutes, { prefix: "/v1" });
 await app.register(webhookRoutes, { prefix: "/v1" });
 // Authenticated but no :orgId in the URL
 await app.register(meRoutes, { prefix: "/v1" });
+// Partner (multi-vendor/reseller) console — scoped by :partnerId, not :orgId; each handler
+// authenticates and checks partner_members itself, since a partner isn't an org.
+await app.register(partnersRoutes, { prefix: "/v1" });
 
 // Everything under /v1/orgs/:orgId/* requires a valid token whose orgId matches the URL.
 await app.register(async (scoped) => {
