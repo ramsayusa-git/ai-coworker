@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos One Care - India's Most Compliant Healthcare Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #003d82;
+            --primary-dark: #002855;
+            --secondary: #0066cc;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --light-bg: #f8f9fb;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .navbar {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            background: linear-gradient(135deg, #00897b, #00d4aa);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            margin-left: 1rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff5722 100%);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 110, 64, 0.3);
+        }
+
+        .cta-button-secondary {
+            background: var(--white);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .cta-button-secondary:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #0055a8 50%, var(--secondary) 100%);
+            color: var(--white);
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-tagline {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .compliance-bar {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 2rem auto;
+            max-width: 700px;
+            font-size: 0.9rem;
+        }
+
+        .compliance-bar span {
+            display: inline-block;
+            margin: 0 1rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        /* Trust Metrics */
+        .trust-metrics {
+            background: var(--white);
+            padding: 3rem 2rem;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+            position: relative;
+            top: -2rem;
+            margin-bottom: 2rem;
+        }
+
+        .metrics-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .metric {
+            padding: 1rem;
+        }
+
+        .metric-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .metric-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--success), #00d4aa);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* Section Styles */
+        .section {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-gray);
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Checklist Styles */
+        .checklist-container {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .checklist-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .checklist-item {
+            padding: 1rem;
+            background: var(--light-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--success);
+            transition: all 0.3s;
+        }
+
+        .checklist-item.missing {
+            border-left-color: var(--danger);
+            background: #fff5f5;
+        }
+
+        .checklist-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .check-status {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .check-status.complete {
+            color: var(--success);
+        }
+
+        .check-status.missing {
+            color: var(--danger);
+        }
+
+        .checklist-text {
+            margin-top: 0.5rem;
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 61, 130, 0.15);
+            border-color: var(--secondary);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            font-size: 0.9rem;
+        }
+
+        .feature-list li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-gray);
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .feature-list li.missing {
+            color: var(--danger);
+        }
+
+        .feature-list li.missing:before {
+            content: "*";
+            color: var(--danger);
+        }
+
+        /* Compliance Section */
+        .compliance-seals {
+            background: var(--light-bg);
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+        }
+
+        .seals-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .seals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .seal {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .seal:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 16px rgba(0, 61, 130, 0.15);
+        }
+
+        .seal-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .seal h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .seal p {
+            color: var(--text-gray);
+            font-size: 0.85rem;
+        }
+
+        /* FAQ Section */
+        .faq {
+            background: var(--light-bg);
+            padding: 4rem 2rem;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--white);
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: var(--light-bg);
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s, padding 0.3s;
+            color: var(--text-gray);
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff5722 100%);
+            color: var(--white);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: 12px;
+            margin: 3rem auto;
+            max-width: 1200px;
+        }
+
+        .cta-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.95;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: var(--white);
+            padding: 3rem 2rem 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-column h4 {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: var(--accent);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.85rem;
+            }
+
+            .trust-badge {
+                display: none;
+            }
+
+            .navbar {
+                padding: 0 1rem;
+                flex-wrap: wrap;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .checklist-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-section {
+                margin: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="navbar">
+            <a href="#" class="logo">❤️ Aetos One Care<span class="trust-badge">ISO 27001</span></a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#checklist">Checklist</a></li>
+                <li><a href="#compliance">Compliance</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#" class="cta-button">Book Now</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-tagline">🏆 India's Most Compliant Healthcare Platform</div>
+            <h1>Your Health, Secured & Simplified</h1>
+            <div class="subtitle">DPDPA Certified | NMC Approved | ABDM Integrated</div>
+            <p>Connect with 50,000+ verified doctors. Access complete digital health records. Manage wellness—all in one secure, compliant platform trusted by 2M+ Indians.</p>
+            <div class="compliance-bar">
+                ✓ <span>DPDPA 2023 Compliant</span>
+                ✓ <span>ISO 27001 Certified</span>
+                ✓ <span>ABDM Ready</span>
+                ✓ <span>NMC Approved</span>
+            </div>
+            <div class="hero-buttons">
+                <button class="cta-button">Book a Consultation</button>
+                <button class="cta-button-secondary">Check Insurance Eligibility</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Metrics -->
+    <section class="trust-metrics">
+        <div class="metrics-container">
+            <div class="metric">
+                <div class="metric-number">50,000+</div>
+                <div class="metric-label">NMC-Verified Doctors</div>
+                <div class="metric-badge">License Verified</div>
+            </div>
+            <div class="metric">
+                <div class="metric-number">2M+</div>
+                <div class="metric-label">Secure Consultations</div>
+                <div class="metric-badge">Encrypted</div>
+            </div>
+            <div class="metric">
+                <div class="metric-number">4.8★</div>
+                <div class="metric-label">Patient Satisfaction</div>
+                <div class="metric-badge">Verified Reviews</div>
+            </div>
+            <div class="metric">
+                <div class="metric-number">24/7</div>
+                <div class="metric-label">Emergency Support</div>
+                <div class="metric-badge">Instant Response</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features">
+        <h2 class="section-title">Core Features (Implemented & Planned)</h2>
+        <p class="section-subtitle">✓ = Ready | * = Planned (in red)</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">👨‍⚕️</div>
+                <h3>Telemedicine Consultations</h3>
+                <ul class="feature-list">
+                    <li>Video consultations</li>
+                    <li>50K+ verified doctors</li>
+                    <li>Digital prescriptions</li>
+                    <li class="missing">Call recording & replay</li>
+                    <li class="missing">Real-time translation (9+ languages)</li>
+                    <li class="missing">Screen sharing</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Digital Health Records</h3>
+                <ul class="feature-list">
+                    <li>Cloud storage (lifetime)</li>
+                    <li>ABDM integration</li>
+                    <li>Lifetime guarantee</li>
+                    <li class="missing">OCR scanning</li>
+                    <li class="missing">Medical timeline</li>
+                    <li class="missing">Medication checker</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💊</div>
+                <h3>Medicine Delivery</h3>
+                <ul class="feature-list">
+                    <li>2-4 hour delivery</li>
+                    <li>Digital prescription support</li>
+                    <li>Insurance accepted</li>
+                    <li class="missing">Real-time GPS tracking</li>
+                    <li class="missing">Pharmacist consultation</li>
+                    <li class="missing">OTC marketplace</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧬</div>
+                <h3>Lab Tests</h3>
+                <ul class="feature-list">
+                    <li>400+ diagnostic tests</li>
+                    <li>Home sample collection</li>
+                    <li>24-48 hour reports</li>
+                    <li class="missing">AI test interpretation</li>
+                    <li class="missing">Previous comparison</li>
+                    <li class="missing">Group booking discounts</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏃‍♀️</div>
+                <h3>Wellness Programs</h3>
+                <ul class="feature-list">
+                    <li>Wellness programs</li>
+                    <li>24/7 support</li>
+                    <li>Basic health tracking</li>
+                    <li class="missing">Diabetes management</li>
+                    <li class="missing">Mental health counseling</li>
+                    <li class="missing">Wearable integration</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Security & Privacy</h3>
+                <ul class="feature-list">
+                    <li>256-bit encryption</li>
+                    <li>India-only servers</li>
+                    <li>DPDPA 2023 compliant</li>
+                    <li class="missing">2FA mandatory</li>
+                    <li class="missing">Audit trails</li>
+                    <li class="missing">Breach protocol</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Checklist -->
+    <section class="section" id="checklist">
+        <h2 class="section-title">Complete Features Checklist (286 Items Total)</h2>
+        <p class="section-subtitle">Current Completion: 42/286 (14.7%)</p>
+
+        <div class="checklist-container">
+            <div class="checklist-title">📋 Telemedicine & Consultations (15 Features)</div>
+            <div class="checklist-grid">
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">Video consultations</div>
+                </div>
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">50K+ verified doctors</div>
+                </div>
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">Digital prescriptions</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Call recording & replay</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Real-time translation (9+ languages)</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Screen sharing</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Appointment reminders</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Consultation rescheduling</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Refund policy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="checklist-container">
+            <div class="checklist-title">🔐 Digital Health Records (15 Features)</div>
+            <div class="checklist-grid">
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">Cloud storage (lifetime)</div>
+                </div>
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">ABDM integration</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">OCR scanning</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Medical history timeline</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Auto-categorization by AI</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Barcode scanning</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Access audit trail</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Allergy tracking</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Medication interaction checker</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="checklist-container">
+            <div class="checklist-title">💊 Medicine Delivery & Pharmacy (13 Features)</div>
+            <div class="checklist-grid">
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">2-4 hour delivery</div>
+                </div>
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">Digital prescription support</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Pharmacy partner directory</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Real-time GPS tracking</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Pharmacist consultation</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Price comparison (generic vs brand)</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Prescription refill automation</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">OTC medicine marketplace</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Medicine side effects checker</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="checklist-container">
+            <div class="checklist-title">🧬 Diagnostics & Lab Tests (14 Features)</div>
+            <div class="checklist-grid">
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">400+ diagnostic tests</div>
+                </div>
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">Home sample collection</div>
+                </div>
+                <div class="checklist-item">
+                    <span class="check-status complete">✓</span>
+                    <div class="checklist-text">24-48 hour reports</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">PDF report download</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">AI result interpretation</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Previous result comparison</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Auto-refill recommendations</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Group booking discounts</div>
+                </div>
+                <div class="checklist-item missing">
+                    <span class="check-status missing">*</span>
+                    <div class="checklist-text">Lab comparison & ratings</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compliance Seals -->
+    <section class="compliance-seals" id="compliance">
+        <div class="seals-container">
+            <h2 class="section-title">Compliance Checklist (62 Standards)</h2>
+            <p class="section-subtitle">Current Completion: 8/62 (12.9%)</p>
+            <div class="seals-grid">
+                <div class="seal">
+                    <div class="seal-icon">✓</div>
+                    <h4>DPDPA 2023</h4>
+                    <p>Digital Personal Data Protection compliance</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">✓</div>
+                    <h4>NMC Approved</h4>
+                    <p>National Medical Commission registration</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">✓</div>
+                    <h4>ISO 27001</h4>
+                    <p>Information Security Management</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">✓</div>
+                    <h4>ABDM Integrated</h4>
+                    <p>Ayushman Bharat Digital Mission</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">*</div>
+                    <h4>DPIA Audit</h4>
+                    <p style="color: var(--danger);">Data Protection Impact Assessment (Planned)</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">*</div>
+                    <h4>Doctor Verification</h4>
+                    <p style="color: var(--danger);">Monthly NMC auto-check (Planned)</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">*</div>
+                    <h4>Data Rights Tools</h4>
+                    <p style="color: var(--danger);">Access/Delete/Correct (Planned)</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">*</div>
+                    <h4>Security Audit</h4>
+                    <p style="color: var(--danger);">Third-party annual audit (Planned)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="faq-container">
+            <h2 class="section-title" style="color: var(--primary);">Frequently Asked Questions</h2>
+
+            <div class="faq-item active">
+                <div class="faq-question">
+                    <span>What's the difference between ✓ and * in the checklist?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <strong>✓ (Green)</strong> = Feature is fully implemented and available now.<br>
+                    <strong>* (Red)</strong> = Feature is planned/in development and will be added soon. This shows our roadmap transparently.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>When will the missing features (*) be available?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Our implementation roadmap is:<br>
+                    <strong>Phase 1 (2 weeks):</strong> Core compliance features<br>
+                    <strong>Phase 2 (4 weeks):</strong> Essential missing features<br>
+                    <strong>Phase 3 (8 weeks):</strong> Competitive features<br>
+                    <strong>Phase 4 (12 weeks):</strong> Nice-to-have enhancements
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How many features are currently implemented?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Currently: <strong>42 features implemented (✓) out of 286 total</strong> = 14.7% complete.<br>
+                    244 features are planned (*) to be added in upcoming phases.<br>
+                    This ensures transparency about what's ready vs. what's coming.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Is it safe to use Aetos One Care now?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Yes, absolutely safe. We have implemented 8/62 compliance standards including DPDPA 2023, NMC approval, ISO 27001, and ABDM integration. Your data is encrypted (256-bit) and stored on India-based servers only. We're adding more compliance features in Phase 1.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Why show incomplete features? Why not launch when everything is ready?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Transparency is part of our core values. We believe in showing what we have, what we're working on, and when features will arrive. This builds trust and allows users to plan accordingly. Better to launch with core features and improve than to delay months waiting for perfection.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="cta-section">
+        <h2>Ready to Experience India's Safest Healthcare Platform?</h2>
+        <p>Join thousands who trust Aetos One Care for secure, compliant healthcare.</p>
+        <button class="cta-button" style="background: var(--white); color: var(--accent); margin-top: 1rem;">Get Started Free</button>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>About</h4>
+                <ul>
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Products</h4>
+                <ul>
+                    <li><a href="#">Telemedicine</a></li>
+                    <li><a href="#">Health Records</a></li>
+                    <li><a href="#">Lab Tests</a></li>
+                    <li><a href="#">Wellness</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Compliance</h4>
+                <ul>
+                    <li><a href="#">DPDPA Compliance</a></li>
+                    <li><a href="#">Security</a></li>
+                    <li><a href="#">ABDM Integration</a></li>
+                    <li><a href="#">Audit Reports</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Aetos One Care. Commitment to transparency: 42/286 features complete | 8/62 compliance standards met<br>DPDPA Compliant | ISO 27001 Certified | NMC Approved | ABDM Integrated</p>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                q.parentElement.classList.toggle('active');
+            });
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const el = document.querySelector(href);
+                    el && el.scrollIntoView({behavior: 'smooth'});
+                }
+            });
+        });
+    </script>
+</body>
+</html>

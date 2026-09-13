@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos One Care - Phase 1: Doctor Verification & Insurance Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #003d82;
+            --primary-dark: #002855;
+            --secondary: #0066cc;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --light-bg: #f8f9fb;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+
+        /* ===== NAVIGATION ===== */
+        nav {
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .navbar {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .phase-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6e40, #ff5722);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 1rem;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff5722 100%);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 110, 64, 0.3);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .emergency-cta {
+            background: var(--danger);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+            margin: 1rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+        }
+
+        /* ===== EMERGENCY CONSULTATION SLA ===== */
+        .emergency-section {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-left: 4px solid var(--warning);
+            padding: 2rem;
+            margin: 2rem;
+            border-radius: 8px;
+        }
+
+        .emergency-section h3 {
+            color: var(--warning);
+            margin-bottom: 1rem;
+        }
+
+        .sla-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .sla-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border-top: 3px solid var(--warning);
+        }
+
+        .sla-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--warning);
+        }
+
+        .sla-label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-top: 0.5rem;
+        }
+
+        /* ===== DOCTOR VERIFICATION TOOL ===== */
+        .verification-section {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .verification-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+
+        .doctor-search {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 61, 130, 0.1);
+        }
+
+        .doctor-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .doctor-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 61, 130, 0.15);
+        }
+
+        .doctor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .doctor-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #00897b, #00d4aa);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .doctor-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .detail-item {
+            background: var(--light-bg);
+            padding: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-dark);
+            margin-top: 0.3rem;
+        }
+
+        /* ===== INSURANCE ELIGIBILITY CHECKER ===== */
+        .insurance-section {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+        }
+
+        .insurance-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .insurance-section h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .insurance-checker {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .insurance-result {
+            background: linear-gradient(135deg, #f0f4ff, #e3f2fd);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .insurance-result.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-status {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .eligible {
+            color: var(--success);
+        }
+
+        .not-eligible {
+            color: var(--danger);
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        /* ===== DATA RIGHTS TOOLS ===== */
+        .data-rights-section {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .data-rights-section h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .rights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .rights-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .rights-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 61, 130, 0.15);
+        }
+
+        .rights-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .rights-card h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .rights-card p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .rights-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .rights-button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-button {
+            float: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-gray);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-button:hover {
+            color: var(--text-dark);
+        }
+
+        .modal h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            clear: both;
+        }
+
+        .modal p {
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .modal textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 0.8rem;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer-phase {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .doctor-header {
+                flex-direction: column;
+            }
+
+            .sla-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="navbar">
+            <a href="#" class="logo">❤️ Aetos One Care <span class="phase-badge">Phase 1</span></a>
+            <ul class="nav-links">
+                <li><a href="#emergency">Emergency</a></li>
+                <li><a href="#doctors">Doctors</a></li>
+                <li><a href="#insurance">Insurance</a></li>
+                <li><a href="#rights">My Rights</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>India's Most Compliant Healthcare Platform</h1>
+            <p>Verified doctors, emergency care, insurance coverage, and your complete data control</p>
+            <a href="#emergency" class="emergency-cta">🚨 Need Emergency Care? (Response in <5 min)</a>
+        </div>
+    </section>
+
+    <!-- EMERGENCY CONSULTATION SLA -->
+    <section class="emergency-section" id="emergency">
+        <h3>⚡ Emergency Consultation - Guaranteed Response Time</h3>
+        <p>For urgent medical issues, connect with an available doctor immediately</p>
+
+        <div class="sla-metrics">
+            <div class="sla-item">
+                <div class="sla-number">&lt;5 min</div>
+                <div class="sla-label">Response Time Guarantee</div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-number">24/7</div>
+                <div class="sla-label">Always Available</div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-number">₹599</div>
+                <div class="sla-label">Emergency Consultation Fee</div>
+            </div>
+            <div class="sla-item">
+                <div class="sla-number">Specialist</div>
+                <div class="sla-label">Escalation Included</div>
+            </div>
+        </div>
+
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem;">
+            <h4 style="color: var(--primary); margin-bottom: 1rem;">How Emergency Consultation Works:</h4>
+            <ol style="margin-left: 1.5rem; color: var(--text-gray);">
+                <li>Click "Emergency" button or call 1-800-AETOS-1</li>
+                <li>Brief symptom description (30 seconds)</li>
+                <li>Doctor connects within 5 minutes</li>
+                <li>Video consultation starts immediately</li>
+                <li>Prescription & referral if needed</li>
+                <li>Escalation to specialist or hospital admission if critical</li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- DOCTOR VERIFICATION TOOL -->
+    <section class="verification-section" id="doctors">
+        <h2>✅ Verify Your Doctor's Credentials</h2>
+
+        <div class="doctor-search">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">Search Verified Doctors by NMC Registration</h3>
+            <input type="text" class="search-input" id="doctorSearch" placeholder="Search doctor name, NMC registration number, or specialty...">
+        </div>
+
+        <div id="doctorResults">
+            <!-- Sample Doctor Card -->
+            <div class="doctor-card">
+                <div class="doctor-header">
+                    <div>
+                        <div class="doctor-name">Dr. Rajesh Kumar</div>
+                        <div style="color: var(--text-gray); font-size: 0.95rem;">Cardiologist</div>
+                    </div>
+                    <span class="verification-badge">✓ Verified</span>
+                </div>
+
+                <div class="doctor-details">
+                    <div class="detail-item">
+                        <div class="detail-label">NMC Registration</div>
+                        <div class="detail-value">#MCI-2015-12345</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">License Status</div>
+                        <div class="detail-value" style="color: var(--success);">✓ Active</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Qualifications</div>
+                        <div class="detail-value">MD, DM Cardiology</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Experience</div>
+                        <div class="detail-value">15+ Years</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Specialties</div>
+                        <div class="detail-value">Cardiology, Hypertension</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Consultation Fee</div>
+                        <div class="detail-value">₹299</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="cta-button" style="flex: 1;">Book Consultation</button>
+                    <button class="rights-button" style="flex: 1; background: var(--secondary);">View Full Profile</button>
+                </div>
+            </div>
+
+            <!-- More doctors would be loaded here via JavaScript -->
+        </div>
+    </section>
+
+    <!-- INSURANCE ELIGIBILITY CHECKER -->
+    <section class="insurance-section" id="insurance">
+        <div class="insurance-container">
+            <h2>💳 Check Your Ayushman Bharat Eligibility</h2>
+
+            <div class="insurance-checker">
+                <div class="form-group">
+                    <label for="aadhar">Aadhaar Number</label>
+                    <input type="text" id="aadhar" class="form-control" placeholder="Enter last 4 digits of Aadhaar" maxlength="4">
+                </div>
+
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <select id="state" class="form-control">
+                        <option>Select Your State</option>
+                        <option>Karnataka</option>
+                        <option>Tamil Nadu</option>
+                        <option>Maharashtra</option>
+                        <option>Delhi</option>
+                        <option>Gujarat</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="income">Annual Family Income</label>
+                    <select id="income" class="form-control">
+                        <option>Select Income Range</option>
+                        <option>Below ₹1 Lakh</option>
+                        <option>₹1 - 5 Lakh</option>
+                        <option>₹5 - 10 Lakh</option>
+                        <option>Above ₹10 Lakh</option>
+                    </select>
+                </div>
+
+                <button class="cta-button" style="width: 100%;" onclick="checkEligibility()">Check Eligibility</button>
+
+                <div class="insurance-result" id="insuranceResult">
+                    <div class="result-status eligible" id="resultStatus"></div>
+                    <div class="result-details">
+                        <div class="result-item">
+                            <div class="detail-label">Coverage Amount</div>
+                            <div class="detail-value" id="coverage">₹5,00,000</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="detail-label">Treatment Types</div>
+                            <div class="detail-value">Hospitalization, Day Care</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="detail-label">Processing Time</div>
+                            <div class="detail-value">Instant</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DATA RIGHTS TOOLS (DPDPA 2023) -->
+    <section class="data-rights-section" id="rights">
+        <h2>🔐 Your DPDPA 2023 Data Rights</h2>
+        <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
+            Under Digital Personal Data Protection Act, 2023, you have complete control over your health data
+        </p>
+
+        <div class="rights-grid">
+            <!-- Right to Access -->
+            <div class="rights-card">
+                <div class="rights-icon">📥</div>
+                <h3>Right to Access</h3>
+                <p>Download a copy of all your personal data, health records, and consultation history in a portable format</p>
+                <button class="rights-button" onclick="openModal('access')">Request Data Export</button>
+            </div>
+
+            <!-- Right to Deletion -->
+            <div class="rights-card">
+                <div class="rights-icon">🗑️</div>
+                <h3>Right to Deletion</h3>
+                <p>Request permanent deletion of your personal data and health records from our servers</p>
+                <button class="rights-button" onclick="openModal('delete')">Request Deletion</button>
+            </div>
+
+            <!-- Right to Correction -->
+            <div class="rights-card">
+                <div class="rights-icon">✏️</div>
+                <h3>Right to Correction</h3>
+                <p>Update or correct any inaccurate personal information in your profile and health records</p>
+                <button class="rights-button" onclick="openModal('correct')">Correct Information</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODALS -->
+    <div id="accessModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('access')">&times;</span>
+            <h2>Request Data Export (Right to Access)</h2>
+            <p>We will compile all your personal data and health records into a portable format (PDF/CSV) and send it to your email within 7 business days.</p>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" class="form-control" placeholder="your@email.com" id="accessEmail">
+            </div>
+
+            <div class="form-group">
+                <label>Format Preference</label>
+                <select class="form-control">
+                    <option>PDF Document</option>
+                    <option>CSV Spreadsheet</option>
+                    <option>JSON (Machine Readable)</option>
+                </select>
+            </div>
+
+            <button class="cta-button" style="width: 100%;" onclick="submitRequest('access')">Submit Request</button>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('delete')">&times;</span>
+            <h2>Request Data Deletion (Right to Deletion)</h2>
+            <p><strong>⚠️ Warning:</strong> This will permanently delete your account and all associated data. This action cannot be undone.</p>
+
+            <div class="form-group">
+                <label>Reason for Deletion (Optional)</label>
+                <textarea placeholder="Why do you want to delete your account?" id="deleteReason"></textarea>
+            </div>
+
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                <strong>Your data will be deleted within 30 days:</strong>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>All health records</li>
+                    <li>Consultation history</li>
+                    <li>Personal information</li>
+                    <li>Payment history</li>
+                </ul>
+            </div>
+
+            <button class="cta-button" style="width: 100%; background: var(--danger);" onclick="submitRequest('delete')">Confirm Deletion</button>
+        </div>
+    </div>
+
+    <div id="correctModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('correct')">&times;</span>
+            <h2>Request Data Correction (Right to Correction)</h2>
+            <p>Let us know which information needs to be corrected and what the correct information should be.</p>
+
+            <div class="form-group">
+                <label>What information is incorrect?</label>
+                <textarea placeholder="e.g., My date of birth is wrong..." id="incorrectData"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Correct Information</label>
+                <textarea placeholder="Provide the correct details..." id="correctData"></textarea>
+            </div>
+
+            <button class="cta-button" style="width: 100%;" onclick="submitRequest('correct')">Submit Correction</button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-phase">
+            <h3>Phase 1 Features</h3>
+            <p>✓ Doctor verification with NMC badge | Emergency SLA (<5 min) | Insurance eligibility checker | DPDPA 2023 data rights tools</p>
+        </div>
+        <p>&copy; 2026 Aetos One Care. All rights reserved. | DPDPA 2023 Compliant | NMC Approved | ABDM Integrated</p>
+    </footer>
+
+    <script>
+        // Doctor Search
+        document.getElementById('doctorSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            // In production, this would fetch from backend
+            console.log('Searching for:', searchTerm);
+        });
+
+        // Insurance Eligibility Check
+        function checkEligibility() {
+            const aadhar = document.getElementById('aadhar').value;
+            const state = document.getElementById('state').value;
+            const income = document.getElementById('income').value;
+
+            if (!aadhar || state === 'Select Your State' || income === 'Select Income Range') {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const result = document.getElementById('insuranceResult');
+            const eligible = income !== 'Above ₹10 Lakh';
+
+            document.getElementById('resultStatus').textContent =
+                eligible ? '✓ You are eligible for Ayushman Bharat coverage!' : '✗ You may not be eligible at this time';
+
+            document.getElementById('resultStatus').className = 'result-status ' + (eligible ? 'eligible' : 'not-eligible');
+
+            result.classList.add('show');
+            result.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Modal Functions
+        function openModal(type) {
+            const modalId = type + 'Modal';
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function closeModal(type) {
+            const modalId = type + 'Modal';
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function submitRequest(type) {
+            alert('Your ' + type + ' request has been submitted. You will receive a confirmation email shortly.');
+            closeModal(type);
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

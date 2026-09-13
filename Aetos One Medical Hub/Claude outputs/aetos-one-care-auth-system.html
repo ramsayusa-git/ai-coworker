@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos One Care - Authentication</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #003d82;
+            --primary-dark: #002855;
+            --secondary: #0066cc;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --light-bg: #f8f9fb;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+            --danger: #f44336;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .auth-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 450px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .auth-body {
+            padding: 2rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .auth-tab {
+            padding: 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 61, 130, 0.1);
+        }
+
+        .form-control.error {
+            border-color: var(--danger);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-gray);
+            font-size: 1.1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-group a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--accent) 0%, #ff5722 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 110, 64, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            color: var(--text-gray);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .social-login {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-btn {
+            padding: 0.9rem;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .social-btn:hover {
+            border-color: var(--primary);
+            background: #f5f7fb;
+        }
+
+        .social-icon {
+            font-size: 1.2rem;
+        }
+
+        .google-btn {
+            grid-column: 1 / -1;
+        }
+
+        .form-footer {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .toggle-form {
+            cursor: pointer;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Forgot Password Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-gray);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: var(--text-dark);
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: #e8f5e9;
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 6px;
+            color: var(--success);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Mobile Optimized */
+        @media (max-width: 480px) {
+            .auth-container {
+                margin: 1rem;
+            }
+
+            .auth-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .auth-header h1 {
+                font-size: 1.4rem;
+            }
+
+            .auth-body {
+                padding: 1.5rem 1rem;
+            }
+
+            .auth-tabs {
+                gap: 0.5rem;
+            }
+
+            .auth-tab {
+                padding: 0.8rem 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .social-login {
+                grid-template-columns: 1fr;
+            }
+
+            .google-btn {
+                grid-column: 1;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Header -->
+        <div class="auth-header">
+            <div class="auth-logo">❤️</div>
+            <h1>Aetos One Care</h1>
+            <p>India's Most Compliant Healthcare Platform</p>
+        </div>
+
+        <!-- Body -->
+        <div class="auth-body">
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+                <button class="auth-tab" onclick="switchTab('signup')">Create Account</button>
+            </div>
+
+            <!-- SUCCESS MESSAGE -->
+            <div class="success-message" id="successMessage"></div>
+
+            <!-- LOGIN FORM -->
+            <form class="auth-form active" id="loginForm">
+                <div class="social-login">
+                    <button type="button" class="social-btn" onclick="signInWithGoogle()">
+                        <span class="social-icon">🔐</span>
+                        <span>Google</span>
+                    </button>
+                    <button type="button" class="social-btn" onclick="signInWithApple()">
+                        <span class="social-icon">🍎</span>
+                        <span>Apple</span>
+                    </button>
+                    <button type="button" class="social-btn google-btn" onclick="signInWithPhone()">
+                        <span class="social-icon">📱</span>
+                        <span>Phone Sign-In</span>
+                    </button>
+                </div>
+
+                <div class="divider">OR</div>
+
+                <div class="form-group">
+                    <label for="loginEmail">Email or Phone</label>
+                    <input type="text" id="loginEmail" class="form-control" placeholder="your@email.com or +91-XXXXX-XXXXX">
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group password-toggle">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password">
+                    <button type="button" class="toggle-btn" onclick="togglePassword('loginPassword')">👁️</button>
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Remember me</label>
+                    <span style="margin-left: auto;">
+                        <a href="#" onclick="openForgotPassword(event)">Forgot password?</a>
+                    </span>
+                </div>
+
+                <button type="submit" class="submit-btn" onclick="handleLogin(event)">Sign In</button>
+
+                <div class="form-footer">
+                    New to Aetos One Care?
+                    <span class="toggle-form" onclick="switchTab('signup')">Create Account</span>
+                </div>
+            </form>
+
+            <!-- SIGNUP FORM -->
+            <form class="auth-form" id="signupForm">
+                <div class="social-login">
+                    <button type="button" class="social-btn" onclick="signUpWithGoogle()">
+                        <span class="social-icon">🔐</span>
+                        <span>Google</span>
+                    </button>
+                    <button type="button" class="social-btn" onclick="signUpWithApple()">
+                        <span class="social-icon">🍎</span>
+                        <span>Apple</span>
+                    </button>
+                    <button type="button" class="social-btn google-btn" onclick="signUpWithPhone()">
+                        <span class="social-icon">📱</span>
+                        <span>Phone Sign-Up</span>
+                    </button>
+                </div>
+
+                <div class="divider">OR</div>
+
+                <div class="form-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" class="form-control" placeholder="John Doe">
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="signupEmail">Email Address</label>
+                    <input type="email" id="signupEmail" class="form-control" placeholder="your@email.com">
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="signupPhone">Phone Number</label>
+                    <input type="tel" id="signupPhone" class="form-control" placeholder="+91-98765-43210">
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group password-toggle">
+                    <label for="signupPassword">Create Password</label>
+                    <input type="password" id="signupPassword" class="form-control" placeholder="Min 8 characters">
+                    <button type="button" class="toggle-btn" onclick="togglePassword('signupPassword')">👁️</button>
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group password-toggle">
+                    <label for="signupPasswordConfirm">Confirm Password</label>
+                    <input type="password" id="signupPasswordConfirm" class="form-control" placeholder="Re-enter password">
+                    <button type="button" class="toggle-btn" onclick="togglePassword('signupPasswordConfirm')">👁️</button>
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-group checkbox-group" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+                    <label>
+                        <input type="checkbox" id="agreeTerms" required>
+                        I agree to <a href="#" style="display: inline;">Terms of Service</a> and <a href="#" style="display: inline;">Privacy Policy</a>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="agreeData">
+                        I consent to DPDPA 2023 data processing terms
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn" onclick="handleSignup(event)">Create Account</button>
+
+                <div class="form-footer">
+                    Already have an account?
+                    <span class="toggle-form" onclick="switchTab('login')">Sign In</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FORGOT PASSWORD MODAL -->
+    <div id="forgotModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button type="button" class="close-btn" onclick="closeForgotPassword()">✕</button>
+            </div>
+
+            <form id="forgotForm">
+                <div class="form-group">
+                    <label for="resetEmail">Email or Phone</label>
+                    <input type="text" id="resetEmail" class="form-control" placeholder="your@email.com or +91-XXXXX-XXXXX">
+                    <div class="error-message"></div>
+                </div>
+
+                <p style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    We'll send you a link or OTP to reset your password
+                </p>
+
+                <button type="submit" class="submit-btn" onclick="handleResetRequest(event)">Send Reset Link</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching
+        function switchTab(tab) {
+            // Hide all forms
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+
+            // Deactivate all tabs
+            document.querySelectorAll('.auth-tab').forEach(tabBtn => {
+                tabBtn.classList.remove('active');
+            });
+
+            // Show selected form
+            const formId = tab === 'login' ? 'loginForm' : 'signupForm';
+            document.getElementById(formId).classList.add('active');
+
+            // Activate selected tab
+            event.target.classList.add('active');
+        }
+
+        // Password Toggle
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        // Form Handlers
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showError('loginEmail', 'Email and password are required');
+                return;
+            }
+
+            // Simulate API call
+            showSuccess('Signing you in...');
+            console.log('Login:', { email, password });
+            setTimeout(() => {
+                showSuccess('✓ Login successful! Redirecting to dashboard...');
+            }, 1000);
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const phone = document.getElementById('signupPhone').value;
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+            if (!name || !email || !phone || !password) {
+                showError('signupName', 'All fields are required');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showError('signupPasswordConfirm', 'Passwords do not match');
+                return;
+            }
+
+            if (password.length < 8) {
+                showError('signupPassword', 'Password must be at least 8 characters');
+                return;
+            }
+
+            // Simulate API call
+            showSuccess('Creating your account...');
+            console.log('Signup:', { name, email, phone });
+            setTimeout(() => {
+                showSuccess('✓ Account created! Please verify your email.');
+            }, 1500);
+        }
+
+        function handleResetRequest(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('resetEmail').value;
+
+            if (!email) {
+                showError('resetEmail', 'Email or phone is required');
+                return;
+            }
+
+            console.log('Reset password for:', email);
+            showSuccess('Reset link sent to ' + email);
+            setTimeout(() => {
+                closeForgotPassword();
+            }, 1500);
+        }
+
+        // Social Sign-In
+        function signInWithGoogle() {
+            console.log('Signing in with Google...');
+            showSuccess('Redirecting to Google Sign-In...');
+        }
+
+        function signUpWithGoogle() {
+            console.log('Signing up with Google...');
+            showSuccess('Redirecting to Google Sign-Up...');
+        }
+
+        function signInWithApple() {
+            console.log('Signing in with Apple...');
+            showSuccess('Redirecting to Apple Sign-In...');
+        }
+
+        function signUpWithApple() {
+            console.log('Signing up with Apple...');
+            showSuccess('Redirecting to Apple Sign-Up...');
+        }
+
+        function signInWithPhone() {
+            console.log('Phone Sign-In - sending OTP...');
+            showSuccess('OTP sent to your phone');
+        }
+
+        function signUpWithPhone() {
+            console.log('Phone Sign-Up - sending OTP...');
+            showSuccess('OTP sent to your phone');
+        }
+
+        // Modal Management
+        function openForgotPassword(event) {
+            event.preventDefault();
+            document.getElementById('forgotModal').classList.add('show');
+        }
+
+        function closeForgotPassword() {
+            document.getElementById('forgotModal').classList.remove('show');
+        }
+
+        // Error & Success Messages
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorMsg = field.parentElement.querySelector('.error-message');
+            field.classList.add('error');
+            errorMsg.textContent = message;
+            errorMsg.classList.add('show');
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.classList.add('show');
+            setTimeout(() => {
+                successDiv.classList.remove('show');
+            }, 4000);
+        }
+
+        // Close modal on outside click
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('forgotModal');
+            if (event.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
+
+        // Clear errors on input
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', function() {
+                this.classList.remove('error');
+                const errorMsg = this.parentElement.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -18,6 +18,7 @@ const nav = [
   { href: "/channels", label: "Channels", icon: "🔌" },
   { href: "/analytics", label: "Analytics", icon: "📊" },
   { href: "/settings", label: "Settings", icon: "⚙️" },
+  { href: "/help", label: "Help & Guide", icon: "❓" },
 ];
 
 const COLLAPSE_KEY = "sidebar_collapsed";

@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos One Care - India's Most Compliant Healthcare Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #003d82;
+            --primary-dark: #002855;
+            --secondary: #0066cc;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --light-bg: #f8f9fb;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .navbar {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            background: linear-gradient(135deg, #00897b, #00d4aa);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            margin-left: 1rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff5722 100%);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 110, 64, 0.3);
+        }
+
+        .cta-button-secondary {
+            background: var(--white);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .cta-button-secondary:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #0055a8 50%, var(--secondary) 100%);
+            color: var(--white);
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-tagline {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .compliance-bar {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 2rem auto;
+            max-width: 700px;
+            font-size: 0.9rem;
+        }
+
+        .compliance-bar span {
+            display: inline-block;
+            margin: 0 1rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        /* Trust Metrics */
+        .trust-metrics {
+            background: var(--white);
+            padding: 3rem 2rem;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+            position: relative;
+            top: -2rem;
+            margin-bottom: 2rem;
+        }
+
+        .metrics-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .metric {
+            padding: 1rem;
+        }
+
+        .metric-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .metric-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--success), #00d4aa);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* Section Styles */
+        .section {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-gray);
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Compliance Seals */
+        .compliance-seals {
+            background: var(--light-bg);
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+        }
+
+        .seals-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .seals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .seal {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .seal:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 16px rgba(0, 61, 130, 0.15);
+        }
+
+        .seal-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .seal h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .seal p {
+            color: var(--text-gray);
+            font-size: 0.85rem;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 61, 130, 0.15);
+            border-color: var(--secondary);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            font-size: 0.9rem;
+        }
+
+        .feature-list li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-gray);
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        /* Service Item */
+        .service-item {
+            display: flex;
+            gap: 3rem;
+            margin-bottom: 4rem;
+            align-items: flex-start;
+            padding: 2rem;
+            background: var(--white);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .service-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .service-content {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .service-image {
+            flex: 1;
+            min-width: 250px;
+            height: 300px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 4rem;
+        }
+
+        .service-content h3 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .service-content p {
+            color: var(--text-gray);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .service-features {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .service-features li {
+            color: var(--text-gray);
+            padding: 0.6rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .service-features li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            margin: 3rem 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.25rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--light-bg);
+        }
+
+        .checkmark {
+            color: var(--success);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .partial {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        /* Pricing Section */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--accent);
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px rgba(255, 110, 64, 0.25);
+        }
+
+        .pricing-card h3 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            color: var(--accent);
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .price-period {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            color: var(--text-gray);
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        .pricing-features li:before {
+            content: "✓ ";
+            color: var(--success);
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        /* FAQ Section */
+        .faq {
+            background: var(--light-bg);
+            padding: 4rem 2rem;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--white);
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: var(--light-bg);
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s, padding 0.3s;
+            color: var(--text-gray);
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+        /* CTA Sections */
+        .cta-section {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff5722 100%);
+            color: var(--white);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: 12px;
+            margin: 3rem auto;
+            max-width: 1200px;
+        }
+
+        .cta-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.95;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: var(--white);
+            padding: 3rem 2rem 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-column h4 {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: var(--accent);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.85rem;
+            }
+
+            .trust-badge {
+                display: none;
+            }
+
+            .navbar {
+                padding: 0 1rem;
+                flex-wrap: wrap;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .service-item,
+            .service-item:nth-child(even) {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .cta-section {
+                margin: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="navbar">
+            <a href="#" class="logo">❤️ Aetos One Care<span class="trust-badge">ISO 27001</span></a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#comparison">Compare</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#" class="cta-button">Book Now</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-tagline">🏆 India's Most Compliant Healthcare Platform</div>
+            <h1>Your Health, Secured & Simplified</h1>
+            <div class="subtitle">DPDPA Certified | NMC Approved | ABDM Integrated</div>
+            <p>Connect with 50,000+ verified doctors. Access complete digital health records. Manage wellness—all in one secure, compliant platform trusted by 2M+ Indians.</p>
+            <div class="compliance-bar">
+                ✓ <span>DPDPA 2023 Compliant</span>
+                ✓ <span>ISO 27001 Certified</span>
+                ✓ <span>ABDM Ready</span>
+                ✓ <span>NMC Approved</span>
+            </div>
+            <div class="hero-buttons">
+                <button class="cta-button">Book a Consultation</button>
+                <button class="cta-button-secondary">Check Insurance Eligibility</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Metrics -->
+    <section class="trust-metrics">
+        <div class="metrics-container">
+            <div class="metric">
+                <div class="metric-number">50,000+</div>
+                <div class="metric-label">NMC-Verified Doctors</div>
+                <div class="metric-badge">License Verified</div>
+            </div>
+            <div class="metric">
+                <div class="metric-number">2M+</div>
+                <div class="metric-label">Secure Consultations</div>
+                <div class="metric-badge">Encrypted</div>
+            </div>
+            <div class="metric">
+                <div class="metric-number">4.8★</div>
+                <div class="metric-label">Patient Satisfaction</div>
+                <div class="metric-badge">Verified Reviews</div>
+            </div>
+            <div class="metric">
+                <div class="metric-number">24/7</div>
+                <div class="metric-label">Emergency Support</div>
+                <div class="metric-badge">Instant Response</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compliance Seals -->
+    <section class="compliance-seals">
+        <div class="seals-container">
+            <h2 class="section-title">Trusted by Regulations</h2>
+            <p class="section-subtitle">The only healthcare platform built for India's strictest compliance standards</p>
+            <div class="seals-grid">
+                <div class="seal">
+                    <div class="seal-icon">🇮🇳</div>
+                    <h4>DPDPA 2023</h4>
+                    <p>Digital Personal Data Protection Act compliance with data residency in India</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">🏥</div>
+                    <h4>NMC Approved</h4>
+                    <p>All doctors follow NMC Telemedicine Guidelines 2020</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">🔐</div>
+                    <h4>ISO 27001</h4>
+                    <p>Medical-grade information security management system</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">📱</div>
+                    <h4>ABDM Integrated</h4>
+                    <p>Ayushman Bharat Digital Mission for national health records</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">💼</div>
+                    <h4>Insurance Ready</h4>
+                    <p>Ayushman Bharat PMJAY scheme compatible</p>
+                </div>
+                <div class="seal">
+                    <div class="seal-icon">⚙️</div>
+                    <h4>DPIA Audited</h4>
+                    <p>Data Protection Impact Assessment by third-party auditors</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features">
+        <h2 class="section-title">Why Doctors & Patients Choose Aetos One Care</h2>
+        <p class="section-subtitle">Experience healthcare with verified doctors, secure records, and India-first compliance</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">👨‍⚕️</div>
+                <h3>Verified Doctors Only</h3>
+                <p>Every doctor's NMC license is verified and displayed. No fake credentials. Real expertise.</p>
+                <ul class="feature-list">
+                    <li>License verification tool</li>
+                    <li>Experience verified</li>
+                    <li>Patient reviews authentic</li>
+                    <li>Specialty expertise</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Secure Digital Records</h3>
+                <p>Your complete medical history in one encrypted vault. ABDM-integrated access.</p>
+                <ul class="feature-list">
+                    <li>256-bit encryption</li>
+                    <li>Lifetime storage</li>
+                    <li>ABDM compatible</li>
+                    <li>Instant doctor sharing</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💊</div>
+                <h3>Medicine Delivery</h3>
+                <p>Prescriptions delivered to your door within 2-4 hours across 50+ Indian cities.</p>
+                <ul class="feature-list">
+                    <li>Real-time tracking</li>
+                    <li>Partner pharmacies</li>
+                    <li>Insurance accepted</li>
+                    <li>Price comparison</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧬</div>
+                <h3>Home Lab Tests</h3>
+                <p>400+ diagnostic tests. Collection at home. Reports in 24-48 hours. Doctor consultation included.</p>
+                <ul class="feature-list">
+                    <li>400+ test options</li>
+                    <li>Home collection</li>
+                    <li>Fast reports</li>
+                    <li>Certified labs</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏃‍♀️</div>
+                <h3>Wellness Programs</h3>
+                <p>Personalized fitness, nutrition, and mental health coaching from certified experts.</p>
+                <ul class="feature-list">
+                    <li>Fitness coaching</li>
+                    <li>Nutrition plans</li>
+                    <li>Mental wellness</li>
+                    <li>AI tracking</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Privacy Guaranteed</h3>
+                <p>Your data is yours. DPDPA compliant. No third-party sharing without consent.</p>
+                <ul class="feature-list">
+                    <li>End-to-end encrypted</li>
+                    <li>You control access</li>
+                    <li>DPDPA compliant</li>
+                    <li>Data deletion available</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="section" id="products">
+        <h2 class="section-title">Our Core Products</h2>
+        <p class="section-subtitle">Complete healthcare solutions under one secure platform</p>
+
+        <div class="service-item">
+            <div class="service-content">
+                <h3>🎥 Real-Time Telemedicine Consultations</h3>
+                <p>Connect with verified specialists instantly through secure video, audio, or text consultations. Get medical advice without leaving home. Digital prescriptions delivered instantly.</p>
+                <p><strong>Key Features:</strong></p>
+                <ul class="service-features">
+                    <li>Video consultations with HD quality</li>
+                    <li>Instant booking with 50+ specialties</li>
+                    <li>10+ Indian language support</li>
+                    <li>Digital prescriptions (valid at all pharmacies)</li>
+                    <li>Follow-up consultations scheduled</li>
+                    <li>Call recording for your records</li>
+                    <li>30-minute average wait time</li>
+                    <li>₹299-₹499 consultation charges</li>
+                </ul>
+                <p><strong>Specialties Available:</strong> General Medicine, Cardiology, Dermatology, Orthopedics, Psychiatry, Gynecology, Pediatrics, Neurology, ENT, Gastroenterology, and 40+ more.</p>
+            </div>
+            <div class="service-image">📱</div>
+        </div>
+
+        <div class="service-item">
+            <div class="service-content">
+                <h3>📑 Cloud-Based Health Records Management</h3>
+                <p>Never lose a medical document again. Secure, organized, and accessible from anywhere. ABDM-integrated for national health records access.</p>
+                <p><strong>Key Features:</strong></p>
+                <ul class="service-features">
+                    <li>Upload unlimited documents</li>
+                    <li>Automatic organization by date</li>
+                    <li>OCR scanning for paper records</li>
+                    <li>ABDM integration for state-wide access</li>
+                    <li>Permission-based sharing with doctors</li>
+                    <li>Lifetime storage guarantee</li>
+                    <li>AI-powered health insights</li>
+                    <li>Prescription tracking and reminders</li>
+                    <li>Medical history timeline</li>
+                </ul>
+                <p><strong>Document Types Supported:</strong> Lab reports, X-rays, prescriptions, discharge summaries, medical bills, vaccination records, allergy information, and more.</p>
+            </div>
+            <div class="service-image">💾</div>
+        </div>
+
+        <div class="service-item">
+            <div class="service-content">
+                <h3>🧪 Diagnostic Testing with Home Sample Collection</h3>
+                <p>Access 400+ diagnostic tests from India's most trusted labs. Trained phlebotomists collect samples at home. Get reports within 24-48 hours.</p>
+                <p><strong>Key Features:</strong></p>
+                <ul class="service-features">
+                    <li>400+ diagnostic tests available</li>
+                    <li>Same-day booking and collection</li>
+                    <li>NABL-certified labs</li>
+                    <li>Reports in 24-48 hours</li>
+                    <li>Doctor consultation on results included</li>
+                    <li>Home sample collection (no visit required)</li>
+                    <li>Insurance accepted</li>
+                    <li>Price comparison across labs</li>
+                    <li>Repeat test discounts</li>
+                </ul>
+                <p><strong>Popular Tests:</strong> Full body checkup (₹1,299), Diabetes screening (₹499), Heart health profile (₹1,899), Thyroid panel (₹599), COVID-19 (₹299), Allergy testing (₹899).</p>
+            </div>
+            <div class="service-image">🧪</div>
+        </div>
+
+        <div class="service-item">
+            <div class="service-content">
+                <h3>💪 Personalized Wellness & Disease Management</h3>
+                <p>Take control of your health with AI-driven wellness programs. Manage chronic diseases with structured programs from certified experts.</p>
+                <p><strong>Key Features:</strong></p>
+                <ul class="service-features">
+                    <li>Personalized fitness coaching</li>
+                    <li>Nutrition & meal planning</li>
+                    <li>Mental health counseling sessions</li>
+                    <li>Structured diabetes management</li>
+                    <li>Hypertension control program</li>
+                    <li>Weight management program</li>
+                    <li>Sleep improvement coaching</li>
+                    <li>Stress management sessions</li>
+                    <li>AI progress tracking</li>
+                    <li>Wearable device integration</li>
+                </ul>
+                <p><strong>Programs Include:</strong> Chronic disease management (Diabetes, BP, Asthma), fitness coaching (weight loss, muscle building), mental wellness (anxiety, depression, stress), pregnancy wellness, post-recovery rehabilitation.</p>
+            </div>
+            <div class="service-image">🌿</div>
+        </div>
+    </section>
+
+    <!-- Comparison with Competitors -->
+    <section class="section" id="comparison">
+        <h2 class="section-title">How Aetos One Care Compares</h2>
+        <p class="section-subtitle">We stack up favorably against India's top healthcare platforms</p>
+
+        <div class="comparison-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Aetos One Care</th>
+                        <th>Practo</th>
+                        <th>1mg</th>
+                        <th>Apollo 24|7</th>
+                        <th>mfine</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Video Consultations</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Doctor License Verification Tool</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                        <td>✗</td>
+                        <td><span class="partial">Partial</span></td>
+                        <td><span class="partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>DPDPA 2023 Compliant</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ABDM Integration</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Home Lab Tests</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Medicine Delivery Integration</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓ (Owned)</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Digital Health Records</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Wellness Programs</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Insurance Integration</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lowest Consultation Price</strong></td>
+                        <td><span class="checkmark">₹299</span></td>
+                        <td>₹399</td>
+                        <td>₹349</td>
+                        <td>₹399</td>
+                        <td>₹299</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Family Plan Available</strong></td>
+                        <td><span class="checkmark">✓ ₹999</span></td>
+                        <td><span class="partial">Partial</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>24/7 Emergency Support</strong></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                        <td><span class="checkmark">✓</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cta-section">
+            <h2>Ready to experience India's most compliant healthcare platform?</h2>
+            <p>Join 2M+ patients who have already switched to Aetos One Care</p>
+            <button class="cta-button" style="background: white; color: var(--accent);">Start Your Free Account</button>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="section" id="pricing">
+        <h2 class="section-title">Affordable Plans for Every Need</h2>
+        <p class="section-subtitle">Choose flexibility. Get quality. Pay fairly.</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Essential</h3>
+                <div class="price">₹0<span class="price-period">/month</span></div>
+                <p style="color: var(--text-gray); margin-bottom: 1rem;">Forever free. No credit card required.</p>
+                <ul class="pricing-features">
+                    <li>Digital health records storage</li>
+                    <li>Doctor directory access (50K+ verified)</li>
+                    <li>Community health forum</li>
+                    <li>Basic health tracking</li>
+                    <li>Limited to 2 consultations/month</li>
+                    <li>Basic wellness content</li>
+                </ul>
+                <button class="cta-button-secondary" style="width: 100%; margin-top: 2rem;">Get Started Free</button>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Premium Plus</h3>
+                <div class="price">₹499<span class="price-period">/month</span></div>
+                <p style="color: var(--text-gray); margin-bottom: 1rem;">Most popular for individuals</p>
+                <ul class="pricing-features">
+                    <li>Unlimited video/text consultations</li>
+                    <li>Priority doctor booking (avg. 15 min wait)</li>
+                    <li>3 free lab tests per month</li>
+                    <li>20% discount on medicine delivery</li>
+                    <li>24/7 health support hotline</li>
+                    <li>Wellness program access</li>
+                    <li>Prescription tracking</li>
+                    <li>Doctor's notes & reports</li>
+                </ul>
+                <button class="cta-button" style="width: 100%; margin-top: 2rem;">Subscribe Now</button>
+            </div>
+            <div class="pricing-card">
+                <h3>Family Care</h3>
+                <div class="price">₹999<span class="price-period">/month</span></div>
+                <p style="color: var(--text-gray); margin-bottom: 1rem;">Best for families (up to 4 members)</p>
+                <ul class="pricing-features">
+                    <li>All Premium Plus features</li>
+                    <li>Up to 4 family members</li>
+                    <li>Unlimited lab tests</li>
+                    <li>30% medicine discount</li>
+                    <li>Nutrition counseling (2x/month)</li>
+                    <li>Mental health sessions (2x/month)</li>
+                    <li>Annual comprehensive checkup</li>
+                    <li>Priority support for emergencies</li>
+                </ul>
+                <button class="cta-button-secondary" style="width: 100%; margin-top: 2rem;">Family Plan</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="faq-container">
+            <h2 class="section-title" style="color: var(--primary);">Frequently Asked Questions</h2>
+
+            <div class="faq-item active">
+                <div class="faq-question">
+                    <span>How do I verify if a doctor is NMC-registered?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Every doctor's NMC license is automatically verified when they join Aetos One Care. You can click on any doctor's profile to see their registration details, license number, and specialization. We cross-check with the National Medical Commission database monthly to ensure validity.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Is my data really encrypted and DPDPA compliant?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Yes, absolutely. We use 256-bit end-to-end encryption (military-grade security). All data is stored on Indian servers only (data localization). We're ISO 27001 certified and have completed a DPIA (Data Protection Impact Assessment) audit. You can access our compliance certifications and audit reports from the Trust & Security page.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How quickly can I get a consultation?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Most consultations are available within 15-30 minutes. You can choose your preferred doctor or select "Next Available" for instant booking. During off-hours, our emergency specialists are available 24/7. For non-urgent concerns, you can also schedule consultations up to 30 days in advance.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Are digital prescriptions valid everywhere?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Yes, digital prescriptions from our NMC-registered doctors are legally valid across India. All pharmacies accept them. You can either use our medicine delivery service (2-4 hour delivery in major cities) or visit any pharmacy with your digital prescription. The prescription is valid for 30 days from issuance.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How do I access my health records from Ayushman Bharat?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Aetos One Care is fully integrated with ABDM (Ayushman Bharat Digital Mission). You can link your Ayushman Bharat Health Account (ABHA) with Aetos One Care in settings. Once linked, your health records automatically sync across state hospitals and authorized healthcare providers using ABDM.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Which insurance schemes are supported?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    We support Ayushman Bharat PMJAY (₹5 lakh coverage) and most major health insurance plans. During consultation booking, you can provide your insurance details, and we'll verify eligibility. If eligible, you won't pay any consultation charges. For non-eligible treatments, you can pay out-of-pocket and claim reimbursement from your insurance.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Can my family members use the same account?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    Yes, with our Family Care plan (₹999/month), you can add up to 4 family members. Each person gets their own secure profile, health records, and doctor access. Parents can monitor children's consultations, and the primary account holder can manage permissions. Individual privacy is always maintained.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>What makes Aetos One Care different from other platforms?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    We're built specifically for India with compliance at our core. Every platform claims security, but we're the only one with ISO 27001 certification and DPIA audit from day one. Our doctor verification is transparent (you can see their NMC license). We prioritize your rights under DPDPA—you can delete your data, access it anytime, and export it. No hidden terms. No data selling.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="cta-section">
+        <h2>Start Your Healthcare Journey Today</h2>
+        <p>Join 2M+ Indians who've made healthcare more accessible, affordable, and secure.</p>
+        <p style="font-size: 0.9rem; opacity: 0.9;">No credit card required. Create your account in 2 minutes.</p>
+        <button class="cta-button" style="background: var(--white); color: var(--accent); margin-top: 1rem;">Get Started Free</button>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>About Aetos One Care</h4>
+                <ul>
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Team & Leadership</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Blog & Resources</a></li>
+                    <li><a href="#">Media Kit</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Products & Services</h4>
+                <ul>
+                    <li><a href="#">Telemedicine</a></li>
+                    <li><a href="#">Health Records</a></li>
+                    <li><a href="#">Lab Tests</a></li>
+                    <li><a href="#">Medicine Delivery</a></li>
+                    <li><a href="#">Wellness Programs</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Support & Help</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Live Chat Support</a></li>
+                    <li><a href="#">Report an Issue</a></li>
+                    <li><a href="#">Feedback</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Compliance & Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy (DPDPA)</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Security & Certifications</a></li>
+                    <li><a href="#">Compliance Reports</a></li>
+                    <li><a href="#">ABDM Integration</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Aetos One Care. All rights reserved. | DPDPA Compliant | ISO 27001 Certified | ABDM Integrated<br>Registered with Ministry of Health & Family Welfare | Medical License: AYUSH-2024-AOC<br>Telemedicine Services regulated by NMC Guidelines 2020</p>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                q.parentElement.classList.toggle('active');
+            });
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const el = document.querySelector(href);
+                    el && el.scrollIntoView({behavior: 'smooth'});
+                }
+            });
+        });
+    </script>
+</body>
+</html>
