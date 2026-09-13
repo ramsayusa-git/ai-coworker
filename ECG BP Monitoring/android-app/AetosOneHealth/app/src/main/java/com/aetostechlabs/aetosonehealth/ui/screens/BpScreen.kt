@@ -55,6 +55,19 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
     }
     val recent = mine.take(20).reversed()
 
+    // The tiles fall back to the newest stored reading when there is no live
+    // one. Without this the screen shows four dashes after any app restart or
+    // tab switch, even though the reading is safely in the database — which
+    // reads as "it didn't work" when in fact it did.
+    val latest = mine.firstOrNull()
+    val showSys = live.systolic ?: latest?.systolic
+    val showDia = live.diastolic ?: latest?.diastolic
+    val showPulse = live.pulse ?: latest?.pulse
+    val showMap = live.meanArterial ?: latest?.meanArterial
+    val showCategory = live.category.ifBlank { latest?.category ?: "" }
+    val showTime = live.readingTime ?: latest?.ts
+    val isLive = live.systolic != null
+
     Column(
         modifier
             .fillMaxSize()
@@ -66,18 +79,18 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             BigValue(
-                "Systolic", live.systolic?.toString() ?: "—", "mmHg · upper",
+                "Systolic", showSys?.toString() ?: "—", "mmHg · upper",
                 BpSystolic, Modifier.weight(1f)
             )
             BigValue(
-                "Diastolic", live.diastolic?.toString() ?: "—", "mmHg · lower",
+                "Diastolic", showDia?.toString() ?: "—", "mmHg · lower",
                 BpDiastolic, Modifier.weight(1f)
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            BigValue("Pulse", live.pulse?.toString() ?: "—", "bpm", BpPulse, Modifier.weight(1f))
+            BigValue("Pulse", showPulse?.toString() ?: "—", "bpm", BpPulse, Modifier.weight(1f))
             BigValue(
-                "Mean arterial", live.meanArterial?.let { "%.1f".format(it) } ?: "—", "mmHg",
+                "Mean arterial", showMap?.let { "%.1f".format(it) } ?: "—", "mmHg",
                 MaterialTheme.colorScheme.primary, Modifier.weight(1f)
             )
         }
@@ -85,7 +98,7 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
         // Connected with nothing to show is the confusing state: the cuff only
         // sends a frame when *it* completes a measurement, so say so plainly
         // rather than leaving four dashes on screen.
-        if (state.connected && live.systolic == null) {
+        if (state.connected && showSys == null) {
             SectionCard("Waiting for a measurement") {
                 Text(
                     "The link is up. This cuff stays silent until a measurement finishes, " +
@@ -110,10 +123,10 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
             }
         }
 
-        if (live.category.isNotBlank()) {
-            SectionCard {
-                Text(live.category, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                live.readingTime?.let {
+        if (showCategory.isNotBlank()) {
+            SectionCard(if (isLive) "Latest reading" else "Last recorded reading") {
+                Text(showCategory, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                showTime?.let {
                     Spacer(Modifier.height(4.dp))
                     Text(
                         "Measured ${SimpleDateFormat("d MMM, HH:mm", Locale.getDefault()).format(Date(it))}" +

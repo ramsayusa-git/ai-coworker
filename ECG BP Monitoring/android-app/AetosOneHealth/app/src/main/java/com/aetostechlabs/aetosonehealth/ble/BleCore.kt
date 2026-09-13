@@ -248,13 +248,23 @@ class BleClient(private val context: Context) {
         return bytes.toString(Charsets.UTF_8).trim().takeIf { it.isNotEmpty() }
     }
 
+    /**
+     * Enable notifications (or indications) on a characteristic.
+     *
+     * **Notify wins when a characteristic declares both.** The RBP cuff's
+     * 0xFFF1 advertises `notify/indicate`, but it only ever *sends*
+     * notifications. Preferring indicate — as this did originally — writes
+     * 0x0002 to the CCCD, the write succeeds, the subscription looks healthy,
+     * and not one packet is ever delivered. BlueZ's StartNotify picks notify in
+     * the same situation, which is why the hub add-on worked and this did not.
+     */
     suspend fun subscribe(c: BluetoothGattCharacteristic): Boolean {
         val g = gatt ?: return false
         if (!g.setCharacteristicNotification(c, true)) return false
         val cccd = c.getDescriptor(CCCD) ?: return false
-        val indicate = c.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0
-        val value = if (indicate) BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
-        else BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+        val canNotify = c.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
+        val value = if (canNotify) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+        else BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
         val deferred = CompletableDeferred<Boolean>()
         writeDescResult = deferred
         val started = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -267,8 +277,14 @@ class BleClient(private val context: Context) {
             }
         }
         if (!started) return false
-        return runCatching { withTimeout(5_000) { deferred.await() } }.getOrDefault(false)
+        val ok = runCatching { withTimeout(5_000) { deferred.await() } }.getOrDefault(false)
+        if (ok) lastSubscribeMode = if (canNotify) "notify" else "indicate"
+        return ok
     }
+
+    /** Which CCCD mode the last successful subscribe used — logged by callers. */
+    var lastSubscribeMode: String = ""
+        private set
 
     fun onNotification(cb: (UUID, ByteArray) -> Unit) {
         onNotify = cb

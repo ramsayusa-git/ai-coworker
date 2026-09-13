@@ -121,7 +121,9 @@ internal object StepText {
             "Reading model/firmware and subscribing to the measurement channel."
         Step.READY -> "Ready — start a measurement" to
             "Connected. Put the cuff on your arm and press its own Start button; the reading appears here automatically."
-        Step.LIVE -> "Measuring" to "The cuff is inflating. Keep your arm still."
+        Step.LIVE -> "Live — ready for a measurement" to
+            "The Bluetooth link is up and listening. Put the cuff on your arm and press " +
+                "START on the cuff itself; the result appears here the moment it finishes."
         Step.RESULT -> "Reading received" to "Latest measurement is shown below."
         Step.ERROR -> "Connection lost" to "If the cuff went to sleep, press its button and press Scan."
     }

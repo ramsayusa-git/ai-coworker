@@ -59,7 +59,8 @@ class BpEngine(
         val (title, hint) = StepText.bp(step)
         _state.value = _state.value.copy(
             step = step, title = title, hint = hint, detail = detail,
-            connected = step == Step.READY || step == Step.CHECKING || step == Step.RESULT
+            connected = step == Step.READY || step == Step.CHECKING ||
+                step == Step.RESULT || step == Step.LIVE
         )
     }
 
@@ -81,6 +82,7 @@ class BpEngine(
     }
 
     private suspend fun runPass() {
+        notifications = 0
         _state.value = _state.value.copy(attempts = _state.value.attempts + 1)
         try {
             ble.requireAdapter()
@@ -141,7 +143,7 @@ class BpEngine(
                 if (!ble.createBond()) log("Pairing request was refused by the phone")
             }
 
-            setStep(Step.READY, "Subscribed — put the cuff on your arm and press its Start button")
+            setStep(Step.LIVE, "Subscribed — put the cuff on your arm and press its Start button")
             while (!dropped) {
                 delay(1000)
                 if (!ble.isConnected) break
@@ -190,7 +192,7 @@ class BpEngine(
         ble.characteristic(BpProtocol.BP_SERVICE, BpProtocol.BP_MEASUREMENT)?.let {
             if (ble.subscribe(it)) {
                 ok = true
-                log("Subscribed to measurement 0xFFF1")
+                log("Subscribed to measurement 0xFFF1 (${ble.lastSubscribeMode})")
             } else {
                 log("StartNotify on 0xFFF1 FAILED")
             }
@@ -229,6 +231,11 @@ class BpEngine(
                 )
                 log("Reading for ${profile?.name ?: "unassigned"}: $s/$d mmHg, pulse $p bpm")
                 setStep(Step.RESULT, "$s/$d mmHg · $p bpm" + if (cal.isActive) " · calibrated" else "")
+                // The link is still up and another measurement can follow, so
+                // return to the live state rather than freezing on RESULT.
+                if (ble.isConnected) {
+                    setStep(Step.LIVE, "$s/$d mmHg · $p bpm — ready for another measurement")
+                }
                 onReadingSaved?.invoke("$s/$d mmHg · $p bpm")
             }
 

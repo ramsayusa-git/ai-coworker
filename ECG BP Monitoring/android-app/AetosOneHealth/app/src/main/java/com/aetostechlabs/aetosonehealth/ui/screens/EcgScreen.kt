@@ -15,6 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import kotlin.math.roundToInt
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.aetostechlabs.aetosonehealth.data.hrBand
@@ -32,6 +34,20 @@ fun EcgScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
     val state by vm.ecg.state.collectAsState()
     val live by vm.ecg.live.collectAsState()
     val cal by vm.calibration.collectAsState()
+    val active by vm.activeProfile.collectAsState()
+    val sessions by vm.repo.sessions.collectAsState()
+
+    // Same rule as the BP screen: when nothing is streaming, fall back to the
+    // last recorded session rather than showing dashes. A screen full of dashes
+    // over a database full of readings reads as "it stopped working".
+    val lastSession = remember(sessions, active?.id) {
+        (if (active == null) sessions else sessions.filter { it.profileId == active?.id })
+            .firstOrNull { it.hrAvg != null }
+    }
+    val streaming = live.hr != null
+    val showHr = live.hr ?: lastSession?.hrAvg?.roundToInt()
+    val showRr = live.rrMs ?: showHr?.takeIf { it > 0 }?.let { (60000.0 / it).roundToInt() }
+    val showBeats = if (streaming) live.beats else (lastSession?.beats ?: 0)
 
     Column(
         modifier
@@ -64,15 +80,19 @@ fun EcgScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             BigValue(
-                "Heart rate", live.hr?.toString() ?: "—",
-                live.hr?.let { hrBand(it) } ?: "bpm", EcgTrace, Modifier.weight(1f)
+                "Heart rate", showHr?.toString() ?: "—",
+                showHr?.let { if (streaming) hrBand(it) else "last session average" } ?: "bpm",
+                EcgTrace, Modifier.weight(1f)
             )
             BigValue(
-                "RR interval", live.rrMs?.toString() ?: "—", "ms", BpPulse, Modifier.weight(1f)
+                "RR interval", showRr?.toString() ?: "—", "ms", BpPulse, Modifier.weight(1f)
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            BigValue("Beats", live.beats.toString(), "detected", AetosOrange, Modifier.weight(1f))
+            BigValue(
+                "Beats", showBeats.toString(),
+                if (streaming) "detected" else "last session", AetosOrange, Modifier.weight(1f)
+            )
             BigValue(
                 "Device HR", live.deviceHr?.toString() ?: "—", "sensor's own estimate",
                 MaterialTheme.colorScheme.primary, Modifier.weight(1f)
