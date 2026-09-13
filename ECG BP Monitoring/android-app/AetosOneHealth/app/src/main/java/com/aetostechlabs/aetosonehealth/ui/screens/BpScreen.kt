@@ -27,8 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.platform.LocalContext
-import android.content.Context
-import android.content.Intent
 import com.aetostechlabs.aetosonehealth.ui.MonitorViewModel
 import com.aetostechlabs.aetosonehealth.ui.components.BigValue
 import com.aetostechlabs.aetosonehealth.ui.components.SectionCard
@@ -170,6 +168,9 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
             InfoRow("Address", state.info.address.ifBlank { "—" })
             InfoRow("Model", state.info.model.ifBlank { "—" })
             InfoRow("Firmware", state.info.firmware.ifBlank { "—" })
+            InfoRow("App version", appVersion())
+            InfoRow("Readings stored (this profile)", mine.size.toString())
+            InfoRow("Readings stored (all)", readings.size.toString())
         }
 
         if (state.log.isNotEmpty()) {
@@ -181,7 +182,7 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.End
                 ) {
                     OutlinedButton(onClick = {
-                        shareText(
+                        shareDiagnostics(
                             context,
                             "Aetos One Health — BP diagnostics",
                             buildString {
@@ -228,12 +229,3 @@ private fun LegendDot(label: String, color: Color) {
 @Composable
 private fun <T> remember2(a: Any?, b: Any?, calc: () -> T): T =
     androidx.compose.runtime.remember(a, b) { calc() }
-
-private fun shareText(context: Context, subject: String, body: String) {
-    val i = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_SUBJECT, subject)
-        putExtra(Intent.EXTRA_TEXT, body)
-    }
-    context.startActivity(Intent.createChooser(i, subject))
-}

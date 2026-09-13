@@ -1,9 +1,11 @@
 # Aetos One Medical Hub — System Architecture
 
-**Version:** 1.0 (draft for review)
+**Version:** 1.1 (scalability fixes applied)
 **Date:** 13 September 2026
 **Owner:** Aetos Tech Labs LLP
 **Status:** Architecture proposal — no code written yet
+
+> **v1.1 changes** (from the Scalability Review): tenant-context enforcement tightened to `SET LOCAL` inside an explicit transaction with an RLS index rule (§6.5); `access_log` given a real sizing and retention design (§7.6); media capacity, 360p cap and audio-only fallback added (§8.5); deployment topology updated for multi-JVB with Octo (§12).
 
 ---
 
@@ -346,11 +348,30 @@ Relationships **expire**. A doctor who saw a patient once in 2024 does not still
 | Route | `@RequirePermission('prescription:sign')` decorator + guard |
 | Scope | Guard resolves `orgId`/`branchId` from the path/body, checks the membership set |
 | Relationship | `@RequireCareRelationship('patientId')` guard hits the `care` module |
-| Data | Postgres RLS policies on every tenant table, driven by session GUCs set per request in a Prisma middleware/interceptor |
+| Data | Postgres RLS policies on every tenant table, driven by **transaction-scoped** session GUCs (see the rule below) |
 | Field | Response serialisation groups (`@Expose({groups:['clinical']})`) so a front-desk token cannot receive clinical fields even if a query over-fetches |
 | Audit | Interceptor writes an `access_log` row for every read of clinical data, not just writes |
 
 Five layers sounds like a lot. It is what stops a single missed `WHERE org_id = ?` from becoming a reportable breach.
+
+#### The tenant-context rule (non-negotiable)
+
+Connection pooling and RLS session variables are a documented way to leak one tenant's data to another, and the failure is silent. The rule:
+
+```sql
+BEGIN;
+  SET LOCAL app.current_user_id  = '…';
+  SET LOCAL app.current_org_id   = '…';
+  SET LOCAL app.current_branches = '…';
+  -- all work for this request
+COMMIT;
+```
+
+- **`SET LOCAL`, never `SET`.** `SET LOCAL` dies with the transaction. A plain `SET` on a PgBouncer transaction-pooled connection persists and is inherited by whichever tenant borrows that connection next.
+- **Every request runs inside an explicit transaction**, including read-only ones. A Prisma extension/middleware opens it, sets the GUCs, and runs the handler. Issuing a query outside that wrapper must be structurally impossible, not merely discouraged.
+- **A test proves it.** An integration test that sets a GUC, returns the connection to the pool, and asserts the next borrower sees no tenant context. It fails the build if the wrapper is bypassed.
+- **PgBouncer runs in transaction mode.** Session mode would work but caps concurrency at the pool size.
+- **Every RLS policy's columns are indexed, `org_id` leading.** An unindexed RLS predicate silently converts point lookups into sequential scans — the system stays correct and gets slow exactly when volume arrives.
 
 ---
 
@@ -796,7 +817,7 @@ erDiagram
 | Table | Notes |
 |---|---|
 | `audit_log` | `id, actor_user_id, actor_role, org_id, action, resource_type, resource_id, before, after, ip, user_agent, request_id, severity, created_at`. Append-only; `REVOKE UPDATE, DELETE` from the app role. Partitioned monthly, retained 7 years (medical-records norm). |
-| `access_log` | Every *read* of clinical data. Higher volume, Timescale hypertable, retained 3 years. Surfaces the patient-facing "who saw my record" view. |
+| `access_log` | Every *read* of clinical data. **The largest table in the system** — see §7.6 for its sizing and retention design. Surfaces the patient-facing "who saw my record" view. |
 | `notification` | Channel, template, payload, status, provider message id, retries. |
 | `attachment` | Generic object-store reference with owner scope + virus-scan status. |
 | `abdm_link` | `patient_id, care_context_id, hip_id, linked_at, status`. |
@@ -812,6 +833,28 @@ erDiagram
 | ECG waveforms, prescription PDFs, lab reports, recordings | MinIO (self-hosted, S3 API) | Blobs do not belong in Postgres. Server-side encryption, object-lock for signed prescriptions. |
 | Sessions, rate limits, realtime presence, job queues | Redis 7 | — |
 | Search (patients, drugs) | Postgres `pg_trgm` + GIN at launch; OpenSearch only if it stops scaling | Don't add Elasticsearch on day one. |
+
+---
+
+### 7.6 `access_log` — sized for what it actually becomes
+
+Every read of clinical data is logged. At 10 000 consults/day that is roughly **500 000 rows/day, 180 million rows/year** — larger than every clinical table in this system combined, and larger than `measurement` by an order of magnitude. This is normal for healthcare and it is the table people under-plan.
+
+Designed for from the first migration, not retrofitted after an incident:
+
+| Control | Spec |
+|---|---|
+| Partitioning | Timescale hypertable, **1-month chunks**, `(org_id, created_at)` |
+| Compression | Native compression after **7 days**, segment by `org_id`, order by `created_at DESC`. Expect 10–20× on this shape |
+| Tablespace | Its own tablespace on cheaper/slower disk — it is append-only and rarely read hot |
+| Hot retention | 12 months queryable in Postgres |
+| Cold retention | 13–36 months exported to object storage as partitioned Parquet; the "who saw my record" API reads it back on demand and says so ("older activity may take a moment") |
+| Purge | Hard delete past the 3-year policy, by chunk drop, never by `DELETE` |
+| Patient-facing view | Reads a **continuous aggregate** (per day, per accessing clinician), never the raw table |
+| Write path | Batched async writes off the request path via a queue — a logging stall must never stall a clinician |
+| What is NOT logged | List-view reads of demographics-only fields, and the patient's own reads of their own record. Logging everything is how this table becomes unaffordable without becoming more useful |
+
+`audit_log` (writes) is far smaller — roughly 1–2% of this volume — and keeps the simpler monthly-partition + 7-year retention design.
 
 ---
 
@@ -890,6 +933,30 @@ The patient app already works offline. Preserve that:
 - Local SQLite stays the write-ahead store. Every reading gets a client-generated UUID used as the server idempotency key.
 - A sync worker drains the outbox on connectivity; server rejects duplicates silently with `200 + already_exists`.
 - `measured_at` (device/phone clock) and `received_at` (server clock) are both stored. If the clock skew exceeds a threshold, the reading is flagged `clock_suspect` rather than silently trusted or dropped.
+
+---
+
+### 8.5 Media capacity and video policy
+
+Video bandwidth is the first hard wall this system hits and the largest single infrastructure cost — larger than compute and storage combined. It is also the one that degrades *visibly* (choppy calls, support tickets) long before anything actually fails. So the policy is set in the architecture, not left to defaults.
+
+**Capacity arithmetic:** 10 000 consults/day × 20 min × 2 participants = 400 000 participant-minutes/day. Compressed into an 8-hour clinic day that is ~830 concurrent participants average, ~1 600 at peak. One JVB comfortably carries 300–500 before packet loss shows, so that load needs **4–6 bridges with Octo cascading**, not one.
+
+**Policy, enforced in the client config — not advisory:**
+
+| Rule | Value | Why |
+|---|---|---|
+| Max video resolution | **360p / 24 fps** for consults | Clinically sufficient for a teleconsult; roughly halves bandwidth against 720p. A doctor who needs to see a lesion asks for a photo upload, which is higher fidelity than any video stream |
+| Simulcast | On | Lets the bridge drop layers for weak receivers instead of dropping the call |
+| Last-N | 2 (+1 for a nurse or caregiver) | No reason to forward more streams than are on screen |
+| Audio-only mode | **First-class, one tap, never a failure state** | ~50 kbps vs ~1.5 Mbps. On a bad rural link this is the difference between a consult and a cancelled appointment |
+| Auto-degrade | Drop to audio-only automatically on sustained packet loss, with a visible banner and a one-tap return to video | Degrade deliberately rather than letting the call disintegrate |
+| Screen share | Disabled by default, org-enable | It is the most expensive stream in the room and is rarely needed clinically |
+| Recording | Off by default; where enabled, record **audio-only** unless video is explicitly consented | Storage and consent cost both drop by an order of magnitude |
+
+**Hosting:** model egress cost before committing. At ~1.5 Mbps × 1 600 peak participants that is ~2.4 Gbps sustained — per-GB egress pricing is ruinous at this shape; committed-bandwidth or unmetered hosting is the right purchase, and it must be decided before the load arrives, not after the first invoice.
+
+**Regionalisation** (needed at national scale): JVBs placed near patients, Octo cascading between regions, and consult routing that prefers the closest healthy bridge. This is the latency fix as much as the capacity fix.
 
 ---
 
@@ -1100,10 +1167,10 @@ flowchart LR
         RD[("Redis")]
         MIN[("MinIO")]
     end
-    subgraph MediaHost["Jitsi VPS (existing)"]
-        JVB["jitsi-videobridge"]
+    subgraph MediaHost["Jitsi (existing box + scale-out)"]
         PROS["prosody (JWT auth)"]
         JIC["jicofo"]
+        JVB["jitsi-videobridge ×N<br/>Octo cascading"]
     end
     CF --> API1
     CF --> RT1
@@ -1121,6 +1188,8 @@ flowchart LR
 - **Environments**: `dev` (aiserver, native processes), `staging` (single VPS, full stack), `prod` (separate app/data/media hosts).
 - **CI/CD**: GitHub Actions → build image → run migrations in a job → rolling restart. Prisma migrations are forward-only; every migration reviewed for lock duration on `measurement`.
 - **Observability**: OpenTelemetry traces → Tempo/Jaeger; Prometheus + Grafana (per-endpoint latency, WS connection count, queue depth, alert-evaluation lag); Loki for logs; Sentry for exceptions. A dedicated dashboard for the **clinical** SLIs: consult join success rate, measurement ingest lag, prescription sign failure rate.
+- **Media scale-out**: one Prosody/Jicofo control plane, **N videobridges added horizontally with Octo**. Start at one JVB; add a bridge per ~300 concurrent participants. Bridge selection, packet loss and per-consult bitrate go on the clinical SLI dashboard from day one — video degrades before it fails, so the metric has to lead the complaint.
+- **Sharding readiness**: `org_id` is on every clinical row and leads every index, so the shard key is already chosen. Nothing needs to be sharded until a single primary stops coping — but no query may be written that spans orgs, and no clinical table may take a foreign key to the global `user` table beyond a plain `user_id` column. Those two rules keep a 6–10 week migration from becoming a rewrite.
 - **DR target**: RPO 15 min (WAL shipping), RTO 4 h. Runbook written and rehearsed before first paying org.
 
 ---

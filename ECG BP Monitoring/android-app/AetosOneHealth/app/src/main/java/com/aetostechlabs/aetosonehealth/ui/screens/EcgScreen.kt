@@ -17,7 +17,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlin.math.roundToInt
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.aetostechlabs.aetosonehealth.data.hrBand
 import com.aetostechlabs.aetosonehealth.ui.MonitorViewModel
@@ -44,6 +46,7 @@ fun EcgScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
         (if (active == null) sessions else sessions.filter { it.profileId == active?.id })
             .firstOrNull { it.hrAvg != null }
     }
+    val context = LocalContext.current
     val streaming = live.hr != null
     val showHr = live.hr ?: lastSession?.hrAvg?.roundToInt()
     val showRr = live.rrMs ?: showHr?.takeIf { it > 0 }?.let { (60000.0 / it).roundToInt() }
@@ -117,11 +120,35 @@ fun EcgScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
             InfoRow("Model", state.info.model.ifBlank { "—" })
             InfoRow("Firmware", state.info.firmware.ifBlank { "—" })
             InfoRow("Samples this session", live.samples.toString())
+            InfoRow("App version", appVersion())
+            InfoRow("Sessions stored (this profile)", sessions.count {
+                active == null || it.profileId == active?.id
+            }.toString())
+            InfoRow("Sessions stored (all)", sessions.size.toString())
         }
 
         if (state.log.isNotEmpty()) {
             SectionCard("Activity") {
-                state.log.takeLast(8).reversed().forEach {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    OutlinedButton(onClick = {
+                        shareDiagnostics(
+                            context,
+                            "Aetos One Health — ECG diagnostics",
+                            buildString {
+                                appendLine("app ${appVersion()}")
+                                appendLine("device: ${state.info.name} ${state.info.address}")
+                                appendLine("model: ${state.info.model} fw ${state.info.firmware}")
+                                appendLine("step: ${state.step} · hr: ${live.hr} · beats: ${live.beats}")
+                                appendLine("samples: ${live.samples} · quality: ${live.quality}")
+                                appendLine("sessions stored: ${sessions.size}")
+                                appendLine()
+                                state.log.forEach { appendLine(it) }
+                            }
+                        )
+                    }) { Text("Send this log") }
+                }
+                Spacer(Modifier.height(6.dp))
+                state.log.reversed().forEach {
                     Text(
                         it,
                         style = MaterialTheme.typography.labelSmall,
