@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Template, TemplateCategory } from "@/lib/types";
 import { apiFetch } from "@/lib/api";
+import { HelpLink } from "@/components/help-link";
 
 const statusColor: Record<Template["status"], string> = {
   approved: "bg-emerald-100 text-emerald-700",
@@ -61,10 +62,13 @@ export function TemplatesView() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Templates</h1>
-        <button onClick={() => setShowNew((s) => !s)}
-          className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
-          + New template
-        </button>
+        <div className="flex items-center gap-2">
+          <HelpLink anchor="templates" />
+          <button onClick={() => setShowNew((s) => !s)}
+            className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
+            + New template
+          </button>
+        </div>
       </div>
 
       {showNew && (

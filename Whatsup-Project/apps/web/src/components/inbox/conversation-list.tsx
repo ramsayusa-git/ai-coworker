@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import type { Conversation, ConvStatus, SavedView } from "@/lib/types";
 import { getCachedMe } from "@/lib/api";
+import { HelpLink } from "@/components/help-link";
 
 const filters: { key: ConvStatus | "all"; label: string }[] = [
   { key: "all", label: "All" },
@@ -64,9 +65,10 @@ export function ConversationList({
 
   return (
     <div className="flex h-full w-80 shrink-0 flex-col border-r border-zinc-200 bg-white">
-      <div className="border-b border-zinc-200 p-2">
+      <div className="flex items-center gap-2 border-b border-zinc-200 p-2">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, phone, message…"
           className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs focus:border-emerald-500 focus:outline-none" />
+        <HelpLink anchor="inbox" label="" />
       </div>
 
       {views.length > 0 && (

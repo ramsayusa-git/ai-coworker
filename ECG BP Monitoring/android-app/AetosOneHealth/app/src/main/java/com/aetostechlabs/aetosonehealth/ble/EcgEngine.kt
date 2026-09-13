@@ -50,6 +50,10 @@ class EcgEngine(
     private val _live = MutableStateFlow(EcgLive())
     val live: StateFlow<EcgLive> = _live.asStateFlow()
 
+    /** True once Scan has been pressed — see [BpEngine.sessionStarted]. */
+    private val _sessionStarted = MutableStateFlow(false)
+    val sessionStarted: StateFlow<Boolean> = _sessionStarted.asStateFlow()
+
     private var job: Job? = null
     private var sessionId: Long? = null
     private var sampleCount = 0
@@ -86,12 +90,16 @@ class EcgEngine(
     /** One more scan pass — this is what the Scan button calls. */
     fun scan() {
         if (job?.isActive == true) return
+        // Clear the readout: a new wear starts from nothing.
+        _live.value = EcgLive()
+        _sessionStarted.value = true
         job = scope.launch { runPass() }
     }
 
     fun stop() {
         job?.cancel()
         job = null
+        _sessionStarted.value = false
         closeSession("stopped")
         ble.close()
         setStep(Step.IDLE, "Stopped. Press Scan to reconnect.")

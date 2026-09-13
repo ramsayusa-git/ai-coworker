@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { apiFetch, getCachedMe } from "@/lib/api";
 import type { Team } from "@/lib/types";
 import { FUNCTIONAL_ROLES, type FunctionalRole } from "@/lib/types";
+import { HelpLink } from "@/components/help-link";
 
 const FUNCTIONAL_ROLE_LABELS: Record<FunctionalRole, string> = {
   administrator: "Administrator", broadcast_manager: "Broadcast Manager", template_manager: "Template Manager",
@@ -275,7 +276,10 @@ export function SettingsView() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold">Settings</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Settings</h1>
+        <HelpLink anchor="settings" />
+      </div>
       <div className="mb-4 flex gap-1 border-b border-zinc-200">
         {tabs.map((t) => (
           <button key={t} onClick={() => setTab(t)}

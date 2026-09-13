@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Channel } from "@/lib/types";
 import { apiFetch } from "@/lib/api";
+import { HelpLink } from "@/components/help-link";
 
 type ApiChannel = {
   id: string; provider: Channel["provider"]; displayName: string; phoneE164: string | null;
@@ -171,10 +172,13 @@ export function ChannelsView() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Channels</h1>
-        <button onClick={() => setShowConnect(true)}
-          className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
-          + Connect number
-        </button>
+        <div className="flex items-center gap-2">
+          <HelpLink anchor="channels" />
+          <button onClick={() => setShowConnect(true)}
+            className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
+            + Connect number
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

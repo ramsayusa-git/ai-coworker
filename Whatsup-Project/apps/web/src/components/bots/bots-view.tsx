@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Bot, BotEdge, BotNode } from "@/lib/types";
 import { BotFlowEditor } from "./bot-flow-editor";
 import { apiFetch } from "@/lib/api";
+import { HelpLink } from "@/components/help-link";
 
 type ApiBot = Omit<Bot, "channels" | "sessionsToday" | "handoffRate"> & { channelIds: string[] };
 
@@ -49,6 +50,8 @@ export function BotsView() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Bots</h1>
+        <div className="flex items-center gap-2">
+        <HelpLink anchor="bots" />
         {creating ? (
           <div className="flex gap-2">
             <input autoFocus value={newName} onChange={(e) => setNewName(e.target.value)}
@@ -62,6 +65,7 @@ export function BotsView() {
             + New bot
           </button>
         )}
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">

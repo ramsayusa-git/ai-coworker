@@ -145,8 +145,13 @@ fun AetosOneApp(vm: MonitorViewModel = viewModel()) {
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
+                            // The version lives in the header, not buried in a
+                            // details card: when a report and a build disagree,
+                            // the first thing anyone needs is which build is
+                            // actually running, at a glance.
                             Text(
-                                active?.name ?: "No profile selected",
+                                (active?.name ?: "No profile selected") +
+                                    "  ·  v" + BuildConfig.VERSION_NAME,
                                 style = MaterialTheme.typography.labelSmall
                             )
                         }

@@ -39,11 +39,13 @@ fun EcgScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
     val active by vm.activeProfile.collectAsState()
     val sessions by vm.repo.sessions.collectAsState()
 
-    // Same rule as the BP screen: when nothing is streaming, fall back to the
-    // last recorded session rather than showing dashes. A screen full of dashes
-    // over a database full of readings reads as "it stopped working".
-    val lastSession = remember(sessions, active?.id) {
-        (if (active == null) sessions else sessions.filter { it.profileId == active?.id })
+    // Same rule as the BP screen: the last recorded session fills the tiles
+    // until Scan is pressed, then they clear so this wear's numbers are
+    // unmistakably this wear's.
+    val started by vm.ecg.sessionStarted.collectAsState()
+    val lastSession = remember(sessions, active?.id, started) {
+        if (started) null
+        else (if (active == null) sessions else sessions.filter { it.profileId == active?.id })
             .firstOrNull { it.hrAvg != null }
     }
     val context = LocalContext.current
@@ -145,7 +147,7 @@ fun EcgScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
                                 state.log.forEach { appendLine(it) }
                             }
                         )
-                    }) { Text("Send this log") }
+                    }) { Text("Share this log") }
                 }
                 Spacer(Modifier.height(6.dp))
                 state.log.reversed().forEach {

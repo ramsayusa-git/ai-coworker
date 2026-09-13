@@ -4,6 +4,7 @@ import type { AdCampaign, AdPlatform, Channel } from "@/lib/types";
 import { AD_PLATFORMS, AD_PLATFORM_LABELS } from "@/lib/types";
 import { apiFetch } from "@/lib/api";
 import { SocialPostsPanel } from "./social-posts-panel";
+import { HelpLink } from "@/components/help-link";
 
 const statusColor: Record<AdCampaign["status"], string> = {
   draft: "bg-zinc-100 text-zinc-600", scheduled: "bg-blue-100 text-blue-700",
@@ -162,7 +163,10 @@ export function AdsManagerView() {
   const [tab, setTab] = useState<"ads" | "social">("ads");
   return (
     <div>
-      <h1 className="mb-3 text-2xl font-semibold">Ads &amp; Social Manager</h1>
+      <div className="mb-3 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Ads &amp; Social Manager</h1>
+        <HelpLink anchor="ads-social" />
+      </div>
       <div className="mb-4 flex gap-4 border-b border-zinc-200 text-sm">
         <button onClick={() => setTab("ads")} className={`border-b-2 px-1 pb-2 ${tab === "ads" ? "border-emerald-600 font-medium text-emerald-700" : "border-transparent text-zinc-500"}`}>Ad Campaigns</button>
         <button onClick={() => setTab("social")} className={`border-b-2 px-1 pb-2 ${tab === "social" ? "border-emerald-600 font-medium text-emerald-700" : "border-transparent text-zinc-500"}`}>Organic Posts</button>

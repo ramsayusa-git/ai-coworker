@@ -53,11 +53,12 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
     }
     val recent = mine.take(20).reversed()
 
-    // The tiles fall back to the newest stored reading when there is no live
-    // one. Without this the screen shows four dashes after any app restart or
-    // tab switch, even though the reading is safely in the database — which
-    // reads as "it didn't work" when in fact it did.
-    val latest = mine.firstOrNull()
+    // Before Scan is pressed the tiles show the last stored reading, so opening
+    // the app is useful. The moment Scan is pressed they clear and show only
+    // this session's result — otherwise a stale value sits there through the
+    // whole measurement and you cannot tell when the new one lands.
+    val started by vm.bp.sessionStarted.collectAsState()
+    val latest = if (started) null else mine.firstOrNull()
     val showSys = live.systolic ?: latest?.systolic
     val showDia = live.diastolic ?: latest?.diastolic
     val showPulse = live.pulse ?: latest?.pulse
@@ -193,7 +194,7 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
                                 state.log.forEach { appendLine(it) }
                             }
                         )
-                    }) { Text("Send this log") }
+                    }) { Text("Share this log") }
                 }
                 Spacer(Modifier.height(6.dp))
                 state.log.reversed().forEach {

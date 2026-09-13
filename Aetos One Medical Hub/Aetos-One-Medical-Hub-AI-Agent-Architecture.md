@@ -1,10 +1,12 @@
 # Aetos One Medical Hub — AI Agent Layer Architecture
 
 **Companion to:** `Aetos-One-Medical-Hub-Architecture.md`
-**Version:** 1.1 (scalability fixes applied)
+**Version:** 1.2 (open-source composition applied)
 **Date:** 13 September 2026
 **Scope:** One AI agent per backend service, the runtime they all share, and the 2026-era stack that runs them.
 
+> **v1.2 changes** (from the OSS Composition review): durable execution is **DBOS Transact TS (MIT)** on the existing Postgres, not a hand-rolled state table (§1.4); the model gateway is **LiteLLM (MIT)** rather than built from scratch (§1.5); ASR split between **IndicConformer (MIT, gated — mirror the weights)** and the **Whisper family (MIT)**; signal processing is **NeuroKit2 + ONNX Runtime (both MIT)** and **py-ecg-detectors (GPL-3.0) is banned** (§3).
+>
 > **v1.1 changes** (from the Scalability Review): Temporal deferred — BullMQ through phase 4 behind a swappable interface (§1.4); agent hosting model changed from one-container-per-agent to a shared agent host with dedicated containers only where earned (§1.7); AI cost made a pricing decision rather than an absorbed overhead (§7).
 
 ---
@@ -164,12 +166,14 @@ Every platform capability an agent may use is published as a typed MCP tool by t
 
 - **Short, single-shot agents** (classify, summarise, score): BullMQ job → agent HTTP call → result event. No workflow engine needed.
 - **Multi-step, long-running or human-gated** (intake interview, credentialing, ABDM consent dance): a `WorkflowEngine` interface with **two implementations**.
-  - **Phases 0–4: BullMQ** with an explicit `workflow_run` state table and resume-on-restart. Temporal is the right answer for durable human-gated workflows *and* it is a cluster with its own database, upgrade cycle and failure modes. Running one to orchestrate four workflows is operational load bought ahead of need.
+  - **Phases 0–4: DBOS Transact TS (MIT)** — TypeScript-native durable execution as a *library* backed by the Postgres you already run. No extra cluster, no control plane, no new on-call surface, and resume-on-restart comes with it rather than being hand-rolled. BullMQ stays for plain fire-and-forget jobs. Temporal is the right answer for durable human-gated workflows *and* it is a cluster with its own database, upgrade cycle and failure modes. Running one to orchestrate four workflows is operational load bought ahead of need.
   - **Introduce Temporal** when either trigger fires: more than about five genuinely durable human-gated workflows, or the first time a multi-step flow is lost to a restart. The interface makes the swap contained; write the interface on day one so that stays true.
   - What is *not* acceptable either way: hand-rolled cron plus status columns with no resume semantics. That is Temporal, rebuilt badly, with none of the replayable history.
 - **Streaming interactive** (live consult copilot, scribe): the agent holds a session on the realtime gateway, emits partial results over WS, and commits only on completion.
 
 ### 1.5 Model gateway
+
+**Implementation: LiteLLM (MIT)**, not built from scratch. Virtual keys, **budget controls and spend tracking**, caching, guardrails, load balancing, retry/fallback routing, observability callbacks and the admin dashboard are all in the MIT tier — which is exactly the gateway specified below. ⚠️ **Audit logs are enterprise-licensed only**; for a DPDP-regulated platform, log key issuance and changes at the application layer or buy the licence — plan for it rather than discovering it at audit.
 
 One chokepoint for every model call in the platform. Responsibilities:
 
@@ -288,10 +292,15 @@ Net effect: roughly 5–7 containers to operate instead of 23, with the same iso
 | Agent runtime | **Python 3.12 + FastAPI**, HA-addon-style manifest, hosted per §1.7 (shared agent host by default, dedicated container where earned) | Matches the Clinic AI pattern you already run; the ML/ASR/vision ecosystem is Python; process isolation means a leaking agent cannot take down the API |
 | Core API | TypeScript / NestJS | Per the main architecture doc; agents are called out to, not embedded |
 | Tool protocol | **MCP** for every agent→platform call | One permission-enforcing surface, reusable by Claude Code, and an allowlist that neuters prompt-injection tool abuse |
-| Durable orchestration | **BullMQ + a `workflow_run` state table** through phase 4, behind a `WorkflowEngine` interface; **Temporal** introduced at >5 durable human-gated workflows or the first restart-lost flow | Temporal is the right destination and the wrong starting point — it is a cluster to run for four workflows. The interface makes the swap cheap; starting with it is not |
+| Durable orchestration | **DBOS Transact TS (MIT)** through phase 4, behind a `WorkflowEngine` interface; BullMQ for fire-and-forget; **Temporal (MIT)** at >5 durable human-gated workflows or the first restart-lost flow. **Restate is excluded — BSL 1.1, source-available, not open source** | Temporal is the right destination and the wrong starting point — it is a cluster to run for four workflows. The interface makes the swap cheap; starting with it is not |
 | Reasoning models | **Claude** — Sonnet for clinical reasoning, Haiku for latency/volume, Opus reserved for offline eval-set grading and hard analysis | You already build on Anthropic; strong structured-output and tool-use behaviour; prompt caching is the main cost lever |
-| Speech | **Sarvam / AI4Bharat** hosted for Telugu/Hindi/Indian-English; Whisper-large self-hosted as fallback | Indian-language and code-mixed medical speech is where general ASR falls over |
-| Signal models | ONNX Runtime — ECG artifact + rhythm screening, on-device and server | Deterministic, cheap, auditable, runs offline on the phone. An LLM has no business reading a waveform |
+| Speech | **AI4Bharat IndicConformer 600M (MIT)** for Telugu/Hindi; **Whisper / faster-whisper / whisper.cpp (MIT, code *and* weights)** for English and code-mixed English-Hindi; Sarvam Saaras only as a paid API fallback | Whisper's Telugu WER is poor — route Telugu to IndicConformer. ⚠️ **IndicConformer's HuggingFace repo is gated**: the licence is MIT but the download needs an accepted-terms token, so **mirror the weights into your own artifact store** or CI breaks. `whisper.cpp` also gives you the Android/offline path. **Sarvam Saaras has no open weights — it is a vendor dependency, not a component** |
+| Reasoning, self-hosted | **Sarvam-M (24B) and Sarvam 30B / 105B — Apache-2.0, ungated** | Indic-tuned open weights with no strings; the right home for high-volume, low-complexity agents once volume justifies self-hosting. *Sarvam Shuka-1 is Llama-3-licensed, not OSI-open — legal sign-off needed, and it is audio-QA, not ASR* |
+| Translation | **IndicTrans2 (MIT — code and weights)**, CTranslate2 inference | Cleanest Indic licence available; drives Indian-language prescription instructions and patient messaging |
+| Medical NLP guardrail | **scispaCy (Apache-2.0 including the models)**; medspaCy (MIT) for negation and section detection | A deterministic validation layer behind the LLM, not the primary pipeline. **Apache cTAKES is excluded — no release since Sep 2023 and a UMLS licence burden.** ⚠️ UMLS linking requires a signed UMLS agreement |
+| Signal processing | **NeuroKit2 (MIT, v0.2.13 Mar 2026)** for ECG/PPG/RSP; BioSPPy (BSD-3), wfdb-python (MIT), torch_ecg (MIT, no weights shipped) | 🚨 **`py-ecg-detectors` is GPL-3.0 and must never enter the codebase** — copyleft in a closed backend is a licence breach, and NeuroKit2 implements the same detector families (Pan-Tompkins, Hamilton, Christov, Engzee) under MIT |
+| Signal models | **ONNX Runtime + ONNX Runtime Android (MIT, Maven Central, ungated)** — ECG artifact + rhythm screening, on-device and server | Deterministic, cheap, auditable, offline on the phone, and the shortest PyTorch→Android path. An LLM has no business reading a waveform. *LiteRT is fine on licence but drags in a TF training stack; MediaPipe is a vision framework and adds nothing for 1-D biosignals* |
+| Training data | **PTB-XL (CC BY 4.0), MIT-BIH (ODC-By), PhysioNet/CinC Challenge 2020 (CC BY 4.0)**; **ECG-FM (MIT, ungated)** as a starting foundation model | All permit commercial use and none are share-alike, so **your trained weights are yours** — but attribution is enforceable: ship a `DATA_ATTRIBUTION.md`. ⚠️ All are Western/Chinese cohorts; **Indian validation data is required before any clinical claim**, and a diagnostic claim is what pulls the Rhythm Screener into CDSCO Class C |
 | Embeddings + vector | **pgvector** in the existing Postgres, HNSW index, org-partitioned | One database. A separate vector DB is a second thing to secure, back up and keep RLS-consistent, for no benefit at this scale |
 | Retrieval | Hybrid: `tsvector` BM25 + vector, reciprocal rank fusion, then a rerank pass on the top 50 | Pure vector search is measurably worse on drug names, dosages and codes |
 | Guardrails | JSON Schema validation, a clinical policy classifier, citation enforcement, PHI-leak scan on egress, a curated refusal set | Layered and cheap. The schema catches most of it before a model-based check is needed |

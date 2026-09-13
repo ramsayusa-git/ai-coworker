@@ -1,10 +1,12 @@
 # Aetos One Medical Hub — System Architecture
 
-**Version:** 1.1 (scalability fixes applied)
+**Version:** 1.2 (open-source composition applied)
 **Date:** 13 September 2026
 **Owner:** Aetos Tech Labs LLP
 **Status:** Architecture proposal — no code written yet
 
+> **v1.2 changes** (from the OSS Composition review): **MinIO removed — its repository was archived 25 Apr 2026 and is unmaintained**; object storage is now managed S3-compatible (ap-south-1) with SeaweedFS as the self-host option (§7.5). Identity moves to **Keycloak 26.7 Organizations** (§5.4). TimescaleDB's TSL boundary documented with a licence-free fallback (§7.5). Jibri's limits noted and the scribe audio tap moved off it (§8.5).
+>
 > **v1.1 changes** (from the Scalability Review): tenant-context enforcement tightened to `SET LOCAL` inside an explicit transaction with an RLS index rule (§6.5); `access_log` given a real sizing and retention design (§7.6); media capacity, 360p cap and audio-only fallback added (§8.5); deployment topology updated for multi-JVB with Octo (§12).
 
 ---
@@ -101,7 +103,7 @@ flowchart TB
     subgraph Data["Data layer"]
         PG[("PostgreSQL 16<br/>+ TimescaleDB<br/>+ RLS")]
         RD[("Redis<br/>cache / pubsub / queues")]
-        OBJ[("MinIO / S3<br/>waveforms, PDFs, images")]
+        OBJ[("S3-compatible object store<br/>waveforms, PDFs, images")]
     end
 
     subgraph Ext["External"]
@@ -225,6 +227,28 @@ flowchart TD
 | Staff invited | Email/SMS invite → accept → membership activated → for doctors, NMC verification gate before any prescribing right is granted |
 
 **The "doctor adds a patient" consent step is non-negotiable.** A clinician must not be able to unilaterally attach themselves to an existing person's health record. Provisional records (created by the clinic, not yet claimed) are a separate state and are merged into the real user on claim.
+
+### 5.4 Identity runtime — Keycloak, not hand-rolled
+
+**This reverses the original plan to build the `identity` module.** Keycloak **26.7.0** (Apache-2.0, released 9 July 2026) now covers multi-tenant identity natively via its **Organizations** feature: `manage-organizations` / `view-organizations` / `query-organizations` roles give **delegated per-tenant admin without granting `manage-realm`**; organization groups inherit realm and client roles into token claims; subdomain-based IdP redirect matching; user-selectable organization at login for people who belong to several; and Organizations as a first-class resource in Fine-Grained Admin Permissions.
+
+**The split of responsibility:**
+
+| Keycloak owns | The kernel owns |
+|---|---|
+| Authentication (phone OTP via a custom authenticator, email/password, magic link) | Tenancy: organizations, branches, memberships |
+| Federation — OIDC/SAML to Google Workspace, Microsoft Entra, hospital LDAP | The permission catalogue and role→permission mapping |
+| MFA, password policy, brute-force protection | **Care-relationship (ABAC) evaluation** |
+| Sessions, refresh-token rotation, revocation, token introspection | Postgres RLS and the tenant-context transaction |
+| Delegated tenant admin UI | Break-glass, audit, access log |
+
+**Why buy rather than build:** a hospital customer will demand SAML/Entra federation on day one, and the list above — session revocation, brute-force protection, token introspection, delegated admin — is six to twelve engineer-months where **every bug is a breach**. Keycloak is roughly two to four weeks to production. Under DPDP, an auditable identity layer is itself a compliance asset.
+
+**What it costs:** a JVM service with its own database, quarterly and occasionally breaking upgrades, and an admin API with a learning curve. Accepted.
+
+**What does *not* move:** the care-relationship check stays in the kernel. It is the part that makes clinical access correct, it is specific to this product, and no identity provider models it.
+
+---
 
 ---
 
@@ -705,7 +729,7 @@ erDiagram
     WAVEFORM {
         uuid id PK
         uuid measurement_id FK
-        string object_key "S3/MinIO"
+        string object_key "S3-compatible store"
         int sample_rate_hz
         int duration_ms
         int channels
@@ -829,8 +853,8 @@ erDiagram
 | Data | Store | Why |
 |---|---|---|
 | All relational + `measurement` | PostgreSQL 16 | One DB, real joins, RLS. |
-| `measurement`, `access_log`, `dose_event` | TimescaleDB hypertables on the same Postgres | Time-partitioned, compressed after 30 days, continuous aggregates for trend charts. Avoids a second database. |
-| ECG waveforms, prescription PDFs, lab reports, recordings | MinIO (self-hosted, S3 API) | Blobs do not belong in Postgres. Server-side encryption, object-lock for signed prescriptions. |
+| `measurement`, `access_log`, `dose_event` | TimescaleDB hypertables on the same Postgres | Time-partitioned, compressed after 30 days, continuous aggregates for trend charts. Avoids a second database. **Licence note: only `create_hypertable`, `drop_chunks` and `time_bucket` are Apache-2.0 — compression, continuous aggregates and retention policies are all TSL (source-available, not open source).** TSL permits self-hosted use and forbids selling TimescaleDB *as a service*; you sell telemedicine, so you are almost certainly inside the grant, but it is a proprietary licence that can change. **Fallback if it ever does: plain Postgres declarative partitioning + object storage for raw waveforms + scheduled materialised views.** |
+| ECG waveforms, prescription PDFs, lab reports, recordings | **Managed S3-compatible storage in India (AWS S3 `ap-south-1` or an Indian provider)**; **SeaweedFS (Apache-2.0)** only where a customer mandates self-hosting | Blobs do not belong in Postgres. Server-side encryption, object-lock for signed prescriptions. **MinIO was the original choice and has been removed: `minio/minio` was archived by its owner on 25 April 2026 and is read-only, so Community Edition gets no releases, no reviewed patches and no official binaries — and it is AGPLv3, network copyleft on the store holding patient recordings. An unpatched object store for protected health data is indefensible.** The S3 API surface is identical either way, so this is a config and ops decision, not a rewrite. |
 | Sessions, rate limits, realtime presence, job queues | Redis 7 | — |
 | Search (patients, drugs) | Postgres `pg_trgm` + GIN at launch; OpenSearch only if it stops scaling | Don't add Elasticsearch on day one. |
 
@@ -898,7 +922,7 @@ sequenceDiagram
 
     Note over P,N: BLE reading taken
     P->>API: POST /measurements (idempotency-key, raw frame)
-    API->>DB: insert measurement (+ waveform to MinIO)
+    API->>DB: insert measurement (+ waveform to object store)
     API->>RT: publish measurement.created
     RT-->>D: live vitals tile updates
     RT-->>P: confirmation tick
@@ -923,7 +947,7 @@ sequenceDiagram
 A 250 Hz single-lead ECG is ~500 B/s raw. Sent as base64 JSON over WS this is ~11 KB/s per viewer — acceptable, but wasteful. Approach:
 
 - Phone buffers 1-second frames, downsamples to a display-rate envelope (min/max per 10 ms bucket) for the **live** view — ~60 points/s, trivially small.
-- The **full-fidelity** samples are uploaded as a binary chunked PUT to the waveform endpoint (resumable, gzip), landing in MinIO. The doctor's "full trace" view reads from there.
+- The **full-fidelity** samples are uploaded as a binary chunked PUT to the waveform endpoint (resumable, gzip), landing in the object store. The doctor's "full trace" view reads from there.
 - This means a doctor on a poor connection still sees a live rhythm, and the diagnostic-quality trace is never lost to a dropped socket.
 
 ### 8.4 Offline-first on the phone
@@ -955,6 +979,14 @@ Video bandwidth is the first hard wall this system hits and the largest single i
 | Recording | Off by default; where enabled, record **audio-only** unless video is explicitly consented | Storage and consent cost both drop by an order of magnitude |
 
 **Hosting:** model egress cost before committing. At ~1.5 Mbps × 1 600 peak participants that is ~2.4 Gbps sustained — per-GB egress pricing is ruinous at this shape; committed-bandwidth or unmetered hosting is the right purchase, and it must be decided before the load arrives, not after the first invoice.
+
+**Recording and transcription — two Jitsi limits that shape the design:**
+
+- **Jibri records one conference at a time per instance.** It runs headless Chrome in a virtual framebuffer and encodes with ffmpeg, so N concurrent recorded consults means N CPU-bound Jibri instances — at volume this is the largest single cost in a recorded-telemedicine deployment. It is the strongest argument for the recording-off-by-default and audio-only-where-enabled policy above.
+- **Jibri only works with a full Jitsi Meet frontend** — *"using a different frontend won't work."* Your clinician console is a custom frontend, so Jibri recording breaks the moment that ships.
+- **Jibri does not transcribe.** Transcription is Jigasi's job and it targets Google Cloud Speech / Vosk.
+
+**Therefore the Scribe agent's audio tap does not go through Jibri or Jigasi.** It uses **LiveKit `agents`** (Apache-2.0) — a server-side participant that receives the audio stream and pipes it to your own ASR, works with a custom frontend, and runs on infrastructure Aetos already operates — or, failing that, a purpose-built headless audio-tap participant. Jitsi keeps the media plane; programmable audio access is a different job and Jitsi is only good at the first.
 
 **Regionalisation** (needed at national scale): JVBs placed near patients, Octo cascading between regions, and consult routing that prefers the closest healthy bridge. This is the latency fix as much as the capacity fix.
 
@@ -1069,7 +1101,7 @@ POST   /measurements                 single, idempotent
 POST   /measurements/batch           offline outbox drain, ≤500 per call
 GET    /patients/:id/measurements?kind=&from=&to=&page=
 GET    /measurements/:id
-POST   /measurements/:id/waveform    chunked binary upload → MinIO
+POST   /measurements/:id/waveform    chunked binary upload → object store
 GET    /measurements/:id/waveform    signed URL
 GET    /patients/:id/trends?kind=bp&bucket=1d&from=&to=   Timescale continuous aggregate
 ```
@@ -1130,7 +1162,7 @@ Server → client: `measurement.created`, `waveform.chunk`, `alert.raised`, `ale
 | Control | Implementation |
 |---|---|
 | Transport | TLS 1.3 everywhere; HSTS; certificate pinning in both Android apps |
-| At rest | Postgres on LUKS volume + `pgcrypto` column encryption for `abha_number`, `phone_e164` hash-index; MinIO SSE-KMS |
+| At rest | Postgres on LUKS volume + `pgcrypto` column encryption for `abha_number`, `phone_e164` hash-index; object-store SSE-KMS |
 | Tokens | Access JWT 15 min (RS256, rotating JWKS); refresh 30 d, rotating, reuse-detection revokes the family |
 | Mobile storage | Android Keystore for refresh token; SQLCipher for the local clinical cache; screenshot blocking on clinical screens |
 | Jitsi | Prosody JWT auth, room name = UUIDv4, JWT TTL 10 min, lobby enabled, moderator = doctor only |
@@ -1138,7 +1170,7 @@ Server → client: `measurement.created`, `waveform.chunk`, `alert.raised`, `ale
 | Input | Zod/class-validator on every DTO; no raw SQL outside reviewed repository methods |
 | Secrets | Not in env files in prod — Docker secrets or Vault; no secret ever in the repo |
 | PII in logs | Structured logging with a redaction serialiser; phone/email/MRN never logged in plaintext |
-| Backups | Nightly `pg_dump` + WAL archiving to a second location; MinIO versioning + object-lock; **restores tested monthly, not just taken** |
+| Backups | Nightly `pg_dump` + WAL archiving to a second location; object-store versioning + object-lock; **restores tested monthly, not just taken** |
 | Vulnerability | Dependency scanning in CI; container image scanning; quarterly pen-test before any hospital-chain customer |
 | Break-glass | Typed reason, 60-minute grant, notifies org owner immediately, permanent high-severity audit entry |
 
@@ -1165,7 +1197,7 @@ flowchart LR
         PG[("Postgres 16 + Timescale<br/>primary")]
         PGR[("streaming replica")]
         RD[("Redis")]
-        MIN[("MinIO")]
+        MIN[("S3-compatible<br/>object store")]
     end
     subgraph MediaHost["Jitsi (existing box + scale-out)"]
         PROS["prosody (JWT auth)"]
@@ -1221,6 +1253,7 @@ Roughly **23 weeks** of focused build to a defensible v1. Phases 0–4 (14 weeks
 | **NMC verification has no clean public API** | Medium — blocks prescribing | Phase 1: manual admin verification with document upload + a reviewer. Automate later if a usable registry endpoint exists. Don't block the roadmap on it. |
 | **ABDM integration effort is routinely underestimated** | Medium | Keep it in phase 7, behind an interface. The core product must work fully without ABDM. |
 | **Jitsi at scale** | Medium | One JVB handles ~100 participants comfortably; plan JVB horizontal scaling and Octo before multi-org load. Monitor bridge selection and packet loss per consult. |
+| **Third-party licence and maintenance risk** | Medium | Every adopted component carries a licence tier (see the OSS Composition doc): permissive in-core, MPL embeddable, GPL/AGPL arms-length only, and a do-not-adopt list. Re-check archived/abandoned status at each major release — MinIO going unmaintained is exactly this risk realised. |
 | **Measurement table growth** | Medium | Timescale compression after 30 d, waveforms in object storage not in Postgres, continuous aggregates for every chart the UI draws. |
 | **Two Android apps, one team** | Medium | Share a `:core-ble`, `:core-data`, `:core-network`, `:core-ui` module set across both app IDs. Do not fork the BLE stack — it took four builds to get the cuff working once. |
 | **Scope: this is three products** | High | Device telemetry, telemedicine, and a practice-management console are each a product. Phase 0–4 deliberately builds the thinnest slice of each that makes the loop work. Resist adding billing, inventory, insurance claims or an EMR-grade note system into v1. |

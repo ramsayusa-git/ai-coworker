@@ -45,6 +45,17 @@ class BpEngine(
     var notifications: Int = 0
         private set
 
+    /**
+     * True once Scan has been pressed in this app session.
+     *
+     * Pressing Scan means "I am about to take a new measurement", so the screen
+     * clears and shows only what this session produces. Until then it shows the
+     * last stored reading, which is the useful thing to see on opening the app.
+     * Without the clear you cannot tell a fresh result from yesterday's.
+     */
+    private val _sessionStarted = MutableStateFlow(false)
+    val sessionStarted: StateFlow<Boolean> = _sessionStarted.asStateFlow()
+
     companion object {
         private const val SCAN_TIMEOUT_MS = 30_000L
     }
@@ -71,12 +82,16 @@ class BpEngine(
 
     fun scan() {
         if (job?.isActive == true) return
+        // Clear the readout: this is a new measurement, not a continuation.
+        _live.value = BpLive()
+        _sessionStarted.value = true
         job = scope.launch { runPass() }
     }
 
     fun stop() {
         job?.cancel()
         job = null
+        _sessionStarted.value = false
         ble.close()
         setStep(Step.IDLE, "Stopped. Press Scan to reconnect.")
     }

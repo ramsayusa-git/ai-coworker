@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import type { AnalyticsSummary } from "@/lib/types";
 import { apiFetch } from "@/lib/api";
+import { HelpLink } from "@/components/help-link";
 
 function Kpi({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -23,7 +24,10 @@ export function AnalyticsView() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold">Analytics</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Analytics</h1>
+        <HelpLink anchor="analytics" />
+      </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Kpi label="Messages sent (30d)" value={data.messagesSent.toLocaleString()} />

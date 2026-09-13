@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { AutomationRule, AutomationAction, AutomationFilter, Team, Template } from "@/lib/types";
 import { apiFetch } from "@/lib/api";
+import { HelpLink } from "@/components/help-link";
 
 type ActionType = AutomationAction["type"];
 const ACTION_LABELS: Record<ActionType, string> = {
@@ -93,10 +94,13 @@ export function AutomationsView() {
     <div>
       <div className="mb-1 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Automations</h1>
-        <button onClick={() => setShowNew((s) => !s)}
-          className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
-          + New rule
-        </button>
+        <div className="flex items-center gap-2">
+          <HelpLink anchor="automations" />
+          <button onClick={() => setShowNew((s) => !s)}
+            className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
+            + New rule
+          </button>
+        </div>
       </div>
       <p className="mb-4 text-xs text-zinc-500">
         Trigger → filter → action rules, evaluated live against real inbound WhatsApp messages — Wati&apos;s Automations &quot;Rules&quot; pattern.
