@@ -17,7 +17,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +33,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.platform.LocalContext
 import com.aetostechlabs.aetosonehealth.ui.MonitorViewModel
 import com.aetostechlabs.aetosonehealth.ui.components.BigValue
+import com.aetostechlabs.aetosonehealth.ui.components.BpStatsCard
 import com.aetostechlabs.aetosonehealth.ui.components.SectionCard
 import com.aetostechlabs.aetosonehealth.ui.components.Series
 import com.aetostechlabs.aetosonehealth.ui.components.StepPanel
@@ -58,6 +63,19 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
     // this session's result — otherwise a stale value sits there through the
     // whole measurement and you cannot tell when the new one lands.
     val started by vm.bp.sessionStarted.collectAsState()
+    val measuring = state.connected && live.systolic == null
+    // Elapsed time since the link came up — the one thing that visibly moves
+    // while the cuff is inflating, because the cuff itself sends nothing until
+    // it has a result.
+    val elapsedState = remember { mutableIntStateOf(0) }
+    val elapsed = elapsedState.intValue
+    LaunchedEffect(measuring) {
+        elapsedState.intValue = 0
+        while (measuring) {
+            delay(1000)
+            elapsedState.intValue++
+        }
+    }
     val latest = if (started) null else mine.firstOrNull()
     val showSys = live.systolic ?: latest?.systolic
     val showDia = live.diastolic ?: latest?.diastolic
@@ -78,31 +96,51 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             BigValue(
-                "Systolic", showSys?.toString() ?: "—", "mmHg · upper",
-                BpSystolic, Modifier.weight(1f)
+                "Systolic", showSys?.toString() ?: "—",
+                if (measuring) "measuring…" else "mmHg · upper",
+                BpSystolic, Modifier.weight(1f), busy = measuring
             )
             BigValue(
-                "Diastolic", showDia?.toString() ?: "—", "mmHg · lower",
-                BpDiastolic, Modifier.weight(1f)
+                "Diastolic", showDia?.toString() ?: "—",
+                if (measuring) "measuring…" else "mmHg · lower",
+                BpDiastolic, Modifier.weight(1f), busy = measuring
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            BigValue("Pulse", showPulse?.toString() ?: "—", "bpm", BpPulse, Modifier.weight(1f))
             BigValue(
-                "Mean arterial", showMap?.let { "%.1f".format(it) } ?: "—", "mmHg",
-                MaterialTheme.colorScheme.primary, Modifier.weight(1f)
+                "Pulse", showPulse?.toString() ?: "—",
+                if (measuring) "measuring…" else "bpm",
+                BpPulse, Modifier.weight(1f), busy = measuring
+            )
+            BigValue(
+                "Mean arterial", showMap?.let { "%.1f".format(it) } ?: "—",
+                if (measuring) "measuring…" else "mmHg",
+                MaterialTheme.colorScheme.primary, Modifier.weight(1f), busy = measuring
             )
         }
 
         // Connected with nothing to show is the confusing state: the cuff only
         // sends a frame when *it* completes a measurement, so say so plainly
         // rather than leaving four dashes on screen.
-        if (state.connected && showSys == null) {
-            SectionCard("Waiting for a measurement") {
+        if (measuring) {
+            SectionCard("Measuring — live") {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        Modifier.size(18.dp), strokeWidth = 2.5.dp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(Modifier.size(10.dp))
+                    Text(
+                        "Connected for ${elapsed}s · waiting for the cuff to finish",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
                 Text(
-                    "The link is up. This cuff stays silent until a measurement finishes, " +
-                        "then sends exactly one packet with the result — it transmits nothing " +
-                        "else, ever. Put it on your arm and press START on the cuff itself.",
+                    "This cuff sends nothing while it inflates — it transmits exactly one " +
+                        "packet, with the result, the moment the measurement completes. Put " +
+                        "it on your arm and press START on the cuff itself; the values land " +
+                        "here automatically.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -123,7 +161,14 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
         }
 
         if (showCategory.isNotBlank()) {
-            SectionCard(if (isLive) "Latest reading" else "Last recorded reading") {
+            SectionCard(if (isLive) "Final reading" else "Last recorded reading") {
+                if (isLive) {
+                    Text(
+                        "${live.systolic}/${live.diastolic} mmHg · ${live.pulse} bpm",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
                 Text(showCategory, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 showTime?.let {
                     Spacer(Modifier.height(4.dp))
@@ -145,6 +190,11 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
                 }
             }
         }
+
+        // Live stats — count, averages, min/max by period, category breakdown.
+        // Derived from the stored readings, so it updates the instant a new
+        // reading lands.
+        BpStatsCard(mine, active?.name)
 
         SectionCard(if (active != null) "Trend — ${active?.name}" else "Trend — all profiles") {
             TrendChart(

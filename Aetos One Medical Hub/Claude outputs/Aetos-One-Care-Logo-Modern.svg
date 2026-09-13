@@ -1,0 +1,30 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="careGradient7" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066cc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00a8e8;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow7" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Square with rounded corners - modern style -->
+  <rect x="15" y="15" width="170" height="170" rx="30" fill="url(#careGradient7)" filter="url(#shadow7)"/>
+  <rect x="15" y="15" width="170" height="170" rx="30" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.3"/>
+
+  <!-- Minimalist pulse line + medical cross -->
+  <g opacity="0.95">
+    <!-- Vertical cross line -->
+    <line x1="100" y1="50" x2="100" y2="150" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <!-- Horizontal cross line -->
+    <line x1="50" y1="100" x2="150" y2="100" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <!-- Left pulse curve -->
+    <path d="M 75 100 Q 70 82 60 100" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Right pulse curve -->
+    <path d="M 125 100 Q 130 82 140 100" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- AOC text -->
+  <text x="100" y="175" font-size="18" font-weight="bold" text-anchor="middle" fill="white" font-family="Arial, sans-serif" letter-spacing="2">AOC</text>
+</svg>

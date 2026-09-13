@@ -141,8 +141,31 @@ class QrsDetector(private val fs: Double) {
             }
             thr = npk + 0.25 * (spk - npk)
         }
-        // missed-beat search-back
-        if (rr.isNotEmpty() && (n - lastPeakN) > 1.66 * (rr.sum() / rr.size) * fs) thr *= 0.5
+        // Missed-beat search-back.
+        //
+        // This used to fire only once at least one beat had been found
+        // (`rr.isNotEmpty()`), which deadlocks: if a single noise spike during
+        // the 2 s warm-up drives `spk` — and therefore `thr` — above anything a
+        // real QRS reaches, no beat is ever detected, so `rr` stays empty, so
+        // the threshold is never lowered. The waveform draws perfectly and the
+        // heart rate stays blank forever.
+        //
+        // It now also runs before the first beat, using a default expected gap
+        // of 1.2 s (50 bpm). The decay is gentle and floored rather than the old
+        // halving-per-sample, which collapsed the threshold to zero within a few
+        // samples and would have turned noise into beats.
+        // It now also runs before the first beat, using a default expected gap
+        // of 1.2 s (50 bpm). Crucially it decays `spk` itself, not just `thr`:
+        // the artefact's damage lives in `spk`, so a threshold floored on the
+        // old `spk` stays out of reach no matter how far `thr` is lowered. Both
+        // estimates are walked back toward the signal actually arriving now.
+        val sinceLast = n - lastPeakN
+        val expectedGap = if (rr.isNotEmpty()) (rr.sum() / rr.size) * fs else 1.2 * fs
+        if (sinceLast > 1.66 * expectedGap) {
+            spk = maxOf(spk * 0.998, y)
+            npk = 0.98 * npk + 0.02 * y
+            thr = npk + 0.25 * (spk - npk)
+        }
         return beat
     }
 }

@@ -3,6 +3,7 @@ package com.aetostechlabs.aetosonehealth.ble
 import android.content.Context
 import com.aetostechlabs.aetosonehealth.data.DeviceKind
 import com.aetostechlabs.aetosonehealth.data.DeviceStore
+import com.aetostechlabs.aetosonehealth.data.EcgSession
 import com.aetostechlabs.aetosonehealth.data.Repository
 import com.aetostechlabs.aetosonehealth.data.applyHr
 import com.aetostechlabs.aetosonehealth.dsp.EcgFilter
@@ -54,6 +55,14 @@ class EcgEngine(
     private val _sessionStarted = MutableStateFlow(false)
     val sessionStarted: StateFlow<Boolean> = _sessionStarted.asStateFlow()
 
+    /**
+     * The final result of the wear that just ended, published the moment the
+     * session closes. Live values are what you watch *during* a wear; this is
+     * what you read *after* it — duration, average and range, beats, quality.
+     */
+    private val _lastResult = MutableStateFlow<EcgSession?>(null)
+    val lastResult: StateFlow<EcgSession?> = _lastResult.asStateFlow()
+
     private var job: Job? = null
     private var sessionId: Long? = null
     private var sampleCount = 0
@@ -92,6 +101,7 @@ class EcgEngine(
         if (job?.isActive == true) return
         // Clear the readout: a new wear starts from nothing.
         _live.value = EcgLive()
+        _lastResult.value = null
         _sessionStarted.value = true
         job = scope.launch { runPass() }
     }
@@ -284,6 +294,8 @@ class EcgEngine(
         val sid = sessionId ?: return
         sessionId = null
         repo.closeSession(sid, _live.value.quality.ifEmpty { why }, sampleCount)
+        // Publish the closed session as the final result of this wear.
+        _lastResult.value = repo.sessions.value.firstOrNull { it.id == sid }
         onReadingSaved?.invoke("ECG session saved")
         _live.value = _live.value.copy(sessionId = null)
     }

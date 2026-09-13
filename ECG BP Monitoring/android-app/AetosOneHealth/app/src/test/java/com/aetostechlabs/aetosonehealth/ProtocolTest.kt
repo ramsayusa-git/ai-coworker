@@ -86,3 +86,56 @@ class ProtocolTest {
         assertEquals(93.3, meanArterial(120, 80), 0.05)
     }
 }
+
+class QrsRecoveryTest {
+    /**
+     * A single large artefact during the 2 s warm-up used to set the detection
+     * threshold so high that no real beat ever crossed it, and the search-back
+     * that would have lowered it only ran after the first beat — which never
+     * came. The trace rendered; the heart rate stayed blank forever.
+     */
+    @Test
+    fun `detector recovers after a noise spike during warm-up`() {
+        val fs = 530.0
+        val qrs = com.aetostechlabs.aetosonehealth.dsp.QrsDetector(fs)
+        var beats = 0
+        for (n in 0 until (30 * fs).toInt()) {
+            val t = n / fs
+            // One huge artefact at 0.5 s, inside the warm-up window.
+            val artefact = if (n in 260..268) -30000.0 else 0.0
+            val phase = (n % fs.toInt()) / fs
+            val qrsSpike =
+                if (phase < 0.03) -1000.0 * kotlin.math.sin(phase / 0.03 * kotlin.math.PI) else 0.0
+            if (qrs.process(qrsSpike + artefact)) beats++
+        }
+        org.junit.Assert.assertTrue(
+            "detector never recovered from the warm-up artefact (beats=$beats)",
+            beats >= 15
+        )
+    }
+}
+
+class StatsTest {
+    private fun bp(ts: Long, s: Int, d: Int, p: Int) =
+        com.aetostechlabs.aetosonehealth.data.BpReading(
+            id = ts, ts = ts, profileId = 1, profileName = "t",
+            systolic = s, diastolic = d, pulse = p, source = "ble", rawHex = ""
+        )
+
+    @Test
+    fun `bp stats average and range by period`() {
+        val now = 1_000_000_000_000L
+        val day = 86_400_000L
+        val rows = listOf(
+            bp(now - 1 * day, 120, 80, 70),   // this week
+            bp(now - 3 * day, 130, 85, 75),   // this week
+            bp(now - 20 * day, 150, 95, 90),  // this month only
+            bp(now - 60 * day, 100, 60, 60)   // all time only
+        )
+        val p = com.aetostechlabs.aetosonehealth.ui.components.bpPeriods(rows, now)
+        val week = p[0]; val month = p[1]; val all = p[2]
+        assertEquals(2, week.count); assertEquals(125, week.sys); assertEquals(83, week.dia)
+        assertEquals(3, month.count); assertEquals(133, month.sys)
+        assertEquals(4, all.count); assertEquals(100, all.sysMin); assertEquals(150, all.sysMax)
+    }
+}

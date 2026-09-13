@@ -1,6 +1,11 @@
 package com.aetostechlabs.aetosonehealth.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -167,8 +173,18 @@ fun BigValue(
     value: String,
     unit: String,
     accent: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    busy: Boolean = false
 ) {
+    // While a measurement is in progress and the device has not yet produced a
+    // number, the tile pulses instead of sitting on a static dash. It is an
+    // honest "working" indicator: the value it shows is still no value.
+    val pulse = rememberInfiniteTransition(label = "busy")
+    val alpha by pulse.animateFloat(
+        initialValue = 0.25f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+        label = "busyAlpha"
+    )
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
@@ -186,11 +202,19 @@ fun BigValue(
                 )
             }
             Spacer(Modifier.height(6.dp))
-            Text(
-                value,
-                style = MaterialTheme.typography.headlineMedium,
-                color = if (value == "—") MaterialTheme.colorScheme.outline else accent
-            )
+            if (busy && value == "—") {
+                Text(
+                    "•••",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = accent.copy(alpha = alpha)
+                )
+            } else {
+                Text(
+                    value,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = if (value == "—") MaterialTheme.colorScheme.outline else accent
+                )
+            }
             Text(
                 unit,
                 style = MaterialTheme.typography.labelSmall,
