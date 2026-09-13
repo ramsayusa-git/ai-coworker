@@ -70,6 +70,9 @@ export default function RegisterPage() {
           <p className="text-center text-xs text-zinc-500">
             Already have an account? <a href="/login" className="text-emerald-600 hover:underline">Sign in</a>
           </p>
+          <p className="text-center text-xs text-zinc-400">
+            <a href="/product" className="hover:text-emerald-600 hover:underline">← Back to product overview</a>
+          </p>
         </div>
       </form>
     </div>

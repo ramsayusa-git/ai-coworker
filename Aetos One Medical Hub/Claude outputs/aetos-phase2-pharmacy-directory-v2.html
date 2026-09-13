@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos Pharmacy Network Directory - Top 20 Partner Pharmacies</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #003d82;
+            --secondary: #0066cc;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --light-bg: #f8f9fb;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        h1 { color: var(--primary); margin-bottom: 1.5rem; font-size: 2.2rem; }
+        h2 { color: var(--primary); margin: 2rem 0 1rem 0; border-left: 4px solid var(--accent); padding-left: 1rem; }
+        .section { background: var(--white); padding: 2rem; margin-bottom: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        .search-filter-bar {
+            display: grid;
+            grid-template-columns: 1fr 200px 200px 150px;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .search-input, .filter-select {
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .pharmacy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .pharmacy-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .pharmacy-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            transform: translateY(-4px);
+        }
+        .pharmacy-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+        }
+        .pharmacy-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .pharmacy-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .pharmacy-body { padding: 1.5rem; }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .stars {
+            color: #ffa726;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+        .rating-value { color: var(--text-gray); font-size: 0.9rem; }
+
+        .pharmacy-info {
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+        .pharmacy-info-icon {
+            display: inline-block;
+            width: 20px;
+            margin-right: 0.5rem;
+        }
+        .info-label { color: var(--text-gray); }
+        .info-value { color: var(--text-dark); font-weight: 500; }
+
+        .delivery-info {
+            background: linear-gradient(135deg, #f0f7ff, #e8f1ff);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            border-left: 3px solid var(--secondary);
+        }
+        .delivery-time { font-weight: 600; color: var(--primary); }
+        .delivery-desc { color: var(--text-gray); font-size: 0.9rem; }
+
+        .service-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .service-pill {
+            background: #e8f5e9;
+            color: var(--success);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pharmacy-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+        .btn {
+            padding: 0.7rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,61,130,0.2); }
+        .btn-secondary {
+            background: var(--light-bg);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-secondary:hover { background: var(--primary); color: white; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .stat-label { opacity: 0.95; font-size: 0.9rem; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        th { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 1rem; text-align: left; font-weight: 600; }
+        td { padding: 0.9rem; border-bottom: 1px solid var(--border-color); }
+        tr:hover { background: var(--light-bg); }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .search-filter-bar { grid-template-columns: 1fr; }
+            .pharmacy-grid { grid-template-columns: 1fr; }
+            .pharmacy-actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💊 Pharmacy Partner Network - Top 20 Vendors</h1>
+        <p style="color: var(--text-gray); font-size: 1.1rem;">Phase 2 Feature: Find verified partner pharmacies, compare prices, and schedule delivery</p>
+
+        <div class="section">
+            <h2>Find Nearby Pharmacies & Compare Prices</h2>
+            <div class="search-filter-bar">
+                <input type="text" class="search-input" placeholder="Search pharmacies, medicines, or location...">
+                <select class="filter-select">
+                    <option>Delivery Time</option>
+                    <option>1-2 hours</option>
+                    <option>2-4 hours</option>
+                    <option>Same day</option>
+                </select>
+                <select class="filter-select">
+                    <option>Distance</option>
+                    <option>Within 1km</option>
+                    <option>Within 3km</option>
+                    <option>Within 5km</option>
+                </select>
+                <select class="filter-select">
+                    <option>Sort By</option>
+                    <option>Rating</option>
+                    <option>Distance</option>
+                    <option>Price</option>
+                    <option>Delivery Time</option>
+                </select>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">2,400+</div>
+                    <div class="stat-label">Partner Pharmacies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">₹0</div>
+                    <div class="stat-label">Free Delivery</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">2-4 hrs</div>
+                    <div class="stat-label">Average Delivery</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">99.2%</div>
+                    <div class="stat-label">On-Time Delivery</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Top 20 Partner Pharmacies</h2>
+            <div class="pharmacy-grid" id="pharmacyGrid"></div>
+        </div>
+
+        <div class="section">
+            <h2>Price Comparison - Popular Medicines</h2>
+            <table>
+                <tr>
+                    <th>Medicine</th>
+                    <th>Apollo Pharmacy</th>
+                    <th>MediHub Central</th>
+                    <th>Quick Pharmacy</th>
+                    <th>Netmeds Express</th>
+                    <th>Lowest Price</th>
+                </tr>
+                <tr>
+                    <td><strong>Paracetamol 650mg (10 tabs)</strong></td>
+                    <td>₹28</td>
+                    <td>₹25</td>
+                    <td>₹24</td>
+                    <td>₹26</td>
+                    <td style="color: var(--success); font-weight: 600;">₹24 (Quick)</td>
+                </tr>
+                <tr>
+                    <td><strong>Metformin 500mg (30 tabs)</strong></td>
+                    <td>₹89</td>
+                    <td>₹85</td>
+                    <td>₹79</td>
+                    <td>₹83</td>
+                    <td style="color: var(--success); font-weight: 600;">₹79 (Quick)</td>
+                </tr>
+                <tr>
+                    <td><strong>Amlodipine 5mg (10 tabs)</strong></td>
+                    <td>₹95</td>
+                    <td>₹92</td>
+                    <td>₹88</td>
+                    <td>₹90</td>
+                    <td style="color: var(--success); font-weight: 600;">₹88 (Quick)</td>
+                </tr>
+                <tr>
+                    <td><strong>Ibuprofen 400mg (10 tabs)</strong></td>
+                    <td>₹48</td>
+                    <td>₹45</td>
+                    <td>₹42</td>
+                    <td>₹44</td>
+                    <td style="color: var(--success); font-weight: 600;">₹42 (Quick)</td>
+                </tr>
+                <tr>
+                    <td><strong>Aspirin 75mg (15 tabs)</strong></td>
+                    <td>₹35</td>
+                    <td>₹32</td>
+                    <td>₹30</td>
+                    <td>₹31</td>
+                    <td style="color: var(--success); font-weight: 600;">₹30 (Quick)</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Partner Features & Benefits</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Verified & Licensed</div>
+                    <div style="color: var(--text-gray);">All pharmacies verified with NIPER/IPA credentials</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Real-time Pricing</div>
+                    <div style="color: var(--text-gray);">Live prices from 2,400+ pharmacies, price comparison</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Free Delivery</div>
+                    <div style="color: var(--text-gray);">Free delivery on most orders, no minimum purchase</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Insurance Support</div>
+                    <div style="color: var(--text-gray);">Direct claim processing for PMJAY & private plans</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Digital Prescriptions</div>
+                    <div style="color: var(--text-gray);">Accept prescriptions from all Aetos doctors</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ 24/7 Support</div>
+                    <div style="color: var(--text-gray);">Customer support + pharmacist consultation</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const pharmacies = [
+        { name: "Apollo Pharmacy Indiranagar", badge: "✓", rating: 4.9, reviews: 412, location: "Indiranagar", distance: "2.1 km", hours: "24/7", phone: "+91-80-APOLLO", delivery: "Same-day", deliveryDesc: "Usually 3-4 hours", services: ["24/7 Service", "Consultations", "Insurance", "Refunds"] },
+        { name: "MediHub Central", badge: "⭐", rating: 4.9, reviews: 523, location: "Cantonment", distance: "1.4 km", hours: "7-11pm", phone: "+91-80-MEDIHUB", delivery: "1-2 hrs express", deliveryDesc: "Free above ₹299", services: ["Express", "24/7 Support", "Insurance", "Premium"] },
+        { name: "Guardian Pharmacy", badge: "✓", rating: 4.8, reviews: 467, location: "CV Raman", distance: "2.7 km", hours: "7:30-10pm", phone: "+91-80-GUARDIAN", delivery: "2-3 hours", deliveryDesc: "Free above ₹450", services: ["Insurance", "Consultations", "Wide Range", "Fast"] },
+        { name: "Netmeds Express", badge: "⭐", rating: 4.8, reviews: 521, location: "HSR Layout", distance: "1.5 km", hours: "8am-12am", phone: "+91-80-NETMEDS", delivery: "2 hrs express", deliveryDesc: "Free above ₹100", services: ["Same Day", "Free Consultation", "Easy Refunds", "Insurance"] },
+        { name: "Medcare Pharmacy", badge: "✓", rating: 4.8, reviews: 234, location: "MG Road", distance: "1.2 km", hours: "8-10pm", phone: "+91-80-MEDCARE", delivery: "2-4 hours", deliveryDesc: "Free above ₹500", services: ["24/7 Support", "Cash Back", "Insurance", "Refills"] },
+        { name: "MedServe Pharmacy", badge: "✓", rating: 4.8, reviews: 389, location: "Brookefield", distance: "2.5 km", hours: "7-11pm", phone: "+91-80-MEDSERVE", delivery: "2-4 hours", deliveryDesc: "Free above ₹500", services: ["Consultation", "Insurance", "Fast", "Rewards"] },
+        { name: "Rx Direct Pharmacy", badge: "⭐", rating: 4.7, reviews: 301, location: "Bellandur", distance: "3.8 km", hours: "7-10pm", phone: "+91-80-RXDIRECT", delivery: "2-3 hrs", deliveryDesc: "Free above ₹400", services: ["Fast Delivery", "Insurance", "Loyalty", "Consultants"] },
+        { name: "Swasth Pharmacy", badge: "⭐", rating: 4.7, reviews: 334, location: "Yelahanka", distance: "3.5 km", hours: "7-10pm", phone: "+91-80-SWASTH", delivery: "2-3 hrs", deliveryDesc: "Free above ₹350", services: ["Wellness", "Consultants", "Loyalty", "Prescriptions"] },
+        { name: "Pharmacy365 Online", badge: "⭐", rating: 4.7, reviews: 445, location: "Indiranagar", distance: "1.8 km", hours: "24/7", phone: "+91-80-PHARM365", delivery: "Same day", deliveryDesc: "Free above ₹299", services: ["24/7", "Loyalty", "Easy Returns", "Wide"] },
+        { name: "Medplus Pharmacy", badge: "✓", rating: 4.7, reviews: 356, location: "Whitefield", distance: "3.2 km", hours: "7-9pm", phone: "+91-80-MEDPLUS", delivery: "2-3 hours", deliveryDesc: "Free above ₹499", services: ["Loyalty", "Easy Returns", "Consultations", "Insurance"] },
+        { name: "Quick Pharmacy Plus", badge: "⭐", rating: 4.6, reviews: 189, location: "Koramangala", distance: "0.8 km", hours: "7-11pm", phone: "+91-80-QUICK", delivery: "1.5-2 hrs", deliveryDesc: "Free all orders", services: ["Express", "Discount", "Loyalty", "Premium"] },
+        { name: "HealthFirst Pharmacy", badge: "✓", rating: 4.6, reviews: 214, location: "Vijayanagar", distance: "3.1 km", hours: "8-10pm", phone: "+91-80-HEALTHFST", delivery: "3-4 hours", deliveryDesc: "₹50 delivery", services: ["Health Tracking", "Prescriptions", "Consultations", "Subscriptions"] },
+        { name: "Premier Pharmacy Store", badge: "✓", rating: 4.6, reviews: 223, location: "Sadashivnagar", distance: "2.3 km", hours: "8-8:30pm", phone: "+91-80-PREMIER", delivery: "2-3 hours", deliveryDesc: "Free above ₹550", services: ["Quality", "Insurance", "Consultations", "Bulk"] },
+        { name: "Wellness Plus Chemist", badge: "✓", rating: 4.6, reviews: 245, location: "Ramamurthy", distance: "3.9 km", hours: "7-10pm", phone: "+91-80-WELL-PLUS", delivery: "2-5 hours", deliveryDesc: "₹40 delivery", services: ["Health Programs", "Consultations", "Insurance", "Loyalty"] },
+        { name: "ChemistPlus", badge: "✓", rating: 4.6, reviews: 267, location: "Jayamahal", distance: "2.0 km", hours: "7:30-10:30pm", phone: "+91-80-CHEMIST", delivery: "2-3 hours", deliveryDesc: "₹30 + insurance", services: ["Insurance", "Refills", "Discounts", "Support"] },
+        { name: "Wellness Pharmacy Hub", badge: "✓", rating: 4.5, reviews: 198, location: "Marathahalli", distance: "2.8 km", hours: "8-8pm", phone: "+91-80-WELLNESS", delivery: "3-4 hours", deliveryDesc: "Free above ₹600", services: ["Health", "Consultant", "Subscriptions", "Bulk"] },
+        { name: "LifeCare Pharmacy Express", badge: "✓", rating: 4.5, reviews: 169, location: "Nagavara", distance: "3.3 km", hours: "8-8pm", phone: "+91-80-LIFECARE", delivery: "3-4 hours", deliveryDesc: "Free above ₹600", services: ["Express", "Insurance", "Discounts", "24/7 Support"] },
+        { name: "eCare Pharmacy Network", badge: "✓", rating: 4.5, reviews: 175, location: "Bannerghatta", distance: "4.5 km", hours: "8-9pm", phone: "+91-80-ECARE", delivery: "4-6 hours", deliveryDesc: "Free above ₹800", services: ["Home Delivery", "Insurance", "Easy Returns", "Support"] },
+        { name: "Total Health Pharmacy", badge: "✓", rating: 4.4, reviews: 128, location: "Frazer Town", distance: "1.9 km", hours: "7:30-9:30pm", phone: "+91-80-TOTAL", delivery: "2-4 hours", deliveryDesc: "₹60 flat", services: ["Health Services", "Consultations", "Insurance", "Records"] },
+        { name: "Care Plus Chemist", badge: "✓", rating: 4.4, reviews: 142, location: "Electronic City", distance: "4.2 km", hours: "8-9pm", phone: "+91-80-CAREPLUS", delivery: "3-5 hours", deliveryDesc: "Free above ₹700", services: ["Pharmacy Support", "Prescriptions", "Home Delivery", "Insurance"] }
+    ];
+
+    function renderPharmacies() {
+        const grid = document.getElementById('pharmacyGrid');
+        pharmacies.forEach(pharm => {
+            const stars = '★'.repeat(Math.floor(pharm.rating)) + '☆'.repeat(5 - Math.floor(pharm.rating));
+            const card = document.createElement('div');
+            card.className = 'pharmacy-card';
+            card.innerHTML = `
+                <div class="pharmacy-header">
+                    <div class="pharmacy-name">${pharm.name}</div>
+                    <span class="pharmacy-badge">${pharm.badge} Verified</span>
+                </div>
+                <div class="pharmacy-body">
+                    <div class="rating">
+                        <span class="stars">${stars}</span>
+                        <span class="rating-value">${pharm.rating} (${pharm.reviews} reviews)</span>
+                    </div>
+                    <div class="pharmacy-info">
+                        <span class="pharmacy-info-icon">📍</span>
+                        <span class="info-label">Location:</span>
+                        <span class="info-value">${pharm.location} • ${pharm.distance}</span>
+                    </div>
+                    <div class="pharmacy-info">
+                        <span class="pharmacy-info-icon">🕐</span>
+                        <span class="info-label">Hours:</span>
+                        <span class="info-value">${pharm.hours}</span>
+                    </div>
+                    <div class="pharmacy-info">
+                        <span class="pharmacy-info-icon">☎️</span>
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">${pharm.phone}</span>
+                    </div>
+                    <div class="delivery-info">
+                        <div class="delivery-time">⚡ ${pharm.delivery}</div>
+                        <div class="delivery-desc">${pharm.deliveryDesc}</div>
+                    </div>
+                    <div class="service-pills">
+                        ${pharm.services.map(s => `<span class="service-pill">${s}</span>`).join('')}
+                    </div>
+                    <div class="pharmacy-actions">
+                        <button class="btn btn-primary">Order Now</button>
+                        <button class="btn btn-secondary">View Prices</button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    renderPharmacies();
+    </script>
+</body>
+</html>

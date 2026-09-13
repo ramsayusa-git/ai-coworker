@@ -5,6 +5,8 @@ import { Sidebar } from "./sidebar";
 import { getCachedMe, getToken, logout as logoutSession, type Me } from "@/lib/api";
 
 const PUBLIC_PATHS = ["/login", "/register", "/accept-invite", "/accept-partner-invite"];
+// Marketing/product site — public by prefix, not exact match (has its own sub-routes).
+const PUBLIC_PREFIXES = ["/product"];
 // Reachable with just a JWT — no cached org profile required. Partner-team-only users
 // (partner_owner/admin/support who accepted a partner invite but belong to no org) land
 // here; there's nothing in getCachedMe() for them since that shape assumes an org.
@@ -19,7 +21,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const [hasToken, setHasToken] = useState(false);
   const [checked, setChecked] = useState(false);
   const [topbarCollapsed, setTopbarCollapsed] = useState(false);
-  const isPublic = PUBLIC_PATHS.includes(pathname);
+  const isPublic = PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
   const isTokenOnly = TOKEN_ONLY_PATHS.some((p) => pathname.startsWith(p));
 
   useEffect(() => {

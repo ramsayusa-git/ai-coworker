@@ -56,6 +56,9 @@ export default function LoginPage() {
           <p className="text-center text-xs text-zinc-500">
             New to {brand.brandName}? <a href="/register" className="text-emerald-600 hover:underline">Create an organization</a>
           </p>
+          <p className="text-center text-xs text-zinc-400">
+            <a href="/product" className="hover:text-emerald-600 hover:underline">← Back to product overview</a>
+          </p>
         </div>
       </form>
       {brand.footerText && <p className="mt-4 text-center text-[11px] text-zinc-400">{brand.footerText}</p>}
