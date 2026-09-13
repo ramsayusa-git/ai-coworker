@@ -8,10 +8,18 @@ one dongle, both were hammering it. It now runs a single scan pass at start and
 then stops, reporting why: the device wasn't advertising, the link closed, or a
 connect attempt failed.
 
-A single contextual **Scan** button appears in the step panel whenever the
-add-on is idle, so scanning can be restarted. It only appears when it can do
-something and is hidden during a scan, connect, or an active wear.
-`POST /api/scan` backs it.
+A **Scan** button sits in the step panel, with a second in the header next to
+Calibration, so scanning can be restarted. Both are the same single action,
+backed by `POST /api/scan`.
+
+*Amended later the same day:* the button was first hidden whenever a pass was
+running, and its click handler disabled it and relied on the next WebSocket
+status broadcast to re-enable it. With the socket down it stayed grey forever,
+label stuck on "Scanning…", with no visible way to scan at all. Both buttons
+are now always present — disabled and labelled "Scanning…" during a pass — a
+single helper owns their enabled state, and an 8-second fallback re-reads
+`/api/status` if no broadcast arrives. A control that vanishes is how someone
+ends up asking how to start a scan.
 
 ## 1.2.3 — 2026-09-13
 The calibration control was still being missed, so the gear is now a clearly

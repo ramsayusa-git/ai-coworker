@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy — Aetos One Health</title>
+<style>
+  :root{
+    --navy:#233C7F; --orange:#F07E26; --ink:#141926; --ink-2:#4A5468;
+    --line:#D9DFEC; --bg:#F4F6FB; --card:#FFFFFF;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{background:var(--navy);color:#fff;padding:38px 20px}
+  .in{max-width:760px;margin:0 auto}
+  header h1{margin:0 0 6px;font-size:27px;letter-spacing:-.01em}
+  header p{margin:0;color:#C3CDE8;font-size:14.5px}
+  main{padding:28px 20px 64px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+        padding:24px 26px;margin-bottom:18px}
+  h2{font-size:18px;margin:0 0 10px;color:var(--navy)}
+  p{margin:0 0 12px;color:var(--ink-2)}
+  p:last-child{margin-bottom:0}
+  ul{margin:0 0 12px;padding-left:20px;color:var(--ink-2)}
+  li{margin-bottom:6px}
+  strong{color:var(--ink)}
+  .lede{font-size:17px;color:var(--ink)}
+  .rule{border-left:3px solid var(--orange);padding-left:14px;margin:16px 0}
+  footer{color:var(--ink-2);font-size:13.5px;text-align:center;padding:0 20px 40px}
+  a{color:var(--navy)}
+  @media (max-width:520px){ .card{padding:18px} header{padding:28px 18px} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="in">
+    <h1>Privacy Policy — Aetos One Health</h1>
+    <p>Aetos Tech Labs · Last updated 13 September 2026</p>
+  </div>
+</header>
+
+<main class="in">
+
+  <div class="card">
+    <p class="lede">Aetos One Health does not collect, transmit, or share any of your
+    data. Everything the app records stays on your phone.</p>
+    <div class="rule">
+      <p>The app is built without the Android <strong>INTERNET</strong> permission.
+      It is not able to send data anywhere, to us or to anyone else, even by
+      mistake. This is verifiable in the app's manifest.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>What the app stores</h2>
+    <p>Aetos One Health connects over Bluetooth to health devices you already own
+    and records what they report:</p>
+    <ul>
+      <li>ECG sessions: heart rate over time, beat counts, signal quality and session duration</li>
+      <li>Blood-pressure readings: systolic, diastolic and pulse</li>
+      <li>Profile names and any note you add, so several people can share one device</li>
+      <li>Calibration offsets you set</li>
+    </ul>
+    <p>All of it is written to a private database inside the app's own storage
+    area, which no other app on your phone can read.</p>
+  </div>
+
+  <div class="card">
+    <h2>What the app does not do</h2>
+    <ul>
+      <li>No account, no sign-in, no email address</li>
+      <li>No analytics, crash reporting, or advertising SDK</li>
+      <li>No advertising identifier, device identifier, or location data</li>
+      <li>No servers of ours are contacted, because there are none</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Permissions, and why each one is needed</h2>
+    <ul>
+      <li><strong>Bluetooth scan and connect</strong> — to find and talk to your ECG
+      sensor and blood-pressure cuff. The scan permission is declared with
+      <em>neverForLocation</em>, so the app cannot derive your location from it.</li>
+      <li><strong>Location (Android 11 and older only)</strong> — older versions of
+      Android require this permission before any app is allowed to scan for
+      Bluetooth devices. The app never reads your location.</li>
+      <li><strong>Notifications</strong> — to tell you when a reading has been recorded.</li>
+      <li><strong>Foreground service</strong> — to keep the Bluetooth connection alive
+      while the screen is off, so a measurement is not cut short.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>When data leaves your phone</h2>
+    <p>Only when you choose. Tapping <strong>Export</strong> creates a CSV or PDF and
+    hands it to Android's share sheet, where you pick the destination — email, a
+    messaging app, your own file storage. Until you do that, and to whatever you
+    choose, nothing is sent anywhere.</p>
+  </div>
+
+  <div class="card">
+    <h2>Deleting your data</h2>
+    <p>Delete any individual reading or session inside the app. To remove
+    everything at once, uninstall the app or clear its storage in Android
+    Settings; the database goes with it. We hold no copy, so there is nothing to
+    request from us.</p>
+    <p>If you have Android backup enabled, your readings may be included in your
+    own device backup. That backup is governed by Google's terms and your own
+    Google account settings, not by us.</p>
+  </div>
+
+  <div class="card">
+    <h2>Children</h2>
+    <p>The app is not directed at children under 13 and collects nothing that
+    would identify anyone.</p>
+  </div>
+
+  <div class="card">
+    <h2>Not a medical device</h2>
+    <p>Aetos One Health displays and records readings from consumer Bluetooth
+    devices. It does not diagnose or treat any condition, and it should not be
+    used to make a medical decision on its own. Discuss any concern about a
+    reading with a clinician.</p>
+  </div>
+
+  <div class="card">
+    <h2>Changes and contact</h2>
+    <p>If this policy ever changes, the updated version will be posted at this
+    address with a new date at the top. Questions about privacy or the app:
+    <a href="mailto:info@aetostechlabs.com">info@aetostechlabs.com</a>.</p>
+  </div>
+
+</main>
+
+<footer>Aetos Tech Labs · aetostechlabs.com</footer>
+
+</body>
+</html>

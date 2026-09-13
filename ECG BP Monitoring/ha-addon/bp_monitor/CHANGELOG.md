@@ -8,11 +8,19 @@ dongle were both hammering it. It now runs a single scan pass when the add-on
 starts and then stops, reporting why it stopped: the cuff wasn't advertising,
 the link closed after a measurement, or a connect attempt failed.
 
-Because scanning stops, there has to be a way to start it again — so a single
-contextual **Scan** button appears in the step panel whenever the add-on is
-idle. It is not a return of the start/stop/reconnect trio: there is one button,
-it only appears when it can do something, and it disappears while a scan,
-connect or measurement is in progress. `POST /api/scan` backs it.
+Because scanning stops, there has to be a way to start it again — so a **Scan**
+button sits in the step panel, and a second one in the header next to
+Calibration. This is not a return of the start/stop/reconnect trio: both are
+the same single action, backed by `POST /api/scan`.
+
+*Amended later the same day:* the button was first hidden whenever a pass was
+running, and its click handler disabled it and relied on the next WebSocket
+status broadcast to re-enable it. With the socket down it stayed grey forever,
+label stuck on "Scanning…", with no visible way to scan at all. Both buttons
+are now always present — disabled and labelled "Scanning…" during a pass — a
+single helper owns their enabled state, and an 8-second fallback re-reads
+`/api/status` if no broadcast arrives. A control that vanishes is how someone
+ends up asking how to start a scan.
 
 ## 1.2.3 — 2026-09-13
 The calibration control was still being missed, so the gear is now a clearly

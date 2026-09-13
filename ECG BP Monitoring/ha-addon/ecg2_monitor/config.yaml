@@ -1,5 +1,5 @@
 name: ECG2 Monitor
-version: "1.3.1"
+version: "1.3.0"
 slug: ecg2_monitor
 description: Live ECG dashboard for the ikinloop ecg2 BLE sensor (host Bluetooth or MQTT bridge)
 url: https://aetostechlabs.com
