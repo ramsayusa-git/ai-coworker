@@ -71,7 +71,7 @@ fun HistoryScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
 
     Column(modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = tab) {
-            Tab(tab == 0, onClick = { tab = 0 }, text = { Text("Blood pressure") })
+            Tab(tab == 0, onClick = { tab = 0 }, text = { Text("BP Monitor") })
             Tab(tab == 1, onClick = { tab = 1 }, text = { Text("ECG sessions") })
         }
 

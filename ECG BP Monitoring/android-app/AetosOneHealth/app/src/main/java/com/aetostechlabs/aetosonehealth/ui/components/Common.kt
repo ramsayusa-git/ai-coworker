@@ -127,6 +127,11 @@ fun StepPanel(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // The label follows the actual state. It previously read
+            // "Scanning…" whenever the button was disabled, which meant a
+            // connected, idle-and-waiting device showed a greyed "Scanning…" —
+            // the one thing guaranteed to look broken when it is working.
+            val connected = state.step == Step.READY || state.step == Step.LIVE
             Button(
                 onClick = onScan,
                 enabled = state.canScan,
@@ -137,7 +142,13 @@ fun StepPanel(
             ) {
                 Icon(Icons.Filled.Search, contentDescription = null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(if (state.canScan) scanLabel else "Scanning…")
+                Text(
+                    when {
+                        state.canScan -> scanLabel
+                        connected -> "Connected"
+                        else -> "Scanning…"
+                    }
+                )
             }
             if (state.attempts > 0) {
                 Text(

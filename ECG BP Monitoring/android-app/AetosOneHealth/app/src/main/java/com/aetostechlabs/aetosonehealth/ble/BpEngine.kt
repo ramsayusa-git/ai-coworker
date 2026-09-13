@@ -1,6 +1,8 @@
 package com.aetostechlabs.aetosonehealth.ble
 
 import android.content.Context
+import com.aetostechlabs.aetosonehealth.data.DeviceKind
+import com.aetostechlabs.aetosonehealth.data.DeviceStore
 import com.aetostechlabs.aetosonehealth.data.Repository
 import com.aetostechlabs.aetosonehealth.data.applyBp
 import com.aetostechlabs.aetosonehealth.data.classify
@@ -25,6 +27,7 @@ import java.util.Locale
 class BpEngine(
     private val context: Context,
     private val repo: Repository,
+    private val devices: DeviceStore,
     private val scope: CoroutineScope,
     private val onReadingSaved: ((String) -> Unit)? = null
 ) {
@@ -38,9 +41,15 @@ class BpEngine(
 
     private var job: Job? = null
 
+    /** Raw notifications received this session — surfaced on the BP screen. */
+    var notifications: Int = 0
+        private set
+
     companion object {
         private const val SCAN_TIMEOUT_MS = 30_000L
     }
+
+    private fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it) }
 
     init {
         setStep(Step.IDLE, "Press the cuff's button, then press Scan.")
@@ -76,9 +85,12 @@ class BpEngine(
         try {
             ble.requireAdapter()
             setStep(Step.WAKE)
+            // A device the user picked in Add Device wins — its address is
+            // exact, where the name prefix is only a guess.
+            val saved = devices[DeviceKind.BP]
             val device = ble.scan(
-                address = null,
-                namePrefix = BpProtocol.DEFAULT_NAME,
+                address = saved?.address,
+                namePrefix = if (saved == null) BpProtocol.DEFAULT_NAME else null,
                 serviceUuid = null,   // this cuff does not advertise 0xFFF0
                 timeoutMs = SCAN_TIMEOUT_MS,
                 onTick = { left -> setStep(Step.SCANNING, "$left s left in this pass") }
@@ -99,16 +111,35 @@ class BpEngine(
 
             setStep(Step.CHECKING, "Link up — reading device information")
             ble.discoverServices()
+            // Dump the whole GATT table before doing anything else. When a
+            // device connects but never sends, this is the evidence that says
+            // whether the expected characteristic exists and can notify.
+            ble.describeGatt().forEach { log(it) }
             readDeviceInfo()
 
             var dropped = false
             ble.onDisconnected { dropped = true }
-            // Every notification is decoded, not just 0xFFF1: when the expected
-            // characteristic is absent we fall back to subscribing to all of
-            // them, and the frame decoder rejects anything that is not ours.
-            ble.onNotification { _, data -> handle(data) }
+            // Every notification is decoded, not just 0xFFF1 — the decoder
+            // rejects anything that is not ours. Each one is logged raw first:
+            // "connected but no reading" is ambiguous until you can see whether
+            // bytes are arriving at all, and what they look like.
+            ble.onNotification { uuid, data ->
+                notifications++
+                log("RX ${data.size}B on ${uuid.toString().take(8)}: ${data.toHex()}")
+                handle(data)
+            }
 
             if (!subscribeMeasurement()) throw BleError("No notifying characteristic to subscribe to")
+
+            // Some ISSC vendor characteristics only deliver notifications over
+            // an authenticated link, and the refusal is silent: the CCCD write
+            // reports success and nothing ever arrives. If the phone has not
+            // bonded with the cuff, ask for a bond now rather than waiting
+            // forever for data that cannot come.
+            if (ble.bondState() != android.bluetooth.BluetoothDevice.BOND_BONDED) {
+                log("Not bonded — requesting pairing (accept the prompt if it appears)")
+                if (!ble.createBond()) log("Pairing request was refused by the phone")
+            }
 
             setStep(Step.READY, "Subscribed — put the cuff on your arm and press its Start button")
             while (!dropped) {
@@ -146,17 +177,33 @@ class BpEngine(
         )
     }
 
+    /**
+     * Subscribe to the measurement characteristic *and* every other notifying
+     * one. The cuff is known to deliver on 0xFFF1, but it also exposes an ISSC
+     * transparent-UART service, and a firmware variant could use it instead.
+     * Subscribing to everything costs nothing — the decoder rejects any frame
+     * that is not ours — and it is the difference between capturing a reading
+     * and silently missing it.
+     */
     private suspend fun subscribeMeasurement(): Boolean {
-        ble.characteristic(BpProtocol.BP_SERVICE, BpProtocol.BP_MEASUREMENT)?.let {
-            if (ble.subscribe(it)) return true
-        }
         var ok = false
+        ble.characteristic(BpProtocol.BP_SERVICE, BpProtocol.BP_MEASUREMENT)?.let {
+            if (ble.subscribe(it)) {
+                ok = true
+                log("Subscribed to measurement 0xFFF1")
+            } else {
+                log("StartNotify on 0xFFF1 FAILED")
+            }
+        } ?: log("Characteristic 0xFFF1 not present on this device")
+
         for (c in ble.notifyingCharacteristics()) {
+            if (c.uuid == BpProtocol.BP_MEASUREMENT) continue
             if (ble.subscribe(c)) {
-                log("Fallback subscription on ${c.uuid}")
+                log("Also listening on ${c.uuid}")
                 ok = true
             }
         }
+        if (!ok) log("No characteristic accepted a subscription")
         return ok
     }
 

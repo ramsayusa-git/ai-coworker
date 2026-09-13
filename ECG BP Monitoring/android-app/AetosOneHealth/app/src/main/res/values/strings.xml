@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Aetos One Health</string>
     <string name="ecg_title">ECG Monitor</string>
-    <string name="bp_title">Blood Pressure</string>
+    <string name="bp_title">BP Monitor</string>
     <string name="brand">Aetos Tech Labs</string>
     <string name="notif_channel_monitor">Monitoring</string>
     <string name="notif_channel_readings">Readings</string>

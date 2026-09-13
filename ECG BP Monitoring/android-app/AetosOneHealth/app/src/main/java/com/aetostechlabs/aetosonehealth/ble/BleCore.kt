@@ -193,6 +193,50 @@ class BleClient(private val context: Context) {
                 BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
         }
 
+    /**
+     * The device's whole GATT table, one line per characteristic, with its
+     * properties and whether it carries a CCCD.
+     *
+     * This is the single most useful thing to look at when a device connects
+     * but never sends anything: it says whether the characteristic we expect is
+     * even present, and whether it can notify at all.
+     */
+    fun describeGatt(): List<String> = buildList {
+        val g = gatt ?: return listOf("not connected")
+        add("bond state: ${bondStateName()}")
+        for (service in g.services) {
+            add("service ${service.uuid}")
+            for (c in service.characteristics) {
+                val p = c.properties
+                val props = buildList {
+                    if (p and BluetoothGattCharacteristic.PROPERTY_READ != 0) add("read")
+                    if (p and BluetoothGattCharacteristic.PROPERTY_WRITE != 0) add("write")
+                    if (p and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0) add("write-nr")
+                    if (p and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) add("notify")
+                    if (p and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) add("indicate")
+                }.joinToString("/").ifEmpty { "none" }
+                val cccd = if (c.getDescriptor(CCCD) != null) " +cccd" else " NO-CCCD"
+                add("  char ${c.uuid} [$props]$cccd")
+            }
+        }
+    }
+
+    fun bondStateName(): String = when (bondState()) {
+        BluetoothDevice.BOND_BONDED -> "bonded"
+        BluetoothDevice.BOND_BONDING -> "bonding"
+        BluetoothDevice.BOND_NONE -> "not bonded"
+        else -> "unknown"
+    }
+
+    fun bondState(): Int = gatt?.device?.bondState ?: BluetoothDevice.BOND_NONE
+
+    /**
+     * Ask Android to pair. Some vendor characteristics refuse a CCCD write
+     * until the link is authenticated, and the failure is silent — the
+     * subscription appears to succeed and no notification ever arrives.
+     */
+    fun createBond(): Boolean = gatt?.device?.createBond() ?: false
+
     suspend fun readString(service: UUID, char: UUID): String? {
         val c = characteristic(service, char) ?: return null
         val g = gatt ?: return null

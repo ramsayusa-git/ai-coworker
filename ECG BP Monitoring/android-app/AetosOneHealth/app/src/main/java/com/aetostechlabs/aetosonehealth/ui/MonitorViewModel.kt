@@ -6,8 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.aetostechlabs.aetosonehealth.AetosApp
 import com.aetostechlabs.aetosonehealth.ble.BpEngine
 import com.aetostechlabs.aetosonehealth.ble.EcgEngine
+import com.aetostechlabs.aetosonehealth.ble.DeviceScanner
+import com.aetostechlabs.aetosonehealth.ble.FoundDevice
 import com.aetostechlabs.aetosonehealth.ble.Step
 import com.aetostechlabs.aetosonehealth.data.Calibration
+import com.aetostechlabs.aetosonehealth.data.DeviceKind
 import com.aetostechlabs.aetosonehealth.data.Profile
 import com.aetostechlabs.aetosonehealth.service.MonitorService
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,12 +23,16 @@ class MonitorViewModel(app: Application) : AndroidViewModel(app) {
 
     private val appCtx = app as AetosApp
     val repo = appCtx.repository
+    val devices = appCtx.devices
     private val notifier = appCtx.notifier
 
-    val ecg = EcgEngine(app, repo, viewModelScope) { text ->
+    /** Backs the Add Device screen. */
+    val scanner = DeviceScanner(app)
+
+    val ecg = EcgEngine(app, repo, devices, viewModelScope) { text ->
         notifier.readingRecorded("ECG session saved", text)
     }
-    val bp = BpEngine(app, repo, viewModelScope) { text ->
+    val bp = BpEngine(app, repo, devices, viewModelScope) { text ->
         notifier.readingRecorded("New blood-pressure reading", text)
     }
 
@@ -58,6 +65,18 @@ class MonitorViewModel(app: Application) : AndroidViewModel(app) {
 
     fun clearMessage() { _message.value = null }
     fun say(text: String) { _message.value = text }
+
+    // ------------------------------------------------------------- devices
+    fun saveDevice(kind: DeviceKind, d: FoundDevice) {
+        devices.save(kind, d.address, d.label)
+        scanner.stop()
+        say("${d.label} saved as the ${if (kind == DeviceKind.ECG) "ECG sensor" else "BP Monitor"}")
+    }
+
+    fun forgetDevice(kind: DeviceKind) {
+        devices.forget(kind)
+        say("Device forgotten — back to finding it automatically")
+    }
 
     // ------------------------------------------------------------ profiles
     fun addProfile(name: String, note: String = "") {
@@ -101,6 +120,7 @@ class MonitorViewModel(app: Application) : AndroidViewModel(app) {
     fun deleteSession(id: Long) = repo.deleteSession(id)
 
     override fun onCleared() {
+        scanner.stop()
         ecg.stop()
         bp.stop()
         MonitorService.stop(getApplication())

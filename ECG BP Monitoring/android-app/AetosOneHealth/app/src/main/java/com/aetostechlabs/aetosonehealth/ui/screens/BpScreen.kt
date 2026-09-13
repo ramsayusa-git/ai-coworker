@@ -25,6 +25,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.platform.LocalContext
+import android.content.Context
+import android.content.Intent
 import com.aetostechlabs.aetosonehealth.ui.MonitorViewModel
 import com.aetostechlabs.aetosonehealth.ui.components.BigValue
 import com.aetostechlabs.aetosonehealth.ui.components.SectionCard
@@ -44,6 +48,7 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
     val live by vm.bp.live.collectAsState()
     val active by vm.activeProfile.collectAsState()
     val readings by vm.repo.bpReadings.collectAsState()
+    val context = LocalContext.current
 
     val mine = remember2(readings, active?.id) {
         if (active == null) readings else readings.filter { it.profileId == active?.id }
@@ -75,6 +80,34 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
                 "Mean arterial", live.meanArterial?.let { "%.1f".format(it) } ?: "—", "mmHg",
                 MaterialTheme.colorScheme.primary, Modifier.weight(1f)
             )
+        }
+
+        // Connected with nothing to show is the confusing state: the cuff only
+        // sends a frame when *it* completes a measurement, so say so plainly
+        // rather than leaving four dashes on screen.
+        if (state.connected && live.systolic == null) {
+            SectionCard("Waiting for a measurement") {
+                Text(
+                    "The link is up. This cuff stays silent until a measurement finishes, " +
+                        "then sends exactly one packet with the result — it transmits nothing " +
+                        "else, ever. Put it on your arm and press START on the cuff itself.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Bluetooth packets received so far: ${vm.bp.notifications}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    "If that stays at 0 through a whole measurement, the cuff is not " +
+                        "sending on the channel we subscribed to. The Activity list below " +
+                        "shows every packet as it arrives.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
         if (live.category.isNotBlank()) {
@@ -128,7 +161,28 @@ fun BpScreen(vm: MonitorViewModel, modifier: Modifier = Modifier) {
 
         if (state.log.isNotEmpty()) {
             SectionCard("Activity") {
-                state.log.takeLast(8).reversed().forEach {
+                // One tap to get the whole log off the phone. A diagnostic you
+                // have to retype by hand is a diagnostic that never arrives.
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    OutlinedButton(onClick = {
+                        shareText(
+                            context,
+                            "Aetos One Health — BP diagnostics",
+                            buildString {
+                                appendLine("device: ${state.info.name} ${state.info.address}")
+                                appendLine("model: ${state.info.model} fw ${state.info.firmware}")
+                                appendLine("step: ${state.step} · packets: ${vm.bp.notifications}")
+                                appendLine()
+                                state.log.forEach { appendLine(it) }
+                            }
+                        )
+                    }) { Text("Send this log") }
+                }
+                Spacer(Modifier.height(6.dp))
+                state.log.reversed().forEach {
                     Text(
                         it,
                         style = MaterialTheme.typography.labelSmall,
@@ -161,3 +215,12 @@ private fun LegendDot(label: String, color: Color) {
 @Composable
 private fun <T> remember2(a: Any?, b: Any?, calc: () -> T): T =
     androidx.compose.runtime.remember(a, b) { calc() }
+
+private fun shareText(context: Context, subject: String, body: String) {
+    val i = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        putExtra(Intent.EXTRA_TEXT, body)
+    }
+    context.startActivity(Intent.createChooser(i, subject))
+}

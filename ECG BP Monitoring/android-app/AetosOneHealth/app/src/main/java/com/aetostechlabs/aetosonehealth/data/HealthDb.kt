@@ -24,13 +24,19 @@ class HealthDb(context: Context) : SQLiteOpenHelper(context, NAME, null, VERSION
         const val GLOBAL_CAL = 0L
     }
 
-    override fun onConfigure(db: SQLiteDatabase) {
-        db.setForeignKeyConstraintsEnabled(true)
+    init {
+        // Write-ahead logging is switched on through the helper API, from the
+        // constructor. Neither `execSQL("PRAGMA journal_mode=WAL")` nor
+        // db.enableWriteAheadLogging() is safe here: the pragma returns a row
+        // and Android's execSQL rejects statements that return data on some
+        // versions, and enableWriteAheadLogging() is explicitly not allowed
+        // from onConfigure. Either would throw inside Application.onCreate and
+        // kill the app before it drew a frame.
+        setWriteAheadLoggingEnabled(true)
     }
 
-    override fun onOpen(db: SQLiteDatabase) {
-        super.onOpen(db)
-        if (!db.isReadOnly) db.execSQL("PRAGMA journal_mode=WAL")
+    override fun onConfigure(db: SQLiteDatabase) {
+        db.setForeignKeyConstraintsEnabled(true)
     }
 
     override fun onCreate(db: SQLiteDatabase) {

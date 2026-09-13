@@ -1,6 +1,8 @@
 package com.aetostechlabs.aetosonehealth.ble
 
 import android.content.Context
+import com.aetostechlabs.aetosonehealth.data.DeviceKind
+import com.aetostechlabs.aetosonehealth.data.DeviceStore
 import com.aetostechlabs.aetosonehealth.data.Repository
 import com.aetostechlabs.aetosonehealth.data.applyHr
 import com.aetostechlabs.aetosonehealth.dsp.EcgFilter
@@ -30,6 +32,7 @@ import kotlin.math.roundToInt
 class EcgEngine(
     private val context: Context,
     private val repo: Repository,
+    private val devices: DeviceStore,
     private val scope: CoroutineScope,
     private val mainsHz: Int = 50,
     private val onReadingSaved: ((String) -> Unit)? = null
@@ -100,10 +103,14 @@ class EcgEngine(
         try {
             ble.requireAdapter()
             setStep(Step.WAKE)
+            // A device the user picked in Add Device wins: matching on its
+            // address is exact, where a name prefix is a guess that fails on a
+            // replacement unit or a differently named one.
+            val saved = devices[DeviceKind.ECG]
             val device = ble.scan(
-                address = null,                       // match by name: the MAC differs per unit
-                namePrefix = EcgProtocol.DEFAULT_NAME,
-                serviceUuid = EcgProtocol.HEART_RATE_SERVICE,
+                address = saved?.address,
+                namePrefix = if (saved == null) EcgProtocol.DEFAULT_NAME else null,
+                serviceUuid = if (saved == null) EcgProtocol.HEART_RATE_SERVICE else null,
                 timeoutMs = SCAN_TIMEOUT_MS,
                 onTick = { left -> setStep(Step.SCANNING, "$left s left in this pass") }
             )

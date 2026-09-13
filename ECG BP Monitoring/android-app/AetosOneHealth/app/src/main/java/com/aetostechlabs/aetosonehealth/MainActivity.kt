@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MonitorHeart
@@ -39,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,6 +53,8 @@ import com.aetostechlabs.aetosonehealth.ble.blePermissions
 import com.aetostechlabs.aetosonehealth.ui.MonitorViewModel
 import com.aetostechlabs.aetosonehealth.ui.components.StatusPill
 import com.aetostechlabs.aetosonehealth.ui.screens.BpScreen
+import com.aetostechlabs.aetosonehealth.ui.screens.DevicesScreen
+import com.aetostechlabs.aetosonehealth.ui.screens.DiagnosticScreen
 import com.aetostechlabs.aetosonehealth.ui.screens.EcgScreen
 import com.aetostechlabs.aetosonehealth.ui.screens.HistoryScreen
 import com.aetostechlabs.aetosonehealth.ui.screens.ProfilesScreen
@@ -59,18 +63,40 @@ import com.aetostechlabs.aetosonehealth.ui.theme.AetosOneTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val app = application as AetosApp
         setContent {
             AetosOneTheme {
                 Surface(
                     Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                ) { AetosOneApp() }
+                ) {
+                    // A failed startup, or a crash on the previous run, is shown
+                    // rather than swallowed — the app closing with no trace is
+                    // the least debuggable outcome there is.
+                    var showCrash by remember { mutableStateOf(CrashLog.read(this)) }
+                    val fatal = !app.isReady
+                    val trace = showCrash
+                    if (trace != null || fatal) {
+                        DiagnosticScreen(
+                            trace = trace ?: app.startupError?.stackTraceToString().orEmpty(),
+                            fatal = fatal,
+                            onDismiss = {
+                                CrashLog.clear(this)
+                                showCrash = null
+                            }
+                        )
+                    } else {
+                        AetosOneApp()
+                    }
+                }
             }
         }
     }
 }
 
-private enum class Dest(val label: String) { ECG("ECG"), BP("Blood pressure"), HISTORY("History"), PROFILE("Profiles") }
+private enum class Dest(val label: String) {
+    ECG("ECG"), BP("BP Monitor"), HISTORY("History"), PROFILE("Profiles"), DEVICES("Devices")
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,6 +175,7 @@ fun AetosOneApp(vm: MonitorViewModel = viewModel()) {
                                     Dest.BP -> Icons.Filled.Favorite
                                     Dest.HISTORY -> Icons.Filled.History
                                     Dest.PROFILE -> Icons.Filled.Person
+                                    Dest.DEVICES -> Icons.Filled.Bluetooth
                                 },
                                 contentDescription = d.label
                             )
@@ -168,6 +195,7 @@ fun AetosOneApp(vm: MonitorViewModel = viewModel()) {
                 Dest.BP -> BpScreen(vm)
                 Dest.HISTORY -> HistoryScreen(vm)
                 Dest.PROFILE -> ProfilesScreen(vm)
+                Dest.DEVICES -> DevicesScreen(vm)
             }
         }
     }

@@ -103,7 +103,7 @@ object Exporter {
         }
         y += 12f
 
-        c.drawText("Blood pressure", 40f, y, head); y += 16f
+        c.drawText("BP Monitor", 40f, y, head); y += 16f
         c.drawText("Date", 40f, y, muted)
         c.drawText("Sys", 220f, y, muted)
         c.drawText("Dia", 265f, y, muted)
