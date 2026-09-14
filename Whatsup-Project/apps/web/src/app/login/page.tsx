@@ -18,7 +18,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -57,7 +57,7 @@ export default function LoginPage() {
             New to {brand.brandName}? <a href="/register" className="text-emerald-600 hover:underline">Create an organization</a>
           </p>
           <p className="text-center text-xs text-zinc-400">
-            <a href="/product" className="hover:text-emerald-600 hover:underline">← Back to product overview</a>
+            <a href="/" className="hover:text-emerald-600 hover:underline">← Back to product overview</a>
           </p>
         </div>
       </form>

@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation History Export - Aetos Medical Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #003d82 0%, #0066cc 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .compliance-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #003d82;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0066cc;
+        }
+
+        .export-formats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .format-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .format-card:hover {
+            border-color: #0066cc;
+            background: #f0f8ff;
+            box-shadow: 0 4px 12px rgba(0,102,204,0.15);
+        }
+
+        .format-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .format-card h3 {
+            color: #003d82;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .format-card p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .format-btn {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s ease;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .format-btn:hover {
+            background: #003d82;
+        }
+
+        .filter-section {
+            background: #f5f7fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #003d82;
+            margin-bottom: 8px;
+        }
+
+        .filter-group select,
+        .filter-group input[type="date"],
+        .filter-group input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0,102,204,0.1);
+        }
+
+        .consultation-list {
+            margin-top: 25px;
+        }
+
+        .consultation-item {
+            border-left: 4px solid #0066cc;
+            background: white;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .consultation-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .consultation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .consultation-date {
+            font-weight: 600;
+            color: #003d82;
+            font-size: 14px;
+        }
+
+        .doctor-name {
+            color: #666;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .consultation-type {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #0066cc;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .export-btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #003d82;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn-small:hover {
+            background: #0066cc;
+            color: white;
+            border-color: #0066cc;
+        }
+
+        .sharing-section {
+            background: #f5f7fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .sharing-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .share-option {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .share-option:hover {
+            border-color: #0066cc;
+            background: #f0f8ff;
+        }
+
+        .share-option h4 {
+            color: #003d82;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .share-option p {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal h2 {
+            color: #003d82;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .modal-field {
+            margin-bottom: 20px;
+        }
+
+        .modal-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #003d82;
+            margin-bottom: 8px;
+        }
+
+        .modal-field input,
+        .modal-field textarea,
+        .modal-field select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .modal-field textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-field input:focus,
+        .modal-field textarea:focus,
+        .modal-field select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0,102,204,0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #003d82;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .preview-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .preview-section h4 {
+            color: #003d82;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .preview-content {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #666;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #003d82 0%, #0066cc 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .checkbox-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            margin: 0;
+        }
+
+        .footer {
+            background: #f5f7fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .export-formats {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 25px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Consultation History Export</h1>
+            <p>Download and share your consultation records with healthcare providers</p>
+            <div class="compliance-badge">
+                ✓ DPDPA 2023 Compliant | AES-256 Encrypted | ISO 27001 Certified
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Statistics Section -->
+            <div class="section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">42</div>
+                        <div class="stat-label">Total Consultations</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">18</div>
+                        <div class="stat-label">Different Doctors</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">Prescriptions Issued</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">89</div>
+                        <div class="stat-label">Lab Tests</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                ✓ Your consultation history has been exported successfully. Check your downloads folder.
+            </div>
+
+            <!-- Export Formats Section -->
+            <div class="section">
+                <h2 class="section-title">Export Formats</h2>
+                <div class="export-formats">
+                    <div class="format-card" onclick="openModal('pdfModal')">
+                        <div class="format-icon">📄</div>
+                        <h3>PDF Report</h3>
+                        <p>Professional PDF with all consultations, diagnoses, prescriptions, and lab results in a formatted document.</p>
+                        <button class="format-btn">Export as PDF</button>
+                    </div>
+
+                    <div class="format-card" onclick="openModal('csvModal')">
+                        <div class="format-icon">📊</div>
+                        <h3>CSV Spreadsheet</h3>
+                        <p>Structured CSV format compatible with Excel and Google Sheets for advanced data analysis.</p>
+                        <button class="format-btn">Export as CSV</button>
+                    </div>
+
+                    <div class="format-card" onclick="openModal('jsonModal')">
+                        <div class="format-icon">📦</div>
+                        <h3>JSON Data</h3>
+                        <p>Complete structured JSON export for integration with other health apps and platforms.</p>
+                        <button class="format-btn">Export as JSON</button>
+                    </div>
+
+                    <div class="format-card" onclick="openModal('fhirModal')">
+                        <div class="format-icon">🏥</div>
+                        <h3>FHIR Format</h3>
+                        <p>FHIR R4 standardized format for seamless healthcare system interoperability (ABDM compatible).</p>
+                        <button class="format-btn">Export as FHIR</button>
+                    </div>
+
+                    <div class="format-card" onclick="openModal('hl7Modal')">
+                        <div class="format-icon">⚕️</div>
+                        <h3>HL7 v2.5</h3>
+                        <p>HL7 v2.5 format for integration with hospital information systems and legacy EHR platforms.</p>
+                        <button class="format-btn">Export as HL7</button>
+                    </div>
+
+                    <div class="format-card" onclick="openModal('summaryModal')">
+                        <div class="format-icon">📝</div>
+                        <h3>Summary Report</h3>
+                        <p>One-page printable health summary with key diagnoses, current medications, and allergies.</p>
+                        <button class="format-btn">Export Summary</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Select Consultations -->
+            <div class="section">
+                <h2 class="section-title">Select Consultations to Export</h2>
+
+                <div class="filter-section">
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Specialty</label>
+                            <select id="specialtyFilter">
+                                <option value="">All Specialties</option>
+                                <option value="general">General Medicine</option>
+                                <option value="cardiology">Cardiology</option>
+                                <option value="endocrinology">Endocrinology</option>
+                                <option value="orthopedics">Orthopedics</option>
+                                <option value="psychiatry">Psychiatry</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Date Range From</label>
+                            <input type="date" id="dateFrom" value="2024-01-01">
+                        </div>
+                        <div class="filter-group">
+                            <label>Date Range To</label>
+                            <input type="date" id="dateTo">
+                        </div>
+                        <div class="filter-group">
+                            <label>Doctor Name</label>
+                            <input type="text" id="doctorFilter" placeholder="Search doctor...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="consultation-list" id="consultationList">
+                    <!-- Consultation items will be generated here -->
+                </div>
+            </div>
+
+            <!-- Sharing Section -->
+            <div class="section">
+                <h2 class="section-title">Share Your Records</h2>
+                <div class="sharing-section">
+                    <p style="color: #666; margin-bottom: 20px;">Share your consultation history securely with healthcare providers or family members</p>
+                    <div class="sharing-options">
+                        <div class="share-option" onclick="openModal('shareModal')">
+                            <h4>🔗 Generate Share Link</h4>
+                            <p>Create a secure, time-limited link to share with doctors</p>
+                        </div>
+                        <div class="share-option" onclick="openModal('shareEmailModal')">
+                            <h4>📧 Send via Email</h4>
+                            <p>Email your records to healthcare providers</p>
+                        </div>
+                        <div class="share-option" onclick="openModal('sharePhoneModal')">
+                            <h4>📱 Share via Phone</h4>
+                            <p>Send records to family members via SMS or WhatsApp</p>
+                        </div>
+                        <div class="share-option" onclick="openModal('shareQRModal')">
+                            <h4>🔲 QR Code Sharing</h4>
+                            <p>Generate QR code for instant access in clinics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Export Options -->
+            <div class="section">
+                <h2 class="section-title">Advanced Export Options</h2>
+                <div class="filter-section">
+                    <h3 style="color: #003d82; font-size: 16px; margin-bottom: 15px;">Include in Export</h3>
+                    <div class="checkbox-list">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chk-consultations" checked>
+                            <label for="chk-consultations">Consultations & Notes</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chk-prescriptions" checked>
+                            <label for="chk-prescriptions">Prescriptions</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chk-labs" checked>
+                            <label for="chk-labs">Lab Results</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chk-vitals" checked>
+                            <label for="chk-vitals">Vital Signs</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chk-diagnoses" checked>
+                            <label for="chk-diagnoses">Diagnoses</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chk-attachments" checked>
+                            <label for="chk-attachments">Attachments & Images</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chk-insurance" checked>
+                            <label for="chk-insurance">Insurance Claims</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chk-allergies" checked>
+                            <label for="chk-allergies">Allergies & Warnings</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>💾 Your data is encrypted with AES-256 and compliant with DPDPA 2023 | Last export: Sep 13, 2026 • 2:45 PM</p>
+        </div>
+    </div>
+
+    <!-- PDF Export Modal -->
+    <div class="modal" id="pdfModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('pdfModal')">✕</button>
+            <h2>Export as PDF</h2>
+
+            <div class="modal-field">
+                <label>PDF Title</label>
+                <input type="text" value="My Medical History - 2024" id="pdfTitle">
+            </div>
+
+            <div class="modal-field">
+                <label>Include Patient Information</label>
+                <div class="checkbox-list">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pdf-personal" checked>
+                        <label for="pdf-personal">Personal Details</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pdf-contact" checked>
+                        <label for="pdf-contact">Contact Information</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pdf-emergency" checked>
+                        <label for="pdf-emergency">Emergency Contact</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-field">
+                <label>PDF Format</label>
+                <select id="pdfFormat">
+                    <option value="standard">Standard (Single Column)</option>
+                    <option value="detailed">Detailed (With Full Notes)</option>
+                    <option value="summary">Summary Only</option>
+                </select>
+            </div>
+
+            <div class="preview-section">
+                <h4>Preview</h4>
+                <div class="preview-content">
+                    <strong>Medical History Report - 2024</strong><br><br>
+                    Patient: Raj Kumar Singh<br>
+                    Date Generated: Sep 13, 2026<br>
+                    DOB: 15 Jan 1978<br><br>
+                    <strong>Consultation Summary</strong><br>
+                    • 42 total consultations<br>
+                    • Last visit: Sep 10, 2026<br>
+                    • Active medications: 8<br>
+                    • Chronic conditions: 3
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('pdfModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="exportPDF()">Export PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSV Export Modal -->
+    <div class="modal" id="csvModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('csvModal')">✕</button>
+            <h2>Export as CSV</h2>
+
+            <div class="modal-field">
+                <label>CSV Format</label>
+                <select id="csvFormat">
+                    <option value="detailed">Detailed (Separate tables)</option>
+                    <option value="flat">Flat (All in one table)</option>
+                    <option value="pivot">Pivot Table (By consultation type)</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>Select Data to Include</label>
+                <div class="checkbox-list">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="csv-consultations" checked>
+                        <label for="csv-consultations">Consultations</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="csv-prescriptions" checked>
+                        <label for="csv-prescriptions">Prescriptions</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="csv-labs" checked>
+                        <label for="csv-labs">Lab Results</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="csv-vitals" checked>
+                        <label for="csv-vitals">Vitals</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h4>Preview</h4>
+                <div class="preview-content">
+                    Date,Doctor,Type,Notes,Prescription<br>
+                    2024-09-10,Dr. Priya Sharma,Follow-up,BP: 130/85,Ramipril 5mg<br>
+                    2024-09-03,Dr. Vikram Singh,Routine,Chest clear,None<br>
+                    2024-08-27,Dr. Anjali Gupta,Diagnosis,Hypertension Stage 1,Atenolol 50mg
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('csvModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="exportCSV()">Export CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSON Export Modal -->
+    <div class="modal" id="jsonModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('jsonModal')">✕</button>
+            <h2>Export as JSON</h2>
+
+            <div class="modal-field">
+                <label>JSON Schema</label>
+                <select id="jsonSchema">
+                    <option value="complete">Complete (Full Schema)</option>
+                    <option value="minimal">Minimal (Core Fields)</option>
+                    <option value="custom">Custom (Select fields)</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>Encryption</label>
+                <div style="margin-top: 10px;">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="json-encrypt" checked>
+                        <label for="json-encrypt">Encrypt with AES-256</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="json-compress">
+                        <label for="json-compress">Compress (GZIP)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h4>Preview</h4>
+                <div class="preview-content">
+                    {<br>
+                    &nbsp;&nbsp;"patient_id": "P12345",<br>
+                    &nbsp;&nbsp;"consultations": 42,<br>
+                    &nbsp;&nbsp;"export_date": "2024-09-13",<br>
+                    &nbsp;&nbsp;"encrypted": true,<br>
+                    &nbsp;&nbsp;"data": "AES256:..."<br>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('jsonModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="exportJSON()">Export JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FHIR Export Modal -->
+    <div class="modal" id="fhirModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('fhirModal')">✕</button>
+            <h2>Export as FHIR R4</h2>
+
+            <div class="modal-field">
+                <label>FHIR Resources to Include</label>
+                <div class="checkbox-list">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="fhir-patient" checked>
+                        <label for="fhir-patient">Patient</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="fhir-encounter" checked>
+                        <label for="fhir-encounter">Encounter (Consultations)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="fhir-observation" checked>
+                        <label for="fhir-observation">Observation (Vitals, Labs)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="fhir-medication" checked>
+                        <label for="fhir-medication">Medication (Prescriptions)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="fhir-condition" checked>
+                        <label for="fhir-condition">Condition (Diagnoses)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="fhir-allergyintolerance" checked>
+                        <label for="fhir-allergyintolerance">AllergyIntolerance</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-field">
+                <label>Endpoint Target</label>
+                <input type="text" placeholder="https://abdm-gateway.example.com/fhir">
+            </div>
+
+            <div class="preview-section">
+                <h4>FHIR Bundle Example</h4>
+                <div class="preview-content">
+                    {<br>
+                    &nbsp;&nbsp;"resourceType": "Bundle",<br>
+                    &nbsp;&nbsp;"type": "collection",<br>
+                    &nbsp;&nbsp;"entry": [<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;{"resource": {"resourceType": "Patient", ...}},<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;{"resource": {"resourceType": "Encounter", ...}}<br>
+                    &nbsp;&nbsp;]<br>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('fhirModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="exportFHIR()">Export FHIR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HL7 Export Modal -->
+    <div class="modal" id="hl7Modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('hl7Modal')">✕</button>
+            <h2>Export as HL7 v2.5</h2>
+
+            <div class="modal-field">
+                <label>HL7 Message Type</label>
+                <select id="hl7Type">
+                    <option value="oru">ORU (Observation Result)</option>
+                    <option value="adc">ADC (Admit/Discharge)</option>
+                    <option value="rxe">RXE (Pharmacy)</option>
+                    <option value="cds">CDS (Clinical Decision Support)</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>Receiving System</label>
+                <input type="text" placeholder="Hospital HIS/EHR System Name">
+            </div>
+
+            <div class="preview-section">
+                <h4>HL7 Segment Preview</h4>
+                <div class="preview-content">
+                    MSH|^~\&|Aetos|Clinic|Hospital|HIS|20240913||ORU^R01<br>
+                    PID|||12345||Singh^Raj||19780115|M<br>
+                    OBX|1|TX|60591-5||Consultation notes...|F<br>
+                    RXE|1|RAMIPRIL 5MG|20240910|TAB|Once daily
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('hl7Modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="exportHL7()">Export HL7</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Export Modal -->
+    <div class="modal" id="summaryModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('summaryModal')">✕</button>
+            <h2>Export Health Summary</h2>
+
+            <div class="modal-field">
+                <label>Summary Type</label>
+                <select id="summaryType">
+                    <option value="one-page">One-Page Summary (Printable)</option>
+                    <option value="wallet">Wallet Card (Compact)</option>
+                    <option value="qr-encoded">QR Code Encoded</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>Language</label>
+                <select id="summaryLang">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi (हिंदी)</option>
+                    <option value="kannada">Kannada (ಕನ್ನಡ)</option>
+                    <option value="telugu">Telugu (తెలుగు)</option>
+                    <option value="tamil">Tamil (தமிழ்)</option>
+                </select>
+            </div>
+
+            <div class="preview-section">
+                <h4>Summary Preview</h4>
+                <div class="preview-content">
+                    <strong>HEALTH SUMMARY CARD</strong><br>
+                    Name: Raj Kumar Singh | DOB: 15-Jan-1978<br>
+                    Blood Type: O+ | Height: 5'10" | Weight: 78kg<br><br>
+                    <strong>Active Conditions:</strong> Hypertension, Type 2 Diabetes<br>
+                    <strong>Current Medications:</strong> Ramipril, Metformin, Atorvastatin<br>
+                    <strong>Allergies:</strong> Penicillin (Rash)<br>
+                    <strong>Emergency Contact:</strong> +91-9876543210
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('summaryModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="exportSummary()">Export Summary</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Link Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('shareModal')">✕</button>
+            <h2>Generate Secure Share Link</h2>
+
+            <div class="modal-field">
+                <label>Share Expiry</label>
+                <select id="shareExpiry">
+                    <option value="24h">24 Hours</option>
+                    <option value="7d">7 Days</option>
+                    <option value="30d">30 Days</option>
+                    <option value="never">Never Expires</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>Access Permission</label>
+                <div style="margin-top: 10px;">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="share-view" checked>
+                        <label for="share-view">View Only</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="share-download" checked>
+                        <label for="share-download">Download</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="share-print">
+                        <label for="share-print">Print</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-field">
+                <label>Share Link</label>
+                <input type="text" value="https://aetos.health/share/ABC123XYZ789" readonly id="shareLink">
+            </div>
+
+            <p style="font-size: 12px; color: #666; margin-top: 15px;">Link copied to clipboard! Share this link with your doctor or healthcare provider.</p>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('shareModal')">Close</button>
+                <button class="btn btn-primary" onclick="copyToClipboard('shareLink')">Copy Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Email Modal -->
+    <div class="modal" id="shareEmailModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('shareEmailModal')">✕</button>
+            <h2>Send Records via Email</h2>
+
+            <div class="modal-field">
+                <label>Recipient Email</label>
+                <input type="email" placeholder="doctor@hospital.com" id="recipientEmail">
+            </div>
+
+            <div class="modal-field">
+                <label>Message</label>
+                <textarea placeholder="Add a personal message..." id="emailMessage"></textarea>
+            </div>
+
+            <div class="modal-field">
+                <label>Format</label>
+                <select id="emailFormat">
+                    <option value="pdf">PDF</option>
+                    <option value="json">JSON</option>
+                    <option value="fhir">FHIR</option>
+                </select>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('shareEmailModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="sendEmail()">Send Email</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Phone Modal -->
+    <div class="modal" id="sharePhoneModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('sharePhoneModal')">✕</button>
+            <h2>Share via Phone</h2>
+
+            <div class="modal-field">
+                <label>Phone Number</label>
+                <input type="tel" placeholder="+91-9876543210" id="recipientPhone">
+            </div>
+
+            <div class="modal-field">
+                <label>Share Method</label>
+                <select id="shareMethod">
+                    <option value="sms">SMS (as link)</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="telegram">Telegram</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>Recipient Name</label>
+                <input type="text" placeholder="e.g., Sister, Mother" id="recipientName">
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('sharePhoneModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="sharePhone()">Send Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share QR Modal -->
+    <div class="modal" id="shareQRModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('shareQRModal')">✕</button>
+            <h2>QR Code Sharing</h2>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <div style="display: inline-block; border: 2px solid #ccc; padding: 20px; border-radius: 8px; background: white;">
+                    <svg width="200" height="200" viewBox="0 0 200 200" style="background: white;">
+                        <rect width="200" height="200" fill="white"/>
+                        <!-- QR Code Pattern -->
+                        <g fill="black">
+                            <rect x="10" y="10" width="40" height="40"/><rect x="60" y="10" width="40" height="40"/><rect x="150" y="10" width="40" height="40"/>
+                            <rect x="10" y="60" width="40" height="40"/><rect x="150" y="60" width="40" height="40"/>
+                            <rect x="10" y="150" width="40" height="40"/><rect x="60" y="150" width="40" height="40"/><rect x="150" y="150" width="40" height="40"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="modal-field">
+                <label>QR Code Format</label>
+                <select id="qrFormat">
+                    <option value="secure-link">Secure Link (Encrypted)</option>
+                    <option value="data-embedded">Data Embedded</option>
+                    <option value="patient-id">Patient ID Only</option>
+                </select>
+            </div>
+
+            <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">Scan this QR code with your phone to access your consultation history. Valid for 24 hours.</p>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('shareQRModal')">Close</button>
+                <button class="btn btn-primary" onclick="downloadQR()">Download QR Code</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample consultation data
+        const consultations = [
+            {
+                id: 1,
+                date: '2024-09-10',
+                doctor: 'Dr. Priya Sharma',
+                specialty: 'general',
+                type: 'Follow-up Consultation',
+                notes: 'Blood pressure control good. Continue current medication.',
+                prescriptions: 'Ramipril 5mg OD',
+                status: 'completed'
+            },
+            {
+                id: 2,
+                date: '2024-09-03',
+                doctor: 'Dr. Vikram Singh',
+                specialty: 'cardiology',
+                type: 'Routine Check-up',
+                notes: 'Cardiac examination normal. ECG within normal limits.',
+                prescriptions: 'None',
+                status: 'completed'
+            },
+            {
+                id: 3,
+                date: '2024-08-27',
+                doctor: 'Dr. Anjali Gupta',
+                specialty: 'endocrinology',
+                type: 'Diagnosis Consultation',
+                notes: 'Diagnosed with Type 2 Diabetes. Fasting glucose: 185 mg/dL',
+                prescriptions: 'Metformin 1000mg BD, Vitamin D3 supplementation',
+                status: 'completed'
+            },
+            {
+                id: 4,
+                date: '2024-08-20',
+                doctor: 'Dr. Priya Sharma',
+                specialty: 'general',
+                type: 'Follow-up Consultation',
+                notes: 'Hypertension stage 1 confirmed. Lifestyle modification advised.',
+                prescriptions: 'Atenolol 50mg OD, Atorvastatin 20mg OD',
+                status: 'completed'
+            },
+            {
+                id: 5,
+                date: '2024-08-12',
+                doctor: 'Dr. Rajesh Kumar',
+                specialty: 'orthopedics',
+                type: 'Specialist Consultation',
+                notes: 'Knee pain assessment. Mild osteoarthritis suspected.',
+                prescriptions: 'Diclofenac 50mg TDS, Physiotherapy',
+                status: 'completed'
+            },
+            {
+                id: 6,
+                date: '2024-07-30',
+                doctor: 'Dr. Meera Patel',
+                specialty: 'psychiatry',
+                type: 'Mental Health Consultation',
+                notes: 'Anxiety management. Sleep quality improved.',
+                prescriptions: 'Escitalopram 10mg OD',
+                status: 'completed'
+            }
+        ];
+
+        // Initialize
+        function init() {
+            renderConsultations();
+            setDateToToday();
+        }
+
+        function setDateToToday() {
+            const today = new Date();
+            document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+        }
+
+        function renderConsultations() {
+            const list = document.getElementById('consultationList');
+            const specialty = document.getElementById('specialtyFilter').value;
+            const doctor = document.getElementById('doctorFilter').value.toLowerCase();
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            const filtered = consultations.filter(c => {
+                const matchSpecialty = !specialty || c.specialty === specialty;
+                const matchDoctor = !doctor || c.doctor.toLowerCase().includes(doctor);
+                const matchDate = c.date >= dateFrom && c.date <= dateTo;
+                return matchSpecialty && matchDoctor && matchDate;
+            });
+
+            list.innerHTML = filtered.map(c => `
+                <div class="consultation-item">
+                    <div class="consultation-header">
+                        <div>
+                            <div class="consultation-date">${new Date(c.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                            <div class="doctor-name">${c.doctor}</div>
+                        </div>
+                        <div class="consultation-type">${c.type}</div>
+                    </div>
+                    <div class="export-options">
+                        <button class="export-btn-small" onclick="alert('Export individual consultation as PDF')">Export PDF</button>
+                        <button class="export-btn-small" onclick="alert('Export individual consultation as CSV')">Export CSV</button>
+                        <button class="export-btn-small" onclick="alert('Share this consultation')">Share</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function exportPDF() {
+            showSuccess('PDF exported successfully as "My_Medical_History_2024.pdf"');
+            closeModal('pdfModal');
+        }
+
+        function exportCSV() {
+            showSuccess('CSV exported successfully as "Medical_History.csv"');
+            closeModal('csvModal');
+        }
+
+        function exportJSON() {
+            showSuccess('JSON exported successfully as "Medical_History.json" (AES-256 encrypted)');
+            closeModal('jsonModal');
+        }
+
+        function exportFHIR() {
+            showSuccess('FHIR Bundle exported successfully. Compatible with ABDM and healthcare systems.');
+            closeModal('fhirModal');
+        }
+
+        function exportHL7() {
+            showSuccess('HL7 v2.5 message exported successfully. Ready for HIS/EHR integration.');
+            closeModal('hl7Modal');
+        }
+
+        function exportSummary() {
+            showSuccess('Health summary exported as "Health_Summary.pdf" (Printable)');
+            closeModal('summaryModal');
+        }
+
+        function sendEmail() {
+            const email = document.getElementById('recipientEmail').value;
+            if (email) {
+                showSuccess(`Records sent to ${email} successfully!`);
+                closeModal('shareEmailModal');
+            }
+        }
+
+        function sharePhone() {
+            const phone = document.getElementById('recipientPhone').value;
+            const method = document.getElementById('shareMethod').value;
+            if (phone) {
+                showSuccess(`Share link sent via ${method.toUpperCase()} to ${phone}`);
+                closeModal('sharePhoneModal');
+            }
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).value;
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('Share link copied to clipboard!');
+            });
+        }
+
+        function downloadQR() {
+            showSuccess('QR code downloaded as "Consultation_QR.png"');
+            closeModal('shareQRModal');
+        }
+
+        function showSuccess(message) {
+            const msg = document.getElementById('successMessage');
+            msg.textContent = '✓ ' + message;
+            msg.classList.add('show');
+            setTimeout(() => {
+                msg.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('specialtyFilter').addEventListener('change', renderConsultations);
+        document.getElementById('doctorFilter').addEventListener('input', renderConsultations);
+        document.getElementById('dateFrom').addEventListener('change', renderConsultations);
+        document.getElementById('dateTo').addEventListener('change', renderConsultations);
+
+        // Close modals on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

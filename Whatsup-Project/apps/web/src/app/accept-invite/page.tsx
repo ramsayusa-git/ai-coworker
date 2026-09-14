@@ -21,7 +21,7 @@ function AcceptInviteForm() {
     setLoading(true);
     try {
       await acceptInvite({ token, password, name });
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not accept invite");
     } finally {

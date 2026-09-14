@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { getCachedMe, getToken, logout as logoutSession, type Me } from "@/lib/api";
 
-const PUBLIC_PATHS = ["/login", "/register", "/accept-invite", "/accept-partner-invite"];
+const PUBLIC_PATHS = ["/", "/login", "/register", "/accept-invite", "/accept-partner-invite"];
 // Marketing/product site — public by prefix, not exact match (has its own sub-routes).
 const PUBLIC_PREFIXES = ["/product"];
 // Reachable with just a JWT — no cached org profile required. Partner-team-only users
@@ -41,7 +41,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     const token = getToken();
     const cached = getCachedMe();
     if (!token || (!cached && !isTokenOnly)) {
-      router.replace("/login");
+      // Not signed in: send to the website (marketing home), not straight to /login.
+      // The site's own "Sign in" button is how a returning user reaches /login.
+      router.replace("/");
       return;
     }
     setMe(cached);
@@ -55,7 +57,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   function logout() {
     logoutSession();
-    router.replace("/login");
+    router.replace("/");
   }
 
   return (

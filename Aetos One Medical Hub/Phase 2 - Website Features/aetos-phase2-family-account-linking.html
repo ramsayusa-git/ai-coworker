@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Account Linking - Aetos Medical Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #003d82 0%, #0066cc 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .compliance-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #003d82;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0066cc;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #003d82 0%, #0066cc 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .family-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .member-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .member-card:hover {
+            border-color: #0066cc;
+            box-shadow: 0 4px 12px rgba(0,102,204,0.15);
+        }
+
+        .member-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #003d82 0%, #0066cc 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: 600;
+            color: #003d82;
+            font-size: 14px;
+        }
+
+        .member-role {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .member-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .member-details {
+            font-size: 12px;
+            color: #666;
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+
+        .member-details p {
+            margin: 5px 0;
+        }
+
+        .member-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #003d82;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover {
+            background: #0066cc;
+            color: white;
+            border-color: #0066cc;
+        }
+
+        .btn-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .btn-danger:hover {
+            background: #f5c2c7;
+            border-color: #ed969e;
+        }
+
+        .add-member-btn {
+            display: inline-block;
+            background: #0066cc;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .add-member-btn:hover {
+            background: #003d82;
+        }
+
+        .permissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .permission-card {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .permission-card h4 {
+            color: #003d82;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .permission-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .permission-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .permission-item label {
+            font-size: 12px;
+            color: #333;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .emergency-contacts {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .emergency-contacts h3 {
+            color: #856404;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .contact-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .contact-item {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .contact-relation {
+            font-size: 11px;
+            color: #666;
+            margin: 3px 0;
+        }
+
+        .contact-phone {
+            font-size: 12px;
+            color: #0066cc;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal h2 {
+            color: #003d82;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .modal-field {
+            margin-bottom: 20px;
+        }
+
+        .modal-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #003d82;
+            margin-bottom: 8px;
+        }
+
+        .modal-field input,
+        .modal-field select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .modal-field input:focus,
+        .modal-field select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0,102,204,0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #003d82;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .activity-feed {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            border-left: 3px solid #0066cc;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .activity-text {
+            font-size: 13px;
+            color: #333;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #0066cc;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            background: #f5f7fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .family-members {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 25px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍👩‍👧‍👦 Family Account Linking</h1>
+            <p>Manage health records and coordination for your entire family</p>
+            <div class="compliance-badge">
+                ✓ DPDPA 2023 Compliant | Role-Based Access | Parental Controls
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage"></div>
+
+            <!-- Statistics -->
+            <div class="section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">Family Members</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">Active Doctors</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">₹18,500</div>
+                        <div class="stat-label">Family Insurance</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Emergency Contacts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contacts Alert -->
+            <div class="section">
+                <div class="emergency-contacts">
+                    <h3>🚨 Emergency Access Contacts</h3>
+                    <div class="contact-list">
+                        <div class="contact-item">
+                            <div class="contact-name">Priya Singh</div>
+                            <div class="contact-relation">Spouse</div>
+                            <div class="contact-phone">+91-9876543211</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-name">Dr. Rajesh Kumar</div>
+                            <div class="contact-relation">Primary Doctor</div>
+                            <div class="contact-phone">+91-9876543212</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-name">Ashok Singh</div>
+                            <div class="contact-relation">Elder</div>
+                            <div class="contact-phone">+91-9876543213</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-name">Apollo Hospitals</div>
+                            <div class="contact-relation">Primary Hospital</div>
+                            <div class="contact-phone">+91-9876543214</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family Members -->
+            <div class="section">
+                <h2 class="section-title">Family Members</h2>
+                <button class="add-member-btn" onclick="openModal('addMemberModal')">+ Add Family Member</button>
+
+                <div class="family-members">
+                    <!-- Primary Account Holder -->
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-avatar">👨</div>
+                            <div class="member-info">
+                                <div class="member-name">Raj Kumar Singh</div>
+                                <div class="member-role">Account Owner (You)</div>
+                            </div>
+                            <div class="member-status status-active">Active</div>
+                        </div>
+                        <div class="member-details">
+                            <p><strong>Age:</strong> 46 years</p>
+                            <p><strong>Joined:</strong> Jan 15, 2024</p>
+                            <p><strong>Role:</strong> <span class="role-badge">Administrator</span></p>
+                            <p><strong>Consultations:</strong> 42</p>
+                        </div>
+                        <div class="member-actions">
+                            <button class="btn-small" onclick="alert('View your profile')">Profile</button>
+                            <button class="btn-small" onclick="alert('View your health records')">Records</button>
+                        </div>
+                    </div>
+
+                    <!-- Spouse -->
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-avatar">👩</div>
+                            <div class="member-info">
+                                <div class="member-name">Priya Singh</div>
+                                <div class="member-role">Spouse</div>
+                            </div>
+                            <div class="member-status status-active">Active</div>
+                        </div>
+                        <div class="member-details">
+                            <p><strong>Age:</strong> 44 years</p>
+                            <p><strong>Joined:</strong> Feb 20, 2024</p>
+                            <p><strong>Role:</strong> <span class="role-badge">Full Access</span></p>
+                            <p><strong>Consultations:</strong> 18</p>
+                        </div>
+                        <div class="member-actions">
+                            <button class="btn-small" onclick="openModal('editPermissionsModal')">Permissions</button>
+                            <button class="btn-small" onclick="openModal('viewRecordsModal')">Records</button>
+                        </div>
+                    </div>
+
+                    <!-- Son -->
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-avatar">👨‍🎓</div>
+                            <div class="member-info">
+                                <div class="member-name">Arjun Singh</div>
+                                <div class="member-role">Son</div>
+                            </div>
+                            <div class="member-status status-active">Active</div>
+                        </div>
+                        <div class="member-details">
+                            <p><strong>Age:</strong> 20 years</p>
+                            <p><strong>Joined:</strong> Jun 10, 2024</p>
+                            <p><strong>Role:</strong> <span class="role-badge">Limited Access</span></p>
+                            <p><strong>Consultations:</strong> 5</p>
+                        </div>
+                        <div class="member-actions">
+                            <button class="btn-small" onclick="openModal('editPermissionsModal')">Permissions</button>
+                            <button class="btn-small" onclick="openModal('viewRecordsModal')">Records</button>
+                        </div>
+                    </div>
+
+                    <!-- Daughter -->
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-avatar">👧</div>
+                            <div class="member-info">
+                                <div class="member-name">Meera Singh</div>
+                                <div class="member-role">Daughter</div>
+                            </div>
+                            <div class="member-status status-active">Active</div>
+                        </div>
+                        <div class="member-details">
+                            <p><strong>Age:</strong> 17 years</p>
+                            <p><strong>Joined:</strong> Jul 05, 2024</p>
+                            <p><strong>Role:</strong> <span class="role-badge">Restricted</span></p>
+                            <p><strong>Consultations:</strong> 3</p>
+                        </div>
+                        <div class="member-actions">
+                            <button class="btn-small" onclick="openModal('editPermissionsModal')">Permissions</button>
+                            <button class="btn-small" onclick="openModal('viewRecordsModal')">Records</button>
+                        </div>
+                    </div>
+
+                    <!-- Elderly Parent -->
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-avatar">👴</div>
+                            <div class="member-info">
+                                <div class="member-name">Ashok Singh</div>
+                                <div class="member-role">Elder / Parent</div>
+                            </div>
+                            <div class="member-status status-active">Active</div>
+                        </div>
+                        <div class="member-details">
+                            <p><strong>Age:</strong> 72 years</p>
+                            <p><strong>Joined:</strong> Mar 12, 2024</p>
+                            <p><strong>Role:</strong> <span class="role-badge">Caregiver Access</span></p>
+                            <p><strong>Consultations:</strong> 28</p>
+                        </div>
+                        <div class="member-actions">
+                            <button class="btn-small" onclick="openModal('editPermissionsModal')">Permissions</button>
+                            <button class="btn-small" onclick="openModal('viewRecordsModal')">Records</button>
+                        </div>
+                    </div>
+
+                    <!-- Dependent -->
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-avatar">👶</div>
+                            <div class="member-info">
+                                <div class="member-name">Vivaan Singh</div>
+                                <div class="member-role">Dependent Child</div>
+                            </div>
+                            <div class="member-status status-active">Active</div>
+                        </div>
+                        <div class="member-details">
+                            <p><strong>Age:</strong> 8 years</p>
+                            <p><strong>Joined:</strong> Apr 01, 2024</p>
+                            <p><strong>Role:</strong> <span class="role-badge">Parental Control</span></p>
+                            <p><strong>Consultations:</strong> 7</p>
+                        </div>
+                        <div class="member-actions">
+                            <button class="btn-small" onclick="openModal('editPermissionsModal')">Permissions</button>
+                            <button class="btn-small" onclick="openModal('viewRecordsModal')">Records</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role-Based Permissions -->
+            <div class="section">
+                <h2 class="section-title">Role-Based Access Control</h2>
+                <div class="permissions-grid">
+                    <div class="permission-card">
+                        <h4>Administrator Role</h4>
+                        <div class="permission-list">
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>View own records</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>Manage family members</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>Edit permissions</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>Access all records</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>Emergency override</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="permission-card">
+                        <h4>Caregiver Role</h4>
+                        <div class="permission-list">
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>View assigned member</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>View prescriptions</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>View appointments</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" disabled>
+                                <label>Edit medical data</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>Emergency access</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="permission-card">
+                        <h4>Limited Access Role</h4>
+                        <div class="permission-list">
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>View own records</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>View shared items</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" disabled>
+                                <label>Manage account</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" disabled>
+                                <label>Access others' data</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" disabled>
+                                <label>Emergency override</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="permission-card">
+                        <h4>Restricted Access</h4>
+                        <div class="permission-list">
+                            <div class="permission-item">
+                                <input type="checkbox" checked disabled>
+                                <label>View own records</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" disabled>
+                                <label>View shared items</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" disabled>
+                                <label>Edit data</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" disabled>
+                                <label>Access others</label>
+                            </div>
+                            <div class="permission-item">
+                                <input type="checkbox" disabled>
+                                <label>Emergency access</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Access Audit Trail -->
+            <div class="section">
+                <h2 class="section-title">Recent Access Activity</h2>
+                <div class="activity-feed">
+                    <div class="activity-item">
+                        <div class="activity-time">Sep 13, 2024 • 2:45 PM</div>
+                        <div class="activity-text"><strong>Priya Singh</strong> viewed your consultation history</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">Sep 13, 2024 • 1:20 PM</div>
+                        <div class="activity-text"><strong>Ashok Singh</strong> accessed medications list</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">Sep 12, 2024 • 11:30 AM</div>
+                        <div class="activity-text"><strong>Arjun Singh</strong> downloaded vaccination certificates</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">Sep 12, 2024 • 9:15 AM</div>
+                        <div class="activity-text"><strong>Meera Singh</strong> viewed appointments</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">Sep 11, 2024 • 6:50 PM</div>
+                        <div class="activity-text"><strong>Vivaan Singh's guardian</strong> viewed health records</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">Sep 11, 2024 • 4:30 PM</div>
+                        <div class="activity-text">Family insurance policy renewed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family Health Insurance -->
+            <div class="section">
+                <h2 class="section-title">Family Health Insurance</h2>
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                    <p style="margin-bottom: 15px; color: #666;">
+                        <strong>Policy Type:</strong> Family Floater | <strong>Coverage:</strong> ₹500,000 | <strong>Premium:</strong> ₹18,500/year
+                    </p>
+                    <p style="margin-bottom: 15px; color: #666;">
+                        <strong>Policy ID:</strong> FAM-2024-ABC123 | <strong>Valid Until:</strong> 31 Dec 2024
+                    </p>
+                    <p style="margin-bottom: 15px; color: #666;">
+                        <strong>Covered Members:</strong> 6 | <strong>Cashless Hospitals:</strong> 5,000+
+                    </p>
+                    <button class="add-member-btn" style="display: inline-block; padding: 10px 20px; margin-top: 10px;">View Policy Documents</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>✓ All family members' data encrypted with AES-256 | DPDPA 2023 Compliant | Last sync: Sep 13, 2024 • 2:45 PM</p>
+        </div>
+    </div>
+
+    <!-- Add Family Member Modal -->
+    <div class="modal" id="addMemberModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('addMemberModal')">✕</button>
+            <h2>Add Family Member</h2>
+
+            <div class="modal-field">
+                <label>Full Name</label>
+                <input type="text" placeholder="e.g., Priya Singh">
+            </div>
+
+            <div class="modal-field">
+                <label>Relationship</label>
+                <select id="relationship">
+                    <option value="">Select relationship</option>
+                    <option value="spouse">Spouse</option>
+                    <option value="parent">Parent</option>
+                    <option value="child">Child</option>
+                    <option value="sibling">Sibling</option>
+                    <option value="grandparent">Grandparent</option>
+                    <option value="dependent">Dependent</option>
+                    <option value="caregiver">Caregiver</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>Email or Phone</label>
+                <input type="text" placeholder="email@example.com or +91-9876543210">
+            </div>
+
+            <div class="modal-field">
+                <label>Access Level</label>
+                <select id="accessLevel">
+                    <option value="full">Full Access</option>
+                    <option value="limited">Limited Access</option>
+                    <option value="caregiver">Caregiver Access</option>
+                    <option value="restricted">Restricted Access</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>Date of Birth</label>
+                <input type="date">
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('addMemberModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addFamilyMember()">Add Member</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Permissions Modal -->
+    <div class="modal" id="editPermissionsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('editPermissionsModal')">✕</button>
+            <h2>Edit Permissions</h2>
+
+            <p style="color: #666; margin-bottom: 20px;">Manage access for <strong>Priya Singh</strong> (Spouse)</p>
+
+            <div class="modal-field">
+                <label>Role</label>
+                <select>
+                    <option value="admin">Administrator</option>
+                    <option value="caregiver" selected>Caregiver</option>
+                    <option value="limited">Limited Access</option>
+                    <option value="restricted">Restricted</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label style="display: block; margin-bottom: 15px;">Access Permissions</label>
+                <div class="permission-list">
+                    <div class="permission-item">
+                        <input type="checkbox" checked id="perm-view">
+                        <label for="perm-view">View health records</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" checked id="perm-prescriptions">
+                        <label for="perm-prescriptions">View prescriptions</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" checked id="perm-appointments">
+                        <label for="perm-appointments">View appointments</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm-edit">
+                        <label for="perm-edit">Edit medical data</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" checked id="perm-emergency">
+                        <label for="perm-emergency">Emergency access</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('editPermissionsModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="savePermissions()">Save Permissions</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Records Modal -->
+    <div class="modal" id="viewRecordsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('viewRecordsModal')">✕</button>
+            <h2>Priya Singh's Medical Records</h2>
+
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                    <strong>Last Updated:</strong> Sep 10, 2024 | <strong>Next Appointment:</strong> Sep 20, 2024
+                </p>
+                <p style="font-size: 12px; color: #666;">
+                    <strong>Active Medications:</strong> 3 | <strong>Recent Consultations:</strong> 5 | <strong>Lab Tests:</strong> 8
+                </p>
+            </div>
+
+            <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Quick Access Links:</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="btn-small" onclick="alert('View medical history')">Medical History</button>
+                <button class="btn-small" onclick="alert('View prescriptions')">Prescriptions</button>
+                <button class="btn-small" onclick="alert('View lab results')">Lab Results</button>
+                <button class="btn-small" onclick="alert('View appointments')">Appointments</button>
+            </div>
+
+            <div class="modal-buttons" style="margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="closeModal('viewRecordsModal')">Close</button>
+                <button class="btn btn-primary" onclick="alert('Downloading records...')">Download Full Records</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function addFamilyMember() {
+            showSuccess('Family member added successfully! An invitation has been sent.');
+            closeModal('addMemberModal');
+        }
+
+        function savePermissions() {
+            showSuccess('Permissions updated successfully!');
+            closeModal('editPermissionsModal');
+        }
+
+        function showSuccess(message) {
+            const msg = document.getElementById('successMessage');
+            msg.textContent = '✓ ' + message;
+            msg.classList.add('show');
+            setTimeout(() => {
+                msg.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modals on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

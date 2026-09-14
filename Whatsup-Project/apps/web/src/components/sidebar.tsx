@@ -7,7 +7,7 @@ import { useBrand } from "@/components/brand-provider";
 import { useResizableWidth } from "@/lib/use-resizable-width";
 
 const nav = [
-  { href: "/", label: "Dashboard", icon: "🏠" },
+  { href: "/dashboard", label: "Dashboard", icon: "🏠" },
   { href: "/inbox", label: "Inbox", icon: "💬" },
   { href: "/contacts", label: "Contacts", icon: "👤" },
   { href: "/broadcasts", label: "Broadcasts", icon: "📣" },
@@ -79,7 +79,7 @@ export function Sidebar() {
       </div>
       <nav className="flex flex-1 flex-col gap-1">
         {nav.map((n) => {
-          const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
+          const active = path.startsWith(n.href);
           return (
             <Link
               key={n.href}

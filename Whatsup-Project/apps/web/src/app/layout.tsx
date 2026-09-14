@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthGate } from "@/components/auth-gate";
 import { BrandProvider } from "@/components/brand-provider";
+import { LanguageProvider } from "@/components/marketing/language-context";
 
 export const metadata: Metadata = {
   title: "Aetos One Chat",
@@ -13,7 +14,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen bg-zinc-50 text-zinc-900 antialiased">
         <BrandProvider>
-          <AuthGate>{children}</AuthGate>
+          <LanguageProvider>
+            <AuthGate>{children}</AuthGate>
+          </LanguageProvider>
         </BrandProvider>
       </body>
     </html>

@@ -183,7 +183,7 @@ export async function partnerFetch(path: string, init?: RequestInit) {
   });
   if (res.status === 401) {
     clearSession();
-    if (typeof window !== "undefined") window.location.href = "/login";
+    if (typeof window !== "undefined") window.location.href = "/";
     throw new Error("Session expired — please sign in again");
   }
   if (!res.ok) {
@@ -213,7 +213,7 @@ export async function apiFetch(path: string, init?: RequestInit, _retried = fals
       return apiFetch(path, init, true);
     }
     clearSession();
-    if (typeof window !== "undefined") window.location.href = "/login";
+    if (typeof window !== "undefined") window.location.href = "/";
     throw new Error("Session expired — please sign in again");
   }
   if (!res.ok) {

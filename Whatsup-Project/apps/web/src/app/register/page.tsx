@@ -21,7 +21,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register({ name, orgName, email, password });
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -71,7 +71,7 @@ export default function RegisterPage() {
             Already have an account? <a href="/login" className="text-emerald-600 hover:underline">Sign in</a>
           </p>
           <p className="text-center text-xs text-zinc-400">
-            <a href="/product" className="hover:text-emerald-600 hover:underline">← Back to product overview</a>
+            <a href="/" className="hover:text-emerald-600 hover:underline">← Back to product overview</a>
           </p>
         </div>
       </form>
