@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Outbound Campaigns - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="../static/images/custom_favicon.png@v=51906">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="../static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/style.css@v=1140.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="ImtYRHp3elpueVp2M2RiR21qMnJhNmFLRDNpU1JqOHVQUkNnNmRnVVJRTGsi.aqgYMQ.mO3dLYksM-ZmjBWr9ywoS33IJoY">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="../index.html" class="sidebar-brand">
+            
+            <img src="../static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="../settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="../index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="../reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="../rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="../call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="../chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="../egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="../tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="../knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="../agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="../web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="campaigns.html" class="nav-link active">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="../agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="../simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="../autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="../improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="../settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="../settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Telephony</h1>
+                
+<p class="page-subtitle">Outbound Campaigns</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="../userguide.html#campaigns" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="campaigns.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-megaphone"></i> Total Campaigns
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-play-circle"></i> Running
+        </div>
+        <div class="stat-value success">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-pause-circle"></i> Paused
+        </div>
+        <div class="stat-value warning">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-check-circle"></i> Completed
+        </div>
+        <div class="stat-value">
+            0
+        </div>
+    </div>
+</div>
+
+<!-- Campaigns List -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">
+            <i class="bi bi-megaphone"></i> Outbound Campaigns
+        </h5>
+        <div class="d-flex gap-2 align-items-center">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshCampaigns()" title="Refresh">
+                <i class="bi bi-arrow-clockwise" id="campaigns-refresh-icon"></i>
+            </button>
+            
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
+                <i class="bi bi-plus-circle"></i> New Campaign
+            </button>
+            
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="campaigns-content">
+            
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <i class="bi bi-megaphone"></i>
+    </div>
+    <div class="empty-state-title">No campaigns yet</div>
+    <div class="empty-state-description">
+        Create your first outbound campaign to start bulk calling
+    </div>
+    
+    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
+        <i class="bi bi-plus-circle"></i> Create Campaign
+    </button>
+    
+</div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Create Campaign Modal -->
+<div class="modal fade" id="createCampaignModal" tabindex="-1" aria-labelledby="createCampaignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCampaignModalLabel">
+                    <i class="bi bi-megaphone"></i> Create Outbound Campaign
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="https://vaai.aetosiot.com/telephony/campaigns/create" enctype="multipart/form-data" id="createCampaignForm">
+                <input type="hidden" name="csrf_token" value="ImtYRHp3elpueVp2M2RiR21qMnJhNmFLRDNpU1JqOHVQUkNnNmRnVVJRTGsi.aqgYMQ.mO3dLYksM-ZmjBWr9ywoS33IJoY">
+                <div class="modal-body">
+                    <!-- Campaign Name -->
+                    <div class="form-group mb-3">
+                        <label for="campaign_name" class="form-label">Campaign Name *</label>
+                        <input type="text" class="form-control" id="campaign_name" name="name"
+                               placeholder="Q1 Sales Outreach" required>
+                    </div>
+
+                    <div class="row">
+                        <!-- SIP Trunk -->
+                        <div class="col-md-6 mb-3">
+                            <label for="sip_trunk_id" class="form-label">SIP Trunk *</label>
+                            <select class="form-select" id="sip_trunk_id" name="sip_trunk_id" required>
+                                <option value="">Select trunk...</option>
+                                
+                            </select>
+                            <div id="pbxCampaignHint" class="alert alert-info py-2 mt-2 mb-0" style="display: none; font-size: 0.85rem;">
+                                <i class="bi bi-info-circle"></i>
+                                PBX trunk selected — your CSV column should contain extensions, queues, or SIP user names (e.g. <code>101</code>, <code>queue302</code>, <code>reception</code>), not phone numbers. Full E.164 numbers are also accepted; the PBX decides routing.
+                            </div>
+                        </div>
+
+                        <!-- Agent -->
+                        <div class="col-md-6 mb-3">
+                            <label for="agent_id" class="form-label">Agent *</label>
+                            <select class="form-select" id="agent_id" name="agent_id" required>
+                                <option value="">Select agent...</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Call Settings -->
+                    <h6 class="text-muted mb-3 mt-2"><i class="bi bi-sliders"></i> Call Settings</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="concurrency" class="form-label">Concurrent Calls</label>
+                            <select class="form-select" id="concurrency" name="concurrency">
+                                <option value="1" selected>1 call at a time</option>
+                                <option value="2">2 concurrent calls</option>
+                                <option value="3">3 concurrent calls</option>
+                                <option value="5">5 concurrent calls</option>
+                                <option value="10">10 concurrent calls</option>
+                            </select>
+                            <small class="text-muted">Maximum simultaneous outbound calls</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="call_delay" class="form-label">Delay Between Calls</label>
+                            <select class="form-select" id="call_delay" name="call_delay_seconds">
+                                <option value="3">3 seconds</option>
+                                <option value="5" selected>5 seconds</option>
+                                <option value="10">10 seconds</option>
+                                <option value="15">15 seconds</option>
+                                <option value="30">30 seconds</option>
+                                <option value="60">1 minute</option>
+                                <option value="120">2 minutes</option>
+                                <option value="300">5 minutes</option>
+                                <option value="600">10 minutes</option>
+                                <option value="900">15 minutes</option>
+                            </select>
+                            <small class="text-muted">Wait time before starting next call</small>
+                        </div>
+                    </div>
+
+                    <!-- Operating Hours -->
+                    <h6 class="text-muted mb-3 mt-2"><i class="bi bi-clock-history"></i> Operating Hours</h6>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="operatingHoursEnabled"
+                                   name="operating_hours_enabled" value="true">
+                            <label class="form-check-label" for="operatingHoursEnabled">
+                                Restrict calls to specific hours
+                            </label>
+                        </div>
+                    </div>
+                    <div id="operatingHoursSettings" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="operatingHoursStart" class="form-label">Start Time</label>
+                                <input type="time" class="form-control" id="operatingHoursStart"
+                                       name="operating_hours_start" value="09:00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="operatingHoursEnd" class="form-label">End Time</label>
+                                <input type="time" class="form-control" id="operatingHoursEnd"
+                                       name="operating_hours_end" value="17:00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="operatingHoursTimezone" class="form-label">Timezone</label>
+                                <select class="form-select" id="operatingHoursTimezone" name="operating_hours_timezone">
+                                    <optgroup label="Americas">
+                                        <option value="America/New_York">Eastern Time (New York)</option>
+                                        <option value="America/Chicago">Central Time (Chicago)</option>
+                                        <option value="America/Denver">Mountain Time (Denver)</option>
+                                        <option value="America/Los_Angeles">Pacific Time (Los Angeles)</option>
+                                        <option value="America/Anchorage">Alaska (Anchorage)</option>
+                                        <option value="Pacific/Honolulu">Hawaii (Honolulu)</option>
+                                        <option value="America/Phoenix">Arizona (Phoenix)</option>
+                                        <option value="America/Toronto">Toronto</option>
+                                        <option value="America/Vancouver">Vancouver</option>
+                                        <option value="America/Mexico_City">Mexico City</option>
+                                        <option value="America/Sao_Paulo">São Paulo</option>
+                                        <option value="America/Argentina/Buenos_Aires">Buenos Aires</option>
+                                        <option value="America/Bogota">Bogotá</option>
+                                    </optgroup>
+                                    <optgroup label="Europe">
+                                        <option value="Europe/London">London (GMT/BST)</option>
+                                        <option value="Europe/Paris">Paris (CET)</option>
+                                        <option value="Europe/Berlin">Berlin (CET)</option>
+                                        <option value="Europe/Madrid">Madrid (CET)</option>
+                                        <option value="Europe/Rome">Rome (CET)</option>
+                                        <option value="Europe/Amsterdam">Amsterdam (CET)</option>
+                                        <option value="Europe/Zurich">Zurich (CET)</option>
+                                        <option value="Europe/Stockholm">Stockholm (CET)</option>
+                                        <option value="Europe/Moscow">Moscow (MSK)</option>
+                                        <option value="Europe/Istanbul">Istanbul</option>
+                                    </optgroup>
+                                    <optgroup label="Asia Pacific">
+                                        <option value="Australia/Sydney">Sydney (AEST)</option>
+                                        <option value="Australia/Melbourne">Melbourne (AEST)</option>
+                                        <option value="Australia/Brisbane">Brisbane (AEST, no DST)</option>
+                                        <option value="Australia/Perth">Perth (AWST)</option>
+                                        <option value="Australia/Adelaide">Adelaide (ACST)</option>
+                                        <option value="Pacific/Auckland">Auckland (NZST)</option>
+                                        <option value="Asia/Tokyo">Tokyo (JST)</option>
+                                        <option value="Asia/Shanghai">Shanghai (CST)</option>
+                                        <option value="Asia/Hong_Kong">Hong Kong (HKT)</option>
+                                        <option value="Asia/Singapore">Singapore (SGT)</option>
+                                        <option value="Asia/Kolkata">India (IST)</option>
+                                        <option value="Asia/Dubai">Dubai (GST)</option>
+                                        <option value="Asia/Seoul">Seoul (KST)</option>
+                                    </optgroup>
+                                    <optgroup label="Africa / Middle East">
+                                        <option value="Africa/Johannesburg">Johannesburg (SAST)</option>
+                                        <option value="Africa/Cairo">Cairo (EET)</option>
+                                        <option value="Africa/Lagos">Lagos (WAT)</option>
+                                        <option value="Asia/Riyadh">Riyadh (AST)</option>
+                                        <option value="Asia/Jerusalem">Jerusalem (IST)</option>
+                                    </optgroup>
+                                </select>
+                                <small class="text-muted">Calls only run during these hours in this timezone</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule -->
+                    <h6 class="text-muted mb-3 mt-2"><i class="bi bi-calendar"></i> Schedule</h6>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="schedule_type" id="scheduleImmediate" value="immediate" checked>
+                            <label class="form-check-label" for="scheduleImmediate">
+                                Start immediately after creation
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="schedule_type" id="scheduleManual" value="manual">
+                            <label class="form-check-label" for="scheduleManual">
+                                Save as draft (start manually later)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="schedule_type" id="scheduleLater" value="scheduled">
+                            <label class="form-check-label" for="scheduleLater">
+                                Schedule for later
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row mb-3" id="scheduleDateTime" style="display: none;">
+                        <div class="col-md-6">
+                            <label for="schedule_date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="schedule_date" name="schedule_date">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="schedule_time" class="form-label">Time</label>
+                            <input type="time" class="form-control" id="schedule_time" name="schedule_time">
+                        </div>
+                        <div class="col-12 mt-1">
+                            <small class="text-muted">Times are in Australia/Sydney timezone (from Settings)</small>
+                        </div>
+                    </div>
+
+                    <!-- Phone Numbers -->
+                    <h6 class="text-muted mb-3 mt-2"><i class="bi bi-telephone"></i> Phone Numbers</h6>
+                    <div class="mb-3">
+                        <ul class="nav nav-tabs" id="numbersTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manualNumbers" type="button">
+                                    Add Manually
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csvImport" type="button">
+                                    Import CSV
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-3" id="numbersTabContent">
+                            <!-- Manual Entry -->
+                            <div class="tab-pane fade show active" id="manualNumbers" role="tabpanel">
+                                <!-- Row 1: Required fields -->
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-5">
+                                        <input type="text" class="form-control" id="newPhoneNumber"
+                                               placeholder="Phone (e.g. 16505551234)">
+                                        <small class="text-muted">Include country code (e.g., 1 for US, 61 for AUS)</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="newContactName"
+                                               placeholder="Name (e.g. Jane Smith)">
+                                    </div>
+                                    <div class="col-md-3 d-flex align-items-start">
+                                        <button type="button" class="btn btn-outline-primary w-100" id="addPhoneBtn">
+                                            <i class="bi bi-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Row 2: Optional fields -->
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control form-control-sm" id="newCompanyName"
+                                               placeholder="Company (e.g. Acme)">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control form-control-sm" id="newCompanyDescription"
+                                               placeholder="Description">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control form-control-sm" id="newJobTitle"
+                                               placeholder="Job Title">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control form-control-sm" id="newCustomField1"
+                                               placeholder="Custom Field 1">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control form-control-sm" id="newCustomField2"
+                                               placeholder="Custom Field 2">
+                                    </div>
+                                </div>
+                                <div id="phoneNumbersList" class="mt-2" style="max-height: 200px; overflow-y: auto;">
+                                    <!-- Phone numbers will be added here -->
+                                </div>
+                                <input type="hidden" name="numbers_json" id="numbersJsonInput" value="[]">
+                            </div>
+                            <!-- CSV Import -->
+                            <div class="tab-pane fade" id="csvImport" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="csvFile" class="form-label">Upload CSV File</label>
+                                    <input type="file" class="form-control" id="csvFile" name="csv_file" accept=".csv">
+                                </div>
+
+                                <!-- PBX-only reminder shown above the column reference -->
+                                <div class="alert alert-info py-2" id="pbxCsvHint" style="display: none; font-size: 0.85rem;">
+                                    <i class="bi bi-info-circle"></i>
+                                    <strong>PBX trunk:</strong> the <code>phone</code> column should contain extensions, queues, or SIP user names (e.g. <code>101</code>, <code>queue302</code>, <code>reception</code>) — letters, digits, <code>.</code>, <code>_</code>, <code>-</code> only. The country-code rule below does <strong>not</strong> apply. Full E.164 numbers are also accepted; the PBX decides routing.
+                                </div>
+
+                                <!-- Column reference table -->
+                                <div class="border rounded p-3 mb-3" style="background: var(--bg-tertiary); font-size: 0.82rem;">
+                                    <p class="mb-2 fw-semibold"><i class="bi bi-table"></i> Column Reference</p>
+                                    <table class="table table-sm mb-0" style="font-size: 0.8rem;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:30px">#</th>
+                                                <th>Column name <span class="text-muted fw-normal">(if using a header row)</span></th>
+                                                <th>Example value</th>
+                                                <th>Required?</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-muted">1</td>
+                                                <td><code>phone</code></td>
+                                                <td><code>16505551234</code></td>
+                                                <td><span class="badge bg-danger">Required</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">2</td>
+                                                <td><code>name</code></td>
+                                                <td><code>Jane Smith</code></td>
+                                                <td><span class="badge bg-secondary">Optional</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">3</td>
+                                                <td><code>company_name</code></td>
+                                                <td><code>Acme Corp</code></td>
+                                                <td><span class="badge bg-secondary">Optional</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">4</td>
+                                                <td><code>company_description</code></td>
+                                                <td><code>Cloud software provider</code></td>
+                                                <td><span class="badge bg-secondary">Optional</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">5</td>
+                                                <td><code>job_title</code></td>
+                                                <td><code>VP of Sales</code></td>
+                                                <td><span class="badge bg-secondary">Optional</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">6</td>
+                                                <td><code>custom_field_1</code></td>
+                                                <td><code>Account #1234</code></td>
+                                                <td><span class="badge bg-secondary">Optional</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">7</td>
+                                                <td><code>custom_field_2</code></td>
+                                                <td><code>Renewal due March</code></td>
+                                                <td><span class="badge bg-secondary">Optional</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Rules -->
+                                <div class="border rounded p-3 mb-3" style="background: var(--bg-tertiary); font-size: 0.82rem;">
+                                    <p class="mb-2 fw-semibold"><i class="bi bi-info-circle"></i> Rules</p>
+                                    <ul class="mb-0 ps-3" style="line-height: 1.8;">
+                                        <li>Only the <strong>phone number</strong> column is required &mdash; all others are optional</li>
+                                        <li>Phone numbers must include the <strong>country code</strong> (e.g. <code>1</code> for US, <code>61</code> for Australia) &mdash; no + sign needed</li>
+                                        <li>A <strong>header row is optional</strong> &mdash; the system detects it automatically. If you include one, columns can be in any order as long as names match the table above</li>
+                                        <li>If there is <strong>no header row</strong>, columns must be in the exact order shown above (left to right)</li>
+                                        <li>Leave a column <strong>blank</strong> (empty value) to skip it &mdash; do not remove it if columns after it have data</li>
+                                        <li>Save your file as <strong>.csv</strong> (comma-separated) &mdash; not .xlsx or .xls</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Examples -->
+                                <div class="border rounded p-3 mb-3" style="background: var(--bg-tertiary); font-size: 0.82rem;">
+                                    <p class="mb-2 fw-semibold"><i class="bi bi-code-square"></i> Examples</p>
+                                    <p class="text-muted mb-1">With header row <span class="text-success">(recommended &mdash; columns can be in any order)</span>:</p>
+                                    <pre class="mb-3 p-2 rounded" style="background: var(--bg-primary); font-size: 0.75rem; white-space: pre-wrap; word-break: break-all;">phone,name,company_name,company_description,job_title,custom_field_1,custom_field_2
+16505551234,Jane Smith,Acme Corp,Cloud software provider,VP of Sales,Account #1234,Renewal due March
+16505559876,John Doe,Beta Inc,Logistics company,CEO,,</pre>
+                                    <p class="text-muted mb-1">Without header row <span class="text-muted">(columns must be in exact order above)</span>:</p>
+                                    <pre class="mb-0 p-2 rounded" style="background: var(--bg-primary); font-size: 0.75rem; white-space: pre-wrap; word-break: break-all;">16505551234,Jane Smith,Acme Corp,Cloud software provider,VP of Sales,Account #1234,Renewal due March
+16505559876,John Doe,Beta Inc,,,, </pre>
+                                </div>
+
+                                <div id="csvPreview" class="mt-3" style="display: none;">
+                                    <strong>Preview:</strong>
+                                    <div id="csvPreviewContent" style="max-height: 150px; overflow-y: auto;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border rounded mt-3 mb-0 py-2 px-3" style="font-size: 0.8rem; background: var(--bg-tertiary);">
+                        <i class="bi bi-lightbulb"></i>
+                        <strong>Tip:</strong> Use these variables in your agent's system prompt to personalise each call:
+                        <code>{{Name}}</code> &bull;
+                        <code>{{CompanyName}}</code> &bull;
+                        <code>{{CompanyDescription}}</code> &bull;
+                        <code>{{JobTitle}}</code> &bull;
+                        <code>{{CustomField1}}</code> &bull;
+                        <code>{{CustomField2}}</code> &bull;
+                        <code>{{user_number}}</code> &bull;
+                        <code>{{time_greeting}}</code> (morning/afternoon/evening) &bull;
+                        <code>{{current_datetime}}</code>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Total numbers: <strong id="totalNumbersCount">0</strong>
+                    </div>
+                    <div class="alert alert-warning" id="duplicateWarning" style="display: none;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="duplicateWarningText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="createCampaignBtn">
+                        <i class="bi bi-megaphone"></i> Create Campaign
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Campaign Modal -->
+<div class="modal fade" id="viewCampaignModal" tabindex="-1" aria-labelledby="viewCampaignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewCampaignModalLabel">
+                    <i class="bi bi-megaphone"></i> Campaign Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="campaignDetailsContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<style>
+/* Modal styling */
+#createCampaignModal .modal-content,
+#viewCampaignModal .modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+}
+
+#createCampaignModal .modal-header,
+#viewCampaignModal .modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+#createCampaignModal .modal-footer,
+#viewCampaignModal .modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+/* Phone number list item */
+.phone-number-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: var(--bg-tertiary);
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+}
+
+.phone-number-item .remove-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.phone-number-item .remove-btn:hover {
+    color: var(--bs-danger);
+}
+
+/* Progress bar stacking */
+.progress {
+    background-color: var(--bg-tertiary);
+}
+
+/* Nav tabs styling */
+.nav-tabs {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--brand-primary);
+    background: transparent;
+    border-bottom: 2px solid var(--brand-primary);
+}
+
+/* Call status badge colors */
+.phone-status-pending { color: var(--text-muted); }
+.phone-status-calling { color: var(--bs-info); }
+.phone-status-completed { color: var(--bs-success); }
+.phone-status-failed { color: var(--bs-danger); }
+.phone-status-no_answer { color: var(--bs-warning); }
+.phone-status-voicemail { color: var(--bs-purple, #6f42c1); }
+.phone-status-transferred { color: var(--bs-info); }
+#campaignDetailsContent tr[onclick]:hover { background-color: rgba(var(--bs-primary-rgb), 0.08); }
+
+/* Refresh button spin animation */
+@keyframes campaigns-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.campaigns-spin {
+    animation: campaigns-spin 1s linear infinite;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // PBX-trunk hints: show notices when the chosen trunk is a PBX trunk
+    // — one under the trunk dropdown, one above the CSV column reference.
+    const trunkSelect = document.getElementById('sip_trunk_id');
+    const pbxHint = document.getElementById('pbxCampaignHint');
+    const pbxCsvHint = document.getElementById('pbxCsvHint');
+    if (trunkSelect) {
+        const updatePbxHints = () => {
+            const opt = trunkSelect.options[trunkSelect.selectedIndex];
+            const tt = opt ? opt.getAttribute('data-trunk-type') : null;
+            const showPbx = (tt === 'pbx');
+            if (pbxHint) pbxHint.style.display = showPbx ? '' : 'none';
+            if (pbxCsvHint) pbxCsvHint.style.display = showPbx ? '' : 'none';
+        };
+        trunkSelect.addEventListener('change', updatePbxHints);
+        updatePbxHints();
+    }
+
+    // Phone numbers management
+    let phoneNumbers = [];
+    const phoneList = document.getElementById('phoneNumbersList');
+    const addBtn = document.getElementById('addPhoneBtn');
+    const newPhoneInput = document.getElementById('newPhoneNumber');
+    const newContactName = document.getElementById('newContactName');
+    const newCompanyName = document.getElementById('newCompanyName');
+    const newCompanyDescription = document.getElementById('newCompanyDescription');
+    const newJobTitle = document.getElementById('newJobTitle');
+    const newCustomField1 = document.getElementById('newCustomField1');
+    const newCustomField2 = document.getElementById('newCustomField2');
+    const numbersJsonInput = document.getElementById('numbersJsonInput');
+    const totalCount = document.getElementById('totalNumbersCount');
+
+    function updatePhoneList() {
+        phoneList.innerHTML = '';
+        phoneNumbers.forEach((num, index) => {
+            const item = document.createElement('div');
+            item.className = 'phone-number-item';
+            const secondLine = [num.name, num.company_name, num.job_title].filter(Boolean).join(' &mdash; ');
+            item.innerHTML = `
+                <div>
+                    <span><i class="bi bi-telephone"></i> ${num.phone}</span>
+                    ${secondLine ? `<br><small class="text-muted">${secondLine}</small>` : ''}
+                </div>
+                <button type="button" class="remove-btn" data-index="${index}">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            `;
+            phoneList.appendChild(item);
+        });
+        numbersJsonInput.value = JSON.stringify(phoneNumbers);
+        totalCount.textContent = phoneNumbers.length;
+
+        // Detect and warn about duplicate phone numbers
+        const dupWarning = document.getElementById('duplicateWarning');
+        const dupText = document.getElementById('duplicateWarningText');
+        const phoneCounts = {};
+        phoneNumbers.forEach(n => {
+            phoneCounts[n.phone] = (phoneCounts[n.phone] || 0) + 1;
+        });
+        const dupsEntries = Object.entries(phoneCounts).filter(([, c]) => c > 1);
+        if (dupsEntries.length > 0) {
+            const totalDups = dupsEntries.reduce((sum, [, c]) => sum + (c - 1), 0);
+            dupText.textContent = `${totalDups} duplicate ${totalDups === 1 ? 'entry' : 'entries'} found for ${dupsEntries.length} ${dupsEntries.length === 1 ? 'number' : 'numbers'}. Each duplicate will result in an extra call to the same number.`;
+            dupWarning.style.display = 'block';
+        } else {
+            dupWarning.style.display = 'none';
+        }
+    }
+
+    function addPhoneNumber(phone, name = '', company_name = '', company_description = '', job_title = '', custom_field_1 = '', custom_field_2 = '') {
+        phone = phone.replace(/[^\d]/g, '');
+        if (phone.length >= 8 && phone.length <= 15) {
+            if (!phoneNumbers.some(n => n.phone === phone)) {
+                phoneNumbers.push({ phone, name, company_name, company_description, job_title, custom_field_1, custom_field_2 });
+                updatePhoneList();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    addBtn.addEventListener('click', function() {
+        const name = newContactName ? newContactName.value.trim() : '';
+        const company = newCompanyName ? newCompanyName.value.trim() : '';
+        const desc = newCompanyDescription ? newCompanyDescription.value.trim() : '';
+        const jobTitle = newJobTitle ? newJobTitle.value.trim() : '';
+        const cf1 = newCustomField1 ? newCustomField1.value.trim() : '';
+        const cf2 = newCustomField2 ? newCustomField2.value.trim() : '';
+        if (addPhoneNumber(newPhoneInput.value, name, company, desc, jobTitle, cf1, cf2)) {
+            newPhoneInput.value = '';
+            if (newContactName) newContactName.value = '';
+            if (newCompanyName) newCompanyName.value = '';
+            if (newCompanyDescription) newCompanyDescription.value = '';
+            if (newJobTitle) newJobTitle.value = '';
+            if (newCustomField1) newCustomField1.value = '';
+            if (newCustomField2) newCustomField2.value = '';
+        } else {
+            alert('Invalid phone number or already added');
+        }
+    });
+
+    newPhoneInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addBtn.click();
+        }
+    });
+
+    phoneList.addEventListener('click', function(e) {
+        const removeBtn = e.target.closest('.remove-btn');
+        if (removeBtn) {
+            const index = parseInt(removeBtn.dataset.index);
+            phoneNumbers.splice(index, 1);
+            updatePhoneList();
+        }
+    });
+
+    // CSV file handling
+    const csvFile = document.getElementById('csvFile');
+    const csvPreview = document.getElementById('csvPreview');
+    const csvPreviewContent = document.getElementById('csvPreviewContent');
+
+    csvFile.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            const lines = content.split('\n').filter(l => l.trim());
+
+            // Clear and add numbers from CSV
+            phoneNumbers = [];
+
+            // Check for header
+            const firstLineLower = lines[0].toLowerCase();
+            const hasHeader = firstLineLower.includes('phone') || firstLineLower.includes('number') ||
+                              firstLineLower.includes('name') || firstLineLower.includes('company');
+            const startIndex = hasHeader ? 1 : 0;
+
+            // Build column map if header present
+            let colMap = {};
+            if (hasHeader) {
+                const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+                headers.forEach((h, i) => { colMap[h] = i; });
+            }
+
+            for (let i = startIndex; i < lines.length; i++) {
+                const parts = lines[i].split(',');
+                let phone, name, company_name, company_description, job_title, custom_field_1, custom_field_2;
+                if (hasHeader) {
+                    const phoneCol = colMap['phone'] ?? colMap['phone_number'] ?? colMap['number'] ?? colMap['telephone'] ?? 0;
+                    phone = (parts[phoneCol] || '').trim().replace(/[^\d]/g, '');
+                    name = colMap['name'] !== undefined ? (parts[colMap['name']] || '').trim() : '';
+                    company_name = colMap['company_name'] !== undefined ? (parts[colMap['company_name']] || '').trim() : '';
+                    company_description = colMap['company_description'] !== undefined ? (parts[colMap['company_description']] || '').trim() : '';
+                    job_title = colMap['job_title'] !== undefined ? (parts[colMap['job_title']] || '').trim() : '';
+                    custom_field_1 = colMap['custom_field_1'] !== undefined ? (parts[colMap['custom_field_1']] || '').trim() : '';
+                    custom_field_2 = colMap['custom_field_2'] !== undefined ? (parts[colMap['custom_field_2']] || '').trim() : '';
+                } else {
+                    phone = (parts[0] || '').trim().replace(/[^\d]/g, '');
+                    name = parts[1] ? parts[1].trim() : '';
+                    company_name = parts[2] ? parts[2].trim() : '';
+                    company_description = parts[3] ? parts[3].trim() : '';
+                    job_title = parts[4] ? parts[4].trim() : '';
+                    custom_field_1 = parts[5] ? parts[5].trim() : '';
+                    custom_field_2 = parts[6] ? parts[6].trim() : '';
+                }
+                if (phone.length >= 8 && phone.length <= 15) {
+                    phoneNumbers.push({ phone, name, company_name, company_description, job_title, custom_field_1, custom_field_2 });
+                }
+            }
+
+            updatePhoneList();
+
+            // Show preview with duplicate info
+            csvPreview.style.display = 'block';
+            csvPreviewContent.textContent = '';
+            const csvLoadedP = document.createElement('p');
+            csvLoadedP.className = 'text-success';
+            csvLoadedP.textContent = 'Loaded ' + phoneNumbers.length + ' valid phone numbers';
+            csvPreviewContent.appendChild(csvLoadedP);
+            const csvPhoneCounts = {};
+            phoneNumbers.forEach(n => {
+                csvPhoneCounts[n.phone] = (csvPhoneCounts[n.phone] || 0) + 1;
+            });
+            const csvDups = Object.entries(csvPhoneCounts).filter(([, c]) => c > 1);
+            if (csvDups.length > 0) {
+                const csvTotalDups = csvDups.reduce((sum, [, c]) => sum + (c - 1), 0);
+                const csvDupP = document.createElement('p');
+                csvDupP.className = 'text-warning mb-0';
+                csvDupP.textContent = csvTotalDups + ' duplicate ' + (csvTotalDups === 1 ? 'entry' : 'entries') + ' found for ' + csvDups.length + ' ' + (csvDups.length === 1 ? 'number' : 'numbers') + '.';
+                csvPreviewContent.appendChild(csvDupP);
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // Schedule type toggle
+    const scheduleInputs = document.querySelectorAll('input[name="schedule_type"]');
+    const scheduleDateTimeDiv = document.getElementById('scheduleDateTime');
+
+    scheduleInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            scheduleDateTimeDiv.style.display = this.value === 'scheduled' ? 'flex' : 'none';
+        });
+    });
+
+    // Operating hours toggle
+    const ohEnabled = document.getElementById('operatingHoursEnabled');
+    const ohSettings = document.getElementById('operatingHoursSettings');
+    const ohTimezone = document.getElementById('operatingHoursTimezone');
+
+    ohEnabled.addEventListener('change', function() {
+        ohSettings.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Set default timezone from server
+    const serverTimezone = 'Australia/Sydney';
+    if (serverTimezone) {
+        const tzOption = ohTimezone.querySelector(`option[value="${serverTimezone}"]`);
+        if (tzOption) {
+            tzOption.selected = true;
+        }
+    }
+
+    // ---- Campaign details auto-polling ----
+    let campaignPollInterval = null;
+    const campaignDetailsContent = document.getElementById('campaignDetailsContent');
+
+    function renderCampaignDetails(data) {
+        const campaign = data;
+        const stats = campaign.stats || {};
+        const numbers = campaign.numbers || [];
+
+        // Preserve scroll position of call log
+        const scrollContainer = campaignDetailsContent.querySelector('.table-responsive');
+        const scrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
+
+        const statusBadge = {
+            running: '<span class="badge badge-success"><i class="bi bi-play-fill"></i> Running</span>',
+            paused: '<span class="badge badge-warning"><i class="bi bi-pause-fill"></i> Paused</span>',
+            completed: '<span class="badge badge-info"><i class="bi bi-check-lg"></i> Completed</span>',
+            cancelled: '<span class="badge badge-danger"><i class="bi bi-x-lg"></i> Cancelled</span>',
+            failed: '<span class="badge badge-danger"><i class="bi bi-exclamation-triangle"></i> Failed</span>',
+            idle: '<span class="badge badge-secondary"><i class="bi bi-clock"></i> Idle</span>',
+            scheduled: '<span class="badge badge-primary"><i class="bi bi-calendar-event"></i> Scheduled</span>',
+        }[campaign.status] || `<span class="badge badge-secondary">${document.createTextNode(campaign.status).textContent}</span>`;
+
+        const rows = numbers.map(num => {
+            const nameCompany = [num.name, num.company_name].filter(Boolean).join(' \u2014 ');
+            const phone = document.createElement('span');
+            phone.textContent = num.phone;
+            const nc = document.createElement('span');
+            nc.textContent = nameCompany || '-';
+            const calledAt = document.createElement('span');
+            calledAt.textContent = num.called_at || '-';
+            const error = document.createElement('span');
+            error.textContent = num.error || '-';
+            const isTerminal = ['completed', 'failed', 'no_answer', 'voicemail', 'transferred'].includes(num.status);
+            const hasRoom = num.room_name;
+            const clickAttr = (isTerminal && hasRoom)
+                ? ` style="cursor:pointer" onclick="viewCampaignCall('${num.room_name}')" title="View call details"`
+                : '';
+            const linkIcon = (isTerminal && hasRoom)
+                ? ' <i class="bi bi-box-arrow-up-right" style="font-size:0.75rem;opacity:0.5"></i>'
+                : '';
+            return `<tr${clickAttr}>
+                <td>${phone.textContent}${linkIcon}</td>
+                <td><small class="text-muted">${nc.textContent}</small></td>
+                <td><span class="phone-status-${num.status}">${num.status}</span></td>
+                <td>${calledAt.textContent}</td>
+                <td>${error.textContent}</td>
+            </tr>`;
+        }).join('');
+
+        const nameEl = document.createElement('span');
+        nameEl.textContent = campaign.name;
+
+        campaignDetailsContent.innerHTML = `
+            <div class="mb-4">
+                <h6>${nameEl.textContent}</h6>
+                <p class="text-muted mb-2">ID: ${campaign.id}</p>
+                <p class="mb-1"><strong>Status:</strong> ${statusBadge}</p>
+                <p class="mb-1"><strong>Created:</strong> ${campaign.created_at}</p>
+                <p class="mb-1"><strong>Concurrency:</strong> ${campaign.concurrency} calls</p>
+                <p class="mb-1"><strong>Delay:</strong> ${campaign.call_delay_seconds >= 60 ? (campaign.call_delay_seconds / 60) + ' minute' + (campaign.call_delay_seconds >= 120 ? 's' : '') : campaign.call_delay_seconds + ' seconds'}</p>
+                ${campaign.operating_hours_enabled ? `<p class="mb-1"><strong>Operating Hours:</strong> ${campaign.operating_hours_start || '09:00'} - ${campaign.operating_hours_end || '17:00'} (${campaign.operating_hours_timezone || 'Server time'})</p>` : ''}
+            </div>
+
+            <div class="mb-4">
+                <h6>Progress</h6>
+                <div class="row text-center">
+                    <div class="col"><span class="text-muted">Total</span><br><strong>${stats.total}</strong></div>
+                    <div class="col"><span class="text-success">Completed</span><br><strong>${stats.completed}</strong></div>
+                    <div class="col"><span class="text-danger">Failed</span><br><strong>${stats.failed}</strong></div>
+                    <div class="col"><span class="text-warning">No Answer</span><br><strong>${stats.no_answer}</strong></div>
+                    <div class="col"><span style="color: var(--bs-purple, #6f42c1)">Voicemail</span><br><strong>${stats.voicemail || 0}</strong></div>
+                    <div class="col"><span class="text-info">Transferred</span><br><strong>${stats.transferred || 0}</strong></div>
+                    <div class="col"><span class="text-muted">Pending</span><br><strong>${stats.pending}</strong></div>
+                    <div class="col"><span class="text-info">In Progress</span><br><strong>${stats.in_progress}</strong></div>
+                </div>
+            </div>
+
+            <div>
+                <h6>Call Log</h6>
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Phone</th>
+                                <th>Name / Company</th>
+                                <th>Status</th>
+                                <th>Called At</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        // Restore scroll position
+        const newScrollContainer = campaignDetailsContent.querySelector('.table-responsive');
+        if (newScrollContainer) {
+            newScrollContainer.scrollTop = scrollTop;
+        }
+
+        // Auto-stop polling for terminal states
+        if (['completed', 'cancelled', 'failed'].includes(campaign.status)) {
+            clearInterval(campaignPollInterval);
+            campaignPollInterval = null;
+        }
+    }
+
+    // Navigate from campaign call entry to call history detail
+    window.viewCampaignCall = async function(roomName) {
+        try {
+            const resp = await fetch(`/api/campaigns/call-lookup/${encodeURIComponent(roomName)}`);
+            if (resp.ok) {
+                const data = await resp.json();
+                window.location.href = `/call-history/${data.call_id}`;
+            } else {
+                alert('Call record not found in call history. It may have expired or not been recorded yet.');
+            }
+        } catch (err) {
+            console.error('Error looking up campaign call:', err);
+        }
+    };
+
+    function loadCampaignDetails(campaignId, showSpinner) {
+        if (showSpinner) {
+            campaignDetailsContent.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        fetch(`/api/campaigns/${campaignId}/status`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error || data.detail) {
+                    const errEl = document.createElement('div');
+                    errEl.className = 'alert alert-danger';
+                    errEl.textContent = data.error || data.detail;
+                    campaignDetailsContent.innerHTML = '';
+                    campaignDetailsContent.appendChild(errEl);
+                    clearInterval(campaignPollInterval);
+                    campaignPollInterval = null;
+                    return;
+                }
+                renderCampaignDetails(data);
+            })
+            .catch(err => {
+                if (showSpinner) {
+                    const errEl = document.createElement('div');
+                    errEl.className = 'alert alert-danger';
+                    errEl.textContent = 'Error loading campaign: ' + err.message;
+                    campaignDetailsContent.innerHTML = '';
+                    campaignDetailsContent.appendChild(errEl);
+                }
+            });
+    }
+
+    // Use event delegation for view and clone buttons (survives innerHTML replacement)
+    document.getElementById('campaigns-content').addEventListener('click', function(e) {
+        const viewBtn = e.target.closest('.view-campaign-btn');
+        if (viewBtn) {
+            const campaignId = viewBtn.dataset.campaignId;
+            // Clear any existing poll
+            if (campaignPollInterval) {
+                clearInterval(campaignPollInterval);
+                campaignPollInterval = null;
+            }
+            // Load immediately with spinner, then start polling
+            loadCampaignDetails(campaignId, true);
+            campaignPollInterval = setInterval(() => loadCampaignDetails(campaignId, false), 3000);
+            return;
+        }
+
+        const cloneBtn = e.target.closest('.clone-campaign-btn');
+        if (cloneBtn) {
+            const campaignId = cloneBtn.dataset.campaignId;
+            cloneCampaign(campaignId);
+        }
+    });
+
+    // Stop polling when modal is closed
+    document.getElementById('viewCampaignModal').addEventListener('hidden.bs.modal', function() {
+        if (campaignPollInterval) {
+            clearInterval(campaignPollInterval);
+            campaignPollInterval = null;
+        }
+    });
+
+    // Clone campaign — pre-fill create modal with existing campaign settings
+    function cloneCampaign(campaignId) {
+        fetch(`/api/campaigns/${campaignId}/status`)
+            .then(r => r.json())
+            .then(campaign => {
+                if (campaign.error) return;
+
+                // Campaign name
+                document.getElementById('campaign_name').value = 'Copy of ' + campaign.name;
+
+                // Trunk and agent
+                document.getElementById('sip_trunk_id').value = campaign.sip_trunk_id || '';
+                document.getElementById('agent_id').value = campaign.agent_id || '';
+
+                // Concurrency and delay
+                const concurrencySelect = document.getElementById('concurrency');
+                const delaySelect = document.getElementById('call_delay');
+                const concurrencyVal = String(campaign.concurrency || 1);
+                const delayVal = String(campaign.call_delay_seconds || 5);
+                if ([...concurrencySelect.options].some(o => o.value === concurrencyVal)) {
+                    concurrencySelect.value = concurrencyVal;
+                }
+                if ([...delaySelect.options].some(o => o.value === delayVal)) {
+                    delaySelect.value = delayVal;
+                }
+
+                // Operating hours
+                if (campaign.operating_hours_enabled) {
+                    ohEnabled.checked = true;
+                    ohSettings.style.display = 'block';
+                    document.getElementById('operatingHoursStart').value = campaign.operating_hours_start || '09:00';
+                    document.getElementById('operatingHoursEnd').value = campaign.operating_hours_end || '17:00';
+                    if (campaign.operating_hours_timezone) {
+                        ohTimezone.value = campaign.operating_hours_timezone;
+                    }
+                } else {
+                    ohEnabled.checked = false;
+                    ohSettings.style.display = 'none';
+                }
+
+                // Reset schedule to immediate
+                document.getElementById('scheduleImmediate').checked = true;
+                scheduleDateTimeDiv.style.display = 'none';
+
+                // Load phone numbers from the original campaign
+                phoneNumbers = (campaign.numbers || [])
+                    .filter(n => n.phone)
+                    .map(n => ({
+                        phone: n.phone || '',
+                        name: n.name || '',
+                        company_name: n.company_name || '',
+                        company_description: n.company_description || '',
+                        job_title: n.job_title || '',
+                        custom_field_1: n.custom_field_1 || '',
+                        custom_field_2: n.custom_field_2 || '',
+                    }));
+
+                // Switch to manual tab so numbers are visible
+                document.getElementById('manual-tab').click();
+                updatePhoneList();
+
+                // Open the create modal
+                new bootstrap.Modal(document.getElementById('createCampaignModal')).show();
+            })
+            .catch(() => {});
+    }
+
+    // Form validation
+    document.getElementById('createCampaignForm').addEventListener('submit', function(e) {
+        if (phoneNumbers.length === 0) {
+            e.preventDefault();
+            alert('Please add at least one phone number');
+            return false;
+        }
+    });
+});
+
+// ---- Campaign list refresh ----
+async function refreshCampaigns() {
+    const refreshIcon = document.getElementById('campaigns-refresh-icon');
+    const campaignsContent = document.getElementById('campaigns-content');
+
+    refreshIcon.classList.add('campaigns-spin');
+
+    try {
+        const response = await fetch('/telephony/campaigns/list', {
+            method: 'GET',
+            headers: { 'Accept': 'text/html' },
+            credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+            const html = await response.text();
+            campaignsContent.innerHTML = html;
+
+            // Update stat cards by counting rows and badge types
+            const rows = campaignsContent.querySelectorAll('tbody tr');
+            let total = rows.length;
+            let running = 0, paused = 0, completed = 0;
+            rows.forEach(row => {
+                const badgeEl = row.querySelector('.badge');
+                if (!badgeEl) return;
+                const text = badgeEl.textContent.trim().toLowerCase();
+                if (text.includes('running')) running++;
+                else if (text.includes('paused')) paused++;
+                else if (text.includes('completed')) completed++;
+            });
+
+            const statValues = document.querySelectorAll('.stat-value');
+            if (statValues.length >= 4) {
+                statValues[0].textContent = total;
+                statValues[1].textContent = running;
+                statValues[2].textContent = paused;
+                statValues[3].textContent = completed;
+            }
+        }
+    } catch (error) {
+        console.error('Error refreshing campaigns:', error);
+    } finally {
+        refreshIcon.classList.remove('campaigns-spin');
+    }
+}
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="ImtYRHp3elpueVp2M2RiR21qMnJhNmFLRDNpU1JqOHVQUkNnNmRnVVJRTGsi.aqgYMQ.mO3dLYksM-ZmjBWr9ywoS33IJoY">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Outbound Campaigns
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Create and manage bulk outbound calling campaigns. Campaigns automate dialing lists of phone numbers with your AI agents.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> What is a Campaign?
+                        </h6>
+                        
+                        <p class="text-muted">An outbound campaign automatically dials a list of phone numbers using a selected SIP trunk and AI agent. The system handles call pacing, retries, and tracks results for each number. Campaigns work with both PSTN trunks (dialing public phone numbers) and PBX trunks (dialing extensions, queues, or named SIP users on a customer&#39;s phone system).</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> PBX Campaigns
+                        </h6>
+                        
+                        <p class="text-muted">When you select a PBX trunk for a campaign, the CSV&#39;s destination column should contain extensions, queues, or SIP user names (e.g. 101, queue302, reception) instead of phone numbers. Full E.164 numbers are also accepted — the PBX decides the routing. Heads up: PBXes throttle total simultaneous calls by license (e.g. 3CX Simultaneous Call units), so the campaign&#39;s Concurrent Calls setting must respect that cap or the extra calls will be rejected by the PBX.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Campaign Dashboard
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Total Campaigns</strong></td>
+                                        <td>Total number of campaigns created</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Running</strong></td>
+                                        <td>Campaigns currently making calls</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Paused</strong></td>
+                                        <td>Campaigns temporarily stopped (can be resumed)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Completed</strong></td>
+                                        <td>Campaigns that have finished calling all numbers</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Creating a Campaign
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Campaign Name</strong></td>
+                                        <td>Descriptive name for this campaign (e.g., &#39;Q1 Sales Outreach&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>SIP Trunk</strong></td>
+                                        <td>Outbound trunk to use for dialing. Must have valid caller ID configured.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Agent</strong></td>
+                                        <td>AI agent that will handle all calls in this campaign</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Concurrent Calls</strong></td>
+                                        <td>Maximum simultaneous outbound calls (1-10). Higher values speed up campaigns but increase system load.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Delay Between Calls</strong></td>
+                                        <td>Wait time before starting the next call (3-30 seconds). Prevents overwhelming your trunk.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Schedule Options
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Start Immediately</strong></td>
+                                        <td>Begin dialing as soon as the campaign is created</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Save as Draft</strong></td>
+                                        <td>Create campaign in &#39;Idle&#39; status - start manually when ready</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Schedule for Later</strong></td>
+                                        <td>Set a specific date and time to automatically start the campaign</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Adding Phone Numbers — Manual Entry
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Phone</strong></td>
+                                        <td>Required. Enter the number with country code but no + sign (e.g. 16505551234 for US, 61412345678 for Australia). Numbers shorter than 8 or longer than 15 digits are rejected.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Name</strong></td>
+                                        <td>Contact&#39;s full name — used with the {{Name}} variable in your system prompt</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Company</strong></td>
+                                        <td>Company name — used with the {{CompanyName}} variable</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Description</strong></td>
+                                        <td>Short description of the company or context — used with the {{CompanyDescription}} variable</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Job Title</strong></td>
+                                        <td>Contact&#39;s role or job title — used with the {{JobTitle}} variable</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Custom Field 1</strong></td>
+                                        <td>Any extra value you want the agent to reference — used with the {{CustomField1}} variable (e.g. account number, appointment date, product interest)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Custom Field 2</strong></td>
+                                        <td>A second flexible field — used with the {{CustomField2}} variable</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Adding Phone Numbers — CSV Import
+                        </h6>
+                        
+                        <p class="text-muted">Upload a .csv file (not .xlsx) to import large lists. The system auto-detects whether the first row is a header. With a header row, columns can be in any order as long as they use the exact names below. Without a header row, columns must appear left to right in this exact order:</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Column 1 — phone</strong></td>
+                                        <td>Required. Phone number with country code, no + sign.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Column 2 — name</strong></td>
+                                        <td>Optional. Contact full name.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Column 3 — company_name</strong></td>
+                                        <td>Optional. Company name.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Column 4 — company_description</strong></td>
+                                        <td>Optional. Company description.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Column 5 — job_title</strong></td>
+                                        <td>Optional. Contact job title.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Column 6 — custom_field_1</strong></td>
+                                        <td>Optional. Any custom value.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Column 7 — custom_field_2</strong></td>
+                                        <td>Optional. Second custom value.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Dynamic Variables (Personalising Each Call)
+                        </h6>
+                        
+                        <p class="text-muted">Place these placeholders anywhere in your agent&#39;s System Prompt. Before each call the agent replaces them with the contact&#39;s actual data, so every conversation feels personal.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>{{Name}}</strong></td>
+                                        <td>Contact&#39;s name (e.g. &#39;Hi {{Name}}, how are you?&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{CompanyName}}</strong></td>
+                                        <td>Company name (e.g. &#39;I&#39;m calling from {{CompanyName}}&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{CompanyDescription}}</strong></td>
+                                        <td>Company description for extra context in the prompt</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{JobTitle}}</strong></td>
+                                        <td>Contact&#39;s job title (e.g. &#39;As {{JobTitle}} you&#39;ll appreciate...&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{CustomField1}}</strong></td>
+                                        <td>First custom field — use it for anything: account numbers, dates, products</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{CustomField2}}</strong></td>
+                                        <td>Second custom field — a second flexible slot</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{user_number}}</strong></td>
+                                        <td>The phone number being dialled — works for all calls, not just campaigns</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{current_datetime}}</strong></td>
+                                        <td>Current date and time (e.g. &#39;Thursday, 20 March 2026 02:30 PM AEDT&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{current_date}}</strong></td>
+                                        <td>Current date only (e.g. &#39;Thursday, 20 March 2026&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{current_time}}</strong></td>
+                                        <td>Current time only (e.g. &#39;02:30 PM AEDT&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>{{time_greeting}}</strong></td>
+                                        <td>Time-of-day greeting word — &#39;morning&#39;, &#39;afternoon&#39;, or &#39;evening&#39; based on the configured timezone</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Campaign Status
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Idle</strong></td>
+                                        <td>Campaign created but not started. Use Start button to begin.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Scheduled</strong></td>
+                                        <td>Campaign will automatically start at the scheduled date/time</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Running</strong></td>
+                                        <td>Campaign is actively making calls</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Paused</strong></td>
+                                        <td>Campaign temporarily stopped. Use Resume to continue.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Completed</strong></td>
+                                        <td>All numbers have been called</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Cancelled</strong></td>
+                                        <td>Campaign was manually stopped and cannot be resumed</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Progress Tracking
+                        </h6>
+                        
+                        <p class="text-muted">The progress bar shows call outcomes: green (completed/answered), red (failed), yellow (no answer). Click the eye icon to view detailed call logs for each number.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Campaign Actions
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Start/Resume</strong></td>
+                                        <td>Begin or continue the campaign</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Pause</strong></td>
+                                        <td>Temporarily stop dialing (can resume later)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Cancel</strong></td>
+                                        <td>Permanently stop the campaign - cannot be resumed</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Retry Failed</strong></td>
+                                        <td>Redial numbers that failed or weren&#39;t answered (available after completion)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Export Results</strong></td>
+                                        <td>Download call results as CSV (available after completion). Includes all contact fields (name, company, job title, custom fields) plus call outcome, timestamp and duration.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Delete</strong></td>
+                                        <td>Remove the campaign and all its data (only for completed/cancelled campaigns)</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Best Practices
+                        </h6>
+                        
+                        <p class="text-muted">Start with low concurrency (1-2 calls) and increase gradually. Test with a small list first. Schedule campaigns during appropriate calling hours. Monitor the first few calls to ensure your agent handles them correctly.</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

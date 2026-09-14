@@ -1,0 +1,715 @@
+/**
+ * SIP Setup Wizard — multi-provider, 5-step flow.
+ *
+ * Loaded on the Outbound, Inbound, and Dispatch Rules pages. Exposes
+ * `window.openSipSetupWizard()` which the page-level button calls. The whole
+ * wizard lives inside `#sipSetupWizardModal` (rendered by
+ * templates/telephony/_setup_wizard_modal.html.j2).
+ *
+ * To add a new provider: add an entry to PROVIDERS — that's it. The tile
+ * grid, portal-checklist step, credentials form, and submit payload all read
+ * from this object.
+ */
+(function () {
+  "use strict";
+
+  const PROVIDERS = {
+    "tronic-cloud": {
+      name: "Tronic Cloud",
+      tagline: "Recommended — pre-configured for this dashboard",
+      icon: "bi-cloud-fill",
+      iconColor: "#10b981",
+      logo: "/static/images/sip-providers/tronic-cloud.png",
+      logoOnDark: true,
+      recommended: true,
+      portalUrl: "https://tronic.com.au/cloud-login/",
+      portalLabel: "Tronic Cloud Portal",
+      docSlug: "sip-tronic-cloud",
+      portalNote: "Tronic Cloud is pre-configured below — you only need the username and password issued to you, plus your assigned phone numbers. Contact accounts@tronic.com.au if you don't have them yet.",
+      checklist: [
+        "Username (issued by Tronic Cloud)",
+        "Password (issued by Tronic Cloud)",
+        "Your assigned DID(s)"
+      ],
+      fields: [
+        { key: "auth_username", label: "Username", type: "text", required: true, placeholder: "livekit_yourcompany_sip-trunk", help: "Provided by Tronic Cloud." },
+        { key: "auth_password", label: "Password", type: "password", required: true, help: "Provided by Tronic Cloud." }
+      ],
+      defaultIps: ["168.138.106.10", "168.138.106.85", "168.138.109.106", "152.67.119.40", "34.117.4.72", "130.162.194.63", "158.179.16.254"],
+      ipsRequired: true,
+      ipsHelp: "Pre-filled with Tronic Cloud's egress IPs. Accept as-is unless Tronic notifies you of a change.",
+      preset: {
+        outbound: { address: "voice.tronic.com.au", transport: "udp", trunk_type: "pstn", number_format: "no_plus" },
+        inbound: { number_format: "no_plus" },
+        dispatch: { rule_type: "individual" }
+      }
+    },
+    "breeze-connect": {
+      name: "Breeze Connect",
+      tagline: "Use your existing Breeze Connect SIP trunk and numbers",
+      icon: "bi-wind",
+      iconColor: "#0ea5e9",
+      logo: "/static/images/sip-providers/breeze-connect.png",
+      logoOnDark: true,
+      portalUrl: "https://portal.breezeconnect.com.au/login",
+      portalLabel: "Breeze Connect Portal",
+      docUrl: "https://help.breezeconnect.com.au/support/login",
+      portalNote: "Breeze Connect is pre-configured below — you only need the username and password issued to you, plus your assigned phone numbers. Contact Breeze Connect support if you don't have them yet.",
+      checklist: [
+        "Username (issued by Breeze Connect)",
+        "Password (issued by Breeze Connect)",
+        "Your assigned DID(s)"
+      ],
+      fields: [
+        { key: "auth_username", label: "Username", type: "text", required: true, placeholder: "livekit_yourcompany_sip-trunk", help: "Provided by Breeze Connect." },
+        { key: "auth_password", label: "Password", type: "password", required: true, help: "Provided by Breeze Connect." }
+      ],
+      defaultIps: ["168.138.106.10", "168.138.106.85", "168.138.109.106", "152.67.119.40", "34.117.4.72", "130.162.194.63", "158.179.16.254"],
+      ipsRequired: true,
+      ipsHelp: "Pre-filled with the egress IPs for this service. Accept as-is unless Breeze Connect notifies you of a change.",
+      preset: {
+        outbound: { address: "voice.breezeconnect.com.au", transport: "udp", trunk_type: "pstn", number_format: "no_plus" },
+        inbound: { number_format: "no_plus" },
+        dispatch: { rule_type: "individual" }
+      }
+    },
+    twilio: {
+      name: "Twilio",
+      tagline: "Twilio Elastic SIP Trunking",
+      icon: "bi-cloud-arrow-up",
+      iconColor: "#f22f46",
+      logo: "/static/images/sip-providers/twilio.svg",
+      logoOnDark: true,
+      portalUrl: "https://console.twilio.com",
+      portalLabel: "Twilio Console",
+      docSlug: "sip-twilio",
+      portalNote: "From the Console: Voice → Elastic SIP Trunking → Trunks. Create a trunk, set Termination URI, add a Credential List, and assign your DIDs.",
+      checklist: ["Termination URI (e.g. yourname.pstn.twilio.com)", "Auth Username + Password (Credential List)", "Your DIDs assigned to the trunk"],
+      fields: [
+        { key: "outbound_address", label: "Termination URI", type: "text", required: true, placeholder: "yourname.pstn.twilio.com", help: "Found under Trunks → Termination." },
+        { key: "auth_username", label: "Auth Username", type: "text", required: true },
+        { key: "auth_password", label: "Auth Password", type: "password", required: true }
+      ],
+      defaultIps: ["54.172.60.0/30", "54.244.51.0/30", "54.171.127.192/30", "35.156.191.128/30", "54.65.63.192/30", "54.169.127.128/30", "54.252.254.64/30", "177.71.206.192/30"],
+      ipsRequired: true,
+      ipsHelp: "Pre-filled with Twilio's published signaling IP ranges (all regions). Update from https://www.twilio.com/docs/sip-trunking#ip-addresses-by-region if Twilio changes them. One per line.",
+      preset: { outbound: { transport: "tls", trunk_type: "pstn", number_format: "with_plus" }, inbound: { number_format: "with_plus" }, dispatch: { rule_type: "individual" } }
+    },
+    telnyx: {
+      name: "Telnyx",
+      tagline: "Telnyx SIP Trunking — REFER-permissive",
+      icon: "bi-telephone-plus-fill",
+      iconColor: "#00e3a4",
+      logo: "/static/images/sip-providers/telnyx.png",
+      logoOnDark: true,
+      portalUrl: "https://portal.telnyx.com",
+      portalLabel: "Telnyx Mission Control",
+      docSlug: "sip-telnyx",
+      portalNote: "Mission Control: Voice → SIP Trunking. Create a Credentials trunk OR an IP trunk. Use sip.telnyx.com as outbound. Assign DIDs to your trunk.",
+      checklist: ["Outbound trunk hostname (default sip.telnyx.com)", "Auth credentials OR your egress IPs whitelisted", "Your DIDs assigned"],
+      fields: [
+        { key: "outbound_address", label: "Outbound Address", type: "text", required: true, value: "sip.telnyx.com", help: "Default is sip.telnyx.com." },
+        { key: "auth_username", label: "Auth Username", type: "text", required: false },
+        { key: "auth_password", label: "Auth Password", type: "password", required: false }
+      ],
+      defaultIps: ["103.115.244.145", "103.115.244.146", "192.76.120.10", "64.16.250.10", "185.246.41.140"],
+      ipsRequired: true,
+      ipsHelp: "Pre-filled with Telnyx's published signaling IPs. Accept as-is unless you've configured digest-only auth on inbound.",
+      preset: { outbound: { transport: "tls", trunk_type: "pstn", number_format: "no_plus" }, inbound: { number_format: "no_plus" }, dispatch: { rule_type: "individual" } }
+    },
+    vonage: {
+      name: "Vonage",
+      tagline: "Regional outbound, IP-whitelist inbound",
+      icon: "bi-broadcast",
+      iconColor: "#871fff",
+      logo: "/static/images/sip-providers/vonage.svg",
+      logoOnDark: true,
+      portalUrl: "https://dashboard.nexmo.com",
+      portalLabel: "Vonage Dashboard",
+      docSlug: "sip-vonage",
+      portalNote: "Vonage inbound is IP-whitelist only — no digest auth. Vonage's egress IPs are at https://api.support.vonage.com/hc/en-us/articles/360035471331. Note: Vonage stores numbers WITHOUT the leading +.",
+      checklist: ["Pick your outbound region (US / EU / APAC)", "Vonage SIP egress IPs (for inbound whitelist)", "Your DIDs from Vonage"],
+      fields: [
+        { key: "outbound_region", label: "Outbound Region", type: "select", required: true, options: [{ value: "us", label: "Americas (sip-us.vonage.com)" }, { value: "eu", label: "EMEA (sip-eu.vonage.com)" }, { value: "ap", label: "APAC (sip-ap.vonage.com)" }], help: "Pick the region closest to your DIDs." }
+      ],
+      defaultIps: [],
+      ipsRequired: true,
+      ipsHelp: "From Vonage's published SIP egress list at https://api.support.vonage.com/hc/en-us/articles/360035471331. Vonage inbound is IP-whitelist only — without these IPs, calls won't be accepted. One CIDR per line.",
+      preset: { outbound: { transport: "tls", trunk_type: "pstn", number_format: "no_plus" }, inbound: { number_format: "no_plus" }, dispatch: { rule_type: "individual" } },
+      computeOutboundAddress: (creds) => `sip-${creds.outbound_region || "us"}.vonage.com`
+    },
+    plivo: {
+      name: "Plivo",
+      tagline: "Plivo Zentrunk — 7-region BYOC",
+      icon: "bi-globe-asia-australia",
+      iconColor: "#fcb415",
+      logo: "/static/images/sip-providers/plivo.png",
+      logoOnDark: true,
+      portalUrl: "https://console.plivo.com",
+      portalLabel: "Plivo Console",
+      docSlug: "sip-plivo",
+      portalNote: "From Console: Voice → Zentrunk → Outbound Trunks. Each Plivo outbound trunk gets its own SIP domain — copy that into the Outbound Address below. India region pinning is mandatory if your DIDs are in IN/AS — choose BOM or SIN.",
+      checklist: ["Per-trunk outbound domain (from Zentrunk Console)", "Credentials List username + password", "Plivo signaling IPs (for inbound whitelist)", "Your DIDs assigned to an Inbound Trunk"],
+      fields: [
+        { key: "outbound_address", label: "Outbound Address (per-trunk)", type: "text", required: true, placeholder: "yourname.sip.plivo.com", help: "Copy from your Zentrunk Outbound Trunk in the Plivo Console." },
+        { key: "auth_username", label: "Auth Username", type: "text", required: true },
+        { key: "auth_password", label: "Auth Password", type: "password", required: true }
+      ],
+      defaultIps: [],
+      ipsRequired: true,
+      ipsHelp: "Plivo signaling IPs from https://www.plivo.com/docs/sip-trunking. Add the CIDRs for each region your DIDs are in. One per line.",
+      preset: { outbound: { transport: "tls", trunk_type: "pstn", number_format: "with_plus" }, inbound: { number_format: "with_plus" }, dispatch: { rule_type: "individual" } }
+    },
+    cloudonix: {
+      name: "Cloudonix",
+      tagline: "Voice CPaaS — bearer-token + service-provider trust",
+      icon: "bi-cloud-haze",
+      iconColor: "#0066cc",
+      logo: "/static/images/sip-providers/cloudonix.png",
+      logoOnDark: true,
+      portalUrl: "https://cockpit.cloudonix.io",
+      portalLabel: "Cloudonix Cockpit",
+      docSlug: "sip-cloudonix",
+      portalNote: "⏳ Cloudonix outbound provisioning takes 24-48h — open a Discord ticket with LiveKit support to get the service-provider entry created. The inbound side gets its own auto-issued <uuid>.sip.cloudonix.net domain.",
+      checklist: ["Inbound SIP alias (e.g. <uuid>.sip.cloudonix.net)", "Bearer token from Cockpit", "Outbound provider entry confirmed by LiveKit support"],
+      fields: [
+        { key: "outbound_address", label: "Outbound Address", type: "text", required: true, placeholder: "<uuid>.sip.cloudonix.net", help: "From your Cloudonix domain — e.g. tronic-prod.sip.cloudonix.net." },
+        { key: "auth_username", label: "Auth Username (optional)", type: "text", required: false },
+        { key: "auth_password", label: "Auth Password (optional)", type: "password", required: false }
+      ],
+      ipsSkip: true,
+      ipsSkipNote: "Cloudonix routes inbound traffic via your auto-issued <uuid>.sip.cloudonix.net domain — IP allowlist isn't needed. Click Next to continue.",
+      preset: { outbound: { transport: "tls", trunk_type: "pstn", number_format: "with_plus" }, inbound: { number_format: "with_plus" }, dispatch: { rule_type: "individual" } }
+    },
+    vobiz: {
+      name: "Vobiz",
+      tagline: "Per-trunk SIP domain, flexible auth",
+      icon: "bi-router",
+      iconColor: "#ff6b35",
+      logo: "/static/images/sip-providers/vobiz.png",
+      logoOnDark: true,
+      portalUrl: "https://app.vobiz.ai",
+      portalLabel: "Vobiz Dashboard",
+      docSlug: "sip-vobiz",
+      portalNote: "Each Vobiz trunk has its own <trunkId>.sip.vobiz.ai domain. Auth supports digest, IP ACL, or both — copy values literally from the Vobiz trunk page.",
+      checklist: ["Per-trunk outbound domain (e.g. <trunkId>.sip.vobiz.ai)", "Auth credentials OR egress IPs", "Your DIDs attached"],
+      fields: [
+        { key: "outbound_address", label: "Outbound Address (per-trunk)", type: "text", required: true, placeholder: "abc123.sip.vobiz.ai", help: "From your Vobiz trunk page." },
+        { key: "auth_username", label: "Auth Username", type: "text", required: false },
+        { key: "auth_password", label: "Auth Password", type: "password", required: false }
+      ],
+      defaultIps: [],
+      ipsRequired: true,
+      ipsHelp: "Vobiz egress IPs from your trunk page. Required to keep the inbound trunk locked down. One per line.",
+      preset: { outbound: { transport: "tls", trunk_type: "pstn", number_format: "with_plus" }, inbound: { number_format: "with_plus" }, dispatch: { rule_type: "individual" } }
+    }
+  };
+
+  const PROVIDER_ORDER = ["tronic-cloud", "breeze-connect", "twilio", "telnyx", "vonage", "plivo", "cloudonix", "vobiz"];
+
+  // ---------- State ----------
+  let currentStep = 1;
+  let selectedProvider = null;
+  let namePrefix = "";
+  let credValues = {};
+  let numbers = [];
+  let optionsLoaded = false;  // agents + time_profiles fetched lazily on first open
+
+  // ---------- DOM helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const modal = () => $("sipSetupWizardModal");
+
+  function el(tag, opts) {
+    const node = document.createElement(tag);
+    if (!opts) return node;
+    if (opts.className) node.className = opts.className;
+    if (opts.text !== undefined) node.textContent = opts.text;
+    if (opts.attrs) for (const k in opts.attrs) node.setAttribute(k, opts.attrs[k]);
+    if (opts.style) for (const k in opts.style) node.style[k] = opts.style[k];
+    if (opts.children) opts.children.forEach((c) => c && node.appendChild(c));
+    return node;
+  }
+
+  function showStep(n) {
+    currentStep = n;
+    document.querySelectorAll(".wizard-pane").forEach((p) => {
+      p.classList.toggle("d-none", String(p.dataset.pane) !== String(n));
+    });
+    document.querySelectorAll("#wizardStepper .wizard-step").forEach((s) => {
+      const num = parseInt(s.dataset.step, 10);
+      s.classList.remove("active", "complete");
+      if (num < n) s.classList.add("complete");
+      else if (num === n) s.classList.add("active");
+    });
+    $("wizardBackBtn").disabled = n <= 1 || n === "success";
+    $("wizardNextBtn").classList.toggle("d-none", n >= 6 || n === "success");
+    $("wizardCreateBtn").classList.toggle("d-none", n !== 6);
+    $("wizardDoneBtn").classList.toggle("d-none", n !== "success");
+    $("wizardCancelBtn").classList.toggle("d-none", n === "success");
+    refreshNextEnabled();
+    clearError();
+  }
+
+  function clearError() {
+    const e = $("wizardError");
+    e.classList.add("d-none");
+    e.textContent = "";
+  }
+  function showError(msg) {
+    const e = $("wizardError");
+    e.textContent = msg;
+    e.classList.remove("d-none");
+  }
+
+  function refreshNextEnabled() {
+    let ok = false;
+    if (currentStep === 1) ok = !!selectedProvider && namePrefix.trim().length > 0;
+    else if (currentStep === 2) ok = true;
+    else if (currentStep === 3) ok = validateCreds();
+    else if (currentStep === 4) ok = validateIps();
+    else if (currentStep === 5) ok = numbers.length > 0;
+    else if (currentStep === 6) ok = true;
+    $("wizardNextBtn").disabled = !ok;
+    $("wizardCreateBtn").disabled = !validateCreds() || !validateIps() || numbers.length === 0 || !namePrefix.trim();
+  }
+
+  // ---------- Step 1: tiles ----------
+  function renderProviderTiles() {
+    const container = $("wizardProviderTiles");
+    container.replaceChildren();
+    PROVIDER_ORDER.forEach((slug) => {
+      const p = PROVIDERS[slug];
+      if (!p) return;
+      const col = el("div", { className: "col" });
+      const tile = el("div", { className: "wizard-provider-tile" });
+      tile.dataset.slug = slug;
+      if (p.recommended) {
+        tile.appendChild(el("span", { className: "badge bg-success badge-recommended", text: "Recommended" }));
+      }
+      // Logo chip: a real provider logo when one is bundled, otherwise the
+      // brand-tinted Bootstrap glyph. The chip keeps a consistent footprint so
+      // logo tiles and icon-fallback tiles line up in the grid.
+      const chip = el("div", { className: "tile-logo-chip" });
+      const buildIcon = () => {
+        const ic = el("i", { className: "bi " + p.icon + " tile-icon" });
+        ic.style.color = p.iconColor || "var(--text-primary)";
+        return ic;
+      };
+      if (p.logo) {
+        // logoOnDark logos already carry a dark/transparent background and sit
+        // directly on the dark tile; everyone else gets a white chip so their
+        // mark reads against the dark theme.
+        if (!p.logoOnDark) chip.classList.add("has-img");
+        const img = el("img", { className: "tile-logo", attrs: { src: p.logo, alt: p.name + " logo", loading: "lazy" } });
+        // If the bundled logo 404s on an older install, fall back to the glyph.
+        img.addEventListener("error", () => {
+          chip.classList.remove("has-img");
+          chip.replaceChildren(buildIcon());
+        });
+        chip.appendChild(img);
+      } else {
+        chip.appendChild(buildIcon());
+      }
+      tile.appendChild(chip);
+      tile.appendChild(el("div", { className: "tile-name", text: p.name }));
+      tile.appendChild(el("div", { className: "tile-tag", text: p.tagline }));
+      tile.addEventListener("click", () => {
+        document.querySelectorAll(".wizard-provider-tile").forEach((t) => t.classList.remove("selected"));
+        tile.classList.add("selected");
+        selectedProvider = slug;
+        refreshNextEnabled();
+      });
+      col.appendChild(tile);
+      container.appendChild(col);
+    });
+  }
+
+  // ---------- Step 2: portal checklist ----------
+  function renderPortal() {
+    const p = PROVIDERS[selectedProvider];
+    if (!p) return;
+    $("wizardPortalHeading").textContent = `Set up your ${p.name} account`;
+    const portalBtn = $("wizardPortalUrlBtn");
+    portalBtn.href = p.portalUrl;
+    $("wizardPortalUrlLabel").textContent = `Open ${p.portalLabel || p.name + " Portal"}`;
+    $("wizardGuideBtn").href = p.docUrl || `/settings/download/doc/${p.docSlug}`;
+    const checklist = $("wizardChecklist");
+    checklist.replaceChildren();
+    (p.checklist || []).forEach((item) => {
+      const li = el("li", { className: "list-group-item d-flex align-items-center gap-2" });
+      const cb = el("input", { className: "form-check-input m-0" });
+      cb.type = "checkbox";
+      li.appendChild(cb);
+      li.appendChild(el("span", { text: item }));
+      checklist.appendChild(li);
+    });
+    const note = $("wizardPortalNote");
+    if (p.portalNote) {
+      note.textContent = p.portalNote;
+      note.classList.remove("d-none");
+    } else {
+      note.classList.add("d-none");
+    }
+  }
+
+  // ---------- Step 3: credentials ----------
+  function renderCreds() {
+    const p = PROVIDERS[selectedProvider];
+    if (!p) return;
+    $("wizardCredsHeading").textContent = `${p.name} credentials`;
+    $("wizardCredsBlurb").textContent = "Paste the values you copied from the provider portal.";
+    const container = $("wizardCredsFields");
+    container.replaceChildren();
+    credValues = {};
+    (p.fields || []).forEach((f) => {
+      const wrap = el("div", { className: "mb-3" });
+      wrap.appendChild(el("label", { className: "form-label", text: f.label + (f.required ? " *" : "") }));
+      let input;
+      if (f.type === "select") {
+        input = el("select", { className: "form-select" });
+        (f.options || []).forEach((opt) => {
+          const o = el("option", { text: opt.label });
+          o.value = opt.value;
+          input.appendChild(o);
+        });
+      } else if (f.type === "textarea") {
+        input = el("textarea", { className: "form-control font-monospace" });
+        input.rows = 3;
+      } else {
+        input = el("input", { className: "form-control" });
+        input.type = f.type || "text";
+      }
+      input.id = `wizardField_${f.key}`;
+      if (f.placeholder) input.placeholder = f.placeholder;
+      if (f.value !== undefined) {
+        input.value = f.value;
+        credValues[f.key] = f.value;
+      }
+      const onChange = () => {
+        credValues[f.key] = input.value;
+        refreshNextEnabled();
+      };
+      input.addEventListener("input", onChange);
+      input.addEventListener("change", onChange);
+      wrap.appendChild(input);
+      if (f.help) wrap.appendChild(el("small", { className: "form-text text-muted", text: f.help }));
+      container.appendChild(wrap);
+      if (f.type === "select") credValues[f.key] = input.value;
+    });
+  }
+
+  function validateCreds() {
+    const p = PROVIDERS[selectedProvider];
+    if (!p) return false;
+    return (p.fields || []).every((f) => {
+      if (!f.required) return true;
+      return ((credValues[f.key] || "") + "").trim().length > 0;
+    });
+  }
+
+  // ---------- Step 4: allowed IPs ----------
+  function renderIps() {
+    const p = PROVIDERS[selectedProvider];
+    if (!p) return;
+    const ta = $("wizardIps");
+    const skipNote = $("wizardIpsSkipNote");
+    const help = $("wizardIpsHelp");
+    if (p.ipsSkip) {
+      ta.classList.add("d-none");
+      ta.value = "";
+      help.textContent = "";
+      skipNote.textContent = p.ipsSkipNote || "Not needed for this provider — click Next to continue.";
+      skipNote.classList.remove("d-none");
+    } else {
+      ta.classList.remove("d-none");
+      skipNote.classList.add("d-none");
+      ta.value = (p.defaultIps || []).join("\n");
+      help.textContent = (p.ipsHelp || "") + (p.ipsRequired ? " — required." : "");
+    }
+    refreshNextEnabled();
+  }
+
+  function bindIpsInput() {
+    const ta = $("wizardIps");
+    if (!ta) return;
+    const onChange = () => refreshNextEnabled();
+    ta.addEventListener("input", onChange);
+    ta.addEventListener("change", onChange);
+  }
+
+  function getIpsList() {
+    const p = PROVIDERS[selectedProvider];
+    if (!p || p.ipsSkip) return [];
+    const raw = ($("wizardIps").value || "").trim();
+    if (!raw) return [];
+    return raw.split(/[\n,]/).map((s) => s.trim()).filter(Boolean);
+  }
+
+  function validateIps() {
+    const p = PROVIDERS[selectedProvider];
+    if (!p) return false;
+    if (p.ipsSkip) return true;
+    if (!p.ipsRequired) return true;
+    return getIpsList().length > 0;
+  }
+
+  // ---------- Step 5: numbers ----------
+  function bindNumbersInput() {
+    const ta = $("wizardNumbers");
+    const counter = $("wizardNumberCount");
+    ta.addEventListener("input", () => {
+      const lines = ta.value.split(/[\n,]/).map((s) => s.trim()).filter(Boolean);
+      numbers = lines
+        .map((n) => n.replace(/[^\d+]/g, ""))
+        .filter((n) => /^\+?\d{6,}$/.test(n));
+      counter.textContent = `${numbers.length} number${numbers.length === 1 ? "" : "s"}`;
+      refreshNextEnabled();
+    });
+  }
+
+  // ---------- Step 6: summary ----------
+  function summaryRow(label, value, isCode) {
+    const div = el("div");
+    div.appendChild(el("strong", { text: label + ": " }));
+    if (isCode) {
+      div.appendChild(el("code", { text: value }));
+    } else {
+      div.appendChild(document.createTextNode(value));
+    }
+    return div;
+  }
+
+  function renderSummary() {
+    const payload = buildPayload();
+    const inb = $("wizardSummaryInbound");
+    inb.replaceChildren(
+      summaryRow("Name", `${payload.name_prefix} Inbound`),
+      summaryRow("Numbers", String(payload.numbers.length)),
+      summaryRow("Allowed IPs", String((payload.inbound.allowed_addresses || []).length || "(any)")),
+      summaryRow("Number format", payload.inbound.number_format)
+    );
+    const outb = $("wizardSummaryOutbound");
+    outb.replaceChildren(
+      summaryRow("Name", `${payload.name_prefix} Outbound`),
+      summaryRow("Address", payload.outbound.address || "(missing)", true),
+      summaryRow("Transport", payload.outbound.transport),
+      summaryRow("Auth", payload.outbound.auth_username ? "Digest (" + payload.outbound.auth_username + ")" : "None")
+    );
+    const rule = $("wizardSummaryRule");
+    const agentSel = $("wizardAgentSelect");
+    const tpSel = $("wizardTimeProfileSelect");
+    const agentLabel = agentSel && agentSel.value
+      ? (agentSel.options[agentSel.selectedIndex].text || agentSel.value)
+      : "(none — assign later)";
+    const tpLabel = tpSel && tpSel.value
+      ? (tpSel.options[tpSel.selectedIndex].text || tpSel.value)
+      : "(none — always active)";
+    rule.replaceChildren(
+      summaryRow("Name", `${payload.name_prefix} Inbound Rule`),
+      summaryRow("Type", payload.dispatch.rule_type),
+      summaryRow("Agent", agentLabel),
+      summaryRow("Time profile", tpLabel),
+      summaryRow("Auto-record", payload.dispatch.auto_record ? "Enabled" : "Disabled"),
+      summaryRow("Bound to", `the new ${payload.name_prefix} inbound trunk`)
+    );
+  }
+
+  // ---------- Submit payload ----------
+  function buildPayload() {
+    const p = PROVIDERS[selectedProvider];
+    const preset = (p && p.preset) || {};
+    const csrfToken = modal().dataset.csrfToken || "";
+
+    let outboundAddress = "";
+    if (typeof p.computeOutboundAddress === "function") {
+      outboundAddress = p.computeOutboundAddress(credValues);
+    } else if (credValues.outbound_address) {
+      outboundAddress = credValues.outbound_address;
+    } else if (preset.outbound && preset.outbound.address) {
+      outboundAddress = preset.outbound.address;
+    }
+
+    // Inbound allowed IPs come from Step 4's textarea (user may have edited the
+    // pre-filled defaults). For ipsSkip providers (Cloudonix), this is empty.
+    const inboundAllowed = getIpsList();
+
+    const numberFormat = (preset.outbound && preset.outbound.number_format) || "with_plus";
+    const normalisedNumbers = numbers.map((n) => {
+      if (numberFormat === "no_plus") return n.replace(/^\+/, "");
+      return n.startsWith("+") ? n : "+" + n;
+    });
+
+    return {
+      csrf_token: csrfToken,
+      provider: selectedProvider,
+      name_prefix: (namePrefix || p.name).trim(),
+      numbers: normalisedNumbers,
+      inbound: {
+        allowed_addresses: inboundAllowed,
+        auth_username: "",
+        auth_password: "",
+        number_format: (preset.inbound && preset.inbound.number_format) || numberFormat
+      },
+      outbound: {
+        address: outboundAddress,
+        transport: (preset.outbound && preset.outbound.transport) || "tls",
+        auth_username: credValues.auth_username || "",
+        auth_password: credValues.auth_password || "",
+        trunk_type: (preset.outbound && preset.outbound.trunk_type) || "pstn",
+        number_format: numberFormat
+      },
+      dispatch: {
+        rule_type: (preset.dispatch && preset.dispatch.rule_type) || "individual",
+        room_prefix: ((namePrefix || p.name) || "wizard").toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-call-",
+        agent_slug: ($("wizardAgentSelect") && $("wizardAgentSelect").value) || "",
+        time_profile_id: ($("wizardTimeProfileSelect") && $("wizardTimeProfileSelect").value) || "",
+        auto_record: !!($("wizardAutoRecord") && $("wizardAutoRecord").checked)
+      }
+    };
+  }
+
+  async function submitWizard() {
+    clearError();
+    const payload = buildPayload();
+    const createBtn = $("wizardCreateBtn");
+    const original = createBtn.textContent;
+    createBtn.disabled = true;
+    createBtn.replaceChildren(
+      el("span", { className: "spinner-border spinner-border-sm me-2" }),
+      document.createTextNode("Creating...")
+    );
+
+    try {
+      const res = await fetch("/telephony/wizard/setup", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": payload.csrf_token },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        const stepLabel = data.step ? `(${data.step}) ` : "";
+        showError(stepLabel + (data.error || `HTTP ${res.status} — please check the credentials and try again.`));
+        createBtn.textContent = original;
+        createBtn.disabled = false;
+        return;
+      }
+      showStep("success");
+    } catch (err) {
+      showError("Network error: " + (err && err.message ? err.message : err));
+      createBtn.textContent = original;
+      createBtn.disabled = false;
+    }
+  }
+
+  function reset() {
+    currentStep = 1;
+    selectedProvider = null;
+    namePrefix = "";
+    credValues = {};
+    numbers = [];
+    const taN = $("wizardNumbers");
+    if (taN) taN.value = "";
+    const taIp = $("wizardIps");
+    if (taIp) taIp.value = "";
+    const nameInput = $("wizardNamePrefix");
+    if (nameInput) nameInput.value = "";
+    const autoRec = $("wizardAutoRecord");
+    if (autoRec) autoRec.checked = true;
+    const agentSel = $("wizardAgentSelect");
+    if (agentSel) agentSel.value = "";
+    const tpSel = $("wizardTimeProfileSelect");
+    if (tpSel) tpSel.value = "";
+    if ($("wizardNumberCount")) $("wizardNumberCount").textContent = "0 numbers";
+    document.querySelectorAll(".wizard-provider-tile").forEach((t) => t.classList.remove("selected"));
+    showStep(1);
+  }
+
+  let wired = false;
+  function wireUp() {
+    if (wired) return;
+    wired = true;
+
+    renderProviderTiles();
+    bindNumbersInput();
+    bindIpsInput();
+
+    const nameInput = $("wizardNamePrefix");
+    if (nameInput) {
+      const onNameChange = () => {
+        namePrefix = nameInput.value;
+        refreshNextEnabled();
+      };
+      nameInput.addEventListener("input", onNameChange);
+      nameInput.addEventListener("change", onNameChange);
+    }
+
+    $("wizardNextBtn").addEventListener("click", () => {
+      if (currentStep === 1) { renderPortal(); showStep(2); }
+      else if (currentStep === 2) { renderCreds(); showStep(3); }
+      else if (currentStep === 3) { renderIps(); showStep(4); }
+      else if (currentStep === 4) { showStep(5); }
+      else if (currentStep === 5) { renderSummary(); showStep(6); }
+    });
+    $("wizardBackBtn").addEventListener("click", () => {
+      if (currentStep === 6) showStep(5);
+      else if (currentStep === 5) showStep(4);
+      else if (currentStep === 4) showStep(3);
+      else if (currentStep === 3) showStep(2);
+      else if (currentStep === 2) showStep(1);
+    });
+    $("wizardCreateBtn").addEventListener("click", submitWizard);
+    $("wizardDoneBtn").addEventListener("click", () => window.location.reload());
+
+    modal().addEventListener("hidden.bs.modal", () => {
+      if (currentStep === "success") window.location.reload();
+      else reset();
+    });
+  }
+
+  async function loadOptions() {
+    if (optionsLoaded) return;
+    try {
+      const res = await fetch("/telephony/wizard/options", { credentials: "same-origin" });
+      const data = await res.json().catch(() => ({}));
+      const agentSel = $("wizardAgentSelect");
+      const tpSel = $("wizardTimeProfileSelect");
+      if (agentSel && Array.isArray(data.agents)) {
+        // Strip any prior dynamic options (keep the leading "(None)" placeholder)
+        while (agentSel.options.length > 1) agentSel.remove(1);
+        data.agents.forEach((a) => {
+          const o = el("option", { text: `${a.name} (${a.slug})` });
+          o.value = a.slug;
+          agentSel.appendChild(o);
+        });
+      }
+      if (tpSel && Array.isArray(data.time_profiles)) {
+        while (tpSel.options.length > 1) tpSel.remove(1);
+        data.time_profiles.forEach((tp) => {
+          const o = el("option", { text: tp.name });
+          o.value = tp.id;
+          tpSel.appendChild(o);
+        });
+      }
+      optionsLoaded = true;
+    } catch (err) {
+      // Non-fatal: dropdowns just stay with "(None)" — operator can edit the rule later
+      console.warn("SIP wizard: failed to load agents/time profiles", err);
+    }
+  }
+
+  window.openSipSetupWizard = function () {
+    wireUp();
+    reset();
+    loadOptions();
+    const m = modal();
+    if (!m) return;
+    bootstrap.Modal.getOrCreateInstance(m).show();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => { if (modal()) wireUp(); });
+  } else {
+    if (modal()) wireUp();
+  }
+})();

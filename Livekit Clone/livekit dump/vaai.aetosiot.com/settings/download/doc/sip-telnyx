@@ -1,0 +1,230 @@
+# Setup SIP Trunks with Telnyx
+
+A step-by-step guide for configuring SIP trunks with Telnyx to work with your LiveKit Voice AI Dashboard.
+
+---
+
+## Prerequisites
+
+- A Telnyx account
+- Access to your LiveKit Dashboard
+- Your LiveKit SIP server FQDN (e.g., `livekit.yourdomain.com`)
+
+---
+
+## Part 1: Telnyx Portal Configuration
+
+### Step 1: Purchase and Manage Numbers
+
+Before setting up the SIP trunk, you must have an active number.
+
+1. Log in to your [Telnyx Mission Control Portal](https://portal.telnyx.com)
+2. Navigate to **Real-Time Communications** → **Numbers**
+3. Select **Buy Numbers**
+4. Search for a number in your desired region (e.g., Australia) and complete the purchase
+5. Navigate to **Manage Numbers** to verify the number is active in your account
+
+### Step 2: Create SIP Connection
+
+1. Navigate to **Voice** → **Programmable Voice** → **SIP Trunking**
+2. Click **Create New SIP Connection**
+
+### Step 3: General Configuration
+
+Configure the basic settings:
+
+| Field | Value |
+|-------|-------|
+| **Connection Name** | `Livekit Dashboard SIP Trunk` |
+| **Anchorsite** | Select the location closest to your users (e.g., Sydney) to minimize latency |
+
+### Step 4: Authentication and Routing
+
+1. Go to the **Authentication and Routing** tab
+2. Configure the **FQDNs Section**:
+
+| Field | Value |
+|-------|-------|
+| **FQDN** | Add your LiveKit FQDN |
+| **Port** | `5060` |
+| **DNS Record Type** | `A` |
+| **SIP Subdomain** | `dashboard` (full URI will be `dashboard.sip.telnyx.com`) |
+| **Receive SIP Subdomain Calls** | `Anyone` |
+| **Primary FQDN** | `YourFQDNforLivekit.com:5060` |
+
+3. Configure **Outbound Authentication**:
+   - Create a username and password
+   - **Save these credentials** for the LiveKit configuration
+
+### Step 5: Inbound Settings
+
+1. Navigate to the **Inbound** tab
+2. Configure the following:
+
+| Field | Value |
+|-------|-------|
+| **Destination Number Format** | `E.164` |
+| **Origination Number Format** | `E.164` |
+| **SIP Transport Protocol** | `UDP` |
+| **SIP Region** | Select your local region |
+| **Codecs** | Select `G711U`, `G711A`, and `Opus` only. **Remove all others.** |
+
+### Step 6: Outbound Profile
+
+1. Go to the **Outbound** tab
+2. Create an **Outbound Voice Profile**
+3. Set the **Localization Country** to your region (e.g., Australia)
+
+### Step 7: Assign Numbers
+
+1. Go to the **Numbers** tab within the SIP Connection settings
+2. Add the number you previously purchased to this connection
+3. Link the number to the `Livekit Dashboard SIP Trunk` connection
+
+### Step 8: Finalize
+
+Click **Save** to apply all settings.
+
+### Note: Telnyx Signaling IPs
+
+You'll need to whitelist Telnyx's signaling IPs in LiveKit. Common addresses:
+```
+sip.telnyx.com
+```
+Or specific IP ranges (verify current list in Telnyx documentation):
+```
+192.76.120.0/24
+185.246.140.0/24
+```
+
+---
+
+## Part 2: LiveKit Dashboard Configuration
+
+### Step 9: Create Inbound SIP Trunk in LiveKit
+
+1. Log into your LiveKit Dashboard
+2. Navigate to **Telephony** → **Inbound Trunks** (or **SIP Inbound**)
+3. Click **Create Trunk** or **+ Add Trunk**
+4. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Telnyx Inbound` |
+| **Numbers** | Your Telnyx number (comma-separated if multiple) |
+| **Allowed Addresses** | `sip.telnyx.com` or Telnyx IPs (comma-separated) |
+| **Allowed Numbers** | Leave empty to allow all, or specify allowed caller IDs |
+| **Username** | Your Telnyx SIP Username (from Step 4 - Outbound Authentication) |
+| **Password** | Your Telnyx SIP Password (from Step 4 - Outbound Authentication) |
+
+5. Click **Create**
+
+### Step 10: Create a Dispatch Rule
+
+1. Navigate to **Telephony** → **Dispatch Rules** (or **SIP Inbound** → Rules section)
+2. Click **Create Rule** or **+ Add Rule**
+3. Configure the rule:
+
+| Field | Value |
+|-------|-------|
+| **Rule Name** | `Telnyx Main Line` |
+| **Trunk IDs** | Select `Telnyx Inbound` (the trunk you just created) |
+| **Dispatch Rule Type** | Choose based on your needs: |
+
+**Option A - Direct (all calls to one room):**
+- Type: `Direct`
+- Room Name: `support-room`
+
+**Option B - Individual (unique room per caller):**
+- Type: `Individual`
+- Room Prefix: `caller-`
+
+**Option C - Multi-Line/Callee (room based on dialed number):**
+- Type: `Multi-Line`
+- Room Prefix: `line-`
+
+4. Optional settings:
+
+| Field | Value |
+|-------|-------|
+| **PIN** | Leave empty or set a required PIN |
+| **Hide Phone Number** | Check if you want caller ID hidden |
+| **Agent Name** | Select an agent to handle calls |
+| **Auto-Record** | Check to automatically record calls |
+
+5. Click **Create**
+
+---
+
+## Part 3: Verification
+
+### Step 11: Test the Configuration
+
+1. From a mobile phone or external line, dial your Telnyx number
+2. The call should:
+   - Route through Telnyx
+   - Hit your LiveKit server at your configured FQDN on port 5060
+   - Match the inbound trunk (based on allowed addresses and number)
+   - Trigger the dispatch rule
+   - Create a room and/or connect to an agent
+
+### Step 12: Monitor in Dashboard
+
+1. Go to **Rooms** in your LiveKit Dashboard
+2. You should see a new room created when a call comes in
+3. Check **Telephony** → **Call Logs** if available
+
+---
+
+## Troubleshooting Checklist
+
+| Issue | Check |
+|-------|-------|
+| Calls not arriving | Verify Telnyx Primary FQDN points to your LiveKit server on port 5060 |
+| "Trunk not found" | Ensure **Allowed Addresses** includes Telnyx IPs or `sip.telnyx.com` |
+| Authentication failed | Verify Username/Password match Telnyx Outbound Authentication credentials |
+| No room created | Check dispatch rule is linked to correct trunk ID |
+| Firewall blocked | Ensure UDP port 5060 is open on your LiveKit server |
+| Audio issues | Verify codecs are set to G711U, G711A, and Opus only |
+| Number not routing | Confirm number is assigned to the SIP Connection in the Numbers tab |
+
+---
+
+## Quick Reference: Configuration Summary
+
+**Telnyx Side:**
+```
+SIP Connection: Livekit Dashboard SIP Trunk
+Anchorsite: [Your nearest region]
+
+Authentication & Routing:
+  → Primary FQDN: YourFQDNforLivekit.com:5060
+  → Port: 5060
+  → SIP Subdomain: dashboard.sip.telnyx.com
+
+Inbound Settings:
+  → Number Format: E.164
+  → Transport: UDP
+  → Codecs: G711U, G711A, Opus only
+
+Outbound Profile:
+  → Localization: [Your country]
+```
+
+**LiveKit Side:**
+```
+Inbound Trunk:
+  → Name: Telnyx Inbound
+  → Numbers: [Your Telnyx number]
+  → Allowed Addresses: sip.telnyx.com (or Telnyx IPs)
+  → Auth: [Telnyx SIP credentials from Step 4]
+
+Dispatch Rule:
+  → Linked to: Telnyx Inbound trunk
+  → Type: Direct/Individual/Multi-Line (your choice)
+  → Agent: [Your agent name]
+```
+
+---
+
+This guide covers the complete end-to-end setup for receiving inbound calls via Telnyx to your LiveKit application.

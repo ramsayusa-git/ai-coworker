@@ -1,0 +1,607 @@
+/**
+ * n8n Webhook Wizard — Tools page (Webhooks tab).
+ *
+ * Drives the 4-step modal in tools/_n8n_wizard_modal.html.j2. One POST to
+ * /api/webhook-tools/n8n-wizard creates the tool AND enables it on the
+ * selected agents; the success pane then offers the workflow download
+ * (plain same-origin <a href> — Content-Disposition does the rest, no
+ * popup-blocker exposure) and a Test-connection probe.
+ *
+ * CSRF: the token is read from the modal's data-csrf-token attribute
+ * (stamped by Jinja), falling back to base.html.j2's global meta tag —
+ * this file is served statically and never sees Jinja variables.
+ */
+(function () {
+    "use strict";
+
+    var TEMPLATE_LABELS = {
+        lead_capture: "Lead capture / CRM push",
+        data_lookup: "Live data lookup",
+        follow_up: "Send follow-up message",
+        generic: "Custom workflow",
+        calendar_calcom: "Calendar booking (Cal.com)",
+        ghl_booking: "GoHighLevel appointments & sales",
+        website_demo: "Website AI demo funnel",
+        ghl_outbound: "GoHighLevel outbound caller",
+        support_ticket: "Create support ticket",
+        notify_team: "Notify the team",
+        sheets_log: "Log to Google Sheets",
+    };
+    var NAME_PLACEHOLDERS = {
+        support_ticket: "e.g. create_ticket",
+        notify_team: "e.g. notify_team",
+        sheets_log: "e.g. log_call",
+    };
+    // Per-recipe (no-tool download) settings. Both recipes share the demo
+    // details pane (agent + trunk); only the funnel uses the email field.
+    var RECIPES = {
+        website_demo: {
+            url: "/api/webhook-tools/n8n-wizard/website-demo-workflow",
+            email: true,
+            downloadLabel: "Download funnel workflow",
+            resultNote: "No tool was created — this recipe runs from your website into the dashboard.",
+            summaryNote: "a downloadable n8n funnel — no tool is created and no agent settings change",
+            secretTitle: "Your form's secret header",
+            secretLead: "Your website backend must send this header with every form POST:",
+            secretNote: "Keep it server-side — never in the page source. Re-downloading with the same agent and trunk produces the identical file and secret.",
+        },
+        ghl_outbound: {
+            url: "/api/webhook-tools/n8n-wizard/ghl-outbound-workflow",
+            email: false,
+            downloadLabel: "Download GHL workflow",
+            resultNote: "No tool was created — this recipe runs from GoHighLevel into the dashboard.",
+            summaryNote: "a downloadable n8n workflow — no tool is created and no agent settings change",
+            secretTitle: "Your GoHighLevel secret header",
+            secretLead: "In your GHL automation's Webhook action, add this custom header:",
+            secretNote: "Without it, the workflow ignores the request. Re-downloading with the same agent and trunk produces the identical file and secret.",
+        },
+    };
+    // Multi-tool cards share the prefix-name UX (two tools from one prefix).
+    function isCalendar() { return state.template === "calendar_calcom"; }
+    function isGhlBooking() { return state.template === "ghl_booking"; }
+    function isMultiTool() { return isCalendar() || isGhlBooking(); }
+    function isDemo() { return !!RECIPES[state.template]; }
+    function recipe() { return RECIPES[state.template] || null; }
+    var NAME_RE = /^[a-z][a-z0-9_]*$/;
+
+    var state = {};
+
+    function resetState() {
+        state = { step: 1, template: null, created: false, submitting: false,
+                  downloadsNeeded: [], downloadsDone: {}, trunksLoaded: false };
+    }
+    resetState();
+
+    function modal() { return document.getElementById("n8nWizardModal"); }
+    function el(id) { return document.getElementById(id); }
+
+    function csrfToken() {
+        var m = modal();
+        if (m && m.dataset.csrfToken) return m.dataset.csrfToken;
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.content : "";
+    }
+
+    function tenantSuffix() {
+        var m = modal();
+        var t = m && m.dataset.tenant ? m.dataset.tenant : "";
+        return t ? ":" + t : "";
+    }
+    function lsKey() { return "n8nWizardBaseUrl" + tenantSuffix(); }
+
+    function showError(msg) {
+        var box = el("n8nWizError");
+        box.textContent = msg;
+        box.classList.remove("d-none");
+        box.scrollIntoView({ block: "nearest" });
+    }
+    function clearError() { el("n8nWizError").classList.add("d-none"); }
+
+    // ---------- step navigation ----------
+
+    function showStep(step) {
+        state.step = step;
+        clearError();
+        document.querySelectorAll("#n8nWizardModal .wizard-pane").forEach(function (p) {
+            p.classList.toggle("d-none", p.dataset.pane !== String(step));
+        });
+        document.querySelectorAll("#n8nWizStepper .wizard-step").forEach(function (s) {
+            var n = parseInt(s.dataset.step, 10);
+            s.classList.toggle("active", n === step);
+            s.classList.toggle("complete", typeof step === "number" && n < step);
+        });
+        var isNum = typeof step === "number";
+        el("n8nWizBackBtn").disabled = !isNum || step === 1;
+        el("n8nWizNextBtn").classList.toggle("d-none", !isNum || step >= 4);
+        el("n8nWizCreateBtn").classList.toggle("d-none", step !== 4);
+        el("n8nWizDoneBtn").classList.toggle("d-none", step !== "success");
+        el("n8nWizCancelBtn").classList.toggle("d-none", step === "success");
+        if (isNum) updateNextEnabled();
+    }
+
+    function updateNextEnabled() {
+        var ok = true;
+        if (state.step === 1) ok = !!state.template;
+        else if (state.step === 2) ok = validateDetails(true) === null;
+        el("n8nWizNextBtn").disabled = !ok;
+    }
+
+    function validateDetails(quiet) {
+        if (isDemo()) {
+            if (!el("n8nWizDemoAgent").value) return quiet ? "x" : "Pick the agent that should make the calls.";
+            if (!el("n8nWizDemoTrunk").value) return quiet ? "x" : "Pick the SIP trunk the call goes out on.";
+            if (recipe().email) {
+                var em = el("n8nWizDemoEmail").value.trim();
+                if (em && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return quiet ? "x" : "That notification email doesn't look right.";
+            }
+            return null;
+        }
+        var name = el("n8nWizName").value.trim();
+        if (!NAME_RE.test(name)) return quiet ? "x" : (isMultiTool()
+            ? "The name prefix must be lowercase letters, numbers and underscores, starting with a letter (e.g. calendar)."
+            : "The tool name must be lowercase letters, numbers and underscores, starting with a letter (e.g. save_lead).");
+        if (!isMultiTool() && !el("n8nWizDescription").value.trim()) return quiet ? "x" : "Please describe what the tool is for — the AI relies on it.";
+        if (!el("n8nWizBaseUrl").value.trim()) return quiet ? "x" : "Please enter your n8n address.";
+        if (state.template === "generic") {
+            if (collectGenericParams().length === 0) return quiet ? "x" : "Add at least one field (lowercase name, no spaces).";
+        }
+        return null;
+    }
+
+    function goNext() {
+        if (state.step === 1) {
+            prepareDetailsPane();
+            showStep(2);
+        } else if (state.step === 2) {
+            var err = validateDetails(false);
+            if (err) { showError(err); return; }
+            if (isDemo()) {
+                // No tool is created, so there is no agent-enable step.
+                buildSummary();
+                showStep(4);
+                return;
+            }
+            prepareAgentsPane();
+            showStep(3);
+        } else if (state.step === 3) {
+            buildSummary();
+            showStep(4);
+        }
+    }
+    function goBack() {
+        if (typeof state.step !== "number" || state.step <= 1) return;
+        if (state.step === 4 && isDemo()) { showStep(2); return; }
+        showStep(state.step - 1);
+    }
+
+    // ---------- pane preparation ----------
+
+    function prepareDetailsPane() {
+        var demo = isDemo();
+        el("n8nWizDemoSection").classList.toggle("d-none", !demo);
+        el("n8nWizNameGroup").classList.toggle("d-none", demo);
+        el("n8nWizDescGroup").classList.toggle("d-none", demo);
+        el("n8nWizUrlGroup").classList.toggle("d-none", demo);
+        el("n8nWizGenericSection").classList.toggle("d-none", state.template !== "generic");
+        if (demo) {
+            el("n8nWizDemoEmailGroup").classList.toggle("d-none", !recipe().email);
+            loadTrunks();
+            return;
+        }
+        if (state.template === "generic" && el("n8nWizParamRows").children.length === 0) addParamRow();
+        if (isMultiTool()) {
+            el("n8nWizNameLabel").innerHTML = 'Name prefix <span class="text-danger">*</span>';
+            el("n8nWizName").placeholder = isGhlBooking() ? "e.g. ghl" : "e.g. calendar";
+            el("n8nWizNameHint").textContent = "Two tools are created from this prefix: «prefix»_check and «prefix»_book.";
+            el("n8nWizDescLabel").innerHTML = "What kind of appointments? (optional)";
+        } else {
+            el("n8nWizNameLabel").innerHTML = 'Tool name <span class="text-danger">*</span>';
+            el("n8nWizName").placeholder = NAME_PLACEHOLDERS[state.template] || "e.g. save_lead, check_order";
+            el("n8nWizNameHint").textContent = "Lowercase letters, numbers and underscores. The AI refers to the tool by this name.";
+            el("n8nWizDescLabel").innerHTML = 'What is it for, and when should the agent use it? <span class="text-danger">*</span>';
+        }
+        var hints = {
+            lead_capture: "e.g. \"Save new customer enquiries to our CRM\". The agent collects name, phone, email and notes.",
+            data_lookup: "e.g. \"Look up order status by order number\". The agent sends the caller's question as a single query field.",
+            follow_up: "e.g. \"Text the caller our price list\". Your workflow receives the caller's number automatically.",
+            generic: "One sentence. This tells the AI when to use the tool.",
+            calendar_calcom: "e.g. \"30-minute consultations\" — optional; the booking behaviour is pre-configured.",
+            ghl_booking: "e.g. \"plumbing service bookings\" — optional; the booking behaviour is pre-configured.",
+            support_ticket: "e.g. \"Log technical problems with our software for the support desk\".",
+            notify_team: "e.g. \"Ping the sales channel when a caller mentions a big order\". The agent uses this silently.",
+            sheets_log: "e.g. \"Record every quote request in the quotes spreadsheet\".",
+        };
+        el("n8nWizDescriptionHint").textContent = hints[state.template] || hints.generic;
+        if (!el("n8nWizBaseUrl").value) {
+            try { el("n8nWizBaseUrl").value = localStorage.getItem(lsKey()) || ""; } catch (e) { /* private mode */ }
+        }
+    }
+
+    function loadTrunks() {
+        if (state.trunksLoaded) return;
+        var sel = el("n8nWizDemoTrunk");
+        fetch("/api/sip-outbound-trunks", { credentials: "same-origin" })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                sel.innerHTML = '<option value="">Choose a trunk...</option>';
+                (d.trunks || []).forEach(function (t) {
+                    var o = document.createElement("option");
+                    o.value = t.value; o.textContent = t.label || t.name || t.value;
+                    sel.appendChild(o);
+                });
+                state.trunksLoaded = true;
+                if (!(d.trunks || []).length) {
+                    sel.innerHTML = '<option value="">No outbound trunks found — set one up on the Telephony page first</option>';
+                }
+            })
+            .catch(function () { sel.innerHTML = '<option value="">Could not load trunks — close and reopen the wizard</option>'; });
+    }
+
+    function checkUrlWarning() {
+        var v = el("n8nWizBaseUrl").value.trim();
+        var box = el("n8nWizUrlWarning");
+        var warn = null;
+        if (v.indexOf("/webhook-test/") !== -1) {
+            warn = "That looks like a TEST webhook URL — those only work while the n8n editor is open. I'll use just the server address part; the wizard generates its own webhook path.";
+        } else if (v.indexOf("/webhook/") !== -1) {
+            warn = "That looks like a full workflow webhook URL. I'll use just the server address part; the wizard generates its own webhook path.";
+        }
+        box.classList.toggle("d-none", !warn);
+        if (warn) box.textContent = warn;
+    }
+
+    function prepareAgentsPane() {
+        // The follow-up template's destination is the caller's phone number,
+        // which web-chat sessions don't have — hide chatbot rows for it.
+        var hideChat = state.template === "follow_up";
+        document.querySelectorAll('#n8nWizAgentList [data-agent-kind="chat"]').forEach(function (row) {
+            row.classList.toggle("d-none", hideChat);
+            if (hideChat) {
+                var cb = row.querySelector("input.n8n-wiz-agent");
+                if (cb) cb.checked = false;
+            }
+        });
+        var note = el("n8nWizChatHiddenNote");
+        if (note) note.classList.toggle("d-none", !hideChat);
+    }
+
+    function selectedAgents() {
+        var out = [];
+        document.querySelectorAll("input.n8n-wiz-agent:checked").forEach(function (cb) {
+            var label = document.querySelector('label[for="' + cb.id + '"]');
+            out.push({ id: cb.value, name: label ? label.textContent.trim() : cb.value });
+        });
+        return out;
+    }
+
+    function buildSummary() {
+        var items;
+        if (isDemo()) {
+            var agentSel = el("n8nWizDemoAgent");
+            items = [
+                "<li><strong>Use case:</strong> " + TEMPLATE_LABELS[state.template] + "</li>",
+                "<li><strong>Calling agent:</strong> " + escapeHtml(agentSel.options[agentSel.selectedIndex].text) + "</li>",
+                "<li><strong>SIP trunk:</strong> " + escapeHtml(el("n8nWizDemoTrunk").options[el("n8nWizDemoTrunk").selectedIndex].text) + "</li>",
+                "<li><strong>What you get:</strong> " + recipe().summaryNote + "</li>",
+            ];
+            el("n8nWizSummary").innerHTML = items.join("");
+            return;
+        }
+        var agents = selectedAgents();
+        var nameVal = el("n8nWizName").value.trim();
+        items = [
+            "<li><strong>Use case:</strong> " + TEMPLATE_LABELS[state.template] + "</li>",
+            (isMultiTool()
+                ? "<li><strong>Tools created:</strong> <code>" + escapeHtml(nameVal) + "_check</code> and <code>" + escapeHtml(nameVal) + "_book</code> (one integration, one shared secret)</li>"
+                : "<li><strong>Tool name:</strong> <code>" + escapeHtml(nameVal) + "</code></li>"),
+            "<li><strong>n8n address:</strong> " + escapeHtml(el("n8nWizBaseUrl").value.trim()) + "</li>",
+            "<li><strong>Security:</strong> a secret key is generated and baked into both sides automatically</li>",
+            "<li><strong>Agents:</strong> " + (agents.length ? escapeHtml(agents.map(function (a) { return a.name; }).join(", ")) : "none yet (assign later)") + "</li>",
+        ];
+        if (state.template === "generic") {
+            var names = collectGenericParams().map(function (p) { return p.name; });
+            items.splice(2, 0, "<li><strong>Fields:</strong> <code>" + names.join("</code>, <code>") + "</code></li>");
+        }
+        el("n8nWizSummary").innerHTML = items.join("");
+    }
+
+    function escapeHtml(s) {
+        var d = document.createElement("div");
+        d.textContent = s == null ? "" : String(s);
+        return d.innerHTML;
+    }
+
+    // ---------- generic parameter builder ----------
+
+    function addParamRow() {
+        var row = document.createElement("div");
+        row.className = "d-flex gap-2 align-items-start mb-2 n8n-wiz-param-row";
+        row.innerHTML =
+            '<input type="text" class="form-control form-control-sm" style="max-width:10rem" placeholder="field_name" data-p="name">' +
+            '<select class="form-select form-select-sm" style="max-width:7rem" data-p="type">' +
+            '<option value="string">text</option><option value="number">number</option><option value="boolean">yes/no</option></select>' +
+            '<input type="text" class="form-control form-control-sm" placeholder="What should the AI put here? (helps accuracy)" data-p="description">' +
+            '<div class="form-check mt-1" style="min-width:5.5rem"><input class="form-check-input" type="checkbox" data-p="required" id="n8nWizReq' + Date.now() + Math.floor(Math.random() * 1000) + '"><label class="form-check-label small">required</label></div>' +
+            '<button type="button" class="btn btn-sm btn-outline-danger" data-p="remove"><i class="bi bi-x"></i></button>';
+        row.querySelector('[data-p="remove"]').addEventListener("click", function () { row.remove(); updateNextEnabled(); });
+        row.querySelector('[data-p="name"]').addEventListener("input", updateNextEnabled);
+        el("n8nWizParamRows").appendChild(row);
+    }
+
+    function collectGenericParams() {
+        var out = [];
+        document.querySelectorAll("#n8nWizParamRows .n8n-wiz-param-row").forEach(function (row) {
+            var name = row.querySelector('[data-p="name"]').value.trim();
+            if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) return;
+            out.push({
+                name: name,
+                type: row.querySelector('[data-p="type"]').value,
+                required: row.querySelector('[data-p="required"]').checked,
+                description: row.querySelector('[data-p="description"]').value.trim(),
+            });
+        });
+        return out;
+    }
+
+    // ---------- submit ----------
+
+    function submit() {
+        if (state.submitting) return;
+        if (isDemo()) { submitDemo(); return; }
+        state.submitting = true;
+        var btn = el("n8nWizCreateBtn");
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+        clearError();
+
+        var agents = selectedAgents();
+        var payload = {
+            template: state.template,
+            name: el("n8nWizName").value.trim(),
+            description: el("n8nWizDescription").value.trim(),
+            n8n_base_url: el("n8nWizBaseUrl").value.trim(),
+            agent_ids: agents.map(function (a) { return a.id; }),
+        };
+        if (state.template === "generic") {
+            payload.generic_params = collectGenericParams();
+            payload.generic_returns_data = el("n8nWizReturnsData").checked;
+        }
+
+        fetch("/api/webhook-tools/n8n-wizard", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken() },
+            body: JSON.stringify(payload),
+        }).then(function (resp) { return resp.json(); }).then(function (data) {
+            state.submitting = false;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic"></i> Create';
+            if (!data.success) {
+                showError(data.error || "Could not create the tool. Please try again.");
+                return;
+            }
+            state.created = true;
+            state.toolName = payload.name;
+            try { localStorage.setItem(lsKey(), payload.n8n_base_url); } catch (e) { /* private mode */ }
+
+            var tools = data.tools || [data.tool];
+            var dlUrls = data.download_urls || [data.download_url];
+            state.downloadsNeeded = dlUrls.slice();
+            state.downloadsDone = {};
+            el("n8nWizProductionUrl").innerHTML = (data.production_urls || [data.production_url])
+                .map(function (u) { return escapeHtml(u); }).join("<br>");
+            el("n8nWizDownloadBtn").href = dlUrls[0];
+            el("n8nWizTestBtn").setAttribute("data-tool-name", tools[0].name);
+            var row2 = el("n8nWizDownloadRow2");
+            if (tools.length > 1) {
+                row2.classList.remove("d-none");
+                el("n8nWizDownloadBtn2").href = dlUrls[1];
+                el("n8nWizDownloadBtn2").innerHTML = '<i class="bi bi-download"></i> Download ' + escapeHtml(tools[1].name) + " workflow";
+                el("n8nWizDownloadBtn").innerHTML = '<i class="bi bi-download"></i> Download ' + escapeHtml(tools[0].name) + " workflow";
+                el("n8nWizTestBtn2").setAttribute("data-tool-name", tools[1].name);
+            } else {
+                row2.classList.add("d-none");
+            }
+            var enabledN = (data.agents_enabled || []).length;
+            var failed = data.agents_failed || [];
+            var msg;
+            if (!agents.length) msg = "No agents assigned yet — you can do that from the Agent Assignments tab.";
+            else if (!failed.length) msg = "Enabled on " + enabledN + " agent" + (enabledN === 1 ? "" : "s") + ".";
+            else {
+                var failedNames = failed.map(function (id) {
+                    var m = agents.filter(function (a) { return a.id === id; });
+                    return m.length ? m[0].name : id;
+                });
+                msg = "Enabled on " + enabledN + " of " + agents.length + " agents. Could not enable on: " +
+                    failedNames.join(", ") + " — finish those from the Agent Assignments tab.";
+            }
+            el("n8nWizAgentResult").textContent = msg;
+            var calNote = el("n8nWizCalendarNote");
+            if (calNote) calNote.classList.toggle("d-none", !isCalendar());
+            var ghlNote = el("n8nWizGhlNote");
+            if (ghlNote) ghlNote.classList.toggle("d-none", !isGhlBooking());
+            showStep("success");
+        }).catch(function () {
+            state.submitting = false;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic"></i> Create';
+            showError("The request didn't complete. Reload the Tools page — if the tool now exists, download its workflow from the tool card; otherwise try again.");
+        });
+    }
+
+    function demoQuery() {
+        var q = "agent_slug=" + encodeURIComponent(el("n8nWizDemoAgent").value) +
+                "&sip_trunk_id=" + encodeURIComponent(el("n8nWizDemoTrunk").value);
+        if (recipe().email) q += "&notify_email=" + encodeURIComponent(el("n8nWizDemoEmail").value.trim());
+        return q;
+    }
+
+    function submitDemo() {
+        state.submitting = true;
+        var r = recipe();
+        var btn = el("n8nWizCreateBtn");
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Preparing...';
+        clearError();
+        fetch(r.url + "?meta=1&" + demoQuery(), { credentials: "same-origin" })
+            .then(function (resp) { return resp.json(); })
+            .then(function (data) {
+                state.submitting = false;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-magic"></i> Create';
+                if (!data.success) { showError(data.error || "Could not prepare the workflow."); return; }
+                state.created = true;
+                state.toolName = null;
+                var dlUrl = r.url + "?" + demoQuery();
+                state.downloadsNeeded = [dlUrl];
+                state.downloadsDone = {};
+                el("n8nWizAgentResult").textContent = r.resultNote;
+                el("n8nWizProductionUrl").textContent = "(your n8n)/webhook/" + (data.webhook_path || "");
+                el("n8nWizDownloadBtn").href = dlUrl;
+                el("n8nWizDownloadBtn").innerHTML = '<i class="bi bi-download"></i> ' + r.downloadLabel;
+                el("n8nWizDownloadRow2").classList.add("d-none");
+                el("n8nWizTestBtn").classList.add("d-none");
+                el("n8nWizSecretBlock").classList.remove("d-none");
+                el("n8nWizSecretTitle").textContent = r.secretTitle;
+                el("n8nWizSecretLead").textContent = r.secretLead;
+                el("n8nWizSecretNote").textContent = r.secretNote;
+                el("n8nWizSecretValue").textContent = data.secret || "";
+                showStep("success");
+            })
+            .catch(function () {
+                state.submitting = false;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-magic"></i> Create';
+                showError("The request didn't complete — try again.");
+            });
+    }
+
+    // ---------- test connection ----------
+
+    function runTest(btn, box) {
+        var toolName = btn.getAttribute("data-tool-name") || state.toolName;
+        if (!toolName) return;
+        if (!confirm("This sends a real request to your n8n. Once your workflow is wired to a real system (CRM, calendar, email...), a test acts on that system too. Run the test?")) return;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+        box.classList.add("d-none");
+
+        fetch("/api/webhook-tools/" + encodeURIComponent(toolName) + "/test", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken() },
+            body: JSON.stringify({ params: {} }),
+        }).then(function (resp) { return resp.json(); }).then(function (r) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-plug"></i> Test connection';
+            box.classList.remove("d-none", "alert-success", "alert-info", "alert-warning", "alert-danger");
+            var status = r.status_code;
+            // A 2xx only proves n8n answered. An imported-but-unwired workflow
+            // returns 200 with an EMPTY body on n8n 2.x (drill-verified) — real
+            // success carries the template's response field.
+            var body = r.response;
+            var hasPayload = body && typeof body === "object" && (body.success === true || (body.result !== undefined && body.result !== null && body.result !== ""));
+            if (r.success && hasPayload) {
+                box.classList.add("alert-success");
+                box.innerHTML = "<strong>It works!</strong> n8n ran your workflow and responded (" + (r.elapsed_ms || 0) + " ms).";
+            } else if (r.success && !hasPayload) {
+                box.classList.add("alert-info");
+                box.innerHTML = "<strong>Connection verified — n8n received the call</strong>, but the workflow didn't respond with the expected data. If the red REPLACE ME node is still in place, this is expected: replace it with your real action, keep it wired to the Respond node, and test again.";
+            } else if (status === 403) {
+                box.classList.add("alert-danger");
+                box.innerHTML = "<strong>Secret mismatch.</strong> n8n answered but rejected the secret — re-download the workflow, delete the old copy in n8n, and import the fresh file.";
+            } else if (status === 404) {
+                box.classList.add("alert-info");
+                box.innerHTML = "<strong>n8n answered, but no workflow is listening yet.</strong> This is expected until you import the file AND activate the workflow (the toggle at the top right in n8n).";
+            } else if (status >= 500) {
+                box.classList.add("alert-info");
+                box.innerHTML = "<strong>Connection verified — the workflow ran but stopped with an error.</strong> If you haven't replaced the red REPLACE ME node yet, this is exactly what should happen. Replace it with your real action and test again.";
+            } else if (r.error && /timed out|Request failed/i.test(r.error)) {
+                box.classList.add("alert-warning");
+                box.innerHTML = "<strong>Couldn't reach your n8n.</strong> Check the address is right and n8n is running. (" + escapeHtml(r.error) + ")";
+            } else {
+                box.classList.add("alert-warning");
+                box.innerHTML = "Unexpected reply" + (status ? " (HTTP " + status + ")" : "") + ": " + escapeHtml(r.error || JSON.stringify(r.response || "").slice(0, 200));
+            }
+        }).catch(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-plug"></i> Test connection';
+            box.classList.remove("d-none", "alert-success", "alert-info");
+            box.classList.add("alert-warning");
+            box.textContent = "The test request didn't complete — try again.";
+        });
+    }
+
+    // ---------- wiring ----------
+
+    function resetWizard() {
+        resetState();
+        document.querySelectorAll("#n8nWizTemplates .wizard-provider-tile").forEach(function (t) { t.classList.remove("selected"); });
+        ["n8nWizName", "n8nWizDescription", "n8nWizBaseUrl", "n8nWizDemoEmail"].forEach(function (id) { var e = el(id); if (e) e.value = ""; });
+        var da = el("n8nWizDemoAgent"); if (da) da.selectedIndex = 0;
+        var dt = el("n8nWizDemoTrunk"); if (dt && dt.options.length) dt.selectedIndex = 0;
+        el("n8nWizParamRows").innerHTML = "";
+        el("n8nWizReturnsData").checked = false;
+        el("n8nWizUrlWarning").classList.add("d-none");
+        el("n8nWizTestResult").classList.add("d-none");
+        el("n8nWizSecretBlock").classList.add("d-none");
+        el("n8nWizDownloadRow2").classList.add("d-none");
+        el("n8nWizTestBtn").classList.remove("d-none");
+        el("n8nWizDownloadBtn").innerHTML = '<i class="bi bi-download"></i> Download n8n workflow';
+        document.querySelectorAll("input.n8n-wiz-agent").forEach(function (cb) { cb.checked = false; });
+        clearError();
+        showStep(1);
+    }
+
+    window.openN8nWizard = function () {
+        resetWizard();
+        new bootstrap.Modal(modal()).show();
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var m = modal();
+        if (!m) return;
+
+        m.querySelectorAll("#n8nWizTemplates .wizard-provider-tile").forEach(function (tile) {
+            tile.addEventListener("click", function () {
+                m.querySelectorAll("#n8nWizTemplates .wizard-provider-tile").forEach(function (t) { t.classList.remove("selected"); });
+                tile.classList.add("selected");
+                state.template = tile.dataset.template;
+                updateNextEnabled();
+            });
+        });
+
+        el("n8nWizNextBtn").addEventListener("click", goNext);
+        el("n8nWizBackBtn").addEventListener("click", goBack);
+        el("n8nWizCreateBtn").addEventListener("click", submit);
+        el("n8nWizTestBtn").addEventListener("click", function () { runTest(el("n8nWizTestBtn"), el("n8nWizTestResult")); });
+        el("n8nWizTestBtn2").addEventListener("click", function () { runTest(el("n8nWizTestBtn2"), el("n8nWizTestResult")); });
+        el("n8nWizAddParam").addEventListener("click", function () { addParamRow(); });
+        el("n8nWizDownloadBtn").addEventListener("click", function () { state.downloadsDone[el("n8nWizDownloadBtn").getAttribute("href")] = true; });
+        el("n8nWizDownloadBtn2").addEventListener("click", function () { state.downloadsDone[el("n8nWizDownloadBtn2").getAttribute("href")] = true; });
+
+        ["n8nWizName", "n8nWizDescription", "n8nWizBaseUrl", "n8nWizDemoEmail"].forEach(function (id) {
+            var e = el(id); if (e) e.addEventListener("input", updateNextEnabled);
+        });
+        ["n8nWizDemoAgent", "n8nWizDemoTrunk"].forEach(function (id) {
+            var e = el(id); if (e) e.addEventListener("change", updateNextEnabled);
+        });
+        el("n8nWizBaseUrl").addEventListener("input", checkUrlWarning);
+
+        // Leaving the finish pane without the workflow file strands the
+        // operator (the tool is live) — warn, and point at the card button.
+        m.addEventListener("hide.bs.modal", function (ev) {
+            if (state.step === "success" && state.created) {
+                var missing = state.downloadsNeeded.filter(function (u) { return !state.downloadsDone[u]; });
+                if (missing.length) {
+                    var msg = missing.length === state.downloadsNeeded.length
+                        ? "You haven't downloaded the n8n workflow file" + (state.downloadsNeeded.length > 1 ? "s" : "") + "."
+                        : "You've only downloaded one of the two workflow files.";
+                    if (!confirm(msg + " You can download later from the tool card on the Webhooks tab" + (state.toolName === null ? " by re-running the wizard" : "") + ". Close anyway?")) {
+                        ev.preventDefault();
+                    }
+                }
+            }
+        });
+    });
+})();

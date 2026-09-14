@@ -1,0 +1,2701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>AutoResearch - LiveKit Dashboard</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=226585">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=1096.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IjdTbUt6M0Rmcmo3N2xWUGswSmw5b2p2b196UUJJLVNDMWNwVk8ycEJVWlEi.aqgYNA.wwxBjTs8X9s1pfQiPsmtnCz0YVI">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link active">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Dashboard</h1>
+                
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#autoresearch" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="autoresearch.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <h4 class="mb-1"><i class="bi bi-search-heart me-2" style="color:#8b5cf6;"></i>AutoResearch</h4>
+        <p class="text-muted small mb-0">Analyse real conversations, get AI-suggested prompt improvements, and apply them with full version history.</p>
+    </div>
+    <div style="min-width: 280px;">
+        <label for="arAgentSelect" class="form-label small mb-1">Agent</label>
+        <select class="form-select" id="arAgentSelect">
+            <option value="">Select an agent&hellip;</option>
+            
+            
+        </select>
+        <small class="text-muted">&#9679; = new results to review</small>
+    </div>
+</div>
+
+
+
+
+<div class="card" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-search-heart" style="font-size: 2.5rem; color: #8b5cf6;"></i>
+        <h5 class="mt-3">Select an agent to get started</h5>
+        <p class="text-muted mb-0">Pick a voice or chatbot agent above. AutoResearch reads its recent conversations, finds patterns, and suggests an improved system prompt &mdash; nothing is ever applied without your confirmation.</p>
+    </div>
+</div>
+
+
+<!-- Apply confirmation modal: full comparison + editable text. Applying saves
+     a backup version of the outgoing prompt first, then records the applied
+     prompt as an "autoresearch" version with the reasons. -->
+<div class="modal fade" id="applyConfirmModal" tabindex="-1" aria-labelledby="applyConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" id="applyConfirmModalLabel"><i class="bi bi-check2-circle me-1"></i> Apply Suggestion to Live Prompt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="applyAlready" class="alert alert-info py-2 small" style="display:none;">The live prompt already matches this suggestion.</div>
+                <div id="applyGuardrailWarnings" class="alert alert-warning alert-permanent py-2 small" style="display:none;"></div>
+                <div class="alert alert-warning alert-permanent py-2 small">
+                    <i class="bi bi-shield-exclamation me-1"></i>
+                    This suggestion was written by AI from real conversation transcripts &mdash; read it carefully (and edit it below if needed) before applying. The current prompt is saved to the Versions history automatically, so you can always restore it.
+                </div>
+                <ul id="applyChangesList" class="small text-muted mb-3"></ul>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Current live prompt</label>
+                        <pre id="applyCurrentPrompt" class="small" style="max-height: 45vh; overflow:auto; white-space:pre-wrap; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:0.375rem; padding:10px;"></pre>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="applySuggestionText" class="form-label small fw-semibold">Suggested prompt (editable)</label>
+                        <textarea id="applySuggestionText" class="form-control small" style="height: 45vh; font-family: var(--bs-font-monospace); font-size: 0.8rem;"></textarea>
+                    </div>
+                </div>
+                <div id="applyResultStatus" class="small mt-2"></div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="applyConfirmBtn" onclick="confirmApplySuggestion()"><i class="bi bi-check-lg"></i> Apply to Live Prompt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<script>
+const _arBaseUrl = "/agents";
+const _agentId = "";
+const _csrfToken = "IjdTbUt6M0Rmcmo3N2xWUGswSmw5b2p2b196UUJJLVNDMWNwVk8ycEJVWlEi.aqgYNA.wwxBjTs8X9s1pfQiPsmtnCz0YVI";
+let _arCurrentPrompt = "";
+const _arDeepLinkResult = "";
+let _arDeepLinkTarget = _arDeepLinkResult;
+// Test-in-Simulation gates (voice only; the simulate endpoint re-checks both).
+const _arSelectedType = "";
+const _canSimCreate = false;
+const _canSimView = false;
+// Poller registry: suite_run_id -> interval id. Every card-wipe path MUST
+// drain the pollers it is about to orphan (round-2 review — the History
+// Details collapse re-renders cards on every expand).
+const _arSimPollers = new Map();
+function _arStopSimPoller(runId) {
+    if (_arSimPollers.has(runId)) { clearInterval(_arSimPollers.get(runId)); _arSimPollers.delete(runId); }
+}
+function _arStopAllSimPollers() {
+    _arSimPollers.forEach(function(iv) { clearInterval(iv); });
+    _arSimPollers.clear();
+}
+
+// Diff renderer — the suggestion cards call this. It lives in the editors'
+// Versions script block, NOT the AutoResearch block this page was extracted
+// from, so it must be defined here too (round-2 review P0).
+function _renderDiffLines(container, lines) {
+    container.textContent = '';
+    if (!lines || lines.length === 0) {
+        container.textContent = 'No differences found.';
+        return;
+    }
+    lines.forEach(function(line) {
+        var span = document.createElement('span');
+        span.style.display = 'block';
+        span.textContent = line;
+        if (line.startsWith('+') && !line.startsWith('+++')) span.style.cssText = 'background:rgba(34,197,94,0.15);color:#22c55e;display:block;';
+        else if (line.startsWith('-') && !line.startsWith('---')) span.style.cssText = 'background:rgba(239,68,68,0.15);color:#ef4444;display:block;';
+        else if (line.startsWith('@@')) span.style.cssText = 'color:#06b6d4;display:block;';
+        container.appendChild(span);
+    });
+}
+const enrichLlmData = {"default_model": null, "default_provider": null, "providers": [{"configured": false, "id": "openai", "models": [], "name": "OpenAI"}, {"configured": false, "id": "anthropic", "models": [], "name": "Anthropic"}, {"configured": false, "id": "google", "models": [], "name": "Google"}, {"configured": false, "id": "google_cloud", "meta": {"region": "us-central1"}, "models": [], "name": "Google Cloud (Vertex AI)"}, {"configured": false, "id": "xai", "models": [], "name": "xAI"}, {"configured": false, "id": "groq", "models": [], "name": "Groq"}, {"configured": false, "id": "bedrock", "models": [], "name": "AWS Bedrock"}, {"configured": false, "id": "azure_openai", "models": [], "name": "Azure"}, {"configured": false, "id": "openrouter", "models": [], "name": "OpenRouter"}, {"configured": false, "id": "scx", "models": [], "name": "SCX (Au)"}, {"configured": false, "id": "telnyx_ai", "models": [], "name": "Telnyx"}]};
+
+// ─── AutoResearch ───────────────────────────────────────────────────────────
+let _arEventSource = null;
+
+function _arIcon(cls) {
+    var i = document.createElement('i');
+    i.className = cls;
+    return i;
+}
+
+function _arSetBtnContent(btn, iconClass, text) {
+    btn.textContent = '';
+    if (iconClass) { var ic = _arIcon(iconClass); ic.classList.add('me-1'); btn.appendChild(ic); }
+    btn.appendChild(document.createTextNode(text));
+}
+
+function _arSetBtnSpinner(btn, text) {
+    btn.textContent = '';
+    var sp = document.createElement('span');
+    sp.className = 'spinner-border spinner-border-sm me-1';
+    btn.appendChild(sp);
+    btn.appendChild(document.createTextNode(text));
+}
+
+function _arPopulateProviders(selectId) {
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
+    var providers = (enrichLlmData.providers || []).filter(function(p) { return p.configured; });
+    providers.forEach(function(p) {
+        var opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.name;
+        sel.appendChild(opt);
+    });
+    if (enrichLlmData.default_provider) {
+        sel.value = enrichLlmData.default_provider;
+    }
+}
+
+function _arPopulateModels(providerSelectId, modelSelectId) {
+    var providerSel = document.getElementById(providerSelectId);
+    var modelSel = document.getElementById(modelSelectId);
+    if (!providerSel || !modelSel) return;
+    while (modelSel.options.length > 1) modelSel.remove(1);
+    var providerId = providerSel.value;
+    if (!providerId) return;
+    var provider = (enrichLlmData.providers || []).find(function(p) { return p.id === providerId; });
+    if (!provider) return;
+    provider.models.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.name;
+        modelSel.appendChild(opt);
+    });
+    if (providerId === enrichLlmData.default_provider && enrichLlmData.default_model) {
+        modelSel.value = enrichLlmData.default_model;
+    } else if (provider.models.length > 0) {
+        modelSel.value = provider.models[0].id;
+    }
+}
+
+// ─── Advanced: Golden Set ────────────────────────────────────────────────────
+async function loadGoldenSet() {
+    if (!_agentId) return;
+    var container = document.getElementById('arGoldenSetList');
+    container.textContent = '';
+    var loadSpan = document.createElement('span');
+    loadSpan.className = 'text-muted small';
+    loadSpan.textContent = 'Loading...';
+    container.appendChild(loadSpan);
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/golden-set', { headers: { 'X-CSRFToken': _csrfToken } });
+        var data = await resp.json();
+        container.textContent = '';
+        if (!data.success || !data.golden_set || data.golden_set.length === 0) {
+            var empty = document.createElement('span');
+            empty.className = 'text-muted small';
+            empty.textContent = 'No reference calls configured.';
+            container.appendChild(empty);
+            return;
+        }
+        data.golden_set.forEach(function(entry) {
+            var row = document.createElement('div');
+            row.className = 'd-flex align-items-center gap-2 py-1';
+            row.style.borderBottom = '1px solid var(--border-color)';
+            var idSpan = document.createElement('span');
+            idSpan.className = 'small fw-semibold';
+            idSpan.textContent = entry.call_id;
+            row.appendChild(idSpan);
+            if (entry.notes) {
+                var dash = document.createElement('span');
+                dash.className = 'text-muted small';
+                dash.textContent = '—';
+                row.appendChild(dash);
+                var noteSpan = document.createElement('span');
+                noteSpan.className = 'text-muted small';
+                noteSpan.textContent = entry.notes;
+                row.appendChild(noteSpan);
+            }
+            if (entry.added_at) {
+                var dateSpan = document.createElement('span');
+                dateSpan.className = 'text-muted small ms-auto';
+                dateSpan.textContent = formatDashboardDate(entry.added_at);
+                row.appendChild(dateSpan);
+            }
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn btn-outline-danger btn-sm py-0 px-1 ms-1';
+            removeBtn.title = 'Remove';
+            var removeIcon = document.createElement('i');
+            removeIcon.className = 'bi bi-x';
+            removeBtn.appendChild(removeIcon);
+            (function(callId) {
+                removeBtn.addEventListener('click', function() { removeGoldenCall(callId); });
+            })(entry.call_id);
+            row.appendChild(removeBtn);
+            container.appendChild(row);
+        });
+    } catch (e) {
+        container.textContent = '';
+        var errSpan = document.createElement('span');
+        errSpan.className = 'text-danger small';
+        errSpan.textContent = 'Failed to load golden set';
+        container.appendChild(errSpan);
+    }
+}
+
+async function addGoldenCall() {
+    var callIdInput = document.getElementById('arGoldenCallId');
+    var notesInput = document.getElementById('arGoldenNotes');
+    var callId = callIdInput.value.trim();
+    if (!callId) { alert('Please enter a Call ID.'); return; }
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/golden-set', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _csrfToken },
+            body: JSON.stringify({ call_id: callId, notes: notesInput.value.trim() })
+        });
+        var data = await resp.json();
+        if (data.success) {
+            callIdInput.value = '';
+            notesInput.value = '';
+            loadGoldenSet();
+        } else { alert('Failed: ' + (data.error || 'Unknown')); }
+    } catch (e) { alert('Error: ' + e.message); }
+}
+
+async function removeGoldenCall(callId) {
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/golden-set/' + encodeURIComponent(callId), {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': _csrfToken }
+        });
+        var data = await resp.json();
+        if (data.success) { loadGoldenSet(); }
+        else { alert('Failed: ' + (data.error || 'Unknown')); }
+    } catch (e) { alert('Error: ' + e.message); }
+}
+
+// ─── Advanced: Call Picker for Golden Set ────────────────────────────────────
+function toggleCallPicker() {
+    var area = document.getElementById('arCallPickerArea');
+    if (area.style.display === 'none') {
+        area.style.display = '';
+        loadRecentCalls();
+    } else {
+        area.style.display = 'none';
+    }
+}
+
+async function loadRecentCalls() {
+    if (!_agentId) return;
+    var container = document.getElementById('arCallPickerList');
+    container.textContent = '';
+    var loadDiv = document.createElement('div');
+    loadDiv.className = 'text-center py-2 text-muted';
+    loadDiv.textContent = 'Loading recent calls...';
+    container.appendChild(loadDiv);
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/recent-calls?limit=50', { headers: { 'X-CSRFToken': _csrfToken } });
+        var data = await resp.json();
+        container.textContent = '';
+        if (!data.success || !data.calls || data.calls.length === 0) {
+            var emptyDiv = document.createElement('div');
+            emptyDiv.className = 'text-center py-2 text-muted';
+            emptyDiv.textContent = 'No recent calls found.';
+            container.appendChild(emptyDiv);
+            return;
+        }
+        data.calls.forEach(function(call) {
+            var row = document.createElement('div');
+            row.className = 'd-flex align-items-center gap-2 px-2 py-1';
+            row.style.cssText = 'cursor:pointer; border-bottom: 1px solid var(--border-color);';
+            row.addEventListener('mouseover', function() { this.style.backgroundColor = 'var(--bg-hover)'; });
+            row.addEventListener('mouseout', function() { this.style.backgroundColor = ''; });
+            // Date
+            var dateSpan = document.createElement('span');
+            dateSpan.className = 'text-muted';
+            dateSpan.style.fontSize = '0.75rem';
+            dateSpan.textContent = call.started_at ? formatDashboardDateTime(call.started_at, {seconds: true}) : '-';
+            row.appendChild(dateSpan);
+            // Duration
+            var durSpan = document.createElement('span');
+            durSpan.className = 'fw-semibold';
+            durSpan.style.fontSize = '0.75rem';
+            var mins = Math.floor((call.duration_seconds || 0) / 60);
+            var secs = (call.duration_seconds || 0) % 60;
+            durSpan.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+            row.appendChild(durSpan);
+            // Direction badge
+            if (call.direction) {
+                var dirBadge = document.createElement('span');
+                dirBadge.className = 'badge ' + (call.direction === 'inbound' ? 'bg-info' : 'bg-secondary');
+                dirBadge.style.fontSize = '0.6rem';
+                dirBadge.textContent = call.direction;
+                row.appendChild(dirBadge);
+            }
+            // Turns
+            if (call.turn_count) {
+                var turnSpan = document.createElement('span');
+                turnSpan.className = 'text-muted';
+                turnSpan.style.fontSize = '0.7rem';
+                turnSpan.textContent = call.turn_count + ' turns';
+                row.appendChild(turnSpan);
+            }
+            // Transcription indicator
+            if (call.has_transcription) {
+                var txIcon = document.createElement('i');
+                txIcon.className = 'bi bi-chat-text text-success ms-auto';
+                txIcon.title = 'Has transcription';
+                txIcon.style.fontSize = '0.75rem';
+                row.appendChild(txIcon);
+            }
+            // Click to select
+            (function(callId) {
+                row.addEventListener('click', function() {
+                    document.getElementById('arGoldenCallId').value = callId;
+                    document.getElementById('arCallPickerArea').style.display = 'none';
+                });
+            })(call.id);
+            container.appendChild(row);
+        });
+    } catch (e) {
+        container.textContent = '';
+        var errDiv = document.createElement('div');
+        errDiv.className = 'text-center py-2 text-danger';
+        errDiv.textContent = 'Failed to load calls';
+        container.appendChild(errDiv);
+    }
+}
+
+// ─── Advanced: Methodology & Engine ──────────────────────────────────────────
+function selectEngine(engineId) {
+    var oproCard = document.getElementById('arEngineCardOpro');
+    var dspyCard = document.getElementById('arEngineCardDspy');
+    var oproRadio = document.getElementById('arEngineOpro');
+    var dspyRadio = document.getElementById('arEngineDspy');
+
+    if (engineId === 'dspy' && dspyRadio.disabled) return;
+
+    if (engineId === 'opro') {
+        oproRadio.checked = true;
+        oproCard.style.borderColor = 'var(--brand-primary)';
+        oproCard.style.backgroundColor = 'rgba(34,197,94,0.05)';
+        dspyCard.style.borderColor = 'var(--border-color)';
+        dspyCard.style.backgroundColor = 'transparent';
+    } else {
+        dspyRadio.checked = true;
+        dspyCard.style.borderColor = '#8b5cf6';
+        dspyCard.style.backgroundColor = 'rgba(139,92,246,0.05)';
+        oproCard.style.borderColor = 'var(--border-color)';
+        oproCard.style.backgroundColor = 'transparent';
+    }
+}
+
+async function loadMethodology() {
+    if (!_agentId) return;
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/methodology', { headers: { 'X-CSRFToken': _csrfToken } });
+        var data = await resp.json();
+        if (!data.success) return;
+        // Engines
+        var engines = data.engines || [];
+        engines.forEach(function(eng) {
+            if (eng.id === 'dspy') {
+                // DSPy is not implemented yet — keep it non-selectable regardless of
+                // whether the package happens to be installed, and show "COMING SOON".
+                var dspyRadio = document.getElementById('arEngineDspy');
+                var hint = document.getElementById('arEngineHint');
+                var dspyCard = document.getElementById('arEngineCardDspy');
+                var badge = document.getElementById('arDspyStatusBadge');
+                dspyRadio.disabled = true;
+                if (hint) hint.style.display = 'none';
+                dspyCard.style.opacity = '0.5';
+                dspyCard.style.pointerEvents = 'none';
+                if (badge) { badge.textContent = 'COMING SOON'; badge.className = 'badge bg-secondary ms-auto'; badge.style.fontSize = '0.65rem'; }
+            }
+        });
+        // Prompts
+        var prompts = data.prompts || {};
+        document.getElementById('arMethodologyVersion').textContent = 'v' + (prompts.methodology_version || '1.0');
+        var customBadge = document.getElementById('arCustomBadge');
+        var resetBtn = document.getElementById('arResetMethodologyBtn');
+        if (prompts.is_custom) {
+            customBadge.style.display = '';
+            resetBtn.style.display = '';
+        } else {
+            customBadge.style.display = 'none';
+            resetBtn.style.display = 'none';
+        }
+        document.getElementById('arAnalysisPrompt').value = prompts.analysis_prompt || '';
+        document.getElementById('arSuggestionPrompt').value = prompts.suggestion_prompt || '';
+        document.getElementById('arScoringPrompt').value = prompts.scoring_prompt || '';
+        // Update available notification
+        if (data.update_available) {
+            document.getElementById('arMethodologyVersion').title = 'A newer methodology version is available';
+            document.getElementById('arMethodologyVersion').classList.add('bg-warning');
+        }
+    } catch (e) { /* silent */ }
+}
+
+async function saveMethodologyPrompts() {
+    var btn = document.getElementById('arSavePromptsBtn');
+    btn.disabled = true;
+    _arSetBtnSpinner(btn, ' Saving...');
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/methodology', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _csrfToken },
+            body: JSON.stringify({
+                analysis_prompt: document.getElementById('arAnalysisPrompt').value,
+                suggestion_prompt: document.getElementById('arSuggestionPrompt').value,
+                scoring_prompt: document.getElementById('arScoringPrompt').value
+            })
+        });
+        var data = await resp.json();
+        btn.disabled = false;
+        if (data.success) {
+            _arSetBtnContent(btn, 'bi bi-check-lg', ' Saved!');
+            setTimeout(function() { _arSetBtnContent(btn, 'bi bi-check-lg', ' Save Prompts'); }, 2000);
+            loadMethodology();
+        } else {
+            _arSetBtnContent(btn, 'bi bi-check-lg', ' Save Prompts');
+            alert('Failed: ' + (data.error || 'Unknown'));
+        }
+    } catch (e) {
+        btn.disabled = false;
+        _arSetBtnContent(btn, 'bi bi-check-lg', ' Save Prompts');
+        alert('Error: ' + e.message);
+    }
+}
+
+async function resetMethodology() {
+    if (!confirm('Reset methodology prompts to defaults? Your custom prompts will be lost.')) return;
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/methodology/reset', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': _csrfToken }
+        });
+        var data = await resp.json();
+        if (data.success) {
+            document.getElementById('arPromptsArea').style.display = 'none';
+            var toggleBtn = document.getElementById('arTogglePromptsBtn');
+            toggleBtn.textContent = '';
+            var chevron = document.createElement('i');
+            chevron.className = 'bi bi-chevron-down me-1';
+            toggleBtn.appendChild(chevron);
+            var small = document.createElement('small');
+            small.textContent = 'Customize Prompts';
+            toggleBtn.appendChild(small);
+            loadMethodology();
+        } else { alert('Failed: ' + (data.error || 'Unknown')); }
+    } catch (e) { alert('Error: ' + e.message); }
+}
+
+function togglePromptsArea() {
+    var area = document.getElementById('arPromptsArea');
+    var btn = document.getElementById('arTogglePromptsBtn');
+    var showing = area.style.display !== 'none';
+    area.style.display = showing ? 'none' : '';
+    btn.textContent = '';
+    var chevron = document.createElement('i');
+    chevron.className = showing ? 'bi bi-chevron-down me-1' : 'bi bi-chevron-up me-1';
+    btn.appendChild(chevron);
+    var small = document.createElement('small');
+    small.textContent = 'Customize Prompts';
+    btn.appendChild(small);
+}
+
+// Engine card selection is handled by selectEngine() function above
+
+// ─── Advanced: Token Estimate ────────────────────────────────────────────────
+async function loadTokenEstimate() {
+    if (!_agentId) return;
+    var countEl = document.getElementById('arTranscriptCount');
+    var count = parseInt(countEl.value) || 20;
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/estimate?transcript_count=' + count, { headers: { 'X-CSRFToken': _csrfToken } });
+        var data = await resp.json();
+        if (data.success) {
+            var estimateEl = document.getElementById('arTokenEstimate');
+            estimateEl.textContent = 'Est. ~' + (data.estimated_tokens || 0).toLocaleString() + ' tokens';
+        }
+    } catch (e) { /* silent */ }
+}
+
+function initAutoResearchPage() {
+    if (!_agentId) return;
+    // Populate Run tab provider/model
+    _arPopulateProviders('arProvider');
+    _arPopulateModels('arProvider', 'arModel');
+    document.getElementById('arProvider').onchange = function() { _arPopulateModels('arProvider', 'arModel'); };
+
+    // Populate Schedule tab provider/model
+    _arPopulateProviders('arScheduleProvider');
+    _arPopulateModels('arScheduleProvider', 'arScheduleModel');
+    document.getElementById('arScheduleProvider').onchange = function() { _arPopulateModels('arScheduleProvider', 'arScheduleModel'); };
+
+    // Frequency toggle for day-of-week
+    document.getElementById('arScheduleFrequency').onchange = function() {
+        document.getElementById('arScheduleDayGroup').style.display = this.value === 'weekly' ? '' : 'none';
+    };
+
+    // Reset UI state (drain sim-test pollers before destroying their cards —
+    // otherwise they keep hitting /status against detached DOM; round-3)
+    _arStopAllSimPollers();
+    document.getElementById('arProgressArea').style.display = 'none';
+    document.getElementById('arResultsArea').style.display = 'none';
+    document.getElementById('arProgressSteps').textContent = '';
+    document.getElementById('arSuggestionCards').textContent = '';
+    document.getElementById('arTokenEstimate').textContent = '';
+    document.getElementById('arPromptsArea').style.display = 'none';
+    document.getElementById('arGoldenCallId').value = '';
+    document.getElementById('arGoldenNotes').value = '';
+    var runBtn = document.getElementById('arRunBtn');
+    runBtn.disabled = false;
+    _arSetBtnContent(runBtn, 'bi bi-play-fill', ' Run Now');
+
+    // Load advanced section data
+    loadGoldenSet();
+    loadMethodology();
+    loadTokenEstimate();
+
+    // Load history when history tab is shown (prevent duplicate listeners)
+    var historyTab = document.getElementById('ar-history-tab');
+    if (!historyTab._arListenerAdded) {
+        historyTab.addEventListener('shown.bs.tab', function() { loadAutoResearchResults(); _arClearPending(); });
+        historyTab._arListenerAdded = true;
+    }
+
+    // Load schedule when schedule tab is shown (prevent duplicate listeners)
+    var scheduleTab = document.getElementById('ar-schedule-tab');
+    if (!scheduleTab._arListenerAdded) {
+        scheduleTab.addEventListener('shown.bs.tab', function() { loadAutoResearchSchedule(); });
+        scheduleTab._arListenerAdded = true;
+    }
+
+}
+
+function runAutoResearch() {
+    if (!_agentId) return;
+    var steps = [];
+    if (document.getElementById('arStepHarvest').checked) steps.push('harvest');
+    if (document.getElementById('arStepAnalyze').checked) steps.push('analyze');
+    if (document.getElementById('arStepSuggest').checked) steps.push('suggest');
+    if (document.getElementById('arStepScore').checked) steps.push('score');
+    if (steps.length === 0) { alert('Please select at least one step.'); return; }
+
+    var provider = document.getElementById('arProvider').value;
+    var model = document.getElementById('arModel').value;
+    if (!provider || !model) { alert('Please select a provider and model.'); return; }
+
+    var transcriptCount = parseInt(document.getElementById('arTranscriptCount').value) || 20;
+    if (transcriptCount < 5) transcriptCount = 5;
+    if (transcriptCount > 50) transcriptCount = 50;
+
+    var btn = document.getElementById('arRunBtn');
+    btn.disabled = true;
+    _arSetBtnSpinner(btn, ' Running...');
+
+    // Show progress area
+    var progressArea = document.getElementById('arProgressArea');
+    var progressSteps = document.getElementById('arProgressSteps');
+    progressArea.style.display = '';
+    progressSteps.textContent = '';
+    _arStopAllSimPollers();
+    document.getElementById('arResultsArea').style.display = 'none';
+    document.getElementById('arSuggestionCards').textContent = '';
+
+    // Build initial step indicators
+    var stepLabels = { harvest: 'Harvest transcripts', analyze: 'Analyze patterns', suggest: 'Generate suggestions', score: 'Score suggestions' };
+    var stepElements = {};
+    steps.forEach(function(s) {
+        var row = document.createElement('div');
+        row.className = 'd-flex align-items-center gap-2 py-1';
+        var icon = document.createElement('span');
+        icon.className = 'text-muted';
+        icon.textContent = '\u25CB';
+        row.appendChild(icon);
+        var label = document.createElement('span');
+        label.className = 'small';
+        label.textContent = stepLabels[s] || s;
+        row.appendChild(label);
+        progressSteps.appendChild(row);
+        stepElements[s] = { row: row, icon: icon, label: label };
+    });
+
+    function resetRunBtn() {
+        btn.disabled = false;
+        _arSetBtnContent(btn, 'bi bi-play-fill', ' Run Now');
+    }
+
+    // POST to start the run
+    fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _csrfToken },
+        body: JSON.stringify({ steps: steps, provider: provider, model: model, transcript_count: transcriptCount, engine: (document.querySelector('input[name="arEngine"]:checked') || {}).value || 'opro', token_budget: parseInt(document.getElementById('arTokenBudget').value) || 60000, filters: { min_duration: parseInt(document.getElementById('arMinDuration').value) || 0, direction: document.getElementById('arDirection').value || '', start_date: document.getElementById('arStartDate').value || '', end_date: document.getElementById('arEndDate').value || '', harvest_mode: (document.getElementById('arHarvestMode') || {}).value || 'recent' } })
+    }).then(function(resp) { return resp.json(); }).then(function(data) {
+        if (!data.success) {
+            resetRunBtn();
+            if (data.retry_after) {
+                // Cooldown — not an error. Show a calm in-modal notice built with safe
+                // DOM methods (alert-permanent so main.js doesn't auto-dismiss it and
+                // break the modal on reopen).
+                var secs = parseInt(data.retry_after, 10) || 0;
+                progressArea.style.display = '';
+                progressSteps.textContent = '';
+                var note = document.createElement('div');
+                note.className = 'alert alert-info alert-permanent mb-0 py-2 small d-flex align-items-center gap-2';
+                var ic = document.createElement('i');
+                ic.className = 'bi bi-hourglass-split';
+                note.appendChild(ic);
+                var sp = document.createElement('span');
+                sp.textContent = 'AutoResearch was run recently. Please wait ' + secs + ' second' + (secs === 1 ? '' : 's') + ' before running again.';
+                note.appendChild(sp);
+                progressSteps.appendChild(note);
+            } else {
+                progressArea.style.display = 'none';
+                alert('Failed to start: ' + (data.error || 'Unknown error'));
+            }
+            return;
+        }
+        var runId = data.run_id;
+        // Open SSE stream for progress
+        if (_arEventSource) { _arEventSource.close(); }
+        _arEventSource = new EventSource(_arBaseUrl + '/' + _agentId + '/autoresearch/run/' + runId + '/progress');
+
+        _arEventSource.addEventListener('step', function(e) {
+            try {
+                var d = JSON.parse(e.data);
+                var el = stepElements[d.step];
+                if (!el) return;
+                if (d.status === 'running') {
+                    el.icon.textContent = '\u23F3';
+                    el.icon.className = 'text-primary';
+                    el.label.textContent = d.message || (stepLabels[d.step] + '...');
+                } else if (d.status === 'done') {
+                    el.icon.textContent = '\u2705';
+                    el.icon.className = '';
+                    el.label.textContent = d.message || (stepLabels[d.step] + ' - done');
+                } else if (d.status === 'failed') {
+                    el.icon.textContent = '\u274C';
+                    el.icon.className = 'text-danger';
+                    el.label.textContent = d.message || (stepLabels[d.step] + ' - failed');
+                }
+            } catch (err) { /* ignore parse errors */ }
+        });
+
+        _arEventSource.addEventListener('complete', function(e) {
+            _arEventSource.close();
+            _arEventSource = null;
+            resetRunBtn();
+            try {
+                var d = JSON.parse(e.data);
+                if (d.result_id) {
+                    _arLoadRunResult(d.result_id);
+                }
+            } catch (err) { /* ignore */ }
+        });
+
+        _arEventSource.addEventListener('error', function(e) {
+            if (e.data) {
+                try {
+                    var d = JSON.parse(e.data);
+                    var failedStep = d.step;
+                    if (failedStep && stepElements[failedStep]) {
+                        stepElements[failedStep].icon.textContent = '\u274C';
+                        stepElements[failedStep].icon.className = 'text-danger';
+                        stepElements[failedStep].label.textContent = d.error || 'Error';
+                    }
+                } catch (err) { /* ignore */ }
+            }
+            _arEventSource.close();
+            _arEventSource = null;
+            resetRunBtn();
+        });
+
+        _arEventSource.onerror = function() {
+            _arEventSource.close();
+            _arEventSource = null;
+            resetRunBtn();
+        };
+    }).catch(function(err) {
+        resetRunBtn();
+        alert('Error: ' + err.message);
+    });
+}
+
+function _arSimpleDiff(oldText, newText) {
+    var oldLines = (oldText || '').split('\n');
+    var newLines = (newText || '').split('\n');
+    // LCS-based diff for quality results
+    var m = oldLines.length, n = newLines.length;
+    // Build LCS table
+    var dp = [];
+    for (var i = 0; i <= m; i++) { dp[i] = []; for (var j = 0; j <= n; j++) dp[i][j] = 0; }
+    for (var i = 1; i <= m; i++) {
+        for (var j = 1; j <= n; j++) {
+            if (oldLines[i-1] === newLines[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+            else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+        }
+    }
+    // Backtrack to produce diff
+    var i = m, j = n;
+    var stack = [];
+    while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && oldLines[i-1] === newLines[j-1]) {
+            stack.push(' ' + oldLines[i-1]);
+            i--; j--;
+        } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+            stack.push('+' + newLines[j-1]);
+            j--;
+        } else {
+            stack.push('-' + oldLines[i-1]);
+            i--;
+        }
+    }
+    stack.reverse();
+    return stack;
+}
+
+// Plain-text serializers for the copy buttons (client-rendered surface — the
+// text is built from the same fetched JSON the cards render, so it matches
+// what's on screen).
+function _arBuildSuggestionText(s, idx) {
+    var lines = ['=== AutoResearch Suggestion ' + (idx + 1) + ' ==='];
+    var meta = [];
+    if (s.confidence) meta.push('Confidence: ' + s.confidence);
+    if (s.score !== undefined && s.score !== null) meta.push('Score: ' + (s.score * 100).toFixed(0) + '%');
+    if (meta.length) lines.push(meta.join(' | '));
+    if (s.rationale) lines.push('', 'Rationale: ' + s.rationale);
+    if (s.issues_addressed && s.issues_addressed.length) lines.push('Issues addressed: ' + s.issues_addressed.join(', '));
+    if (s.changes && s.changes.length) {
+        lines.push('', 'Changes:');
+        s.changes.forEach(function(c) { lines.push('  - ' + c); });
+    }
+    if (s.warnings && s.warnings.length) {
+        lines.push('', 'Warnings:');
+        s.warnings.forEach(function(w) { lines.push('  ! ' + w); });
+    }
+    if (s.prompt) lines.push('', '--- Suggested Prompt ---', s.prompt);
+    return lines.join('\n');
+}
+
+function _arBuildResultText(result) {
+    var lines = ['=== AutoResearch Analysis ==='];
+    var meta = [];
+    if (result.provider) meta.push(result.provider);
+    if (result.model) meta.push(result.model);
+    if (result.transcript_count) meta.push(result.transcript_count + ' calls analyzed');
+    if (result.created_at) meta.push(result.created_at);
+    if (meta.length) lines.push(meta.join(' | '));
+    var analysis = result.analysis || {};
+    if (analysis.overall_score !== undefined && analysis.overall_score !== null) {
+        // overall_score is a 0-1 fraction (see the analysis prompt's JSON
+        // sample) — same ×100 rendering as the on-screen badge below.
+        lines.push('Overall score: ' + (analysis.overall_score * 100).toFixed(0) + '%');
+    }
+    if (analysis.summary) lines.push('', 'Summary: ' + analysis.summary);
+    if (analysis.issues_found && analysis.issues_found.length) {
+        lines.push('', 'Issues found:');
+        analysis.issues_found.forEach(function(i) {
+            lines.push('  [' + (i.severity || 'info') + ']' + (i.category ? ' (' + i.category + ')' : '') + ' ' + (i.description || ''));
+        });
+    }
+    if (analysis.patterns && analysis.patterns.length) {
+        lines.push('', 'Patterns:');
+        analysis.patterns.forEach(function(p) {
+            lines.push('  [' + (p.type || 'pattern') + '] ' + (p.description || ''));
+        });
+    }
+    (result.suggestions || []).forEach(function(s, idx) {
+        lines.push('', _arBuildSuggestionText(s, idx));
+    });
+    return lines.join('\n');
+}
+
+function _arFlashCopied(btn, labelHtml) {
+    btn.innerHTML = '<i class="bi bi-clipboard-check"></i> Copied';
+    setTimeout(function() { btn.innerHTML = labelHtml; }, 2000);
+}
+
+function _arRenderSuggestionCard(s, idx, container, showApply, resultId) {
+    var card = document.createElement('div');
+    card.className = 'card mb-2';
+    card.style.cssText = 'background-color: var(--bg-tertiary); border-color: var(--border-color);';
+    var cardBody = document.createElement('div');
+    cardBody.className = 'card-body py-2 px-3';
+    // Header with title + badges
+    var header = document.createElement('div');
+    header.className = 'd-flex flex-wrap align-items-center gap-2 mb-2';
+    var title = document.createElement('strong');
+    title.className = 'small';
+    title.textContent = 'Suggestion ' + (idx + 1);
+    header.appendChild(title);
+    // Copy button (right-aligned) — copies prompt + rationale + changes as text
+    var copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'btn btn-sm btn-outline-secondary py-0 ms-auto';
+    var copyLabel = '<i class="bi bi-clipboard"></i> Copy';
+    copyBtn.innerHTML = copyLabel;
+    copyBtn.title = 'Copy this suggestion (prompt, rationale, changes) as plain text';
+    copyBtn.addEventListener('click', function() {
+        copyToClipboard(_arBuildSuggestionText(s, idx));
+        _arFlashCopied(copyBtn, copyLabel);
+    });
+    header.appendChild(copyBtn);
+    if (s.confidence) {
+        var confBadge = document.createElement('span');
+        confBadge.className = 'badge text-white';
+        if (s.confidence === 'high') confBadge.classList.add('bg-success');
+        else if (s.confidence === 'medium') confBadge.style.backgroundColor = '#e67e22';
+        else confBadge.classList.add('bg-secondary');
+        confBadge.textContent = s.confidence;
+        header.appendChild(confBadge);
+    }
+    if (s.score !== undefined && s.score !== null) {
+        var scoreBadge = document.createElement('span');
+        scoreBadge.className = 'badge text-white';
+        if (s.score >= 0.7) scoreBadge.classList.add('bg-success');
+        else if (s.score >= 0.4) scoreBadge.style.backgroundColor = '#e67e22';
+        else scoreBadge.classList.add('bg-danger');
+        scoreBadge.textContent = 'Score: ' + (s.score * 100).toFixed(0) + '%';
+        header.appendChild(scoreBadge);
+    }
+    cardBody.appendChild(header);
+    // Rationale
+    if (s.rationale) {
+        var ratP = document.createElement('p');
+        ratP.className = 'small text-muted mb-2';
+        ratP.textContent = s.rationale;
+        cardBody.appendChild(ratP);
+    }
+    // Issues addressed
+    if (s.issues_addressed && s.issues_addressed.length > 0) {
+        var issuesDiv = document.createElement('div');
+        issuesDiv.className = 'mb-2';
+        s.issues_addressed.forEach(function(issue) {
+            var tag = document.createElement('span');
+            tag.className = 'badge bg-secondary me-1 mb-1';
+            tag.style.fontSize = '0.7rem';
+            tag.textContent = issue;
+            issuesDiv.appendChild(tag);
+        });
+        cardBody.appendChild(issuesDiv);
+    }
+    // Changes list
+    if (s.changes && s.changes.length > 0) {
+        var changesList = document.createElement('ul');
+        changesList.className = 'small mb-2';
+        s.changes.forEach(function(c) {
+            var li = document.createElement('li');
+            li.textContent = c;
+            changesList.appendChild(li);
+        });
+        cardBody.appendChild(changesList);
+    }
+    // Guardrail warnings (advisory — never block)
+    if (s.warnings && s.warnings.length > 0) {
+        var warnDiv = document.createElement('div');
+        warnDiv.className = 'alert alert-warning alert-permanent py-1 px-2 mb-2';
+        warnDiv.style.fontSize = '0.75rem';
+        s.warnings.forEach(function(w) {
+            var line = document.createElement('div');
+            line.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>';
+            var span = document.createElement('span');
+            span.textContent = w;
+            line.appendChild(span);
+            warnDiv.appendChild(line);
+        });
+        cardBody.appendChild(warnDiv);
+    }
+    // Comparison section + Apply button
+    if (s.prompt) {
+        // --- Comparison section (always visible) ---
+        var compDiv = document.createElement('div');
+        compDiv.className = 'mt-2';
+        compDiv.style.cssText = 'border:1px solid var(--border-color); border-radius:0.375rem; overflow:hidden;';
+
+        // Tab buttons
+        var tabBar = document.createElement('div');
+        tabBar.className = 'd-flex';
+        tabBar.style.cssText = 'background:var(--bg-tertiary); border-bottom:1px solid var(--border-color);';
+        var tabSbs = document.createElement('button');
+        tabSbs.type = 'button';
+        tabSbs.className = 'btn btn-sm flex-fill';
+        tabSbs.style.cssText = 'border:none; border-bottom:2px solid var(--brand-primary); font-weight:600; font-size:0.8rem; border-radius:0; background:transparent; color:var(--text-primary);';
+        tabSbs.textContent = 'Side by Side';
+        var tabDiff = document.createElement('button');
+        tabDiff.type = 'button';
+        tabDiff.className = 'btn btn-sm flex-fill';
+        tabDiff.style.cssText = 'border:none; border-bottom:2px solid transparent; font-size:0.8rem; border-radius:0; background:transparent; color:var(--text-muted);';
+        tabDiff.textContent = 'Diff';
+        tabBar.appendChild(tabSbs);
+        tabBar.appendChild(tabDiff);
+        compDiv.appendChild(tabBar);
+
+        // Side-by-side panel
+        var sbsPanel = document.createElement('div');
+        sbsPanel.className = 'row g-0';
+        sbsPanel.style.padding = '8px';
+        var preStyle = 'max-height:200px; overflow:auto; white-space:pre-wrap; font-size:0.75rem; background:var(--bg-card); border:1px solid var(--border-color); border-radius:0.375rem; padding:8px; margin:0;';
+        var colLeft = document.createElement('div');
+        colLeft.className = 'col-md-6 pe-1';
+        var lblLeft = document.createElement('label');
+        lblLeft.className = 'form-label small fw-semibold mb-1';
+        lblLeft.textContent = 'Current Prompt';
+        var preLeft = document.createElement('pre');
+        preLeft.style.cssText = preStyle;
+        preLeft.textContent = _arCurrentPrompt;
+        colLeft.appendChild(lblLeft);
+        colLeft.appendChild(preLeft);
+        var colRight = document.createElement('div');
+        colRight.className = 'col-md-6 ps-1';
+        var lblRight = document.createElement('label');
+        lblRight.className = 'form-label small fw-semibold mb-1';
+        lblRight.textContent = 'Suggested Prompt';
+        var preRight = document.createElement('pre');
+        preRight.style.cssText = preStyle;
+        preRight.textContent = s.prompt;
+        colRight.appendChild(lblRight);
+        colRight.appendChild(preRight);
+        sbsPanel.appendChild(colLeft);
+        sbsPanel.appendChild(colRight);
+        compDiv.appendChild(sbsPanel);
+
+        // Diff panel (hidden by default)
+        var diffPanel = document.createElement('div');
+        diffPanel.style.cssText = 'display:none; padding:8px;';
+        var diffPre = document.createElement('pre');
+        diffPre.style.cssText = 'max-height:200px; overflow:auto; font-size:0.75rem; margin:0; padding:8px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:0.375rem;';
+        var currentPrompt = _arCurrentPrompt;
+        var diffLines = _arSimpleDiff(currentPrompt, s.prompt);
+        _renderDiffLines(diffPre, diffLines);
+        diffPanel.appendChild(diffPre);
+        compDiv.appendChild(diffPanel);
+
+        // Tab switching
+        tabSbs.addEventListener('click', function() {
+            sbsPanel.style.display = '';
+            diffPanel.style.display = 'none';
+            tabSbs.style.borderBottomColor = 'var(--brand-primary)';
+            tabSbs.style.fontWeight = '600';
+            tabSbs.style.color = 'var(--text-primary)';
+            tabDiff.style.borderBottomColor = 'transparent';
+            tabDiff.style.fontWeight = '';
+            tabDiff.style.color = 'var(--text-muted)';
+        });
+        tabDiff.addEventListener('click', function() {
+            sbsPanel.style.display = 'none';
+            diffPanel.style.display = '';
+            tabDiff.style.borderBottomColor = 'var(--brand-primary)';
+            tabDiff.style.fontWeight = '600';
+            tabDiff.style.color = 'var(--text-primary)';
+            tabSbs.style.borderBottomColor = 'transparent';
+            tabSbs.style.fontWeight = '';
+            tabSbs.style.color = 'var(--text-muted)';
+        });
+
+        cardBody.appendChild(compDiv);
+
+        // Apply + Test-in-Simulation buttons (below the comparison)
+        if (showApply) {
+            var btnRow = document.createElement('div');
+            btnRow.className = 'd-flex flex-wrap gap-2 mt-2';
+            var applyBtn = document.createElement('button');
+            applyBtn.type = 'button';
+            applyBtn.className = 'btn btn-sm';
+            applyBtn.style.cssText = 'background-color:var(--brand-primary); color:#fff; border-color:var(--brand-primary); font-weight:600;';
+            applyBtn.innerHTML = '<i class="bi bi-check-lg"></i> Apply to Live Prompt\u2026';
+            applyBtn.addEventListener('click', function() { openApplyModal(resultId, idx); });
+            btnRow.appendChild(applyBtn);
+            if (_canSimCreate) {
+                var simBtn = document.createElement('button');
+                simBtn.type = 'button';
+                simBtn.className = 'btn btn-outline-secondary btn-sm';
+                simBtn.innerHTML = '<i class="bi bi-collection-play"></i> Test in Simulation\u2026';
+                simBtn.addEventListener('click', function() { openSimTestModal(resultId, idx); });
+                btnRow.appendChild(simBtn);
+            }
+            cardBody.appendChild(btnRow);
+        }
+        // Simulation tests already run for this suggestion
+        _arRenderSimTests(s, idx, cardBody, resultId);
+    }
+    card.appendChild(cardBody);
+    container.appendChild(card);
+}
+
+function _arRenderSimTests(s, idx, cardBody, resultId) {
+    var tests = (s.sim_tests || []).filter(function(t) { return t && t.suite_run_id; });
+    if (tests.length === 0) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'mt-2';
+    var head = document.createElement('div');
+    head.className = 'small fw-semibold mb-1';
+    head.innerHTML = '<i class="bi bi-collection-play me-1"></i>Simulation tests';
+    wrap.appendChild(head);
+    tests.forEach(function(t) {
+        var row = document.createElement('div');
+        row.className = 'small d-flex flex-wrap align-items-center gap-2 mb-1';
+        var name = document.createElement('span');
+        name.textContent = (t.suite_name || t.suite_id) + (t.version_label ? ' (' + t.version_label + ')' : '');
+        row.appendChild(name);
+        var status = document.createElement('span');
+        status.className = 'text-muted';
+        status.textContent = 'checking\u2026';
+        row.appendChild(status);
+        var link = document.createElement('a');
+        link.href = '/simulation?suite_run=' + encodeURIComponent(t.suite_run_id);
+        link.className = 'small';
+        link.textContent = 'View in Simulation';
+        row.appendChild(link);
+        wrap.appendChild(row);
+        if (_canSimView) {
+            _arPollSimTest(t, status, row);
+        } else {
+            status.textContent = '';
+        }
+    });
+    cardBody.appendChild(wrap);
+}
+
+function _arDescribeSuiteRun(run) {
+    var judged = (run.total_runs || 0) - (run.error_count || 0);
+    if (run.status === 'running') return 'running\u2026';
+    var label = run.status === 'completed' ? '' : '[' + run.status + '] ';
+    if (run.pass_rate === null || run.pass_rate === undefined || judged <= 0) {
+        // "all attempts errored" is only accurate for completed runs; an
+        // orchestrator-error/interrupted run never aggregated at all.
+        return label + (run.status === 'completed' ? 'no verdict (all attempts errored)' : 'no verdict');
+    }
+    var txt = label + 'passed ' + Math.round(run.pass_rate * 100) + '%';
+    if (run.avg_score !== null && run.avg_score !== undefined) txt += ' \u00b7 avg ' + run.avg_score;
+    if (run.error_count) txt += ' \u00b7 ' + run.error_count + ' attempt' + (run.error_count !== 1 ? 's' : '') + ' errored';
+    return txt;
+}
+
+function _arPollSimTest(t, statusEl, row) {
+    // Replace-on-register: card re-renders (new run started, History Details
+    // re-expanded) hand the poller to the NEWEST DOM elements and clear the
+    // old interval — no duplicate timers, no stale rows that never update.
+    _arStopSimPoller(t.suite_run_id);
+    var finishedCand = null, finishedBase = null, compared = false;
+    function render() {
+        var parts = [];
+        if (finishedCand) parts.push('candidate: ' + _arDescribeSuiteRun(finishedCand));
+        if (t.baseline_run_id && finishedBase) parts.push('baseline: ' + _arDescribeSuiteRun(finishedBase));
+        statusEl.textContent = parts.join(' \u00b7 ');
+    }
+    function maybeCompare() {
+        // Once-guard: overlapping ticks (a /status round-trip slower than the
+        // 5s interval) must not append duplicate A/B lines (round-3 review).
+        if (compared) return;
+        // Compare only when BOTH runs completed cleanly with verdicts.
+        if (!t.baseline_run_id || !finishedCand || !finishedBase) return;
+        if (finishedCand.status !== 'completed' || finishedBase.status !== 'completed') return;
+        if (finishedCand.pass_rate === null || finishedBase.pass_rate === null) return;
+        compared = true;
+        fetch('/api/simulation/suite-runs/' + encodeURIComponent(t.suite_run_id) + '/compare?against=' + encodeURIComponent(t.baseline_run_id))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data.success || !data.headline) return;
+                var h = data.headline;
+                var cmp = document.createElement('span');
+                cmp.className = (h.pass_rate_to !== null && h.pass_rate_from !== null && h.pass_rate_to >= h.pass_rate_from) ? 'text-success fw-semibold' : 'text-danger fw-semibold';
+                var pct = function(v) { return (v === null || v === undefined) ? '\u2014' : Math.round(v * 100) + '%'; };
+                cmp.textContent = 'A/B: pass rate ' + pct(h.pass_rate_from) + ' \u2192 ' + pct(h.pass_rate_to);
+                if (h.comparison_warning) {
+                    cmp.className = 'text-warning';
+                    cmp.title = h.comparison_warning;
+                    cmp.textContent += ' \u26a0';
+                }
+                row.appendChild(cmp);
+            }).catch(function() {});
+    }
+    function tick() {
+        if (document.hidden) return;
+        var pending = [];
+        if (!finishedCand || finishedCand.status === 'running') pending.push(['cand', t.suite_run_id]);
+        if (t.baseline_run_id && (!finishedBase || finishedBase.status === 'running')) pending.push(['base', t.baseline_run_id]);
+        if (pending.length === 0) {
+            _arStopSimPoller(t.suite_run_id);
+            maybeCompare();
+            return;
+        }
+        pending.forEach(function(pair) {
+            fetch('/api/simulation/suite-runs/' + encodeURIComponent(pair[1]) + '/status')
+                .then(function(r) {
+                    if (r.status === 404 || r.status === 403) {
+                        // Terminal: never spin on a pruned run or revoked access.
+                        _arStopSimPoller(t.suite_run_id);
+                        statusEl.textContent = (r.status === 404) ? 'run no longer exists' : 'no permission to view results';
+                        return null;
+                    }
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (!data || !data.success || !data.suite_run) return;
+                    if (pair[0] === 'cand') finishedCand = data.suite_run; else finishedBase = data.suite_run;
+                    render();
+                    // Terminal = anything not running (completed / cancelled /
+                    // aborted_balance / error / interrupted) \u2014 status allow-lists
+                    // rot; the sim page's own poller uses the same rule.
+                    var candDone = finishedCand && finishedCand.status !== 'running';
+                    var baseDone = !t.baseline_run_id || (finishedBase && finishedBase.status !== 'running');
+                    if (candDone && baseDone) {
+                        _arStopSimPoller(t.suite_run_id);
+                        maybeCompare();
+                    }
+                }).catch(function() {});
+        });
+    }
+    _arSimPollers.set(t.suite_run_id, setInterval(tick, 5000));
+    tick();
+}
+
+function _arRenderAnalysisSummary(result, container) {
+    var analysis = result.analysis;
+    if (!analysis) return;
+    // Copy-full-analysis button (analysis + every suggestion, one paste)
+    var copyWrap = document.createElement('div');
+    copyWrap.className = 'd-flex justify-content-end mb-1';
+    var copyAllBtn = document.createElement('button');
+    copyAllBtn.type = 'button';
+    copyAllBtn.className = 'btn btn-sm btn-outline-secondary py-0';
+    var copyAllLabel = '<i class="bi bi-clipboard"></i> Copy Full Analysis';
+    copyAllBtn.innerHTML = copyAllLabel;
+    copyAllBtn.title = 'Copy the whole analysis and all suggestions as plain text';
+    copyAllBtn.addEventListener('click', function() {
+        copyToClipboard(_arBuildResultText(result));
+        _arFlashCopied(copyAllBtn, copyAllLabel);
+    });
+    copyWrap.appendChild(copyAllBtn);
+    container.appendChild(copyWrap);
+    // Run metadata line (provider, model, tokens)
+    var metaParts = [];
+    if (result.provider) metaParts.push(result.provider);
+    if (result.model) metaParts.push(result.model);
+    if (result.token_estimate) metaParts.push(result.token_estimate.toLocaleString() + ' tokens');
+    if (result.harvest_mode === 'problems') metaParts.push('problem-weighted harvest');
+    if (metaParts.length > 0) {
+        var metaDiv = document.createElement('div');
+        metaDiv.className = 'small text-muted mb-1';
+        metaDiv.textContent = metaParts.join(' \u00b7 ');
+        container.appendChild(metaDiv);
+    }
+    // Steps status line
+    if (result.steps_run) {
+        var stepsDiv = document.createElement('div');
+        stepsDiv.className = 'small text-muted mb-2';
+        var completedCount = Array.isArray(result.steps_completed) ? result.steps_completed.length : (result.steps_completed || 0);
+        var failedCount = typeof result.steps_failed === 'object' ? Object.keys(result.steps_failed || {}).length : (result.steps_failed || 0);
+        var runCount = Array.isArray(result.steps_run) ? result.steps_run.length : (result.steps_run || 0);
+        stepsDiv.textContent = 'Steps: ' + completedCount + ' completed';
+        if (failedCount > 0) stepsDiv.textContent += ', ' + failedCount + ' failed';
+        stepsDiv.textContent += ' of ' + runCount + ' run';
+        container.appendChild(stepsDiv);
+    }
+    // Overall score
+    if (analysis.overall_score !== undefined) {
+        var scoreDiv = document.createElement('div');
+        scoreDiv.className = 'd-flex align-items-center gap-2 mb-2';
+        var scoreLabel = document.createElement('span');
+        scoreLabel.className = 'small fw-semibold';
+        scoreLabel.textContent = 'Overall Score:';
+        scoreDiv.appendChild(scoreLabel);
+        var scoreBadge = document.createElement('span');
+        var pct = (analysis.overall_score * 100).toFixed(0);
+        scoreBadge.className = 'badge text-white';
+        if (analysis.overall_score >= 0.7) scoreBadge.classList.add('bg-success');
+        else if (analysis.overall_score >= 0.4) scoreBadge.style.backgroundColor = '#e67e22';
+        else scoreBadge.classList.add('bg-danger');
+        scoreBadge.textContent = pct + '%';
+        scoreDiv.appendChild(scoreBadge);
+        container.appendChild(scoreDiv);
+    }
+    // Summary
+    if (analysis.summary) {
+        var summaryP = document.createElement('p');
+        summaryP.className = 'small mb-2';
+        summaryP.textContent = analysis.summary;
+        container.appendChild(summaryP);
+    }
+    // Issues found
+    if (analysis.issues_found && analysis.issues_found.length > 0) {
+        var issuesLabel = document.createElement('strong');
+        issuesLabel.className = 'small';
+        issuesLabel.textContent = 'Issues Found';
+        container.appendChild(issuesLabel);
+        var issuesList = document.createElement('div');
+        issuesList.className = 'mb-2';
+        analysis.issues_found.forEach(function(issue) {
+            var row = document.createElement('div');
+            row.className = 'small py-1';
+            row.style.borderBottom = '1px solid var(--border-color)';
+            var sevBadge = document.createElement('span');
+            sevBadge.className = 'badge text-white me-1';
+            if (issue.severity === 'high') sevBadge.classList.add('bg-danger');
+            else if (issue.severity === 'medium') sevBadge.style.backgroundColor = '#e67e22';
+            else sevBadge.classList.add('bg-secondary');
+            sevBadge.textContent = issue.severity || 'info';
+            row.appendChild(sevBadge);
+            if (issue.category) {
+                var catBadge = document.createElement('span');
+                catBadge.className = 'badge bg-info text-white me-1';
+                catBadge.textContent = issue.category;
+                row.appendChild(catBadge);
+            }
+            var descSpan = document.createElement('span');
+            descSpan.textContent = issue.description || '';
+            row.appendChild(descSpan);
+            issuesList.appendChild(row);
+        });
+        container.appendChild(issuesList);
+    }
+    // Patterns
+    if (analysis.patterns && analysis.patterns.length > 0) {
+        var patternsLabel = document.createElement('strong');
+        patternsLabel.className = 'small';
+        patternsLabel.textContent = 'Patterns';
+        container.appendChild(patternsLabel);
+        var patternsList = document.createElement('div');
+        patternsList.className = 'mb-2';
+        analysis.patterns.forEach(function(p) {
+            var row = document.createElement('div');
+            row.className = 'small py-1';
+            row.style.borderBottom = '1px solid var(--border-color)';
+            var typeBadge = document.createElement('span');
+            typeBadge.className = 'badge bg-secondary me-1';
+            typeBadge.textContent = p.type || 'pattern';
+            row.appendChild(typeBadge);
+            var descSpan = document.createElement('span');
+            descSpan.textContent = p.description || '';
+            row.appendChild(descSpan);
+            patternsList.appendChild(row);
+        });
+        container.appendChild(patternsList);
+    }
+}
+
+function _arLoadRunResult(resultId) {
+    fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/results/' + resultId, {
+        headers: { 'X-CSRFToken': _csrfToken }
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        if (!data.success || !data.result) return;
+        var result = data.result;
+        var area = document.getElementById('arResultsArea');
+        var container = document.getElementById('arSuggestionCards');
+        area.style.display = '';
+        container.textContent = '';
+        // Analysis summary
+        _arRenderAnalysisSummary(result, container);
+        // Suggestions
+        var suggestions = result.suggestions || [];
+        if (suggestions.length === 0) return;
+        var sugLabel = document.createElement('label');
+        sugLabel.className = 'form-label fw-semibold small mt-2';
+        sugLabel.textContent = 'Suggestions (' + suggestions.length + ')';
+        container.appendChild(sugLabel);
+        suggestions.forEach(function(s, idx) {
+            _arRenderSuggestionCard(s, idx, container, true, result.result_id || resultId);
+        });
+    }).catch(function() { /* silent */ });
+}
+
+function loadAutoResearchResults() {
+    if (!_agentId) return;
+    var loading = document.getElementById('arHistoryLoading');
+    var empty = document.getElementById('arHistoryEmpty');
+    var table = document.getElementById('arHistoryTable');
+    var tbody = document.getElementById('arHistoryTableBody');
+
+    loading.style.display = '';
+    empty.style.display = 'none';
+    table.style.display = 'none';
+    tbody.textContent = '';
+
+    fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/results', {
+        headers: { 'X-CSRFToken': _csrfToken }
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        loading.style.display = 'none';
+        if (!data.success || !data.results || data.results.length === 0) {
+            empty.style.display = '';
+            return;
+        }
+        table.style.display = '';
+        data.results.forEach(function(r) {
+            var tr = document.createElement('tr');
+
+            var tdDate = document.createElement('td');
+            tdDate.className = 'small';
+            tdDate.textContent = r.created_at ? formatDashboardDateTime(r.created_at, {seconds: true}) : '-';
+            tr.appendChild(tdDate);
+
+            var tdEngine = document.createElement('td');
+            tdEngine.className = 'd-none d-md-table-cell';
+            var engineBadge = document.createElement('span');
+            engineBadge.className = 'badge text-white ' + (r.engine === 'dspy' ? 'bg-primary' : 'bg-secondary');
+            engineBadge.textContent = (r.engine || 'opro').toUpperCase();
+            tdEngine.appendChild(engineBadge);
+            if (r.harvest_mode === 'problems') {
+                var hmBadge = document.createElement('span');
+                hmBadge.className = 'badge ms-1';
+                hmBadge.style.cssText = 'background:rgba(230,126,34,0.2);color:#e67e22;';
+                hmBadge.textContent = 'problem-weighted';
+                hmBadge.title = 'This run prioritised problem calls (errors, abandoned, negative sentiment)';
+                tdEngine.appendChild(hmBadge);
+            }
+            tr.appendChild(tdEngine);
+
+            var tdType = document.createElement('td');
+            var typeBadge = document.createElement('span');
+            typeBadge.className = 'badge text-white ' + (r.run_type === 'scheduled' ? 'bg-info' : 'bg-secondary');
+            typeBadge.textContent = r.run_type || 'manual';
+            tdType.appendChild(typeBadge);
+            tr.appendChild(tdType);
+
+            var tdStatus = document.createElement('td');
+            var statusBadge = document.createElement('span');
+            statusBadge.className = 'badge text-white';
+            if (r.status === 'completed') statusBadge.classList.add('bg-success');
+            else if (r.status === 'failed') statusBadge.classList.add('bg-danger');
+            else statusBadge.style.backgroundColor = '#e67e22';
+            statusBadge.textContent = r.status || 'unknown';
+            tdStatus.appendChild(statusBadge);
+            tr.appendChild(tdStatus);
+
+            var tdTranscripts = document.createElement('td');
+            tdTranscripts.className = 'small text-center d-none d-md-table-cell';
+            tdTranscripts.textContent = r.transcript_count || '-';
+            tr.appendChild(tdTranscripts);
+
+            var tdCount = document.createElement('td');
+            tdCount.className = 'small text-center';
+            var suggestions = r.suggestions || [];
+            tdCount.textContent = suggestions.length;
+            tr.appendChild(tdCount);
+
+            var tdActions = document.createElement('td');
+            var expandBtn = document.createElement('button');
+            expandBtn.type = 'button';
+            expandBtn.className = 'btn btn-outline-secondary btn-sm';
+            expandBtn.textContent = 'Details';
+            (function(result) {
+                expandBtn.addEventListener('click', function() {
+                    var existing = tr.nextElementSibling;
+                    if (existing && existing.classList.contains('ar-detail-row')) {
+                        existing.remove();
+                        return;
+                    }
+                    var detailTr = document.createElement('tr');
+                    detailTr.className = 'ar-detail-row';
+                    var detailTd = document.createElement('td');
+                    detailTd.colSpan = 7;
+                    detailTd.style.cssText = 'background: var(--bg-tertiary); padding: 0.75rem;';
+
+                    // Analysis summary
+                    _arRenderAnalysisSummary(result, detailTd);
+
+                    // Suggestions using shared renderer
+                    if (result.suggestions && result.suggestions.length > 0) {
+                        var sugLabel = document.createElement('strong');
+                        sugLabel.className = 'small';
+                        sugLabel.textContent = 'Suggestions (' + result.suggestions.length + ')';
+                        detailTd.appendChild(sugLabel);
+                        result.suggestions.forEach(function(s, idx) {
+                            _arRenderSuggestionCard(s, idx, detailTd, true, result.result_id);
+                        });
+                    } else {
+                        var noSug = document.createElement('span');
+                        noSug.className = 'text-muted small';
+                        noSug.textContent = 'No suggestions in this run.';
+                        detailTd.appendChild(noSug);
+                    }
+
+                    if (result.error) {
+                        var errDiv = document.createElement('div');
+                        errDiv.className = 'text-danger small mt-2';
+                        errDiv.textContent = 'Error: ' + result.error;
+                        detailTd.appendChild(errDiv);
+                    }
+
+                    detailTr.appendChild(detailTd);
+                    tr.after(detailTr);
+                });
+            })(r);
+            tdActions.appendChild(expandBtn);
+
+            var deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'btn btn-outline-danger btn-sm ms-1';
+            deleteBtn.title = 'Delete result';
+            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+            (function(result, row) {
+                deleteBtn.addEventListener('click', function() {
+                    if (!confirm('Delete this result? This cannot be undone.')) return;
+                    fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/results/' + result.result_id, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRFToken': _csrfToken }
+                    }).then(function(resp) { return resp.json(); }).then(function(data) {
+                        if (data.success) {
+                            var next = row.nextElementSibling;
+                            if (next && next.classList.contains('ar-detail-row')) next.remove();
+                            row.remove();
+                            if (tbody.children.length === 0) {
+                                table.style.display = 'none';
+                                empty.style.display = '';
+                            }
+                        } else {
+                            alert('Failed to delete: ' + (data.error || 'Unknown error'));
+                        }
+                    }).catch(function() { alert('Failed to delete result.'); });
+                });
+            })(r, tr);
+            tdActions.appendChild(deleteBtn);
+
+            tr.appendChild(tdActions);
+
+            tbody.appendChild(tr);
+
+            // ?result= deep link (Versions badge): surface the referenced run —
+            // highlight, scroll to it, and auto-open its details. One-shot.
+            if (_arDeepLinkTarget && r.result_id === _arDeepLinkTarget) {
+                _arDeepLinkTarget = '';
+                tr.style.outline = '2px solid #8b5cf6';
+                setTimeout(function() {
+                    tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    expandBtn.click();
+                }, 100);
+            }
+        });
+    }).catch(function() {
+        loading.style.display = 'none';
+        empty.style.display = '';
+    });
+}
+
+function loadAutoResearchSchedule() {
+    if (!_agentId) return;
+    fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/schedule', {
+        headers: { 'X-CSRFToken': _csrfToken }
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        if (!data.success) return;
+        var config = data.schedule || data.config || {};
+        document.getElementById('arScheduleEnabled').checked = !!config.enabled;
+        if (config.frequency) document.getElementById('arScheduleFrequency').value = config.frequency;
+        document.getElementById('arScheduleDayGroup').style.display = config.frequency === 'weekly' ? '' : 'none';
+        if (config.day !== undefined) document.getElementById('arScheduleDay').value = config.day;
+        if (config.time) document.getElementById('arScheduleTime').value = config.time;
+        if (config.provider) {
+            document.getElementById('arScheduleProvider').value = config.provider;
+            _arPopulateModels('arScheduleProvider', 'arScheduleModel');
+            if (config.model) document.getElementById('arScheduleModel').value = config.model;
+        }
+        if (config.transcript_count) document.getElementById('arScheduleTranscriptCount').value = config.transcript_count;
+        document.getElementById('arScheduleHarvestMode').value = config.harvest_mode || 'recent';
+        // Steps
+        var steps = config.steps || ['harvest', 'analyze', 'suggest', 'score'];
+        document.getElementById('arSchedStepHarvest').checked = steps.indexOf('harvest') !== -1;
+        document.getElementById('arSchedStepAnalyze').checked = steps.indexOf('analyze') !== -1;
+        document.getElementById('arSchedStepSuggest').checked = steps.indexOf('suggest') !== -1;
+        document.getElementById('arSchedStepScore').checked = steps.indexOf('score') !== -1;
+        // Status card
+        var statusCard = document.getElementById('arScheduleStatusCard');
+        var failureCount = data.failure_count || 0;
+        var maxFailures = data.max_failures || 3;
+        var lastError = data.last_error || '';
+        var hasRunToday = data.has_run_today || false;
+        var lastRun = data.last_run || '';
+        statusCard.style.display = '';
+        document.getElementById('arSchedLastRun').textContent = lastRun ? formatDashboardDate(lastRun) : 'Never';
+        document.getElementById('arSchedRunToday').textContent = hasRunToday ? 'Yes' : 'No';
+        document.getElementById('arSchedRunToday').className = 'badge ' + (hasRunToday ? 'bg-success' : 'bg-secondary');
+        var failBadge = document.getElementById('arSchedFailures');
+        failBadge.textContent = failureCount + ' / ' + maxFailures;
+        failBadge.className = 'badge ' + (failureCount === 0 ? 'bg-success' : failureCount < maxFailures ? 'bg-warning' : 'bg-danger');
+        var lastErrEl = document.getElementById('arSchedLastError');
+        if (lastError) { lastErrEl.textContent = 'Last error: ' + lastError; lastErrEl.style.display = ''; }
+        else { lastErrEl.style.display = 'none'; }
+        document.getElementById('arSchedDisabledAlert').style.display = failureCount >= maxFailures ? '' : 'none';
+    }).catch(function() { /* silent */ });
+}
+
+function saveAutoResearchSchedule() {
+    if (!_agentId) return;
+    var btn = document.getElementById('arSaveScheduleBtn');
+    btn.disabled = true;
+    _arSetBtnSpinner(btn, ' Saving...');
+
+    var schedSteps = [];
+    if (document.getElementById('arSchedStepHarvest').checked) schedSteps.push('harvest');
+    if (document.getElementById('arSchedStepAnalyze').checked) schedSteps.push('analyze');
+    if (document.getElementById('arSchedStepSuggest').checked) schedSteps.push('suggest');
+    if (document.getElementById('arSchedStepScore').checked) schedSteps.push('score');
+    var payload = {
+        enabled: document.getElementById('arScheduleEnabled').checked,
+        frequency: document.getElementById('arScheduleFrequency').value,
+        day: parseInt(document.getElementById('arScheduleDay').value),
+        time: document.getElementById('arScheduleTime').value,
+        provider: document.getElementById('arScheduleProvider').value,
+        model: document.getElementById('arScheduleModel').value,
+        transcript_count: parseInt(document.getElementById('arScheduleTranscriptCount').value) || 20,
+        harvest_mode: document.getElementById('arScheduleHarvestMode').value || 'recent',
+        steps: schedSteps
+    };
+
+    fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _csrfToken },
+        body: JSON.stringify(payload)
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        btn.disabled = false;
+        _arSetBtnContent(btn, 'bi bi-check-lg', ' Save Schedule');
+        if (data.success) {
+            _arSetBtnContent(btn, 'bi bi-check-lg', ' Saved!');
+            setTimeout(function() { _arSetBtnContent(btn, 'bi bi-check-lg', ' Save Schedule'); }, 2000);
+        } else {
+            alert('Failed: ' + (data.error || 'Unknown error'));
+        }
+    }).catch(function(err) {
+        btn.disabled = false;
+        _arSetBtnContent(btn, 'bi bi-check-lg', ' Save Schedule');
+        alert('Error: ' + err.message);
+    });
+}
+
+async function reenableSchedule() {
+    try {
+        var resp = await fetch(_arBaseUrl + '/' + _agentId + '/autoresearch/schedule/reenable', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': _csrfToken }
+        });
+        var data = await resp.json();
+        if (data.success) { loadAutoResearchSchedule(); }
+        else { alert('Failed: ' + (data.error || 'Unknown')); }
+    } catch (e) { alert('Error: ' + e.message); }
+}
+
+let _applyCtx = null;
+let _applyHideTimer = null;
+
+function openApplyModal(resultId, idx) {
+    if (!resultId) { alert('This run has no stored result id \u2014 re-run the analysis.'); return; }
+    if (_applyHideTimer) { clearTimeout(_applyHideTimer); _applyHideTimer = null; }
+    fetch(_arBaseUrl + '/' + encodeURIComponent(_agentId) + '/autoresearch/results/' + encodeURIComponent(resultId) + '/apply-preview?suggestion_index=' + idx, {
+        headers: { 'X-CSRFToken': _csrfToken, 'Accept': 'application/json' }
+    }).then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    }).then(function(data) {
+        if (!data.success) { alert(data.error || 'Could not load the preview'); return; }
+        _applyCtx = { resultId: resultId, idx: idx, suggestion: data.suggestion_prompt || '' };
+        document.getElementById('applyCurrentPrompt').textContent = data.current_prompt || '(empty)';
+        var ta = document.getElementById('applySuggestionText');
+        ta.value = data.suggestion_prompt || '';
+        var chg = document.getElementById('applyChangesList');
+        chg.textContent = '';
+        (data.changes || []).forEach(function(c) {
+            var li = document.createElement('li');
+            li.textContent = c;
+            chg.appendChild(li);
+        });
+        document.getElementById('applyAlready').style.display = data.already_applied ? '' : 'none';
+        // Guardrail warnings recomputed server-side against the CURRENT prompt
+        var gw = document.getElementById('applyGuardrailWarnings');
+        gw.textContent = '';
+        if (data.warnings && data.warnings.length > 0) {
+            data.warnings.forEach(function(w) {
+                var line = document.createElement('div');
+                line.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>';
+                var span = document.createElement('span');
+                span.textContent = w;
+                line.appendChild(span);
+                gw.appendChild(line);
+            });
+            gw.style.display = '';
+        } else {
+            gw.style.display = 'none';
+        }
+        var st = document.getElementById('applyResultStatus');
+        st.textContent = '';
+        st.className = 'small mt-2';
+        var btn = document.getElementById('applyConfirmBtn');
+        btn.disabled = !!data.already_applied;
+        _arSetBtnContent(btn, 'bi bi-check-lg', ' Apply to Live Prompt');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('applyConfirmModal')).show();
+    }).catch(function(err) { alert('Error: ' + err.message); });
+}
+
+var _simTestCtx = null;
+function openSimTestModal(resultId, idx) {
+    if (!_canSimCreate) return;
+    if (!resultId) { alert('This run has no stored result id — re-run the analysis.'); return; }
+    _simTestCtx = { resultId: resultId, idx: idx, suites: [] };
+    var st = document.getElementById('simTestStatus');
+    st.textContent = '';
+    st.className = 'small mt-2';
+    fetch(_arBaseUrl + '/' + encodeURIComponent(_agentId) + '/autoresearch/suites', {
+        headers: { 'X-CSRFToken': _csrfToken, 'Accept': 'application/json' }
+    }).then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    }).then(function(data) {
+        if (!data.success) { alert(data.error || 'Could not load test suites'); return; }
+        _simTestCtx.suites = data.suites || [];
+        var hasSuites = _simTestCtx.suites.length > 0;
+        document.getElementById('simTestNoSuites').style.display = hasSuites ? 'none' : '';
+        document.getElementById('simTestForm').style.display = hasSuites ? '' : 'none';
+        document.getElementById('simTestStartBtn').disabled = !hasSuites;
+        var sel = document.getElementById('simTestSuite');
+        sel.textContent = '';
+        _simTestCtx.suites.forEach(function(s) {
+            var opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name + ' (' + s.test_count + ' test' + (s.test_count !== 1 ? 's' : '') + ')';
+            sel.appendChild(opt);
+        });
+        _updateSimTestCostNote();
+        sel.onchange = _updateSimTestCostNote;
+        document.getElementById('simTestBaseline').onchange = _updateSimTestCostNote;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('simTestModal')).show();
+    }).catch(function(err) { alert('Error: ' + err.message); });
+}
+
+function _updateSimTestCostNote() {
+    if (!_simTestCtx) return;
+    var sel = document.getElementById('simTestSuite');
+    var suite = _simTestCtx.suites.find(function(s) { return s.id === sel.value; });
+    var note = document.getElementById('simTestCostNote');
+    var base = 'Runs are text-mode with simulated tools and use your configured simulation AI models. The suggestion is saved to Version History. The live agent is not changed.';
+    if (suite) {
+        var runs = suite.test_count * (suite.attempts || 1);
+        var withBaseline = document.getElementById('simTestBaseline').checked;
+        var total = withBaseline ? runs * 2 : runs;
+        note.textContent = 'This will run ' + total + ' simulated conversation' + (total !== 1 ? 's' : '') + (withBaseline ? ' (suggestion + current-prompt baseline)' : '') + '. ' + base;
+    } else {
+        note.textContent = base;
+    }
+}
+
+function confirmSimTest() {
+    if (!_simTestCtx) return;
+    var suiteId = document.getElementById('simTestSuite').value;
+    if (!suiteId) return;
+    var btn = document.getElementById('simTestStartBtn');
+    btn.disabled = true;
+    _arSetBtnSpinner(btn, ' Starting…');
+    var st = document.getElementById('simTestStatus');
+    fetch(_arBaseUrl + '/' + encodeURIComponent(_agentId) + '/autoresearch/results/' + encodeURIComponent(_simTestCtx.resultId) + '/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify({
+            suggestion_index: _simTestCtx.idx,
+            suite_id: suiteId,
+            run_baseline: document.getElementById('simTestBaseline').checked
+        })
+    }).then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+    .then(function(res) {
+        btn.disabled = false;
+        _arSetBtnContent(btn, 'bi bi-play-fill', ' Start Test');
+        if (!res.data.success) {
+            st.className = 'small mt-2 text-danger';
+            st.textContent = res.data.error || ('Failed (HTTP status)');
+            return;
+        }
+        st.className = 'small mt-2 text-success';
+        st.textContent = res.data.message || 'Simulation started.';
+        // Re-render the suggestion cards so the new sim-test row + poller appear.
+        setTimeout(function() {
+            bootstrap.Modal.getInstance(document.getElementById('simTestModal')).hide();
+            if (_simTestCtx) {
+                // _arLoadRunResult renders into the RUN tab's container. When
+                // the test was started from a History Details row, switch to
+                // the Run tab so the user actually SEES the sim-test row
+                // (round-3 P0 — otherwise nothing visibly changes, and the
+                // Run tab silently swaps to a different result).
+                var runTabBtn = document.getElementById('ar-run-tab');
+                if (runTabBtn && !runTabBtn.classList.contains('active')) {
+                    bootstrap.Tab.getOrCreateInstance(runTabBtn).show();
+                }
+                _arLoadRunResult(_simTestCtx.resultId);
+            }
+        }, 900);
+    }).catch(function(err) {
+        btn.disabled = false;
+        _arSetBtnContent(btn, 'bi bi-play-fill', ' Start Test');
+        st.className = 'small mt-2 text-danger';
+        st.textContent = 'Error: ' + err.message;
+    });
+}
+
+function confirmApplySuggestion() {
+    if (!_applyCtx) return;
+    var edited = document.getElementById('applySuggestionText').value;
+    var body = { suggestion_index: _applyCtx.idx };
+    // Any textual difference counts as an edit \u2014 including clearing the box
+    // (the server refuses an empty prompt rather than silently applying the
+    // unedited suggestion).
+    if (edited !== _applyCtx.suggestion) body.edited_prompt = edited;
+    var btn = document.getElementById('applyConfirmBtn');
+    btn.disabled = true;
+    _arSetBtnSpinner(btn, ' Applying\u2026');
+    fetch(_arBaseUrl + '/' + encodeURIComponent(_agentId) + '/autoresearch/results/' + encodeURIComponent(_applyCtx.resultId) + '/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRFToken': _csrfToken },
+        body: JSON.stringify(body)
+    }).then(function(r) {
+        if (!r.ok && r.status !== 400) throw new Error('HTTP ' + r.status);
+        return r.json();
+    }).then(function(data) {
+        btn.disabled = false;
+        _arSetBtnContent(btn, 'bi bi-check-lg', ' Apply to Live Prompt');
+        var st = document.getElementById('applyResultStatus');
+        if (data.success) {
+            _arCurrentPrompt = ('edited_prompt' in body) ? body.edited_prompt : _applyCtx.suggestion;
+            st.className = 'small text-success mt-2';
+            var backupNote = data.backup_version_id
+                ? ' A backup of the previous prompt was saved to the Versions history'
+                : ' The previous prompt was already saved in the Versions history';
+            st.textContent = '\u2705 ' + (data.message || 'Applied.') + backupNote + (data.hand_edited ? ' (marked hand-edited).' : '.');
+            btn.disabled = true;
+            _applyHideTimer = setTimeout(function() {
+                _applyHideTimer = null;
+                var m = bootstrap.Modal.getInstance(document.getElementById('applyConfirmModal'));
+                if (m) m.hide();
+            }, 2200);
+        } else {
+            st.className = 'small text-danger mt-2';
+            st.textContent = data.error || 'Apply failed';
+        }
+    }).catch(function(err) {
+        btn.disabled = false;
+        _arSetBtnContent(btn, 'bi bi-check-lg', ' Apply to Live Prompt');
+        var st = document.getElementById('applyResultStatus');
+        st.className = 'small text-danger mt-2';
+        st.textContent = 'Error: ' + err.message;
+    });
+}
+
+function _arClearPending() {
+    fetch(_arBaseUrl + '/' + encodeURIComponent(_agentId) + '/autoresearch/pending/clear', {
+        method: 'POST', headers: { 'X-CSRFToken': _csrfToken }
+    }).then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        var dot = document.querySelector('#arAgentSelect option:checked');
+        if (dot && dot.dataset.pending) {
+            if (dot.textContent.endsWith(' \u25CF')) dot.textContent = dot.textContent.slice(0, -2);
+            delete dot.dataset.pending;
+        }
+    }).catch(function(err) { console.warn('AutoResearch: pending-clear failed', err); });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var sel = document.getElementById('arAgentSelect');
+    if (sel) {
+        sel.addEventListener('change', function() {
+            // Full navigation on switch: kills any live SSE stream and resets
+            // every tab's state for the newly selected agent.
+            var v = this.value;
+            window.location = v ? ('/autoresearch?agent=' + encodeURIComponent(v)) : '/autoresearch';
+        });
+    }
+    if (!_agentId) return;
+    initAutoResearchPage();
+    // ?result= deep link (Versions badge, reports): open that run in History.
+    // Deferred a tick so the tab listeners initAutoResearchPage just
+    // registered are guaranteed attached before the shown.bs.tab fires.
+    if (_arDeepLinkResult) {
+        setTimeout(function() {
+            var historyTab = document.getElementById('ar-history-tab');
+            if (historyTab) bootstrap.Tab.getOrCreateInstance(historyTab).show();
+        }, 0);
+    }
+});
+
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IjdTbUt6M0Rmcmo3N2xWUGswSmw5b2p2b196UUJJLVNDMWNwVk8ycEJVWlEi.aqgYNA.wwxBjTs8X9s1pfQiPsmtnCz0YVI">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Overview Dashboard
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">The Overview page provides analytics and monitoring across 9 tabs: Overview, Calls &amp; Rooms, Latency, AI Insights, Agents, Media, Telephony, Price, and Server Stats. The top bar has a date-range dropdown (Today / Yesterday / Last 7-90 days / Custom range…), an auto-refresh toggle, and Export. Picking &#39;Custom range…&#39; opens a small popover where you can choose any two dates up to 90 days apart. Export downloads the currently active tab as CSV or JSON for whichever range is active.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Date Range &amp; Export
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Date Range</strong></td>
+                                        <td>Filter data by time period (Today, Yesterday, 7/14/30/60/90 days). Defaults to Today for faster loading.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Custom Range</strong></td>
+                                        <td>Pick any two dates up to 90 days apart. Select &#39;Custom range…&#39; from the Date Range dropdown — a small picker appears with From and To date boxes and an Apply button. Click Apply to load the charts for exactly those dates, or Cancel (or press Escape, or click outside the picker) to close it without changing anything. The picker pre-fills with the preset you were on, so switching from &#39;Last 7 days&#39; to Custom starts with a 7-day window selected. Once applied, all charts, pricing, and the Export button use the custom window.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Auto-Refresh</strong></td>
+                                        <td>Enable to update the page automatically every 30s, 60s, or 2min.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Export</strong></td>
+                                        <td>Download the currently active tab&#39;s data as CSV or JSON for the selected date range — works with both preset ranges and custom date ranges. Available on all tabs including Media, Telephony, Price, and Server Stats.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Overview Tab
+                        </h6>
+                        
+                        <p class="text-muted">Consolidated dashboard with key metrics: Room Connection Rate, Estimated Cost (configurable in Settings &gt; Analytics), Answer Rate, Active Rooms, Calls Today, Running Agents, and summarized stats from other tabs including Trunk Status, SIP Success Rate, Total Calls, Total Minutes, Avg Duration, Avg Sentiment. Includes Success Status Breakdown pie chart and Call Trends graph.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Calls &amp; Rooms Tab
+                        </h6>
+                        
+                        <p class="text-muted">Comprehensive call analytics including total calls, answer rate, call volume trends, outcomes (completed/transferred/missed/failed), direction (inbound/outbound), hourly distribution, and real-time room analytics with historical room trends. New metrics: Room Connection Rate, Longest/Shortest Call, Busiest Day/Hour, Talk Time Breakdown chart, and Call Distribution Heatmap showing call density by day and hour.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Latency Tab
+                        </h6>
+                        
+                        <p class="text-muted">Response latency metrics including API Latency, TTFB percentiles (Avg, P50, P90, P99), component breakdown (STT/LLM/TTS), hourly latency trend, and per-agent latency breakdown. Industry targets: &lt;500ms (natural), 500-1000ms (acceptable), &gt;1000ms (noticeable pause).</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> AI Insights Tab
+                        </h6>
+                        
+                        <p class="text-muted">AI-powered call analysis showing average sentiment score, pending action items, interruption rate, sentiment distribution (positive/neutral/negative), top topics extracted from calls, LLM-analyzed call outcomes, and Call End Reasons breakdown (Customer-ended vs Agent-ended with detailed reason table).</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Agents Tab
+                        </h6>
+                        
+                        <p class="text-muted">Agent performance metrics including total agents, agents active today, average success rate, top performer, detailed performance table with calls/answered/success rate/minutes/duration per agent, and calls by agent chart.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Media Tab
+                        </h6>
+                        
+                        <p class="text-muted">Recording &amp; Storage section showing active jobs, success rate, egress types chart, and storage used. Ingress/Streaming section showing active streams, connection quality, stream types, and average bitrate.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Telephony Tab
+                        </h6>
+                        
+                        <p class="text-muted">SIP trunk analytics (only visible if SIP is enabled) showing total trunks, connection success rate, trunk status, dispatch rules count, and call volume. Quick links to manage outbound/inbound trunks and dispatch rules.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Price Tab
+                        </h6>
+                        
+                        <p class="text-muted">Pricing analytics showing cost breakdown by service (LLM, STT, TTS, Realtime), total estimated cost, cost per call, cost per minute, and margin revenue. Realtime agents (audio-to-audio) appear as a separate category in the doughnut chart and stacked bar chart. Includes provider cost comparison charts, daily cost trends, and per-agent cost breakdown. Configure provider pricing rates in Settings &gt; Analytics. Margin settings allow sub-users to see adjusted pricing with your markup applied.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Server Stats Tab
+                        </h6>
+                        
+                        <p class="text-muted">System health monitoring with Total CPU Load (1/5/15 min averages as percentages), memory usage, swap usage, disk usage, uptime, network I/O, and process count. Service Status cards show CPU% and memory for each service (Dashboard, LiveKit, Agent, Redis, SIP, Egress). CPU Usage History chart displays per-service CPU over 24 hours with auto-scaling Y-axis that adjusts to actual usage levels. CPU samples are recorded every 60 seconds.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> New Metrics Reference
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Room Connection Rate</strong></td>
+                                        <td>Percentage of successful LiveKit room connections</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Success Status Breakdown</strong></td>
+                                        <td>Pie chart showing call completion status (Success/Failure/Unknown)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Call Distribution Heatmap</strong></td>
+                                        <td>Day x Hour grid showing call density patterns</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Talk Time Breakdown</strong></td>
+                                        <td>Total vs Average talk time per day</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Busiest Day/Hour</strong></td>
+                                        <td>Day and hour with highest call volume</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Longest/Shortest Call</strong></td>
+                                        <td>Duration of longest and shortest calls in period</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Call End Reasons</strong></td>
+                                        <td>Who terminated calls - Customer, Agent, or Other</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

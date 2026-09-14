@@ -1,0 +1,263 @@
+# Connecting 3CX SMS Chat
+
+A complete walkthrough for setting up **inbound + outbound SMS** between your 3CX phone system and any **3CX-compatible SMS provider** — so customers can text your business number and your team replies from the 3CX Web Client chat panel.
+
+> **What this gives you:** customers SMS your business number → the message arrives in 3CX as a chat conversation routed to a queue → an agent replies in 3CX → the reply goes back to the customer's mobile.
+>
+> **Three places to configure:**
+> 1. **3CX Admin Console** — SIP trunk + DID + SMS settings + chat queue routing
+> 2. **Your SMS provider's portal** (any 3CX-compatible SMS service — Tronic Cloud, Twilio, Telnyx, etc.) — issues the API Key + Provider URL
+> 3. **3CX Web Client** — where agents handle the SMS conversations
+>
+> This guide is **provider-agnostic**. The 3CX configuration is identical regardless of which SMS service you use — only the provider-portal screens in Part B differ. Your provider must support **3CX's Generic SMS protocol**.
+
+---
+
+## Prerequisites
+
+- A 3CX PBX with admin access to **Admin → SIP Trunks** and **Admin → Call Queues**
+- An account with an SMS provider that supports 3CX's Generic SMS protocol, with a provisioned SMS-capable phone number (DID)
+- Access to the 3CX Web Client for at least one user / queue agent
+- The phone number you want to receive SMS on, in **E.164 format without the `+`** (e.g. `61488883111`)
+
+> **Why no `+`?** 3CX's DID matcher is exact-string. If the carrier sends `to: 61488883111` and your DID is stored as `+61488883111`, 3CX matches **nothing** and silently drops the message with Event ID 30045 in the event log. Always store the DID without the `+`.
+
+---
+
+## Part A — 3CX Admin Console
+
+### Step 1 — Open or create the SIP trunk
+
+1. Log into your 3CX Admin Console (e.g. `https://your-3cx.example.com`).
+2. Go to **Admin → SIP Trunks**.
+3. Either edit an existing SIP trunk you'll use for SMS, or click **Add SIP Trunk**.
+4. On the **General** tab give the trunk a friendly name (e.g. `SMS Provider`).
+
+> **Can SMS share a trunk with voice calls?** Yes, as long as the same trunk also receives voice. But it's cleaner to dedicate one trunk to SMS so the SMS settings don't interfere with voice routing — especially when voice and SMS use different providers.
+
+### Step 2 — Add the DID number
+
+1. Click the **DID Numbers** tab.
+2. Click **Add**.
+3. Enter your SMS phone number **without the `+`**:
+   - ✅ Correct: `61488883111`
+   - ❌ Wrong: `+61488883111` or `0488883111`
+4. Click **OK**.
+
+The DID stored here must **exactly match** the `to` field the provider sends. Any mismatch = silent drop.
+
+### Step 3 — Configure the SMS tab (first pass)
+
+1. Click the **SMS** tab on the same SIP trunk.
+2. Tick **Enable SMS** ✅.
+3. The **Webhook URL** will auto-generate. Copy it — it looks like:
+
+```
+https://your-3cx.example.com/sms/generic/<random-token>
+```
+
+You'll paste this into your SMS provider's portal in Part B.
+
+4. Leave **API Key** and **Provider URL** blank for now — you'll fill them in after Part B.
+5. **Caller-ID Number Matching** (optional): if ticked, 3CX tries to match the inbound caller's mobile to an existing 3CX contact. Leave at the default (3 digits) unless you have a specific contact-matching reason.
+
+> If **Enable SMS** is greyed out: you haven't added a DID yet. Go back to Step 2.
+
+### Step 4 — Route inbound SMS to a queue or extension
+
+3CX needs to know which queue / extension should be alerted when an SMS arrives.
+
+**Option A — Route to a queue (recommended for teams)**
+
+1. **Admin → Call Queues** → open or create the queue that handles SMS (e.g. `SMS ONLY - 817`).
+2. **Agents** tab: add the extensions that should receive SMS conversations.
+3. In the queue settings, ensure **Chat is enabled**.
+
+**Option B — Route directly to an extension**
+
+1. **Admin → Extensions** → open the extension.
+2. **Options** tab: ensure chat / messaging is enabled.
+
+**How 3CX picks the destination**: 3CX reads the `to` DID number on the inbound SMS, finds the matching DID on this trunk, then routes to the queue / extension you've configured as the SMS destination. If you need different DIDs to ring different queues, give each queue its own DID.
+
+### Step 5 — Save the trunk (don't close it yet)
+
+Click **OK / Save** on the SIP trunk. Keep this browser tab open — you'll come back to it in Part C.
+
+---
+
+## Part B — Your SMS provider's portal
+
+The exact button names and screen layout differ per provider, but every 3CX-compatible SMS provider follows the same pattern: you give them your 3CX webhook URL, and they give you back an **API Key** and a **Provider URL**.
+
+### Step 6 — Create the SMS integration in your provider's portal
+
+1. Log into your SMS provider's portal at the URL they gave you (e.g. `https://your-provider.example.com`).
+2. Navigate to the section for **SMS Integrations**, **3CX SMS**, **Generic SMS Webhook**, or similarly named (varies per provider).
+3. Click **New Integration** / **Add** / **Create** (or edit an existing entry if you already have one for this DID).
+4. Fill in:
+
+| Field | Value |
+|---|---|
+| **Integration Name** | A friendly label, e.g. `Acme 3CX SMS` |
+| **3CX Webhook URL** | The URL you copied from Part A Step 3 |
+
+5. Click **Save**. The provider's portal will display two values you'll need next:
+
+| Field | Example shape |
+|---|---|
+| **API Key** | `87530f93-d60d-4190-9dc9-147a604e4a1d` |
+| **Provider URL** | `https://your-provider.example.com/api/3cx/<uuid>` |
+
+Copy both.
+
+6. Set **Integration Status → Active** (or equivalent — some providers enable automatically on save).
+
+> **Don't share these values.** The API Key authenticates 3CX's outbound replies into the SMS carrier. Anyone with the key + Provider URL can send SMS through your account.
+>
+> **If your provider's terminology differs**: the API Key may be called "Token", "Auth Key", or "Webhook Secret". The Provider URL may be called "Outbound Endpoint", "Webhook URL", or "Carrier URL". The values are functionally the same — paste them into the matching 3CX field.
+
+---
+
+## Part C — Back to 3CX Admin
+
+### Step 7 — Complete the SMS tab
+
+1. Return to the SIP trunk you saved in Step 5 → **SMS** tab.
+2. Paste the values from Step 6:
+   - **API Key** → the API Key from your provider's portal
+   - **Provider URL** → the Provider URL from your provider's portal
+3. Click **Save / Apply**.
+
+The trunk is now **bidirectionally** connected:
+- **Inbound**: the carrier POSTs incoming SMS to 3CX's Webhook URL.
+- **Outbound**: 3CX POSTs replies to the Provider URL, authenticated with the API Key.
+
+---
+
+## Part D — 3CX Web Client (Agent Side)
+
+### Step 8 — Receiving inbound SMS
+
+When a customer texts your number:
+
+1. Open the **3CX Web Client** (e.g. `https://your-3cx.example.com/webclient`).
+2. Click the **Chat** icon in the left sidebar.
+3. The inbound SMS appears as a new conversation under the queue name (e.g. `SMS ONLY (817)`).
+4. The conversation shows:
+   - **From**: customer's mobile number (e.g. `+61416059519`)
+   - **Channel indicator**: SMS
+5. All agents in the queue are notified per the queue's notification settings.
+
+### Step 9 — Replying from 3CX
+
+1. Click the conversation in the chat list.
+2. Type your reply in the message box at the bottom.
+3. Press **Enter** or click **Send**.
+4. 3CX POSTs the reply to the **Provider URL** (Step 7), the carrier delivers it to the customer's mobile.
+
+> **Outgoing-message detail**: in the carrier's outbound payload, `from` is the DID number (`+61488883111`) and `to` is the customer's mobile. If a 3CX contact record exists for the customer, the `to` field may carry the contact name instead of the raw number — keep this in mind if you process replies programmatically.
+
+---
+
+## How it all connects
+
+```
+Customer sends SMS to +61488883111
+         ↓
+SMS provider's carrier receives it
+         ↓
+Provider POSTs to 3CX Webhook URL  ← configured in provider portal (Part B)
+         ↓
+3CX matches DID (61488883111) → routes to queue (e.g. 817 / SMS ONLY)
+         ↓
+Agent sees conversation in 3CX Web Client → Chat
+         ↓
+Agent replies → 3CX POSTs to Provider URL  ← configured in 3CX SMS tab (Part C)
+         ↓
+Provider delivers SMS reply to customer's mobile
+```
+
+---
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Event ID 30045 in 3CX event log | DID stored with `+` prefix or provider sending different format | Re-enter the DID without `+` (Step 2) and verify the provider sends matching format |
+| SMS arrives at 3CX but no agent notified | Queue chat not enabled OR no agents assigned to queue | Step 4 — enable Chat on the queue, add agents |
+| Agent sends reply, customer doesn't receive | Wrong Provider URL OR API Key in 3CX SMS tab | Re-copy both from your provider's portal (Part B) into 3CX SMS tab (Part C) |
+| 3CX shows "Authentication Error" from provider | API Key mismatch | Re-copy API Key exactly — case-sensitive, no leading/trailing whitespace |
+| **Enable SMS** checkbox is greyed out | No DID added yet | Add a DID first (Step 2), then return to the SMS tab |
+| SMS goes to the wrong queue | DID routing in 3CX is mapped to a different queue | Check **Admin → Call Queues** for which queue holds that DID |
+| Agent reply never arrives | 3CX → provider connection blocked by firewall / proxy | Ensure 3CX can reach the Provider URL host over HTTPS (port 443) |
+| Customer's number shows as "Unknown" in 3CX | 3CX contact-matching is on but no record exists | Either disable Caller-ID Number Matching, or import contacts |
+| Conversation shows in chat but agent can't type a reply | Agent isn't a member of the queue OR queue is paused | Add agent to queue / unpause queue |
+
+### Reading the 3CX event log
+
+For any of the symptoms above, the 3CX **Admin → Event Log** is the authoritative source. Filter by Event ID `30045` (SMS routing failures) to find dropped messages and their reason codes.
+
+---
+
+## Quick reference
+
+### 3CX SIP trunk
+
+| Setting | Value |
+|---|---|
+| Trunk name | e.g. `SMS Provider` |
+| DID (no `+`) | e.g. `61488883111` |
+| Enable SMS | ✅ Yes |
+| Webhook URL | auto-generated by 3CX |
+| API Key | from your provider's portal (Step 6) |
+| Provider URL | from your provider's portal (Step 6) |
+| Default destination for the DID | the SMS queue or extension (Step 4) |
+
+### Your SMS provider's portal
+
+| Setting | Value |
+|---|---|
+| Integration name | friendly label |
+| 3CX Webhook URL | from 3CX SMS tab (Step 3) |
+| API Key | auto-generated, paste into 3CX |
+| Provider URL | auto-generated, paste into 3CX |
+| Status | Active |
+
+### 3CX queue
+
+| Setting | Value |
+|---|---|
+| Chat enabled | ✅ Yes |
+| Agents | the extensions who should receive SMS |
+| Default destination for SMS DID | this queue |
+
+---
+
+## FAQ
+
+**Q: Does this guide require the LiveKit Dashboard?**
+No — this is a 3CX ↔ SMS provider integration. The dashboard's voice AI agents play no role in this customer-to-3CX SMS chat flow. If you want a voice agent to *also* send SMS *into* the 3CX chat (e.g. to brief a sales rep mid-call), see the separate `threecx_messaging` agent tool in the dashboard's Agents → Tools tab — that's a different flow that complements this one.
+
+**Q: Which SMS providers support 3CX's Generic SMS?**
+Any provider that documents support for 3CX's Generic SMS Webhook protocol. Common ones include Tronic Cloud, Twilio, Telnyx, and other carriers offering programmable SMS. Check your provider's documentation or support team for "3CX Generic SMS" or "3CX SMS Webhook" support.
+
+**Q: Can I have multiple DIDs on the same SMS trunk?**
+Yes. Add a row in the **DID Numbers** tab for each. Routing per-DID is configured in the queue / extension settings — each DID can point to a different queue.
+
+**Q: Does international SMS work?**
+Depends on your provider's coverage. Verify with your SMS provider that the destination countries you need are supported on your account.
+
+**Q: Can I send MMS / images via this flow?**
+3CX's Generic SMS protocol is text-only. MMS isn't carried through this trunk regardless of provider.
+
+**Q: Will the customer see "Sender: 3CX" or similar?**
+No — the `from` on the customer's screen is your DID number, exactly as you entered it (with the `+` re-added by the provider). If your provider supports alphanumeric sender IDs and you've configured one, the sender may show your business name instead, but that's account-level config at the provider, not part of this trunk setup.
+
+**Q: What's the difference between this SMS integration and the dashboard's `threecx_messaging` tool?**
+- **This guide**: customer-initiated SMS conversations that arrive in 3CX as chat. The customer can SMS your business and an agent replies from 3CX.
+- **`threecx_messaging` tool** (separate, in the dashboard agent's Tools tab): a voice AI agent injects an internal SMS *into* 3CX's chat as if from a customer, so a 3CX user gets a notification with details. Use it for AI-to-human handoffs (e.g. "the AI just took a booking from 0416 ___ — here's the summary").
+
+---
+
+If you hit something this guide doesn't cover, copy the relevant 3CX Event Log line (Event ID + reason text) and the time of the test SMS — that's enough for your provider's support team to diagnose in one round-trip.

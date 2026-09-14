@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Reports - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=500954">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=5570.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IjBFMEJjNVdadktUR0hicjVtWTIzNkxWbmd6bXBYWnZJLWEyc3A2R25Welki.aqgYJg.9gblWHU5nIIpjPqBpg8CstdUWjo">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link active">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Reports</h1>
+                
+<p class="page-subtitle">Configure automated reports triggered by calls, analysis, or schedules</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#reports" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="reports.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+
+<div class="alert alert-warning d-flex align-items-center mb-4" style="border-left: 4px solid var(--warning);">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <div>
+        <strong>Email not configured.</strong> Email-based reports require email to be set up in
+        <a href="settings.html#email" style="color: var(--warning);">Settings &gt; Email</a> before they can send. Webhook reports are not affected.
+    </div>
+</div>
+
+
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-file-earmark-bar-graph"></i> Total Reports
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-check-circle"></i> Active
+        </div>
+        <div class="stat-value success">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-pause-circle"></i> Disabled
+        </div>
+        <div class="stat-value">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-send"></i> Recent Executions
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-envelope"></i> Email Reports
+        </div>
+        <div class="stat-value">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-globe"></i> Webhook Reports
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+</div>
+
+<!-- Reports Table -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-file-earmark-bar-graph"></i> Report Rules
+        </h5>
+        <div class="d-flex gap-2"><a href="settings.html#email-settings" class="btn btn-sm" style="background-color: #3b82f6; color: #fff; border-color: #3b82f6;">
+                <i class="bi bi-envelope-gear"></i> Email & Template Settings
+            </a>
+            <button type="button" class="btn btn-sm" style="background-color: #6366f1; color: #fff; border-color: #6366f1;"
+                    onclick="openFailsafeWizard()"
+                    title="Create a failsafe: if a caller hangs up before their booking or enquiry is completed, an n8n workflow emails your team so the lead isn't lost">
+                <i class="bi bi-life-preserver"></i> n8n Failsafe Wizard
+            </button>
+            <a href="reports/editor.html" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg"></i> New Report
+            </a>
+            
+        </div>
+    </div>
+    <div class="card-body">
+        
+        <div class="text-center py-5">
+            <i class="bi bi-file-earmark-bar-graph" style="font-size: 3rem; color: var(--text-muted);"></i>
+            <h5 class="mt-3">No reports configured</h5>
+            <p class="text-muted">Create a report rule to automatically send reports after calls or on a schedule.</p>
+            
+            <a href="reports/editor.html" class="btn btn-primary mt-2">
+                <i class="bi bi-plus-lg"></i> Create First Report
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+
+<!-- Execution History -->
+
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="deleteReportName"></strong>?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const csrfToken = 'IjBFMEJjNVdadktUR0hicjVtWTIzNkxWbmd6bXBYWnZJLWEyc3A2R25Welki.aqgYJg.9gblWHU5nIIpjPqBpg8CstdUWjo';
+
+function toggleReport(reportId) {
+    fetch('/api/reports/' + reportId + '/toggle', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || data.detail || 'Failed to toggle report'));
+        }
+    })
+    .catch(() => alert('Network error'));
+}
+
+function executeReport(reportId) {
+    if (!confirm('Send this report now?')) return;
+    fetch('/api/reports/' + reportId + '/execute', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            if (data.webhook_status_code) {
+                alert('Webhook delivered successfully (HTTP ' + data.webhook_status_code + ')');
+            } else {
+                alert('Report sent to ' + data.recipients_sent + ' recipient(s)');
+            }
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || data.detail || 'Failed to execute report'));
+        }
+    })
+    .catch(() => alert('Network error'));
+}
+
+let deleteTargetId = null;
+function deleteReport(reportId, reportName) {
+    deleteTargetId = reportId;
+    document.getElementById('deleteReportName').textContent = reportName;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+    if (!deleteTargetId) return;
+    fetch('/api/reports/' + deleteTargetId, {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || data.detail || 'Failed to delete'));
+        }
+    })
+    .catch(() => alert('Network error'));
+});
+</script>
+
+
+<div class="modal fade" id="failsafeWizardModal" tabindex="-1" aria-labelledby="fsWizLabel" aria-hidden="true"
+     data-csrf-token="IjBFMEJjNVdadktUR0hicjVtWTIzNkxWbmd6bXBYWnZJLWEyc3A2R25Welki.aqgYJg.9gblWHU5nIIpjPqBpg8CstdUWjo"
+     data-tenant=""
+     data-require-https="">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fsWizLabel">
+                    <i class="bi bi-life-preserver"></i> n8n Failsafe Wizard
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="px-4 pt-3" id="fsWizStepper">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="wizard-step active" data-step="1">
+                        <span class="wizard-step-num">1</span> <span class="wizard-step-label">Type</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="2">
+                        <span class="wizard-step-num">2</span> <span class="wizard-step-label">Details</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="3">
+                        <span class="wizard-step-num">3</span> <span class="wizard-step-label">Review</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="4">
+                        <span class="wizard-step-num">4</span> <span class="wizard-step-label">Finish</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-danger alert-permanent d-none" id="fsWizError" role="alert"></div>
+
+                
+                <div class="wizard-pane" data-pane="1">
+                    <p class="text-muted mb-3">
+                        A failsafe catches the calls that slip through — a caller hangs up mid-booking, the line
+                        drops, the enquiry never gets logged. The wizard sets up BOTH sides for you: a report that
+                        sends every finished call to your n8n, and a matching n8n workflow file that emails your
+                        team <strong>only</strong> when a call ended without being handled.
+                    </p>
+                    <div class="row row-cols-1 row-cols-md-2 g-3" id="fsWizTemplates">
+                        <div class="col"><div class="wizard-provider-tile" data-template="failsafe_tool_check">
+                            <span class="tile-icon"><i class="bi bi-check2-square"></i></span>
+                            <div class="tile-name mt-2">Failsafe (tool check)</div>
+                            <div class="tile-tag">Rule-based: emails only when none of your booking/handling tools
+                                ran successfully and the caller wasn't transferred. Predictable — recommended when
+                                your agent books via a tool.</div>
+                        </div></div>
+                        <div class="col"><div class="wizard-provider-tile" data-template="failsafe_ai_classify">
+                            <span class="tile-icon"><i class="bi bi-stars"></i></span>
+                            <div class="tile-name mt-2">Failsafe (AI classify)</div>
+                            <div class="tile-tag">An AI reads each missed call and decides whether the caller's
+                                request was completed before emailing. When in doubt it emails — better a duplicate
+                                than a lost lead. Needs an AI credential in n8n.</div>
+                        </div></div>
+                    </div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="2">
+                    <div class="mb-3">
+                        <label class="form-label" for="fsWizName">Report name</label>
+                        <input type="text" class="form-control" id="fsWizName" maxlength="100"
+                               placeholder="e.g. Missed booking failsafe">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="fsWizBaseUrl">Your n8n address</label>
+                        <input type="url" class="form-control" id="fsWizBaseUrl"
+                               placeholder="https://n8n.example.com">
+                        <div class="form-text">The address you open n8n at. Pasting a full webhook URL is fine —
+                            the wizard trims it.</div>
+                        <div class="alert alert-warning alert-permanent d-none mt-2" id="fsWizUrlWarning"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Which voice agents should this watch?</label>
+                        <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;" id="fsWizAgents">
+                            
+                            <div class="text-muted small">No voice agents found — create a voice agent first.
+                                (Chatbot agents aren't shown: their sessions don't record tool calls, which the
+                                failsafe relies on.)</div>
+                            
+                        </div>
+                    </div>
+                    <div class="mb-3 d-none" id="fsWizToolsSection">
+                        <label class="form-label">Which tools mean the call was <em>handled</em>?</label>
+                        <div class="form-text mb-1">If one of these ran <strong>successfully</strong>, no alert is
+                            sent. Pick your booking / cancellation / enquiry tools. Transferred calls never alert.</div>
+                        <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;" id="fsWizToolPicker">
+                            <div class="text-muted small" id="fsWizToolPickerEmpty">Select an agent above to list its tools.</div>
+                        </div>
+                        <input type="text" class="form-control mt-2" id="fsWizExtraTools"
+                               placeholder="Other tool names, comma-separated (e.g. book_appointment)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="fsWizKeywords">Enquiry keywords <span class="text-muted">(optional)</span></label>
+                        <input type="text" class="form-control" id="fsWizKeywords"
+                               placeholder="e.g. booking, quote, hire, cancel">
+                        <div class="form-text">Comma-separated. If set, a call only alerts when the conversation
+                            mentions one of these — keeps wrong-number calls out of your inbox.</div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="fsWizFailsafeEmail">Send alerts to</label>
+                            <input type="email" class="form-control" id="fsWizFailsafeEmail" maxlength="254"
+                                   placeholder="team@yourbusiness.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="fsWizFromEmail">From address</label>
+                            <input type="email" class="form-control" id="fsWizFromEmail" maxlength="254"
+                                   placeholder="noreply@yourbusiness.com">
+                        </div>
+                    </div>
+                    <div class="mb-3" id="fsWizErrorEmailWrap">
+                        <label class="form-label" for="fsWizErrorEmail">Error alerts to</label>
+                        <input type="email" class="form-control" id="fsWizErrorEmail" maxlength="254"
+                               placeholder="you@yourbusiness.com">
+                        <div class="form-text">Emailed if the workflow itself fails (e.g. a missing credential) so
+                            a broken failsafe never fails silently.</div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" for="fsWizMinTurns">Min. turns</label>
+                            <input type="number" class="form-control" id="fsWizMinTurns" value="4" min="0" max="100">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" for="fsWizMinDuration">Min. seconds</label>
+                            <input type="number" class="form-control" id="fsWizMinDuration" value="30" min="0" max="3600">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-text mt-md-4">A call is only "real" once it passes either threshold
+                                (or the caller asked for a callback).</div>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mb-2 d-none" id="fsWizAiExtractWrap">
+                        <input class="form-check-input" type="checkbox" id="fsWizAiExtract" checked>
+                        <label class="form-check-label" for="fsWizAiExtract">
+                            Use AI to read the transcript and extract the caller's name, number and request into the
+                            email <span class="text-muted">(needs an OpenRouter credential in n8n; the transcript is
+                            sent to OpenRouter through your own account)</span>
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="fsWizHandoffHandled">
+                        <label class="form-check-label" for="fsWizHandoffHandled">
+                            Count agent-to-agent handoffs as handled
+                            <span class="text-muted">(off = an alert still fires when the second agent also doesn't
+                            complete the booking — recommended)</span>
+                        </label>
+                    </div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="3">
+                    <div class="alert alert-warning alert-permanent d-none" id="fsWizDupWarning" role="alert"></div>
+                    <div id="fsWizSummary"></div>
+                    <p class="text-muted small mb-0 mt-3">Clicking <strong>Create</strong> saves the report rule
+                        (enabled straight away) and generates your n8n workflow file on the next page.</p>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="success">
+                    <div class="alert alert-success alert-permanent">
+                        <i class="bi bi-check-circle"></i> Report created. Now wire up n8n:
+                    </div>
+                    <div class="mb-3">
+                        <a class="btn btn-primary w-100" id="fsWizDownloadBtn" href="reports.html#">
+                            <i class="bi bi-download"></i> Download the n8n workflow file
+                        </a>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small mb-1">Webhook address (already saved on the report)</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control font-monospace" id="fsWizProdUrl" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="fsWizCopyUrl"><i class="bi bi-clipboard"></i></button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small mb-1">Security key (baked into the downloaded file — keep it private)</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control font-monospace" id="fsWizSecret" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="fsWizCopySecret"><i class="bi bi-clipboard"></i></button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body py-2">
+                            <div class="fw-semibold mb-1">Finish up in n8n</div>
+                            <ol class="small mb-1 ps-3">
+                                <li>Import the downloaded file (n8n → Workflows → Import from File).</li>
+                                <li>Attach your <strong>SMTP credential</strong> to <em>Send Alert Email</em> and <em>Email Error Alert</em>.</li>
+                                <li id="fsWizAiChecklistItem">Attach your <strong>OpenRouter credential</strong> to <em>OpenRouter Chat Model</em>.</li>
+                                <li><strong>Activate</strong> the workflow (toggle, top right).</li>
+                                <li>Press <em>Send test event</em> below, then check n8n → Executions.</li>
+                            </ol>
+                            <div class="small text-muted">
+                                Alerts arrive ~1–2 minutes after a call ends. Until the workflow is imported and
+                                activated, this report's history will show <em>failed</em> rows — that's expected.
+                                To change recipients later, edit the <em>Config</em> node in n8n. You can re-download
+                                this file any time from the report's row.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-3 align-items-center">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="fsWizTestBtn">
+                            <i class="bi bi-lightning"></i> Send test event
+                        </button>
+                        <span class="small" id="fsWizTestResult"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-link text-decoration-none" id="fsWizBackBtn" disabled>
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="fsWizCancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="fsWizNextBtn" disabled>
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <button type="button" class="btn btn-success d-none" id="fsWizCreateBtn">
+                        <i class="bi bi-life-preserver"></i> Create
+                    </button>
+                    <button type="button" class="btn btn-primary d-none" id="fsWizDoneBtn" data-bs-dismiss="modal">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.wizard-step { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-secondary, #888); white-space: nowrap; }
+.wizard-step.active { color: var(--text-primary, #fff); font-weight: 600; }
+.wizard-step.complete { color: var(--bs-success, #10b981); }
+.wizard-step-num { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--bg-tertiary, #2a2a2a); font-weight: 600; font-size: 0.75rem; }
+.wizard-step.active .wizard-step-num { background: var(--bs-primary, #3b82f6); color: #fff; }
+.wizard-step.complete .wizard-step-num { background: var(--bs-success, #10b981); color: #fff; }
+.wizard-step-divider { flex: 1; height: 1px; background: var(--border-color, #333); margin: 0 0.5rem; }
+.wizard-step-label { display: none; }
+@media (min-width: 576px) { .wizard-step-label { display: inline; } }
+.wizard-provider-tile { cursor: pointer; padding: 1rem 0.75rem; border: 2px solid var(--border-color, #333); border-radius: 0.5rem; text-align: center; transition: border-color 0.15s, transform 0.15s; position: relative; height: 100%; }
+.wizard-provider-tile:hover { border-color: var(--bs-primary, #3b82f6); transform: translateY(-2px); }
+.wizard-provider-tile.selected { border-color: var(--bs-primary, #3b82f6); background: rgba(59, 130, 246, 0.06); }
+.wizard-provider-tile .tile-icon { font-size: 1.75rem; display: block; line-height: 1; }
+.wizard-provider-tile .tile-name { font-weight: 600; }
+.wizard-provider-tile .tile-tag { font-size: 0.75rem; color: var(--text-secondary, #888); margin-top: 0.25rem; }
+</style>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<script src="static/js/n8n-report-wizard.js@v=4725"></script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IjBFMEJjNVdadktUR0hicjVtWTIzNkxWbmd6bXBYWnZJLWEyc3A2R25Welki.aqgYJg.9gblWHU5nIIpjPqBpg8CstdUWjo">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Automated Reports
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Configure email reports that send automatically based on triggers like call completion, AI analysis, or on a daily/weekly schedule.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Report Types
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Post-Call Summary</strong></td>
+                                        <td>Sends an email after each call ends with call details, transcription, and cost breakdown</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>AI Conversation Analysis</strong></td>
+                                        <td>Sends after AI analysis completes with summary, sentiment, intent, and extracted data</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Scheduled Summary</strong></td>
+                                        <td>Sends a daily or weekly digest with aggregate call statistics and cost breakdown</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>AutoResearch Complete</strong></td>
+                                        <td>Sends when an AutoResearch analysis finishes, with the score, issues found, and prompt suggestions</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Simulation Complete</strong></td>
+                                        <td>Sends when a simulation suite run or individual test finishes, with pass/fail results and scores. Covers scheduled tests and crash-interrupted runs; runs you cancel yourself stay silent. Choose whether the rule covers suite runs, individual runs, or both — a test scheduled hourly emails every hour if individual runs are on</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Improvement Lab Complete</strong></td>
+                                        <td>Sends when a Lab replay run finishes or fails, with each variant&#39;s word-error-rate results and the winning variant. Failed and interrupted runs email too, so a scheduled overnight run can&#39;t die silently — runs you abort yourself stay quiet</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Configuration
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Agent Filter</strong></td>
+                                        <td>Choose &#39;All Agents&#39; or select specific voice and/or chatbot agents to report on. Chatbot sessions count as inbound for the Direction Filter</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Direction Filter</strong></td>
+                                        <td>Filter by inbound, outbound, or all call directions</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Recipients</strong></td>
+                                        <td>Email addresses that will receive the report</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Email Template</strong></td>
+                                        <td>Select which email template to use — customise templates in Settings &gt; Email</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> How It Works
+                        </h6>
+                        
+                        <p class="text-muted">When a call ends or AI analysis completes, the agent worker pushes an event to a Redis queue. The report engine background task polls the queue every 30 seconds, matches events against your report rules, and sends emails to the configured recipients. Scheduled reports check their target time and run when due.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Requirements
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Email Configuration</strong></td>
+                                        <td>Email must be configured in Settings &gt; Email (SMTP or AWS SES) before reports can send</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Dashboard URL</strong></td>
+                                        <td>Set the Dashboard Public URL in Settings for links in emails to work correctly</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> n8n Failsafe Wizard
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>What it does</strong></td>
+                                        <td>Builds a lost-lead safety net: if a caller hangs up before their booking or enquiry is completed, an n8n workflow emails your team the caller&#39;s details for a callback. If the booking/cancellation tool ran successfully, or the caller was transferred to a person, nothing is sent. The wizard creates the report rule (webhook delivery pre-configured) AND a matching n8n workflow file you download and import</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Failsafe (tool check)</strong></td>
+                                        <td>Rule-based: you tick which tools count as &#39;handled&#39;. Alerts only when none of them completed SUCCESSFULLY — a tool that ran but failed still alerts. Optional AI step extracts the caller&#39;s name, spoken number and request from the transcript into the email</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Failsafe (AI classify)</strong></td>
+                                        <td>An AI reads each missed call and decides whether the request was completed before emailing. When in doubt it emails. Needs an OpenRouter credential in n8n</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>After creating</strong></td>
+                                        <td>The report is enabled immediately, so history shows failed rows until you import and ACTIVATE the workflow in n8n — that&#39;s expected. Alerts arrive ~1-2 minutes after a call ends. Use Send test event on the finish page, then check n8n → Executions</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Changing things later</strong></td>
+                                        <td>Recipients: edit the Config node in n8n directly. Security key: edit the report&#39;s API Key, save, re-download (JSON button on the report row) and re-import. Tools/keywords/thresholds: re-run the wizard, then delete the old report and deactivate the old workflow or you&#39;ll get duplicate alerts. Don&#39;t change the report&#39;s webhook field list — the workflow reads exactly those fields</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Privacy</strong></td>
+                                        <td>With AI extraction on, the call transcript is sent to OpenRouter through your own n8n credential. The downloaded file embeds the report&#39;s security key — treat it as confidential</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

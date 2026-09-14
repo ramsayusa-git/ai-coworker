@@ -1,0 +1,246 @@
+# Setup SIP Trunks with Cloudonix
+
+A step-by-step guide for configuring Cloudonix SIP Trunking to work with your LiveKit Voice AI Dashboard.
+
+---
+
+## Prerequisites
+
+- A Cloudonix account
+- A purchased phone number (DNID) in Cloudonix
+- Access to your LiveKit Dashboard
+- Your LiveKit project's SIP URI (the public address of your LiveKit SIP gateway)
+
+> **Reference:** Cloudonix's official LiveKit integration guide is at [developers.cloudonix.com/Documentation/aiAgentsServices/Provider/Livekit](https://developers.cloudonix.com/Documentation/aiAgentsServices/Provider/Livekit).
+
+> **Heads up — Outbound provisioning:** Cloudonix outbound trunking is **NOT self-service**. To enable outbound calls from your LiveKit project through Cloudonix, you must raise a ticket with **LiveKit support** (via Discord) so they can provision Cloudonix as a service-provider entry on your LiveKit project. **Allow 24-48 hours of lead time** for this to be set up. Inbound works without LiveKit-side provisioning.
+
+---
+
+## Part 1: Cloudonix Cockpit Configuration
+
+### Step 1: Log In to the Cockpit
+
+1. Log in to [cockpit.cloudonix.io](https://cockpit.cloudonix.io)
+2. Select the domain you want to use (or create one)
+
+### Step 2: Create an Inbound Trunk
+
+1. Navigate to **Domain** → **Trunks**
+2. Click **Create New Trunk**
+3. Choose **Inbound**
+4. Configure:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `LiveKit Inbound` |
+| **Type** | `Inbound` |
+| **Destination** | Your LiveKit project's SIP URI |
+
+5. Click **Create**
+
+Cloudonix will auto-issue a SIP alias for this trunk in the format:
+
+```
+<uuid>.sip.cloudonix.net
+```
+
+This UUID is unique per trunk. **Save this alias** — you'll use it when configuring DNIDs and verifying inbound routing. (You won't paste it into LiveKit; LiveKit only needs to know about Cloudonix's egress IPs and your project's own URI.)
+
+### Step 3: Bind DNID Numbers to the Trunk
+
+In Cloudonix, phone numbers are called **DNIDs** (Dialed Number Identifiers). You bind them at the application level.
+
+1. Navigate to **Domain** → **Applications**
+2. Open or create the application that will receive your inbound calls
+3. Click **DNID Numbers**
+4. Add the phone number you've purchased (in E.164 format, e.g., `+14155551234`)
+5. In the application's routing logic, point inbound calls at the LiveKit Inbound trunk you created in Step 2
+
+### Step 4: Configure Authentication
+
+Cloudonix uses a **two-layer auth model** that is different from most providers:
+
+- **API layer:** bearer token (used by Cloudonix's own services, not by LiveKit)
+- **SIP layer:** Cloudonix's own service-provider trust — **no per-call digest username/password is issued for the SIP trunk itself**
+
+This means **you will leave Username and Password blank** when configuring the LiveKit trunk. Authentication happens by Cloudonix's egress IPs being whitelisted in LiveKit (and, for outbound, by the service-provider relationship that LiveKit support provisions for you).
+
+### Step 5: Get Cloudonix's Egress IPs
+
+Cloudonix's signaling IPs are documented in their developer portal. Pull the current list before proceeding — you'll paste them into LiveKit's **Allowed Addresses** field in Step 8.
+
+### Step 6: Raise a LiveKit Outbound Ticket (For Outbound Calls Only)
+
+Skip this step if you only need inbound.
+
+To enable outbound dialing from your LiveKit project through Cloudonix:
+
+1. Open a Discord ticket with the LiveKit support team
+2. State that you want **Cloudonix provisioned as a service-provider entry** on your LiveKit project
+3. Provide:
+   - Your LiveKit project's SIP URI
+   - Your Cloudonix domain
+   - Confirmation that you have an active Cloudonix account
+4. Wait **24-48 hours** for LiveKit to provision the entry
+5. LiveKit support will confirm when complete and provide the outbound SIP host you'll use in the LiveKit Dashboard's Outbound Trunk **Address** field
+
+### Step 7: Final Review in Cockpit
+
+Before moving to LiveKit, verify in cockpit.cloudonix.io:
+
+| Item | Check |
+|------|-------|
+| Inbound trunk exists with auto-issued `<uuid>.sip.cloudonix.net` alias | ✓ |
+| DNID numbers bound to your application | ✓ |
+| Application routes calls to the inbound trunk | ✓ |
+| (Outbound only) LiveKit support has confirmed provisioning | ✓ |
+
+---
+
+## Part 2: LiveKit Dashboard Configuration
+
+### Step 8: Create Inbound SIP Trunk
+
+1. Log into your LiveKit Dashboard
+2. Navigate to **Telephony** → **Inbound Trunks**
+3. Click **+ Create Trunk**
+4. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Cloudonix Inbound` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Numbers** | Your Cloudonix DNID (e.g., `+14155551234`) |
+| **Allowed Addresses** | Cloudonix's egress IP list (from Step 5) |
+| **Username** | Leave empty |
+| **Password** | Leave empty |
+
+5. Click **Create**
+
+> **Important - Firewall Configuration:**
+> You must allow Cloudonix's egress IPs in your cloud provider's firewall (AWS Security Groups, GCP Firewall Rules, etc.) for **both TCP and UDP on port 5060**. If your firewall blocks Cloudonix's IPs, calls will not reach your LiveKit server even if the LiveKit trunk configuration is correct.
+
+### Step 9: Create Dispatch Rule
+
+1. Navigate to **Telephony** → **Dispatch Rules**
+2. Click **+ Create Rule**
+3. Configure the rule:
+
+| Field | Value |
+|-------|-------|
+| **Trunk IDs** | Select `Cloudonix Inbound` |
+| **Dispatch Rule Type** | Choose based on your needs (Direct/Individual/Multi-Line) |
+| **Room Name** | `support-room` (or your target room) |
+| **Agent Name** | Select your AI Agent |
+
+4. Click **Create**
+
+### Step 10: Create Outbound SIP Trunk (Skip if Inbound-Only)
+
+> Only proceed once LiveKit support has confirmed they've provisioned Cloudonix as a service-provider on your project (Step 6).
+
+1. Navigate to **Telephony** → **Outbound Trunks**
+2. Click **Create new trunk**
+3. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Cloudonix Outbound` |
+| **Address** | The outbound SIP host LiveKit support provided you |
+| **Transport** | `UDP` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Username** | Leave Empty (Cloudonix uses service-provider trust, no per-call digest) |
+| **Password** | Leave Empty |
+| **Numbers** | Your Cloudonix DNID (e.g., `+14155551234`) |
+
+4. Click **Create**
+
+---
+
+## Part 3: Verification
+
+### Step 11: Test Inbound
+
+1. Call your Cloudonix DNID from a mobile phone or external line
+2. Check the **Rooms** page in the dashboard
+3. You should see a new room created when the call connects
+
+**If it fails:**
+- Verify the DNID is bound to your Cloudonix application (Step 3)
+- Verify the application routes to the inbound trunk
+- Confirm **Allowed Addresses** in LiveKit matches Cloudonix's current egress IP list
+- Check the auto-issued `<uuid>.sip.cloudonix.net` alias is referenced correctly in your application's call flow
+
+### Step 12: Test Outbound
+
+1. Go to **Telephony** → **Outbound Trunks**
+2. Click **Create Outbound Call** (or use the Sandbox)
+3. Enter a destination number in E.164 format and call
+4. Verify caller ID displays correctly and audio works both ways
+
+**If outbound fails:**
+- Confirm LiveKit support has actually provisioned Cloudonix on your project (Step 6) — without that, outbound will simply not work
+- Verify the **Address** field uses the exact outbound SIP host LiveKit gave you, not the inbound `<uuid>.sip.cloudonix.net` alias
+
+---
+
+## Troubleshooting Checklist
+
+| Issue | Check |
+|-------|-------|
+| Inbound calls not arriving | Verify DNID is bound to the application AND the application routes to the inbound trunk in cockpit.cloudonix.io |
+| "Trunk not found" / 404 | Ensure **Allowed Addresses** in LiveKit includes Cloudonix's full egress IP list |
+| 401 / 407 on outbound | Confirm Username/Password are LEFT EMPTY (Cloudonix uses service-provider trust, not digest) |
+| Outbound calls fail with no obvious error | Confirm LiveKit support has provisioned Cloudonix as a service-provider on your project — without this, outbound will not work no matter what config you use |
+| One-way audio | Confirm UDP/RTP ports are open in your cloud firewall and `use_external_ip: true` is set in `livekit-sip` config if behind NAT |
+| No room created | Check dispatch rule is linked to the correct trunk ID |
+| Wrong outbound host | Use the exact host LiveKit support gave you — do NOT use the `<uuid>.sip.cloudonix.net` inbound alias |
+
+---
+
+## Quick Reference: Configuration Summary
+
+**Cloudonix Side:**
+```
+Cockpit (cockpit.cloudonix.io):
+  → Inbound Trunk: <uuid>.sip.cloudonix.net (auto-issued)
+  → Application: routes incoming calls to inbound trunk
+  → DNID Numbers: bound to application
+
+Authentication:
+  → API layer: bearer token (not used by LiveKit)
+  → SIP layer: service-provider trust (no digest)
+
+Outbound Provisioning:
+  → Discord ticket to LiveKit support
+  → 24-48h lead time
+  → LiveKit provides the outbound SIP host
+```
+
+**LiveKit Side:**
+```
+Inbound Trunk:
+  → Name: Cloudonix Inbound
+  → Number Format: +E.164 (WITH +)
+  → Numbers: Your Cloudonix DNID
+  → Allowed Addresses: Cloudonix egress IP list
+  → Auth: None
+
+Dispatch Rule:
+  → Linked to: Cloudonix Inbound trunk
+  → Type: Direct/Individual/Multi-Line (your choice)
+  → Agent: Your AI agent
+
+Outbound Trunk (only after LiveKit provisions):
+  → Name: Cloudonix Outbound
+  → Address: [host provided by LiveKit support]
+  → Transport: UDP
+  → Number Format: +E.164 (WITH +)
+  → Auth: None (service-provider trust)
+  → Numbers: Your Cloudonix DNID
+```
+
+---
+
+This guide covers the complete end-to-end setup for both inbound and outbound calls via Cloudonix with your LiveKit Voice AI Dashboard.

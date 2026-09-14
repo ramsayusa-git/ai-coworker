@@ -1,0 +1,3178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Agent Management - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=887211">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=2202.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link active">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Agent Management</h1>
+                
+<p class="page-subtitle">Configure and Monitor AI Agents for LiveKit</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#voice-agents" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="agents.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-robot"></i> Total Agents
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-play-circle"></i> Running
+        </div>
+        <div class="stat-value success">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-stop-circle"></i> Stopped
+        </div>
+        <div class="stat-value">
+            0
+        </div>
+    </div>
+</div>
+
+<!-- Stopped-agent warning: shown when any agent in this (already tenant-scoped)
+     view isn't running. rejectattr catches stopped + any missing/unknown status.
+     alert-permanent so main.js doesn't auto-dismiss it after 15s. -->
+
+
+
+<!-- Info Alert (dismissible — dismissal persisted per browser via localStorage) -->
+<div class="alert alert-info alert-permanent position-relative" id="agentMgmtInfoBox" role="alert">
+    <button type="button" class="btn-close position-absolute" style="top: 0.75rem; right: 0.75rem;" aria-label="Dismiss" onclick="dismissAgentMgmtInfoBox()"></button>
+    <i class="bi bi-info-circle"></i>
+    <strong>Agent Management:</strong> Create and configure AI voice agents (LLM/STT/TTS). Changes apply on restart, and an agent must be selected in a <a href="telephony/rules.html" class="alert-link">Dispatch Rule</a> to take calls.
+</div>
+
+<!-- Flash Messages -->
+
+
+
+
+<!-- Agents List -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center gap-3 flex-wrap">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-robot"></i> AI Agents
+        </h5>
+        
+        <div class="d-flex gap-2">
+            
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#folderManageModal" title="Manage Folders">
+                <i class="bi bi-folder2"></i> Folders
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#templateSelectorModal">
+                <i class="bi bi-layout-text-sidebar-reverse"></i> Templates
+            </button>
+            
+            
+            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#agentHelpModal" title="Help">
+                <i class="bi bi-question-circle"></i> Help
+            </button>
+            
+            
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#importAgentsModal" title="Import agent">
+                <i class="bi bi-upload"></i> Import
+            </button>
+            
+            
+            
+            
+            
+            
+            <a href="agents/create.html" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Create Agent
+                <span class="badge bg-light text-dark ms-1">0/2</span>
+                
+            </a>
+            
+            
+        </div>
+    </div>
+    <div class="card-body">
+        
+        
+
+        
+        
+
+        
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-robot"></i>
+            </div>
+            <div class="empty-state-title">No agents configured</div>
+            <div class="empty-state-description">
+                
+                Create an AI agent to handle automated interactions in your LiveKit rooms.
+                
+            </div>
+            
+            
+            <a href="agents/create.html" class="btn btn-primary mt-3">
+                <i class="bi bi-plus-circle"></i> Create Your First Agent
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+
+<!-- Folder Management Modal -->
+<div class="modal fade" id="folderManageModal" tabindex="-1" aria-labelledby="folderManageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="folderManageModalLabel"><i class="bi bi-folder2"></i> Manage Folders</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="newFolderName" placeholder="New folder name..." maxlength="50" onkeydown="if(event.key==='Enter') createFolder()">
+                    <button class="btn btn-primary" type="button" onclick="createFolder()">
+                        <i class="bi bi-plus-circle"></i> Create
+                    </button>
+                </div>
+                <div id="folderList">
+                    
+                    <p class="text-muted small mb-0"><i class="bi bi-info-circle"></i> No folders yet. Create one to start organising your agents.</p>
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Code Viewer Modal -->
+<div class="modal fade" id="codeViewerModal" tabindex="-1" aria-labelledby="codeViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color: #1e1e1e;">
+            <div class="modal-header" style="border-bottom: 1px solid #333;">
+                <h5 class="modal-title" id="codeViewerModalLabel">
+                    <i class="bi bi-code-slash"></i> Agent Configuration (JSON)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="copyCodeToClipboard()">
+                        <i class="bi bi-clipboard"></i> Copy to Clipboard
+                    </button>
+                </div>
+                <pre style="background-color: #2d2d2d; color: #d4d4d4; padding: 1rem; border-radius: 0.25rem; max-height: 500px; overflow-y: auto;"><code id="agent-code-content"></code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Logs Viewer Modal -->
+<div class="modal fade" id="logsViewerModal" tabindex="-1" aria-labelledby="logsViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="background-color: #000;">
+            <div class="modal-header" style="border-bottom: 1px solid #333;">
+                <h5 class="modal-title" id="logsViewerModalLabel" style="color: #0f0;">
+                    <i class="bi bi-terminal"></i> Agent Logs
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <select class="form-select form-select-sm" id="agentLogLinesSelect" style="width: auto; background-color: #222; color: #0f0; border-color: #333;">
+                        <option value="50">50 lines</option>
+                        <option value="100">100 lines</option>
+                        <option value="200" selected>200 lines</option>
+                        <option value="500">500 lines</option>
+                    </select>
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="refreshLogs()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="copyAgentLogs()" id="copyAgentLogsBtn">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <pre style="background-color: #000; color: #0f0; padding: 1rem; border-radius: 0.25rem; max-height: 600px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.875rem;"><code id="agent-logs-content"></code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Agents Modal -->
+<div class="modal fade" id="importAgentsModal" tabindex="-1" aria-labelledby="importAgentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importAgentsModalLabel">Import Agents</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="https://vaai.aetosiot.com/agents/import" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Upload a JSON file exported from another LiveKit Dashboard.
+                        If an agent with the same slug already exists, a unique slug will be generated automatically.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="importAgentFile" class="form-label">Select JSON File</label>
+                        <input type="file" class="form-control" id="importAgentFile" name="import_file" accept=".json" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteAgentModal" tabindex="-1" aria-labelledby="deleteAgentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAgentModalLabel">Confirm Delete Agent</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="deleteAgentForm">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    
+                    <p>Are you sure you want to delete agent <strong id="delete_agent_name"></strong>?</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> This action cannot be undone.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Agent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Health Error Modal -->
+<div class="modal fade" id="healthErrorModal" tabindex="-1" aria-labelledby="healthErrorModalLabel"
+     aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="healthErrorModalLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Configuration Error
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                <div class="alert alert-warning mb-3 mt-0" role="alert" style="border-left: 5px solid #ffc107;">
+                    <h6 class="alert-heading mb-2"><i class="bi bi-tools"></i> How to fix</h6>
+                    <ol class="mb-2 ps-3">
+                        <li>Open <a href="settings@tab=integrations.html" class="alert-link">Settings → Integrations</a> and paste the missing API key(s).</li>
+                        <li>Click <strong>Save</strong>. The dashboard will write them to <code>.env</code> and restart the agent worker automatically.</li>
+                        <li>Return to this page and reload — the badge should turn green.</li>
+                    </ol>
+                    <small class="text-muted">
+                        If a key is already set and you are still seeing this error, restart the dashboard service
+                        (<code>sudo systemctl restart livekit-dashboard livekit-agent</code>) and hard-reload the page.
+                    </small>
+                </div>
+                <p class="mb-2 fw-semibold">The following environment variables are missing or not configured:</p>
+                <ul id="health-error-list" class="list-unstyled mb-0">
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <a href="settings@tab=integrations.html" class="btn btn-primary">
+                    <i class="bi bi-gear"></i> Open Settings → Integrations
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.pulsing-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #fff;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+/* Action buttons styling */
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-outline-secondary {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+    background-color: var(--bg-hover);
+}
+
+.btn-outline-primary {
+    color: var(--brand-primary);
+    border-color: var(--border-color);
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.btn-outline-success {
+    color: #28a745;
+    border-color: var(--border-color);
+}
+
+.btn-outline-success:hover {
+    color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: var(--border-color);
+}
+
+.btn-outline-danger:hover {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-outline-info {
+    color: #17a2b8;
+    border-color: var(--border-color);
+}
+
+.btn-outline-info:hover {
+    color: #fff;
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-outline-warning {
+    color: #ffc107;
+    border-color: var(--border-color);
+}
+
+.btn-outline-warning:hover {
+    color: #212529;
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+</style>
+
+<!-- Agent Help Modal -->
+<div class="modal fade" id="agentHelpModal" tabindex="-1" aria-labelledby="agentHelpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agentHelpModalLabel">
+                    <i class="bi bi-question-circle"></i> AI Voice Agent Guide
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Quick Navigation -->
+                <div class="d-flex gap-2 mb-3 flex-wrap">
+                    <a href="agents.html#overview-section" class="btn btn-outline-primary btn-sm"><i class="bi bi-info-circle"></i> Overview</a>
+                    <a href="agents.html#llm-help" class="btn btn-outline-success btn-sm"><i class="bi bi-cpu"></i> LLM Models</a>
+                    <a href="agents.html#stt-help" class="btn btn-outline-info btn-sm"><i class="bi bi-mic"></i> STT Models</a>
+                    <a href="agents.html#tts-help" class="btn btn-outline-warning btn-sm"><i class="bi bi-volume-up"></i> TTS Models</a>
+                    <a href="agents.html#realtime-help" class="btn btn-outline-danger btn-sm"><i class="bi bi-lightning"></i> Realtime</a>
+                    <a href="agents.html#dynamics-help" class="btn btn-outline-purple btn-sm" style="border-color: #7952b3; color: #7952b3;"><i class="bi bi-sliders"></i> Conversation Dynamics</a>
+                    <a href="agents.html#config-tips" class="btn btn-outline-secondary btn-sm"><i class="bi bi-gear"></i> Configuration Tips</a>
+                </div>
+
+                <!-- Overview Section -->
+                <section id="overview-section" class="mb-4">
+                    <h5 class="border-bottom pb-2"><i class="bi bi-info-circle text-primary"></i> Overview</h5>
+                    <p>AI Voice Agents handle phone calls using three core AI components:</p>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card border-primary mb-2">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-mic fs-2 text-primary"></i>
+                                    <h6 class="mt-2">STT (Speech-to-Text)</h6>
+                                    <small class="text-muted">Converts caller's voice to text</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-success mb-2">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-cpu fs-2 text-success"></i>
+                                    <h6 class="mt-2">LLM (Language Model)</h6>
+                                    <small class="text-muted">Understands and generates responses</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-info mb-2">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-volume-up fs-2 text-info"></i>
+                                    <h6 class="mt-2">TTS (Text-to-Speech)</h6>
+                                    <small class="text-muted">Speaks the response to caller</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- LLM Section -->
+                <section id="llm-help" class="mb-4">
+                    <h5 class="border-bottom pb-2"><i class="bi bi-cpu text-success"></i> LLM Models Comparison</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr><th>Provider</th><th>Model</th><th>Latency</th><th>Quality</th><th>Cost</th><th>Best For</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>OpenAI</strong></td></tr>
+                                <tr><td></td><td>GPT-4o</td><td>300-500ms</td><td>Excellent</td><td>$$</td><td>Balanced, general purpose</td></tr>
+                                <tr><td></td><td>GPT-4o Mini</td><td>200-300ms</td><td>Good</td><td>$</td><td>Budget-friendly</td></tr>
+                                <tr><td></td><td>GPT-4.1 Mini</td><td>150-250ms</td><td>Good</td><td>$</td><td>Fast responses</td></tr>
+                                <tr><td></td><td>GPT-4.1 Nano</td><td>100-200ms</td><td>Basic</td><td>$</td><td>Cheapest option</td></tr>
+                                <tr><td></td><td>GPT-5.1/5.2 Instant</td><td>200-400ms</td><td>Best</td><td>$$$</td><td>Complex reasoning</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>Google</strong></td></tr>
+                                <tr><td></td><td>Gemini 2.5 Flash</td><td>150-300ms</td><td>Excellent</td><td>$</td><td>Fast, cost-effective</td></tr>
+                                <tr><td></td><td>Gemini 3 Flash</td><td>150-300ms</td><td>Best</td><td>$</td><td>Latest, best quality</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>Anthropic / AWS Bedrock</strong></td></tr>
+                                <tr><td></td><td>Claude Haiku 4.5</td><td>200-400ms</td><td>Good</td><td>$</td><td>Fast Claude</td></tr>
+                                <tr><td></td><td>Claude Sonnet 5</td><td>300-550ms</td><td>Excellent</td><td>$$</td><td>Nuanced conversations</td></tr>
+                                <tr><td></td><td>Amazon Nova Micro</td><td>100-200ms</td><td>Basic</td><td>$</td><td>Fastest AWS option</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>xAI</strong></td></tr>
+                                <tr><td></td><td>Grok-4/4.1 Fast</td><td>150-300ms</td><td>Excellent</td><td>$</td><td>Conversational</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>Azure OpenAI</strong> <span class="badge bg-warning text-dark">BETA</span></td></tr>
+                                <tr><td></td><td>GPT-4o / GPT-4o Mini</td><td>300-500ms</td><td>Excellent</td><td>$$</td><td>Enterprise / Azure ecosystem</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- STT Section -->
+                <section id="stt-help" class="mb-4">
+                    <h5 class="border-bottom pb-2"><i class="bi bi-mic text-info"></i> STT Models Comparison</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr><th>Provider</th><th>Model</th><th>Latency</th><th>Accuracy</th><th>Languages</th><th>Best For</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>Deepgram</strong> <span class="badge bg-success">Recommended</span></td></tr>
+                                <tr><td></td><td>Flux</td><td>~100ms</td><td>Good</td><td>English</td><td><strong>Fastest for real-time</strong></td></tr>
+                                <tr><td></td><td>Nova 3 General</td><td>~150ms</td><td>Excellent</td><td>36+</td><td>Best accuracy</td></tr>
+                                <tr><td></td><td>Nova 3 Medical</td><td>~150ms</td><td>Excellent</td><td>English</td><td>Medical terminology</td></tr>
+                                <tr><td></td><td>Nova 2 General</td><td>~200ms</td><td>Good</td><td>36+</td><td>Stable, proven</td></tr>
+                                <tr><td></td><td>Nova 2 Phone Call</td><td>~200ms</td><td>Good</td><td>English</td><td>Phone audio optimized</td></tr>
+                                <tr><td></td><td>Whisper Cloud</td><td>N/A</td><td>Good</td><td>98</td><td>Batch only (no streaming)</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>OpenAI</strong></td></tr>
+                                <tr><td></td><td>GPT-4o Transcribe</td><td>300-500ms</td><td>Best</td><td>50+</td><td>Highest accuracy</td></tr>
+                                <tr><td></td><td>GPT-4o Mini Transcribe</td><td>200-400ms</td><td>Excellent</td><td>50+</td><td>Faster option</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>Google</strong></td></tr>
+                                <tr><td></td><td>Chirp 3</td><td>200-400ms</td><td>Excellent</td><td>125+</td><td>Best multilingual</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>ElevenLabs</strong></td></tr>
+                                <tr><td></td><td>Scribe v2 Realtime</td><td>~150ms</td><td>Excellent</td><td>32</td><td>Fast streaming</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>AWS Transcribe</strong></td></tr>
+                                <tr><td></td><td>Streaming</td><td>200-400ms</td><td>Good</td><td>50+</td><td>Data residency</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>Azure Speech</strong> <span class="badge bg-warning text-dark">BETA</span></td></tr>
+                                <tr><td></td><td>Neural STT</td><td>200-400ms</td><td>Good</td><td>100+</td><td>Azure ecosystem</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="6"><strong>Azure OpenAI</strong> <span class="badge bg-warning text-dark">BETA</span></td></tr>
+                                <tr><td></td><td>GPT-4o Transcribe / Whisper</td><td>300-500ms</td><td>Excellent</td><td>50+</td><td>Enterprise Azure</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- TTS Section -->
+                <section id="tts-help" class="mb-4">
+                    <h5 class="border-bottom pb-2"><i class="bi bi-volume-up text-warning"></i> TTS Models Comparison</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr><th>Provider</th><th>Model</th><th>Latency</th><th>Quality</th><th>Best For</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>ElevenLabs</strong> <span class="badge bg-success">Best Quality</span></td></tr>
+                                <tr><td></td><td>Flash v2.5</td><td>~75ms</td><td>Excellent</td><td><strong>Best for voice AI</strong> - fast + natural</td></tr>
+                                <tr><td></td><td>Turbo v2.5</td><td>~250ms</td><td>Best</td><td>Highest quality</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>Cartesia</strong> <span class="badge bg-info">Lowest Latency</span></td></tr>
+                                <tr><td></td><td>Sonic 2/3</td><td>~50ms</td><td>Good/Excellent</td><td>Fastest TTS available</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>Deepgram</strong></td></tr>
+                                <tr><td></td><td>Aura-2</td><td>~100ms</td><td>Good</td><td>Multi-language (EN, ES, FR, DE, IT, NL, JA). No speed control.</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>OpenAI</strong></td></tr>
+                                <tr><td></td><td>TTS-1 / TTS-1 HD</td><td>200-300ms</td><td>Good/Excellent</td><td>Simple integration</td></tr>
+                                <tr><td></td><td>GPT-4o Mini TTS</td><td>~200ms</td><td>Excellent</td><td>Expressive voices</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>Google</strong></td></tr>
+                                <tr><td></td><td>Neural2 / Chirp 3 HD</td><td>200-250ms</td><td>Good/Excellent</td><td>Many accents (US, AU, GB)</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>Azure Speech</strong> <span class="badge bg-warning text-dark">BETA</span></td></tr>
+                                <tr><td></td><td>Azure Neural TTS</td><td>200-300ms</td><td>Good</td><td>400+ voices, enterprise</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>Azure OpenAI</strong> <span class="badge bg-warning text-dark">BETA</span></td></tr>
+                                <tr><td></td><td>GPT-4o Mini TTS / TTS-1</td><td>200-300ms</td><td>Good/Excellent</td><td>Azure ecosystem</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Realtime Section -->
+                <section id="realtime-help" class="mb-4">
+                    <h5 class="border-bottom pb-2"><i class="bi bi-lightning text-danger"></i> Realtime Models (Audio-to-Audio)</h5>
+                    <p class="text-muted small">Realtime mode uses a single audio-to-audio stream instead of separate STT + LLM + TTS. Select "Realtime" in the Pipeline Mode dropdown when creating an agent.</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr><th>Provider</th><th>Models</th><th>Latency</th><th>Key Features</th><th>API Key</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>Google (Gemini Live)</strong> <span class="badge bg-success">Recommended</span></td></tr>
+                                <tr><td></td><td>Gemini 2.5 Flash Native Audio</td><td><200ms</td><td>Language, proactivity, affective dialog, thinking budget, context compression</td><td><code>GOOGLE_API_KEY</code></td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>Google Cloud (Vertex AI)</strong></td></tr>
+                                <tr><td></td><td>Gemini 2.5 Flash Native Audio</td><td><200ms</td><td>Same as Google + enterprise Vertex AI</td><td>Service Account</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>OpenAI</strong></td></tr>
+                                <tr><td></td><td>GPT-4o Realtime</td><td>~300ms</td><td>Playback speed, turn detection, noise reduction, modalities</td><td><code>OPENAI_API_KEY</code></td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>xAI (Grok)</strong></td></tr>
+                                <tr><td></td><td>Grok 2 Realtime</td><td>~300ms</td><td>Playback speed, turn detection, noise reduction</td><td><code>XAI_API_KEY</code></td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>AWS (Nova Sonic)</strong></td></tr>
+                                <tr><td></td><td>Amazon Nova 2 Sonic</td><td>~300ms</td><td>top_p, max_tokens, turn detection sensitivity</td><td>AWS Credentials</td></tr>
+                                <tr style="background-color: #343a40; color: white; border-top: 3px solid #0d6efd; font-size: 0.95rem;"><td colspan="5"><strong>Azure OpenAI</strong> <span class="badge bg-warning text-dark">BETA</span></td></tr>
+                                <tr><td></td><td>GPT Realtime (Azure)</td><td>~300ms</td><td>Same as OpenAI Realtime via Azure</td><td>Azure Credentials</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-info small mt-2">
+                        <i class="bi bi-lightbulb"></i> Advanced options (language, proactivity, etc.) are automatically shown or hidden in the editor based on the selected provider's capabilities.
+                    </div>
+                </section>
+
+                <!-- Conversation Dynamics Section -->
+                <section id="dynamics-help" class="mb-4">
+                    <h5 class="border-bottom pb-2"><i class="bi bi-sliders" style="color: #7952b3;"></i> Conversation Dynamics</h5>
+                    <p class="text-muted small">These settings control how the agent handles turn-taking, interruptions, and response timing during a call. Found under the <strong>Dynamics</strong> tab in the agent editor.</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr><th>Setting</th><th>What It Does</th><th>Default</th><th>Tip</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #343a40; color: white; font-size: 0.95rem;"><td colspan="4"><strong>Timing</strong></td></tr>
+                                <tr>
+                                    <td><strong>Response Delay</strong></td>
+                                    <td>How long the agent waits after you stop speaking before it responds</td>
+                                    <td>0s</td>
+                                    <td>Increase to 0.3-0.4s if the agent cuts off users mid-thought</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Preemptive Generation</strong></td>
+                                    <td>Start generating a response before the user fully finishes speaking</td>
+                                    <td>On</td>
+                                    <td>Reduces latency but may occasionally respond too early</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Endpointing Mode</strong></td>
+                                    <td>Controls how the agent decides when to respond. Dynamic learns caller's pause rhythm; Fixed uses exact Response Delay.</td>
+                                    <td>Dynamic</td>
+                                    <td>Use Dynamic for most calls. Switch to Fixed if agent needs precise timing control.</td>
+                                </tr>
+                                <tr style="background-color: #343a40; color: white; font-size: 0.95rem;"><td colspan="4"><strong>Interruption Controls</strong></td></tr>
+                                <tr>
+                                    <td><strong>Barge-In Threshold</strong></td>
+                                    <td>How long a caller must speak to interrupt the agent</td>
+                                    <td>0.5s</td>
+                                    <td>Set to 0.3s to allow quick interruptions while filtering brief acknowledgments</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Resume After False Interruptions</strong></td>
+                                    <td>Agent resumes speaking from where it left off if an interruption was background noise</td>
+                                    <td>On</td>
+                                    <td>Keep on — prevents the agent from losing its train of thought</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>False Interruption Timeout</strong></td>
+                                    <td>How long to wait after an interruption before deciding it was false</td>
+                                    <td>2.0s</td>
+                                    <td>Higher values give more time to determine if speech was real</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Min Words to Interrupt</strong></td>
+                                    <td>Minimum recognized words before treating input as a real interruption</td>
+                                    <td>0</td>
+                                    <td>Set to 1-2 to prevent coughs or clicks from cutting off the agent</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Discard Audio During Announcements</strong></td>
+                                    <td>Discards buffered caller audio during non-interruptible agent speech</td>
+                                    <td>On</td>
+                                    <td>Keep on unless you need to capture what callers say during announcements</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Echo Cancel Warmup</strong></td>
+                                    <td>Ignores the caller's audio for X seconds after the agent's first words, so echo can't trigger a false barge-in</td>
+                                    <td>Auto (0s outbound, 0.5s inbound phone, 3s web)</td>
+                                    <td>Leave on Auto; set a manual value only if a specific line has echo issues at call start</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>User Away Detection</strong></td>
+                                    <td>Seconds of mutual silence before caller is considered "away"</td>
+                                    <td>15s</td>
+                                    <td>Works alongside End Call on Silence for comprehensive silence handling</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+
+                <!-- Configuration Tips -->
+                <section id="config-tips" class="mb-3">
+                    <h5 class="border-bottom pb-2"><i class="bi bi-gear text-secondary"></i> Configuration Tips</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-success text-white"><i class="bi bi-lightning"></i> For Lowest Latency</div>
+                                <div class="card-body">
+                                    <ul class="small mb-0">
+                                        <li><strong>LLM:</strong> GPT-4.1 Mini or Gemini 2.5 Flash</li>
+                                        <li><strong>STT:</strong> Deepgram Flux</li>
+                                        <li><strong>TTS:</strong> Cartesia Sonic or ElevenLabs Flash</li>
+                                        <li><strong>Responsiveness:</strong> 0.7-0.9</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white"><i class="bi bi-trophy"></i> For Best Quality</div>
+                                <div class="card-body">
+                                    <ul class="small mb-0">
+                                        <li><strong>LLM:</strong> GPT-5.2 Instant or Claude Sonnet 5</li>
+                                        <li><strong>STT:</strong> Deepgram Flux</li>
+                                        <li><strong>TTS:</strong> ElevenLabs Turbo v2.5</li>
+                                        <li><strong>Responsiveness:</strong> 0.4-0.6</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-secondary mb-3">
+                        <h6><i class="bi bi-braces"></i> Dynamic Variables</h6>
+                        <p class="small mb-2">Use these placeholders in your system prompt, greeting, or voicemail message. They are replaced with real values at call time:</p>
+                        <ul class="small mb-0">
+                            <li><code>{{time_greeting}}</code> (morning/afternoon/evening) — time-of-day greeting based on server time</li>
+                            <li><code>{{user_number}}</code> — caller's phone number (inbound) or dialed number (outbound)</li>
+                            <li><code>{{current_datetime}}</code> — current date and time</li>
+                            <li><code>{{current_date}}</code> — current date</li>
+                            <li><code>{{current_time}}</code> — current time</li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-lightbulb"></i> Quick Tips</h6>
+                        <ul class="small mb-0">
+                            <li><strong>Health Indicators:</strong> Green = ready, Yellow = warning, Red = missing API key or dependency</li>
+                            <li><strong>Status:</strong> Agents must be "running" to handle calls</li>
+                            <li><strong>Edit vs Create:</strong> Changes to running agents take effect immediately after restart</li>
+                            <li><strong>Logs:</strong> Check agent logs for troubleshooting call issues</li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="copyAgentModal" tabindex="-1" aria-labelledby="copyAgentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="copyAgentModalLabel"><i class="bi bi-arrow-left-right me-2"></i><span id="copyAgentTitle">Copy agent</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3" id="copyAgentIntro"></p>
+        <div class="row g-3 mb-3">
+          <div class="col-md-7">
+            <label class="form-label" for="copyAgentName">Name of the copy</label>
+            <input type="text" class="form-control" id="copyAgentName" maxlength="120" autocomplete="off">
+            <div class="form-text">If the name is already used on the other channel, a number is added.</div>
+          </div>
+          <div class="col-md-5" id="copyAgentModeWrap">
+            <label class="form-label" for="copyAgentMode">Chat mode for the chatbot</label>
+            <select class="form-select" id="copyAgentMode">
+              <option value="full_voice">Full voice (talk and type)</option>
+              <option value="voice_with_avatar">Voice with avatar (type, hear replies)</option>
+              <option value="text">Text only</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="copyAgentPreviewLoading" class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Working out what carries over…</div>
+        <div id="copyAgentPreviewError" class="alert alert-danger alert-permanent d-none" role="alert"></div>
+
+        <div id="copyAgentPreview" class="d-none">
+          <div id="copyAgentWarnings" class="alert alert-warning alert-permanent d-none" role="alert">
+            <div class="fw-semibold mb-1"><i class="bi bi-exclamation-triangle me-1"></i>Please check before you copy</div>
+            <ul class="mb-0 small" id="copyAgentWarningsList"></ul>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="fw-semibold text-success mb-1"><i class="bi bi-check-circle me-1"></i>Copied</div>
+              <ul class="small ps-3 mb-0" id="copyAgentCopied"></ul>
+            </div>
+            <div class="col-md-4">
+              <div class="fw-semibold text-primary mb-1"><i class="bi bi-sliders me-1"></i>Adapted</div>
+              <ul class="small ps-3 mb-0" id="copyAgentAdapted"></ul>
+            </div>
+            <div class="col-md-4">
+              <div class="fw-semibold text-secondary mb-1"><i class="bi bi-dash-circle me-1"></i>Not carried over</div>
+              <ul class="small ps-3 mb-0" id="copyAgentDropped"></ul>
+            </div>
+          </div>
+          <div class="form-check mt-3 d-none" id="copyAgentAckWrap">
+            <input class="form-check-input" type="checkbox" id="copyAgentAck">
+            <label class="form-check-label small" for="copyAgentAck">I will pick a speech recogniser and a voice on the copy before enabling it.</label>
+          </div>
+          <p class="text-muted small mt-3 mb-0">This is a one-time snapshot. Changing one agent later does not change the other. The copy is created switched off so you can review it first.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="copyAgentSubmit" disabled><i class="bi bi-arrow-left-right me-1"></i>Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const S = { direction: null, agentId: null, agentName: null, previewTimer: null, previewSeq: 0, realtime: false };
+  const $ = (id) => document.getElementById(id);
+
+  function csrf() {
+    const m = document.querySelector('meta[name="csrf-token"]');
+    return m ? m.getAttribute('content') : '';
+  }
+  function endpoint() {
+    return S.direction === 'voice_to_chat'
+      ? `/agents/${encodeURIComponent(S.agentId)}/copy-to-chatbot`
+      : `/web-chat/${encodeURIComponent(S.agentId)}/copy-to-voice`;
+  }
+  function payload(dryRun) {
+    const body = { name: $('copyAgentName').value.trim(), dry_run: !!dryRun };
+    if (S.direction === 'voice_to_chat') body.chat_mode = $('copyAgentMode').value;
+    return body;
+  }
+  function post(body) {
+    return fetch(endpoint(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+      body: JSON.stringify(body),
+    }).then(r => {
+      if (r.status === 401) { window.location.href = '/login'; return null; }
+      return r.json().catch(() => ({ success: false, error: `HTTP ${r.status}` }));
+    });
+  }
+  function fill(listId, items) {
+    const ul = $(listId);
+    ul.innerHTML = '';
+    if (!items || !items.length) {
+      const li = document.createElement('li'); li.className = 'text-muted'; li.textContent = 'Nothing'; ul.appendChild(li); return;
+    }
+    items.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+  }
+  function updateSubmit() {
+    const ackNeeded = !$('copyAgentAckWrap').classList.contains('d-none');
+    const ok = !$('copyAgentPreview').classList.contains('d-none') && (!ackNeeded || $('copyAgentAck').checked);
+    $('copyAgentSubmit').disabled = !ok;
+  }
+  function preview() {
+    const seq = ++S.previewSeq;
+    $('copyAgentPreviewLoading').classList.remove('d-none');
+    $('copyAgentPreview').classList.add('d-none');
+    $('copyAgentPreviewError').classList.add('d-none');
+    $('copyAgentSubmit').disabled = true;
+    post(payload(true)).then(data => {
+      if (!data || seq !== S.previewSeq) return;
+      $('copyAgentPreviewLoading').classList.add('d-none');
+      if (!data.success) {
+        $('copyAgentPreviewError').textContent = data.error || 'Preview failed';
+        $('copyAgentPreviewError').classList.remove('d-none');
+        return;
+      }
+      const rep = data.report || {};
+      fill('copyAgentCopied', rep.copied);
+      fill('copyAgentAdapted', rep.adapted);
+      fill('copyAgentDropped', rep.dropped);
+      const warns = rep.warnings || [];
+      $('copyAgentWarnings').classList.toggle('d-none', !warns.length);
+      fill('copyAgentWarningsList', warns);
+      // Voice setup acknowledgement: a realtime source (voice->chat) or a chatbot
+      // without a recogniser/voice (chat->voice) lands without usable speech.
+      S.realtime = !!rep.needs_voice_setup;
+      $('copyAgentAckWrap').classList.toggle('d-none', !S.realtime);
+      $('copyAgentAck').checked = false;
+      $('copyAgentPreview').classList.remove('d-none');
+      updateSubmit();
+    }).catch(err => {
+      if (seq !== S.previewSeq) return;
+      $('copyAgentPreviewLoading').classList.add('d-none');
+      $('copyAgentPreviewError').textContent = 'Preview failed: ' + err;
+      $('copyAgentPreviewError').classList.remove('d-none');
+    });
+  }
+  function schedulePreview() {
+    clearTimeout(S.previewTimer);
+    $('copyAgentSubmit').disabled = true;  // the shown preview no longer matches the typed name
+    S.previewTimer = setTimeout(preview, 350);
+  }
+
+  window.openCopyAgentModal = function (direction, agentId, agentName) {
+    S.direction = direction; S.agentId = agentId; S.agentName = agentName || 'Agent';
+    const toChat = direction === 'voice_to_chat';
+    $('copyAgentTitle').textContent = toChat ? 'Copy to Chatbot Agent' : 'Copy to Voice Agent';
+    $('copyAgentIntro').textContent = toChat
+      ? `Make a website chatbot from "${S.agentName}". The prompt, knowledge, tools, memory settings, language model and speech settings carry over; phone-only settings do not.`
+      : `Make a phone agent from "${S.agentName}". The prompt, knowledge, tools, memory settings, language model and speech settings carry over; website-only settings do not.`;
+    $('copyAgentName').value = `${S.agentName} (${toChat ? 'Chatbot' : 'Voice'} copy)`;
+    $('copyAgentModeWrap').classList.toggle('d-none', !toChat);
+    $('copyAgentMode').value = 'full_voice';
+    $('copyAgentAckWrap').classList.add('d-none');
+    $('copyAgentAck').checked = false;
+    $('copyAgentPreview').classList.add('d-none');
+    $('copyAgentPreviewError').classList.add('d-none');
+    bootstrap.Modal.getOrCreateInstance($('copyAgentModal')).show();
+    preview();
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    $('copyAgentName').addEventListener('input', schedulePreview);
+    $('copyAgentMode').addEventListener('change', preview);
+    $('copyAgentAck').addEventListener('change', updateSubmit);
+    $('copyAgentSubmit').addEventListener('click', function () {
+      const btn = $('copyAgentSubmit');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Copying…';
+      post(payload(false)).then(data => {
+        btn.innerHTML = '<i class="bi bi-arrow-left-right me-1"></i>Copy';
+        if (!data) return;
+        if (!data.success) {
+          $('copyAgentPreviewError').textContent = data.error || 'Copy failed';
+          $('copyAgentPreviewError').classList.remove('d-none');
+          btn.disabled = false;
+          return;
+        }
+        const kind = S.direction === 'voice_to_chat' ? 'Chatbot' : 'Voice agent';
+        // Warnings raised DURING the write (e.g. assignment or versioning hiccups)
+        // only exist in this response — show them before moving on.
+        const lateWarns = ((data.report || {}).warnings || []);
+        const shown = Array.from($('copyAgentWarningsList').querySelectorAll('li')).map(li => li.textContent);
+        const fresh = lateWarns.filter(w => !shown.includes(w));
+        const extra = fresh.length ? `\n\nPlease note:\n- ${fresh.join('\n- ')}` : '';
+        const go = confirm(`${kind} "${data.name}" created switched off.${extra}\n\nOpen it now to review?`);
+        if (go && data.edit_url) { window.location.href = data.edit_url; return; }
+        location.reload();
+      }).catch(err => {
+        btn.innerHTML = '<i class="bi bi-arrow-left-right me-1"></i>Copy';
+        btn.disabled = false;
+        $('copyAgentPreviewError').textContent = 'Copy failed: ' + err;
+        $('copyAgentPreviewError').classList.remove('d-none');
+      });
+    });
+  });
+})();
+</script>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<script>
+let currentAgentId = null;
+
+function toggleAgentStatus(agentId, action) {
+    const btn = document.getElementById(`status-btn-${agentId}`);
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' + (action === 'start' ? 'Starting...' : 'Stopping...');
+    
+    fetch(`/agents/${agentId}/${action}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        // Check for authentication errors
+        if (response.status === 401) {
+            alert('Session expired. Redirecting to login...');
+            window.location.href = '/login';
+            return;
+        }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data) return; // Prevents error when redirecting
+        if (data.success) {
+            // Reload page to update UI
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || data.detail || 'Unknown error'));
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to ' + action + ' agent');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    });
+}
+
+function duplicateAgent(agentId) {
+    if (!confirm('Duplicate this agent?')) return;
+    
+    fetch(`/agents/${agentId}/duplicate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        // Check for authentication errors
+        if (response.status === 401) {
+            alert('Session expired. Redirecting to login...');
+            window.location.href = '/login';
+            return;
+        }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data) return; // Prevents error when redirecting
+        if (data.success) {
+            alert(`Agent duplicated successfully: ${data.agent_name}`);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || data.detail || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to duplicate agent');
+    });
+}
+
+function viewAgentCode(agentId) {
+    fetch(`/agents/${agentId}/json`, {
+        headers: {
+            'Accept': 'application/json',
+        },
+    })
+    .then(response => {
+        // Check for authentication errors
+        if (response.status === 401) {
+            alert('Session expired. Redirecting to login...');
+            window.location.href = '/login';
+            return;
+        }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data) return; // Prevents error when redirecting
+        if (data.error || data.detail) {
+            alert('Error: ' + (data.error || data.detail));
+            return;
+        }
+        
+        const codeContent = document.getElementById('agent-code-content');
+        codeContent.textContent = JSON.stringify(data, null, 2);
+        
+        const modal = new bootstrap.Modal(document.getElementById('codeViewerModal'));
+        modal.show();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to load agent configuration');
+    });
+}
+
+function copyCodeToClipboard() {
+    const codeContent = document.getElementById('agent-code-content').textContent;
+    navigator.clipboard.writeText(codeContent).then(() => {
+        alert('Code copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy code');
+    });
+}
+
+function viewAgentLogs(agentId) {
+    currentAgentId = agentId;
+    refreshLogs();
+    
+    const modal = new bootstrap.Modal(document.getElementById('logsViewerModal'));
+    modal.show();
+}
+
+function refreshLogs() {
+    if (!currentAgentId) return;
+
+    const logsContent = document.getElementById('agent-logs-content');
+    const lines = document.getElementById('agentLogLinesSelect').value;
+    logsContent.textContent = 'Loading logs...';
+
+    fetch(`/agents/${currentAgentId}/logs?lines=${lines}`, {
+        headers: {
+            'Accept': 'application/json',
+        },
+    })
+    .then(response => {
+        // Check for authentication errors
+        if (response.status === 401) {
+            alert('Session expired. Redirecting to login...');
+            window.location.href = '/login';
+            return;
+        }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data) return; // Prevents error when redirecting
+        logsContent.textContent = data.logs || 'No logs available';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        logsContent.textContent = 'Failed to load logs';
+    });
+}
+
+function copyAgentLogs() {
+    const logsContent = document.getElementById('agent-logs-content');
+    const copyBtn = document.getElementById('copyAgentLogsBtn');
+    const logText = logsContent.textContent;
+
+    if (!logText || logText === 'Loading logs...' || logText === 'No logs available') {
+        alert('No logs to copy.');
+        return;
+    }
+
+    navigator.clipboard.writeText(logText).then(() => {
+        // Show success feedback
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        copyBtn.classList.remove('btn-outline-light');
+        copyBtn.classList.add('btn-success');
+
+        setTimeout(() => {
+            copyBtn.innerHTML = originalHTML;
+            copyBtn.classList.remove('btn-success');
+            copyBtn.classList.add('btn-outline-light');
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy logs:', err);
+        alert('Failed to copy logs');
+    });
+}
+
+function showHealthError(agentId, llmProvider, sttProvider, ttsProvider, installedDeps, apiKeys, rtEnabled, rtProvider, rtModalities) {
+    const errorList = document.getElementById('health-error-list');
+    errorList.innerHTML = '';
+
+    const isRealtime = rtEnabled === 'true';
+    const isRealtimeTextOnly = isRealtime && rtModalities === 'text';
+
+    // Provider to SDK name mapping
+    // IMPORTANT: when adding a new provider, add an entry here AND in keyNames below.
+    // Missing entry → frontend shows "undefined - API key not configured" in Health modal.
+    // See CLAUDE.md "Adding a NEW provider" checklist step 9.
+    const sdkNames = {
+        openai: 'openai',
+        google: 'google-generativeai',
+        google_cloud: 'google-generativeai',
+        google_gemini: 'google-generativeai',
+        anthropic: 'anthropic',
+        bedrock: 'livekit-plugins-aws',
+        aws_transcribe: 'livekit-plugins-aws',
+        xai: 'openai',
+        xai_realtime: 'livekit-plugins-xai',
+        aws_realtime: 'livekit-plugins-aws',
+        azure_realtime: 'openai',
+        azure_openai: 'openai',
+        azure_speech: 'livekit-plugins-azure',
+        assemblyai: 'livekit-plugins-assemblyai',
+        speechmatics: 'livekit-plugins-speechmatics',
+        sarvam: 'livekit-plugins-sarvam',
+        slaute: 'livekit-plugins-slaute',
+        deepgram: 'deepgram-sdk',
+        elevenlabs: 'elevenlabs',
+        cartesia: 'cartesia',
+        aws_polly: 'livekit-plugins-aws',
+        openrouter: 'openai',
+        groq: 'livekit-plugins-groq',
+        hume: 'livekit-plugins-hume',
+        minimax: 'livekit-plugins-minimax-ai',
+        telnyx_ai: 'livekit-plugins-telnyx',
+        slng: 'livekit-plugins-slng',
+        scx: 'openai'
+    };
+
+    // Provider to API key name mapping
+    const keyNames = {
+        openai: 'OPENAI_API_KEY',
+        google: 'GOOGLE_API_KEY',
+        google_cloud: 'GOOGLE_CLOUD_CREDENTIALS_FILE',
+        google_gemini: 'GOOGLE_CLOUD_CREDENTIALS_FILE',
+        anthropic: 'ANTHROPIC_API_KEY',
+        bedrock: 'AWS_ACCESS_KEY_ID',
+        aws_transcribe: 'AWS_ACCESS_KEY_ID',
+        xai: 'XAI_API_KEY',
+        aws: 'AWS_ACCESS_KEY_ID',
+        // Azure: each service has its own env var (AZURE_LLM_*, AZURE_STT_*,
+        // AZURE_TTS_*, AZURE_SPEECH_STT_*, AZURE_SPEECH_TTS_*). The Azure LLM
+        // section is the master — STT/TTS inherit it when left blank.
+        azure: 'AZURE_LLM_API_KEY',
+        azure_openai: 'AZURE_LLM_API_KEY',
+        azure_speech: 'AZURE_SPEECH_STT_KEY / AZURE_SPEECH_TTS_KEY',
+        assemblyai: 'ASSEMBLYAI_API_KEY',
+        speechmatics: 'SPEECHMATICS_API_KEY',
+        sarvam: 'SARVAM_API_KEY',
+        slaute: 'SLAUTE_AUTH_KEY',
+        deepgram: 'DEEPGRAM_API_KEY',
+        elevenlabs: 'ELEVENLABS_API_KEY',
+        cartesia: 'CARTESIA_API_KEY',
+        aws_polly: 'AWS_ACCESS_KEY_ID',
+        openrouter: 'OPENROUTER_API_KEY',
+        groq: 'GROQ_API_KEY',
+        hume: 'HUME_API_KEY',
+        minimax: 'MINIMAX_API_KEY',
+        telnyx_ai: 'TELNYX_AI_API_KEY',
+        slng: 'SLNG_API_KEY',
+        scx: 'SCX_API_KEY'
+    };
+
+    // Check LLM dependencies and API key (not needed for realtime — realtime model replaces LLM)
+    if (!isRealtime) {
+        if (!installedDeps[llmProvider]) {
+            errorList.innerHTML += `<li class="mb-2"><i class="bi bi-box text-warning"></i> <strong>${sdkNames[llmProvider]}</strong> - SDK not installed (required for ${llmProvider} LLM). <a href="settings.html" class="text-primary">Install in Settings → Dependencies</a></li>`;
+        }
+        if (!apiKeys[llmProvider]) {
+            errorList.innerHTML += `<li class="mb-2"><i class="bi bi-key text-danger"></i> <strong>${keyNames[llmProvider]}</strong> - API key not configured (required for ${llmProvider} LLM)</li>`;
+        }
+    }
+
+    // Check STT dependencies and API key (not needed for realtime — realtime model handles audio input)
+    if (!isRealtime) {
+        // xAI STT uses livekit-plugins-xai, not the openai SDK (same remap as TTS below)
+        let sttDepKey = sttProvider;
+        if (sttProvider === 'xai') sttDepKey = 'xai_realtime';
+
+        if (!installedDeps[sttDepKey]) {
+            errorList.innerHTML += `<li class="mb-2"><i class="bi bi-box text-warning"></i> <strong>${sdkNames[sttDepKey]}</strong> - SDK not installed (required for ${sttProvider} STT). <a href="settings.html" class="text-primary">Install in Settings → Dependencies</a></li>`;
+        }
+        if (!apiKeys[sttProvider]) {
+            errorList.innerHTML += `<li class="mb-2"><i class="bi bi-key text-danger"></i> <strong>${keyNames[sttProvider]}</strong> - API key not configured (required for ${sttProvider} STT)</li>`;
+        }
+    }
+
+    // Check TTS dependencies and API key (not needed for realtime unless text-only modalities)
+    if (!isRealtime || isRealtimeTextOnly) {
+        // xAI TTS uses livekit-plugins-xai, not openai SDK
+        let ttsDepKey = ttsProvider;
+        if (ttsProvider === 'xai') ttsDepKey = 'xai_realtime';
+
+        if (!installedDeps[ttsDepKey]) {
+            errorList.innerHTML += `<li class="mb-2"><i class="bi bi-box text-warning"></i> <strong>${sdkNames[ttsDepKey]}</strong> - SDK not installed (required for ${ttsProvider} TTS). <a href="settings.html" class="text-primary">Install in Settings → Dependencies</a></li>`;
+        }
+        if (!apiKeys[ttsProvider]) {
+            errorList.innerHTML += `<li class="mb-2"><i class="bi bi-key text-danger"></i> <strong>${keyNames[ttsProvider]}</strong> - API key not configured (required for ${ttsProvider} TTS)</li>`;
+        }
+    }
+
+    // Check Realtime dependencies and API key
+    if (isRealtime) {
+        let rtDepKey = rtProvider;
+        if (rtProvider === 'xai') rtDepKey = 'xai_realtime';
+        if (rtProvider === 'aws') rtDepKey = 'aws_realtime';
+        if (rtProvider === 'azure') rtDepKey = 'azure_realtime';
+
+        if (!installedDeps[rtDepKey]) {
+            errorList.innerHTML += `<li class="mb-2"><i class="bi bi-box text-warning"></i> <strong>${sdkNames[rtDepKey]}</strong> - SDK not installed (required for ${rtProvider} Realtime). <a href="settings.html" class="text-primary">Install in Settings → Dependencies</a></li>`;
+        }
+        if (!apiKeys[rtProvider]) {
+            errorList.innerHTML += `<li class="mb-2"><i class="bi bi-key text-danger"></i> <strong>${keyNames[rtProvider]}</strong> - API key not configured (required for ${rtProvider} Realtime)</li>`;
+        }
+    }
+
+    // If no errors found, show a generic message
+    if (errorList.innerHTML === '') {
+        errorList.innerHTML = '<li class="mb-2"><i class="bi bi-info-circle text-info"></i> Configuration appears complete. Please check agent settings.</li>';
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('healthErrorModal'));
+    modal.show();
+}
+
+function confirmDeleteAgent(agentId, agentName) {
+    document.getElementById('delete_agent_name').textContent = agentName;
+    document.getElementById('deleteAgentForm').action = '/agents/delete/' + agentId;
+
+    const modal = new bootstrap.Modal(document.getElementById('deleteAgentModal'));
+    modal.show();
+}
+
+// ---- Folder management functions ----
+const csrfToken = 'Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g';
+
+function createFolder() {
+    const nameInput = document.getElementById('newFolderName');
+    const name = nameInput.value.trim();
+    if (!name) return;
+
+    fetch('/agents/folders/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: JSON.stringify({name: name})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + (data.error || 'Failed to create folder'));
+    })
+    .catch(() => alert('Failed to create folder'));
+}
+
+function startRenameFolder(folderId) {
+    const item = document.getElementById('folder-item-' + folderId);
+    item.querySelector('.folder-name-display').classList.add('d-none');
+    item.querySelector('.folder-name-edit').classList.remove('d-none');
+    item.querySelector('.folder-rename-btn').classList.add('d-none');
+    item.querySelector('.folder-save-btn').classList.remove('d-none');
+    item.querySelector('.folder-cancel-btn').classList.remove('d-none');
+    item.querySelector('.folder-name-edit').focus();
+}
+
+function cancelRenameFolder(folderId) {
+    const item = document.getElementById('folder-item-' + folderId);
+    const display = item.querySelector('.folder-name-display');
+    const edit = item.querySelector('.folder-name-edit');
+    edit.value = display.textContent.trim();
+    display.classList.remove('d-none');
+    edit.classList.add('d-none');
+    item.querySelector('.folder-rename-btn').classList.remove('d-none');
+    item.querySelector('.folder-save-btn').classList.add('d-none');
+    item.querySelector('.folder-cancel-btn').classList.add('d-none');
+}
+
+function saveRenameFolder(folderId) {
+    const item = document.getElementById('folder-item-' + folderId);
+    const newName = item.querySelector('.folder-name-edit').value.trim();
+    if (!newName) return;
+
+    fetch('/agents/folders/' + folderId + '/rename', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: JSON.stringify({name: newName})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + (data.error || 'Failed to rename folder'));
+    })
+    .catch(() => alert('Failed to rename folder'));
+}
+
+function deleteFolder(folderId) {
+    const item = document.getElementById('folder-item-' + folderId);
+    const folderName = item ? item.querySelector('.folder-name-display').textContent.trim() : folderId;
+    if (!confirm('Delete folder "' + folderName + '"? Agents in this folder will become ungrouped.')) return;
+
+    fetch('/agents/folders/' + folderId + '/delete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: JSON.stringify({})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + (data.error || 'Failed to delete folder'));
+    })
+    .catch(() => alert('Failed to delete folder'));
+}
+
+function moveAgentToFolder(agentId, folderId) {
+    fetch('/agents/' + agentId + '/move-folder', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: JSON.stringify({folder_id: folderId})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + (data.error || 'Failed to move agent'));
+    })
+    .catch(() => alert('Failed to move agent'));
+}
+
+// Add click handlers for health error badges
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.health-error-badge').forEach(function(badge) {
+        badge.addEventListener('click', function() {
+            const agentId = this.dataset.agentId;
+            const llmProvider = this.dataset.llmProvider;
+            const sttProvider = this.dataset.sttProvider;
+            const ttsProvider = this.dataset.ttsProvider;
+            const installedDeps = JSON.parse(this.dataset.installedDeps);
+            const apiKeys = JSON.parse(this.dataset.apiKeys);
+
+            const rtEnabled = this.dataset.rtEnabled;
+            const rtProvider = this.dataset.rtProvider;
+            const rtModalities = this.dataset.rtModalities || 'text_audio';
+
+            showHealthError(agentId, llmProvider, sttProvider, ttsProvider, installedDeps, apiKeys, rtEnabled, rtProvider, rtModalities);
+        });
+    });
+
+    // ---- Folder collapse state persistence ----
+    document.querySelectorAll('.folder-header[data-folder-id]').forEach(function(header) {
+        const folderId = header.dataset.folderId;
+        const target = document.querySelector(header.dataset.bsTarget);
+        if (!target) return;
+
+        // Restore saved state
+        const savedState = localStorage.getItem('folder_collapsed_' + folderId);
+        if (savedState === 'true') {
+            target.classList.remove('show');
+            header.setAttribute('aria-expanded', 'false');
+            const icon = header.querySelector('.folder-icon');
+            if (icon) { icon.classList.remove('bi-folder2-open'); icon.classList.add('bi-folder2'); }
+        }
+
+        // Save state on toggle
+        target.addEventListener('shown.bs.collapse', function() {
+            localStorage.setItem('folder_collapsed_' + folderId, 'false');
+            const icon = header.querySelector('.folder-icon');
+            if (icon) { icon.classList.remove('bi-folder2'); icon.classList.add('bi-folder2-open'); }
+        });
+        target.addEventListener('hidden.bs.collapse', function() {
+            localStorage.setItem('folder_collapsed_' + folderId, 'true');
+            const icon = header.querySelector('.folder-icon');
+            if (icon) { icon.classList.remove('bi-folder2-open'); icon.classList.add('bi-folder2'); }
+        });
+    });
+
+    // ---- Search filter over agent rows (covers folder + ungrouped + flat layouts) ----
+    document.getElementById('agentsSearch')?.addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        const card = e.target.closest('.card');
+        if (!card) return;
+        card.querySelectorAll('.card-body tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+    });
+
+    // Auto-refresh page continuously while any agent is restarting
+    function checkForRestartingAgents() {
+        const hasRestartingAgent = Array.from(document.querySelectorAll('.badge')).some(
+            badge => badge.textContent.trim().includes('Restarting')
+        );
+        return hasRestartingAgent;
+    }
+
+    if (checkForRestartingAgents()) {
+        console.log('🔄 Agent is restarting - starting auto-refresh cycle...');
+
+        // Refresh every 3 seconds while agent is restarting
+        const refreshInterval = setInterval(function() {
+            console.log('🔄 Auto-refreshing to check agent status...');
+            window.location.reload();
+        }, 3000); // Check every 3 seconds
+
+        // Also do immediate first refresh after 3 seconds
+        setTimeout(function() {
+            console.log('🔄 First auto-refresh after 3 seconds...');
+            window.location.reload();
+        }, 3000);
+    }
+});
+
+// --- Dismissible "Agent Management" info banner (dismissal persisted per
+//     browser via localStorage; mirrors the Agent Tester "How to Use" box). ---
+document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('agentMgmtInfoBoxDismissed') === 'true') {
+        const box = document.getElementById('agentMgmtInfoBox');
+        if (box) box.style.display = 'none';
+    }
+});
+
+function dismissAgentMgmtInfoBox() {
+    const box = document.getElementById('agentMgmtInfoBox');
+    if (box) box.style.display = 'none';
+    localStorage.setItem('agentMgmtInfoBoxDismissed', 'true');
+}
+
+// --- Stopped-agent warning: dismissible for the current session only
+//     (sessionStorage, so it re-appears in a new tab / after the browser is
+//     reopened, and whenever the stopped condition is freshly seen again). ---
+document.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('agentStoppedAlertDismissed') === 'true') {
+        const a = document.getElementById('agentStoppedAlert');
+        if (a) a.style.display = 'none';
+    }
+});
+
+function dismissAgentStoppedAlert() {
+    const a = document.getElementById('agentStoppedAlert');
+    if (a) a.style.display = 'none';
+    sessionStorage.setItem('agentStoppedAlertDismissed', 'true');
+}
+</script>
+
+<!-- Template Selector Modal -->
+<div class="modal fade" id="templateSelectorModal" tabindex="-1" aria-labelledby="templateSelectorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="templateSelectorModalLabel">
+                    <i class="bi bi-layout-text-sidebar-reverse"></i> Agent Templates
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                
+
+
+
+<p class="text-muted mb-2">Choose a pre-configured template to get started quickly. You'll be taken to the editor to review and customise the agent before activating it.</p>
+
+<style>
+/* Template cards only: the default --border-color (#2a2a2a) is near-invisible
+   on the dark card background — lift it a touch so the card edges read. */
+.template-card-grid { --tmpl-border: #4a4a4a; }
+.template-card-grid .card.h-100 { border-color: var(--tmpl-border); }
+</style>
+<div class="row g-3 template-card-grid">
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(16,185,129,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-heart-pulse fs-5" style="color: #10b981;"></i>
+                        <strong>Healthcare Appointment Reminder</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Outbound patient reminder agent that confirms appointments, collects pre-visit information, and handles rescheduling requests. Warm, professional tone with empathetic handling.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-primary">OpenAI GPT-4o</span>
+                    
+                    <span class="badge bg-info">Deepgram</span>
+                    
+                    <span class="badge bg-success">ElevenLabs</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="healthcare">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(245,158,11,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-bag-check fs-5" style="color: #f59e0b;"></i>
+                        <strong>E-Commerce Customer Support</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Inbound support agent that handles order tracking, returns, damaged items, and product questions. Solution-focused with clear escalation paths for complex issues.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-danger">Claude Haiku 4.5</span>
+                    
+                    <span class="badge bg-info">Deepgram</span>
+                    
+                    <span class="badge bg-success">Cartesia</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="ecommerce">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(34,197,94,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-house-door fs-5" style="color: #22c55e;"></i>
+                        <strong>Real Estate Lead Qualifier</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Outbound lead qualification agent that discovers buyer/seller intent, qualifies readiness, and books consultations. Confident and professional without being pushy.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-warning text-dark">Gemini 3.5 Flash</span>
+                    
+                    <span class="badge bg-info">Deepgram</span>
+                    
+                    <span class="badge bg-success">ElevenLabs</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="realestate">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(139,92,246,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-stars fs-5" style="color: #8b5cf6;"></i>
+                        <strong>Hotel Concierge</strong>
+                    </div>
+                    
+                    <span class="badge bg-warning text-dark">Realtime</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Five-star hotel concierge powered by Grok Voice speech-to-speech for ultra-low latency. Handles room service, dining reservations, spa bookings, and local recommendations. Requires an xAI API key.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-primary">Grok Voice 2.0</span>
+                    
+                    <span class="badge bg-secondary">Audio-to-Audio</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="hotel">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(239,68,68,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-cup-hot fs-5" style="color: #ef4444;"></i>
+                        <strong>Restaurant Reservations</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Inbound reservations host for a restaurant — takes booking requests, answers menu and hours questions, and hands large groups or complaints to a human. Booking details are captured in the call transcript and summary.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-warning text-dark">Gemini 3.5 Flash</span>
+                    
+                    <span class="badge bg-info">Deepgram</span>
+                    
+                    <span class="badge bg-success">Deepgram Aura-2</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="restaurant">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(59,130,246,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-headset fs-5" style="color: #3b82f6;"></i>
+                        <strong>IT Helpdesk &amp; Tech Support</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Inbound IT helpdesk agent that walks callers through common fixes (passwords, email, wifi, printers), collects ticket details for anything unresolved, and escalates outages. Allows up to 20-minute calls for longer troubleshooting.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-primary">GPT-4o Mini</span>
+                    
+                    <span class="badge bg-info">Deepgram</span>
+                    
+                    <span class="badge bg-success">Deepgram Aura-2</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="it_helpdesk">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(249,115,22,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-tools fs-5" style="color: #f97316;"></i>
+                        <strong>Trades Job Booking</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Inbound job-booking agent for a trades business — qualifies the job, checks the service area, quotes the call-out fee, and collects address and preferred time window. Emergencies are transferred straight to a human.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-danger">Claude Haiku 4.5</span>
+                    
+                    <span class="badge bg-info">Deepgram</span>
+                    
+                    <span class="badge bg-success">ElevenLabs</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="trades_booking">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(99,102,241,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-clipboard-check fs-5" style="color: #6366f1;"></i>
+                        <strong>Customer Feedback Survey</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Outbound</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Outbound post-service feedback survey — asks a satisfaction rating, a recommendation score, and what could be improved, with each answer captured as a structured extraction field. Answers auto-extract when Auto-generate summaries is enabled in Settings → AI Summary.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-warning text-dark">Gemini 3.5 Flash Lite</span>
+                    
+                    <span class="badge bg-info">Deepgram</span>
+                    
+                    <span class="badge bg-success">Deepgram Aura-2</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="survey">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(20,184,166,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-clipboard2-pulse fs-5" style="color: #14b8a6;"></i>
+                        <strong>Clinic Front Desk</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Inbound front-desk receptionist for a medical practice — answers policy questions, takes booking and reschedule requests, records messages for the care team, and triages possible emergencies. Patient, unhurried pacing tuned for callers who pause mid-sentence.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-danger">Claude Haiku 4.5</span>
+                    
+                    <span class="badge bg-info">Deepgram</span>
+                    
+                    <span class="badge bg-success">ElevenLabs</span>
+                    
+                </div>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/agents/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                    <input type="hidden" name="template_id" value="clinic_frontdesk">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<p class="small text-white mt-3 mb-0"><i class="bi bi-info-circle"></i> Templates that include call transfer need a destination set under <strong>Tools → Blind Transfer</strong> after creation.</p>
+
+<script>
+(function () {
+    if (window._templateCreateGuard) return;
+    window._templateCreateGuard = true;
+    // Disable the submit button on first click so a double-click can't
+    // create two agents (creation takes a moment before the redirect).
+    document.addEventListener('submit', function (e) {
+        var form = e.target && e.target.closest ? e.target.closest('form[data-template-create]') : null;
+        if (!form) return;
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn && !btn.disabled) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating…';
+        }
+    }, true);
+})();
+</script>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="Ii1tQVhqY2lEZ0Y0RlFzbzhET3FJTlR6Z1ZFRzZ1Nm9HaEdZYUVCbkEtT00i.aqgYLg.rNt39yvfjAjL0_MkqJZrOZ1Xa3g">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Agent Configuration
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Create and configure AI voice agents that handle calls. Each agent has its own personality, voice, and capabilities.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Agent List
+                        </h6>
+                        
+                        <p class="text-muted">View all configured agents with status indicator. Click an agent to edit, or use the Create Agent button. Agents can be duplicated, exported, or deleted. The arrows button (Copy to Chatbot Agent) makes a website chatbot from a voice agent: a preview shows what carries over (prompt, knowledge, tools, memory, language model, speech settings) and what does not (phone transfers, voicemail detection, routing slug), then the chatbot is created switched off for you to review. It is a one-time copy, not a link. On Community Edition installs, creation is limited to 2 voice agents and 2 chatbot agents — see the Settings &gt; Licensing tab.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Templates
+                        </h6>
+                        
+                        <p class="text-muted">The Templates button (also at Agents → Templates) offers nine ready-made agents: healthcare appointment reminders, a clinic front-desk receptionist (inbound — answers practice questions, collects bookings and messages, triages emergencies to 000, and uses a longer listening pause so hesitant callers aren&#39;t cut off), e-commerce support, real estate lead qualification, hotel concierge (speech-to-speech on Grok Voice — needs an xAI API key), restaurant reservations, IT helpdesk, trades job booking, and a customer feedback survey. Each arrives with a complete prompt — including a shared block of phone-call delivery rules for natural-sounding calls — reference information, attached tools (hangup, transfer, date lookup), and settings, then opens in the editor for customisation. Transfer-equipped templates need a destination added under Tools → Blind Transfer before transfers work. The survey and clinic front-desk templates&#39; answers auto-extract only when Auto-generate summaries is on in Settings → AI Summary.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Basic Settings
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Name</strong></td>
+                                        <td>Display name for the agent (shown in dashboard and call history)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Slug</strong></td>
+                                        <td>URL-safe identifier used in API calls and dispatch rules (auto-generated from name)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>System Prompt</strong></td>
+                                        <td>Instructions that define the agent&#39;s personality, knowledge, and behavior. This is the main prompt sent to the LLM.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Initial Greeting</strong></td>
+                                        <td>What the agent says when answering a call. Leave empty for no greeting.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Reference Information</strong></td>
+                                        <td>Reference information the agent should always know: business hours, address, contact details, policies, etc. Added to the prompt under &#39;## Reference Information&#39;.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Tool Usage Instructions</strong></td>
+                                        <td>Instructions for when and how to use assigned tools. Only applied when the agent has tools configured.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> LLM Configuration
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Provider</strong></td>
+                                        <td>AI provider: OpenAI (GPT-5), Anthropic (Claude), Google (Gemini), AWS Bedrock, Telnyx, or LiteLLM for custom endpoints</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Model</strong></td>
+                                        <td>Specific model to use. Newer models are generally faster and more capable.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Temperature</strong></td>
+                                        <td>Creativity level 0-1. Lower (0.1-0.3) for consistent responses, higher (0.7-1.0) for creative responses.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> LLM Fallback &amp; Auto-Failover
+                        </h6>
+                        
+                        <p class="text-muted">Two layers of protection against provider issues: (1) the existing &#39;Enable LLM Fallback&#39; toggle builds a chain (primary → backup 1 → backup 2) with a per-turn timeout that catches mid-call freezes; (2) the new &#39;Auto-failover with health checks&#39; toggle periodically probes each provider in the background and auto-routes NEW calls to a healthier backup when the primary degrades. When the primary recovers, the dashboard automatically switches back. A small status line under each provider shows its current state in plain language. Click &#39;Details&#39; to open the full health modal with a 24-hour latency chart.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Enable LLM Fallback</strong></td>
+                                        <td>Turn on the fallback chain. Required before you can enable auto-failover.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Fallback Timeout</strong></td>
+                                        <td>Per-turn timeout used during a live call — if the current provider doesn&#39;t respond within this window, the next provider in the chain is tried immediately (default 4 seconds).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Fallback Provider / Model</strong></td>
+                                        <td>First backup to try. Ideally a different provider to protect against single-provider outages.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>2nd Fallback Provider / Model</strong></td>
+                                        <td>Optional second backup. Used only if both the primary and first backup fail.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Auto-failover with health checks</strong></td>
+                                        <td>When on, the dashboard runs small background test prompts against each provider at the chosen interval. Poor performance shifts new calls to the first healthy backup; recovery shifts them back automatically.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Check every</strong></td>
+                                        <td>How often to probe. Default is 60 minutes. Shorter intervals (10/15/20 min) detect problems faster but cost more in API tokens (cost estimate shown below the dropdown).</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> STT (Speech-to-Text)
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Provider</strong></td>
+                                        <td>Deepgram (recommended), OpenAI Whisper, Google Cloud Speech, ElevenLabs Scribe, or Telnyx (Telnyx/Deepgram/Google/Azure engines)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Model</strong></td>
+                                        <td>Deepgram: nova-3-general (best), nova-2. OpenAI: gpt-4o-transcribe. Google: chirp. ElevenLabs: scribe_v2_realtime (150ms latency).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Language</strong></td>
+                                        <td>Primary language code (en, es, fr, etc.). Use &#39;multi&#39; for multilingual. ElevenLabs auto-detects 90+ languages.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Keywords</strong></td>
+                                        <td>Boost recognition of specific words (names, products, jargon)</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> TTS (Text-to-Speech)
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Provider</strong></td>
+                                        <td>ElevenLabs (best quality), OpenAI, Google, Cartesia, MiniMax, AWS Polly, or Telnyx (Kokoro)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Voice</strong></td>
+                                        <td>Select from available voices. ElevenLabs supports custom cloned voices.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Speed</strong></td>
+                                        <td>Speaking rate multiplier (0.5-2.0). Default 1.0.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Advanced Speech Settings
+                        </h6>
+                        
+                        <p class="text-muted">Fine-tune conversation dynamics in the expandable Advanced section. Includes VAD sensitivity, silence thresholds, interruption handling, and Flux turn detection settings.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Turn Detection
+                        </h6>
+                        
+                        <p class="text-muted">Predicts end-of-turn beyond plain silence. Choose Audio (v1-mini) — LiveKit&#39;s recommended on-device model that listens to the caller&#39;s voice (intonation and pacing), runs entirely on your server with no cloud account, and supports 14 languages — or Text (legacy), the older transcript-based model that LiveKit has deprecated. Off uses silence detection only. Realtime (audio-to-audio) agents can also use Audio (v1-mini): pick it under the Realtime settings&#39; &#39;End-of-turn detection&#39; option — it automatically turns off the provider&#39;s own built-in turn detection so the two don&#39;t conflict. AWS Nova Sonic is the exception (it manages turn-taking internally, so the option is shown but disabled there). Note: switching a realtime agent to the on-device detector trades a little extra interrupt latency for smarter end-of-turn that won&#39;t cut a caller off mid-thought.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Agent Handoff
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Target Agents</strong></td>
+                                        <td>Select which agents this agent can hand off calls to</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Handoff Type - Transfer</strong></td>
+                                        <td>Explicit department handoff. The caller knows they are being transferred to a different agent or department (e.g., &#39;Let me transfer you to billing&#39;).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Handoff Type - Transition</strong></td>
+                                        <td>Seamless workflow phase change. The caller does not notice a switch — the conversation continues naturally as if it&#39;s the same agent moving to a new topic.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Sign-off Prompt / Bridge Phrase</strong></td>
+                                        <td>Transfer: optional announcement before handing off. Transition: optional natural phrase to bridge conversation phases.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Context Mode</strong></td>
+                                        <td>Full (complete history), Summary (an AI-written handover brief generated at transfer time — adds a short pause (typically 2-5s, up to 7s on announced transfers); you can pick the model and customise the instructions per target), or Fresh (clean slate for receiving agent)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Initial Greeting on handoff</strong></td>
+                                        <td>Announced handoffs speak the target&#39;s Initial Greeting as before. On SILENT handoffs the greeting is now the spoken bridge over the changeover: silent transitions speak it by default, silent transfers stay quiet by default, and the per-route &#39;Speak this agent&#39;s Initial Greeting on takeover&#39; tick-box overrides either. A Bridge Phrase on the route is spoken automatically instead and replaces the greeting there. Keep bridge lines to one short phrase - callers cannot interrupt them while the new agent&#39;s speech recognition connects.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Speak greeting on takeover</strong></td>
+                                        <td>Per-route tick-box. On silent transitions it defaults ON (the greeting covers the changeover gap); untick it on loop-back routes so a call-opening greeting never replays mid-call. On silent transfers it defaults OFF.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Import/Export
+                        </h6>
+                        
+                        <p class="text-muted">Export agent as JSON for backup or sharing. Import JSON to create new agent or update existing. Useful for migrating between servers.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Performance Optimization
+                        </h6>
+                        
+                        <p class="text-muted">Optimize your agent for faster response times. Target latency: &lt;500ms TTFB (Time To First Byte) for natural conversation, 500-1000ms is acceptable, &gt;1000ms feels broken.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Fastest STT</strong></td>
+                                        <td>Deepgram Nova-3 or ElevenLabs Scribe v2 Realtime (~150ms). Set responsiveness to 0.7-0.9 for quicker transcription.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Fastest TTS</strong></td>
+                                        <td>ElevenLabs eleven_flash_v2_5 (~75ms latency). Turbo v2.5 (~250ms) for better quality.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Fastest LLM</strong></td>
+                                        <td>GPT-4o is 2-3x faster than GPT-4. Use temperature 0.3-0.5 for faster, more deterministic responses.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>vad_threshold (Microphone Sensitivity)</strong></td>
+                                        <td>Set to 0.35 for faster voice detection. Lower values detect quieter speech but may pick up background noise.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>vad_min_silence (Min Silence Duration)</strong></td>
+                                        <td>Set to 150ms for quicker turn-taking. How long the agent waits in silence before assuming you&#39;ve finished speaking.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>agent_response_delay (Response Delay)</strong></td>
+                                        <td>Set to 0.0s to eliminate artificial pauses. Increase to 0.3-0.4s if agent cuts off users.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>flux_eot_timeout_ms (EOT Timeout)</strong></td>
+                                        <td>Set to 2500ms for faster end-of-turn detection. Maximum wait time before forcing turn end.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Flux Turn Detection</strong></td>
+                                        <td>Enable for 39% fewer false interruptions. Set eot_threshold to 0.6-0.7.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>resume_false_interruption (Resume After False Interruptions)</strong></td>
+                                        <td>When enabled, the agent resumes speaking from where it left off if an interruption turns out to be background noise. Default: On.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>false_interruption_timeout (False Interruption Timeout)</strong></td>
+                                        <td>How long to wait after an interruption before deciding it was false. Higher values = more patient. Default: 2.0s.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>min_interruption_words (Min Words to Interrupt)</strong></td>
+                                        <td>Minimum recognized words before treating user input as a real interruption. Phone agents using Deepgram Flux STT must use 2 or higher — setting to 0 disables protection against false interruptions from echo, breath sounds, or line noise and causes mid-sentence audio cutouts. Default: 2 (auto-floored to 2 for Flux agents unless disable_flux_min_words_floor is set).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>preemptive_generation (Preemptive Response Generation)</strong></td>
+                                        <td>Start generating a response before the user fully finishes speaking. Reduces latency but may occasionally respond too early. Default: On.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>prompt_caching_enabled (Prompt Caching)</strong></td>
+                                        <td>Shown only for Anthropic direct or Bedrock Claude. Tells Anthropic/AWS to keep a cached copy of the system prompt between calls so subsequent calls respond faster. Default: Off. Do NOT enable with rotating prompts (e.g., AutoResearch A/B variants) — cache writes cost ~25% more than uncached input and may never be read.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>flux_skip_response_delay (Flux: Skip Extra Response Delay)</strong></td>
+                                        <td>Shown in the Flux panel. When ON (default), the dashboard&#39;s Response Delay is bypassed so it doesn&#39;t stack on top of Flux&#39;s own end-of-turn timeout. Turn OFF only if your TTS is slow on cold start and you want the extra buffer to avoid barge-in.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Agent Warm Idle (Settings &gt; System)</strong></td>
+                                        <td>Keeps one agent worker process pre-spawned and preloads the turn-detection model at startup. First call of the day responds ~2-5s faster. Adds ~500MB RAM. Disable on constrained hosts (e.g., 2GB VPS).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>System Prompt</strong></td>
+                                        <td>Keep concise - fewer tokens = faster LLM response. Move static info to Reference Information.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Prompt Versioning
+                        </h6>
+                        
+                        <p class="text-muted">Every time you save changes to an agent&#39;s system prompt, knowledge base, or tool instructions — whether from the web UI or from an external MCP client — the previous version is automatically saved. You can view version history, compare differences between versions, and restore any previous version.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Version History</strong></td>
+                                        <td>Click the green Versions button to see all saved prompt versions with timestamps and source labels.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Source Labels</strong></td>
+                                        <td>manual = browser edit, enrich = Enrich Prompt modal, autoresearch = AutoResearch suggestion accepted, sim test = AutoResearch suggestion saved for a Test-in-Simulation experiment, mcp = API-initiated edit (green badge; shows which API key made the change, useful for audit trails when Claude Code or Cursor edits agents).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Diff View</strong></td>
+                                        <td>Click &#39;Diff&#39; on any version to see a color-coded comparison showing exactly what changed (green = added, red = removed).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Restore</strong></td>
+                                        <td>Click &#39;Restore&#39; to load a previous version into the editor. You must click Update Agent to save the restored version.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Max Versions</strong></td>
+                                        <td>Configure how many versions to keep per agent (5-50, default 20). Oldest versions are automatically pruned.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> AutoResearch
+                        </h6>
+                        
+                        <p class="text-muted">AI-powered prompt optimization that analyzes your agent&#39;s actual call transcripts to suggest specific improvements. Lives on its own AutoResearch page in the sidebar (Testing section) — the editor&#39;s purple AutoResearch button takes you there with the agent pre-selected. Can be run manually or scheduled to run overnight.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Run Analysis</strong></td>
+                                        <td>Select analysis steps, choose an LLM provider/model, set the number of transcripts to analyze (5-50), and click Run Now. Progress is shown step-by-step.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Call Selection</strong></td>
+                                        <td>Choose &#39;Most recent calls&#39; or &#39;Prioritise problem calls&#39; — the latter hunts for calls that ended in errors, were abandoned, didn&#39;t achieve their goal, or had negative sentiment, mixing in a few normal calls for contrast, so the AI learns from what actually went wrong.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Suggestions</strong></td>
+                                        <td>Each suggestion shows what would change, which issues it addresses, and a confidence score. Amber warnings flag suggestions that dropped placeholders, shrank suspiciously, or grew too much — review those carefully. Click &#39;Apply to Live Prompt&#39; to review a side-by-side comparison (editable) and apply — the outgoing prompt is saved to Versions automatically, so applying is always reversible.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Test in Simulation</strong></td>
+                                        <td>On voice agents with a test suite, run a suggestion through the suite side-by-side with the current prompt (text-mode, simulated tools — the live agent is untouched) and see the pass-rate comparison before applying. Requires Simulation permissions.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Schedule</strong></td>
+                                        <td>Set AutoResearch to run automatically (daily or weekly) at a specific time, including the call-selection mode. Suggestions are never auto-applied — review in Results History.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Reference Calls</strong></td>
+                                        <td>Curate your best calls as benchmarks. AutoResearch uses these to score suggestions and ensure they don&#39;t make good interactions worse.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Methodology</strong></td>
+                                        <td>Advanced: customize the analysis, suggestion, and scoring prompts that drive AutoResearch.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> MCP / API Access
+                        </h6>
+                        
+                        <p class="text-muted">External tools (Claude Code, Cursor, Claude Desktop, scripts) can create, read, update, and delete agents through the built-in MCP server at /mcp. Every field you can edit on this page is also editable over MCP — including the realtime model, voicemail/IVR detection, LLM fallback chain, Azure deployment names, ElevenLabs and Hume voice tuning, knowledge-base assignments, and all conversation dynamics.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Discovery</strong></td>
+                                        <td>Ask your MCP client to call get_agent_config_reference() for the full schema of providers, models, valid values, and nested dict keys.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Creating Agents</strong></td>
+                                        <td>create_agent supports standard pipeline (STT → LLM → TTS) out of the box; pass realtime_config to create a realtime audio-to-audio agent.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Editing Agents</strong></td>
+                                        <td>update_agent_config takes typed params for common fields (name, system_prompt, llm_*, stt_*, tts_*) plus nested dict params for complex groups: realtime_config, outbound_detection, llm_fallback_config, conversation_dynamics_patch.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Audit Trail</strong></td>
+                                        <td>Every MCP edit that touches system_prompt, knowledge_base, or tool_instructions creates a prompt version entry tagged source=&#39;mcp&#39; with the API key name — visible in the Versions tab alongside browser edits.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Setup</strong></td>
+                                        <td>Enable the MCP server under Settings → Integrations → MCP Server sub-tab (admin only). Generate an API key, optionally restrict by IP. Max 20 keys, 60 requests/min per key. For triggering outbound calls from workflow tools like n8n, use the separate REST API sub-tab instead.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,69 @@
+# Connecting Sent.dm (SMS + WhatsApp)
+
+Sent.dm (https://sent.dm) gives your business **one phone number that covers both SMS and WhatsApp**. Connect it once and:
+
+- Your **chatbot agents** can hold two-way conversations over SMS *and* WhatsApp — replies automatically go back on whichever channel the visitor used.
+- Your **voice agents** can text people mid-call through the `send_sms` tool (SMS reliably; WhatsApp where allowed — see the WhatsApp notes below).
+
+> **Status note:** the SMS side of this integration is fully tested end-to-end. The WhatsApp side is built and ready but marked **not yet verified** in the dashboard until a Meta WhatsApp Business connection has been validated with a live account.
+
+---
+
+## 1. Create your Sent.dm account
+
+1. Sign up at [app.sent.dm](https://app.sent.dm) and follow their onboarding.
+2. Provision your **business phone number** when prompted. Choose carefully — Sent.dm notes the number cannot be changed easily later. This one number is your sender identity for SMS and WhatsApp.
+3. Copy your **API key** (shown after channel setup, or later under the **API Keys** section of the Sent.dm dashboard).
+
+**Good to know about new accounts:** with only email + phone verified, Sent.dm limits you to their 6 pre-built templates and 500 sends/day. Completing their full business verification (KYC) removes those limits and enables custom templates — the dashboard's automatic template setup (below) needs that, so complete KYC early.
+
+## 2. Add the API key to your dashboard
+
+1. In your dashboard, open **Settings → Integrations** and find the **Sent.dm** card in the *SMS / WhatsApp Providers* section.
+2. Paste the API key and save.
+3. Use the card's **Test** button to confirm the key works.
+
+## 3. Connect a chatbot (two-way SMS / WhatsApp)
+
+1. Open your chatbot agent's editor → **SMS / WhatsApp** tab.
+2. Enable the channel, pick **Sent.dm (SMS + WhatsApp)** as the provider.
+3. Copy the **Webhook URL** shown on the tab.
+4. In the **Sent.dm dashboard**, create a **webhook endpoint** pointed at that URL and subscribe it to the **message.received** event.
+5. Copy that endpoint's **signing secret** (starts with `whsec_`) and paste it into the tab's *Webhook signing secret* field.
+6. Save the chatbot. On save, the dashboard also creates a small "passthrough" template in your Sent.dm account automatically (used for business-initiated messages like test sends). If that fails, the tab shows a *Template ID* field where you can paste one you created yourself — make a template whose whole body is `{{0:message}}`.
+7. Use the tab's **Test** panel: run the configuration checks, then send yourself a real test SMS.
+
+Now text your Sent.dm business number from your phone — the chatbot should reply within a few seconds.
+
+**Important — one number, one chatbot.** A Sent.dm account has one business number, and every inbound message fires the webhook endpoints you configured. Configure **exactly one** endpoint (one chatbot's URL) per Sent.dm account. Pointing two chatbots at the same account would make both reply to every message.
+
+**No From number needed.** Unlike the other providers, Sent.dm has no per-message sender — everything sends from your account's business number.
+
+## 4. Enable WhatsApp
+
+1. Inside the **Sent.dm dashboard**, follow their WhatsApp setup: log in with your **Meta (Facebook) Business account**, select or create a WhatsApp Business account, and grant Sent.dm permission to manage messages.
+2. Add a payment method on the **Meta side** (Meta bills WhatsApp conversations separately).
+3. That's it on the dashboard side — no extra configuration. When a visitor messages your number on WhatsApp, the chatbot replies on WhatsApp; when they text via SMS, it replies via SMS.
+
+**WhatsApp rules worth knowing** (these are Meta's rules, not the dashboard's):
+- Replying to a customer is free-form for **24 hours** after their last message. Your chatbot's replies always fall inside this window.
+- **Business-initiated** WhatsApp messages (e.g. your voice agent texting someone who hasn't messaged you) must use a **Meta-approved template**. Meta often rejects "catch-all" templates that carry arbitrary text, so cold WhatsApp sends of free text may not deliver. The dashboard's WhatsApp channel option is honest about this — choose **"WhatsApp, fall back to SMS"** if delivery matters more than the channel.
+
+## 5. Voice-agent texting (send_sms tool)
+
+1. Open **Tools** → configure **send_sms** (globally, or per-agent in the agent's Edit Tools dialog).
+2. Pick **Sent.dm (SMS/WhatsApp)** as the provider.
+3. Choose the **channel**: SMS (recommended), WhatsApp, or WhatsApp-with-SMS-fallback.
+4. Save, then use the **Test** button — run the checks and send yourself a real test message.
+
+There is no From number to enter, and messages ride the same auto-created passthrough template.
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+|---|---|
+| Inbound texts get no reply | Webhook endpoint not subscribed to `message.received`, or the signing secret on the tab doesn't match the endpoint's — re-copy it from Sent.dm. |
+| "Invalid signature" in logs | Wrong or stale signing secret. Each webhook endpoint has its own — copy the one for THIS endpoint. |
+| Test send fails with a template error | The passthrough template hasn't been created (save the config with a valid API key) or your Sent.dm account hasn't finished business verification (KYC) — required for custom templates. You can also create the template manually (body: `{{0:message}}`) and paste its ID. |
+| WhatsApp message didn't arrive | Cold WhatsApp with free text is only deliverable inside a 24h window after the recipient messaged you, or via a Meta-approved template. Use SMS or the fallback option. |
+| Two chatbots both reply | Two webhook endpoints configured on one Sent.dm account. Remove one — one number belongs to one chatbot. |

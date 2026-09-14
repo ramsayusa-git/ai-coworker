@@ -1,0 +1,2570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SIP Trunks - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="../static/images/custom_favicon.png@v=902567">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="../static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/style.css@v=4662.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IkEyRWs5Y25aSEtHODZCX085NUFCVnNURlIzaS0tc0ZqbXlPdi1MdkZzTmsi.aqgYLw.R7FDNCjc81nIWke8ag3dHsKuU8w">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="../index.html" class="sidebar-brand">
+            
+            <img src="../static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="../settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="../index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="../reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="../rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="../call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="../chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="../egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="../tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="../knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="../agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="../web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="inbound.html" class="nav-link active">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="../agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="../simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="../autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="../improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="../settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="../settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Telephony</h1>
+                
+<p class="page-subtitle">Configuration - SIP Trunks</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="../userguide.html#sip-trunks" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="inbound.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<!-- SIP Trunks tabs -->
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link active" href="inbound.html" aria-current="page">
+            <i class="bi bi-telephone-inbound"></i> Inbound
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="outbound.html">
+            <i class="bi bi-telephone-outbound"></i> Outbound
+        </a>
+    </li>
+</ul>
+
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-telephone-inbound"></i> Inbound Trunks
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+</div>
+
+<!-- SIP Inbound Trunks -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">
+            <i class="bi bi-telephone-inbound"></i> Inbound Trunks
+        </h5>
+        <div class="d-flex gap-2">
+            
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#importTrunkModal" title="Import trunk">
+                <i class="bi bi-upload"></i> Import
+            </button>
+            
+            
+            <button type="button" class="btn btn-sm" style="background-color: #3b82f6; color: #fff; border-color: #3b82f6;" onclick="openSipSetupWizard()" title="Guided setup for Twilio, Telnyx, Vonage, Plivo, Cloudonix, Vobiz or Tronic Cloud">
+                <i class="bi bi-magic"></i> Setup Wizard
+            </button>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createTrunkModal">
+                <i class="bi bi-plus-circle"></i> Create Trunk
+            </button>
+            
+        </div>
+    </div>
+    <div class="card-body">
+        
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-telephone-inbound"></i>
+            </div>
+            <div class="empty-state-title">No inbound trunks configured</div>
+            <div class="empty-state-description">
+                Create an inbound trunk to accept SIP calls from external providers.
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Import Trunk Modal -->
+
+<div class="modal fade" id="importTrunkModal" tabindex="-1" aria-labelledby="importTrunkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importTrunkModalLabel">
+                    <i class="bi bi-upload"></i> Import Inbound Trunk
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="https://vaai.aetosiot.com/telephony/inbound/import" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="IkEyRWs5Y25aSEtHODZCX085NUFCVnNURlIzaS0tc0ZqbXlPdi1MdkZzTmsi.aqgYLw.R7FDNCjc81nIWke8ag3dHsKuU8w">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Import a previously exported SIP inbound trunk configuration.
+                    </div>
+                    <div class="mb-3">
+                        <label for="import_file" class="form-label">Select JSON File</label>
+                        <input type="file" class="form-control" id="import_file" name="import_file" accept=".json" required>
+                        <small class="form-text text-muted">Select a JSON file exported from this dashboard.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Create Trunk Modal -->
+<div class="modal fade" id="createTrunkModal" tabindex="-1" aria-labelledby="createTrunkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="https://vaai.aetosiot.com/telephony/inbound/trunk/create" id="createInboundTrunkForm">
+                <input type="hidden" name="csrf_token" value="IkEyRWs5Y25aSEtHODZCX085NUFCVnNURlIzaS0tc0ZqbXlPdi1MdkZzTmsi.aqgYLw.R7FDNCjc81nIWke8ag3dHsKuU8w">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTrunkModalLabel">
+                        <i class="bi bi-telephone-inbound"></i> Create Inbound Trunk
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="createTrunkTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="create-details-tab" data-bs-toggle="tab" data-bs-target="#create-details" type="button" role="tab">
+                                TRUNK DETAILS
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="create-json-tab" data-bs-toggle="tab" data-bs-target="#create-json" type="button" role="tab">
+                                JSON EDITOR
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="createTrunkTabContent">
+                        <!-- Details Tab -->
+                        <div class="tab-pane fade show active" id="create-details" role="tabpanel">
+                            <div class="mb-3">
+                                <label for="trunk_name" class="form-label">Trunk Name <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="A friendly name to identify this SIP trunk in the dashboard"></i></label>
+                                <input type="text" class="form-control" id="trunk_name" name="trunk_name" placeholder="e.g., My Inbound Trunk">
+                            </div>
+                            <div class="mb-3">
+                                <label for="number_format" class="form-label">Number Format <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Choose whether incoming caller numbers include the + prefix. Twilio and most providers use +E.164 format (WITH +)"></i></label>
+                                <select class="form-select" id="number_format" name="number_format">
+                                    <option value="no_plus">E.164 (NO +) - e.g., 61400123123</option>
+                                    <option value="with_plus">+E.164 (WITH +) - e.g., +61400123123</option>
+                                </select>
+                                <small class="form-text text-muted">Format for incoming caller numbers. Twilio uses "with +".</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="numbers" class="form-label">Phone Numbers <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Phone numbers accepted on this trunk. Always enter WITHOUT the + prefix (e.g., 61400123123 not +61400123123)"></i></label>
+                                <input type="text" class="form-control" id="numbers" name="numbers" placeholder="e.g., 61400123123, 61400123124">
+                                <small class="form-text text-muted">Always enter WITHOUT the + (e.g., 61400123123). Comma-separated for multiple numbers.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="allowed_addresses" class="form-label">Allowed IP Addresses (Recommended) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="IP addresses allowed to send SIP traffic to this trunk. Restricting IPs improves security by preventing unauthorized calls"></i></label>
+                                <input type="text" class="form-control" id="allowed_addresses" name="allowed_addresses" placeholder="e.g., 192.168.1.1, 10.0.0.0/8">
+                                <small class="form-text text-muted">Comma-separated list. Leave empty to allow any IP.</small>
+                                <small class="form-text d-block mt-1" style="color: var(--bs-warning);"><i class="bi bi-shield-check"></i> <strong>Note:</strong> IPs added here are automatically whitelisted in Fail2ban security.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="allowed_numbers" class="form-label">Allowed Phone Numbers (Optional) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Only accept calls from these phone numbers. Useful for restricting who can call in"></i></label>
+                                <input type="text" class="form-control" id="allowed_numbers" name="allowed_numbers" placeholder="e.g., 1234567890, 0987654321">
+                                <small class="form-text text-muted">Comma-separated list in E.164 format (without +). Leave empty to allow any number</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">Auth Username (Optional) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Username for SIP authentication. If set, callers must authenticate with these credentials"></i></label>
+                                    <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Auth Password (Optional) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Password for SIP authentication. Used with username for challenge-response authentication"></i></label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                                </div>
+                            </div>
+                            <small class="form-text d-block mb-3" style="color: var(--bs-warning);"><i class="bi bi-info-circle"></i> <strong>Note:</strong> If you want IP-based authentication, leave Auth Username/Password empty. Entering credentials will override IP-based auth with per-call challenge-response authentication.</small>
+                            <hr>
+                            
+
+
+<input type="hidden" name="codecs_present" value="1">
+
+<div class="mb-3">
+  <label class="form-label">Audio Codecs</label>
+  <div class="border rounded p-2">
+    
+    <div class="form-check">
+      <input class="form-check-input ibc_codec-box" type="checkbox"
+             name="codecs" value="PCMU" id="ibc_codecPCMU"
+             checked>
+      <label class="form-check-label" for="ibc_codecPCMU">
+        G.711 &micro;-law (PCMU)
+        <small class="text-muted d-block">Standard &mdash; supported by virtually every carrier</small>
+      </label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input ibc_codec-box" type="checkbox"
+             name="codecs" value="PCMA" id="ibc_codecPCMA"
+             checked>
+      <label class="form-check-label" for="ibc_codecPCMA">
+        G.711 A-law (PCMA)
+        <small class="text-muted d-block">Standard &mdash; common on AU/EU carriers</small>
+      </label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input ibc_codec-box" type="checkbox"
+             name="codecs" value="G722" id="ibc_codecG722"
+             checked>
+      <label class="form-check-label" for="ibc_codecG722">
+        G.722 (HD Voice)
+        <small class="text-muted d-block">Wideband 16&nbsp;kHz &mdash; better speech recognition, if your carrier offers it</small>
+      </label>
+    </div>
+    
+  </div>
+  <div class="form-check mt-2">
+    <input class="form-check-input" type="checkbox" name="only_listed_codecs"
+           value="on" id="ibc_lockCodecs" >
+    <label class="form-check-label" for="ibc_lockCodecs">
+      <strong>Only allow the codecs ticked above</strong>
+    </label>
+  </div>
+  <div class="form-text">
+    Leave this off (the default) to let your carrier choose, exactly as the trunk
+    behaves today. Ticking it restricts the call to your selection.
+  </div>
+  
+  <div class="alert alert-warning alert-permanent mt-2 d-none"
+       id="ibc_codecWarn" role="alert">
+    <strong>Calls may fail to connect.</strong> If your carrier cannot offer one
+    of the codecs you have ticked, it rejects the call with
+    <code>488 Not Acceptable Here</code> &mdash; inbound calls stop arriving and
+    outbound calls stop connecting. Most phone carriers offer only G.711
+    (PCMU/PCMA). Only narrow this if you know what your carrier supports, and
+    <strong>test a real call straight afterwards</strong>. To undo it, tick every
+    codec again and save.
+  </div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="ibc_mediaTimeout">
+    Media timeout (seconds)
+  </label>
+  <input type="number" class="form-control" name="media_timeout_s"
+         id="ibc_mediaTimeout" min="30" step="1" placeholder="Not set"
+         value="">
+  <div class="form-text">
+    Hangs up a call whose audio has stopped flowing, instead of leaving a silent
+    line open. <strong>Leave blank</strong> to keep the current behaviour.
+    Minimum 30 seconds. This is not the same as an agent's maximum call length &mdash;
+    that limits a healthy call, this one ends a dead one.
+  </div>
+  <div class="alert alert-warning alert-permanent mt-2 d-none"
+       id="ibc_timeoutWarn" role="alert">
+    <strong>Set this too low and live calls will drop.</strong> Some carriers stop
+    sending audio packets while nobody is speaking (silence suppression). On such
+    a carrier a quiet caller can trip this timeout and be hung up on mid-call. If
+    you are unsure, start at 60 seconds or leave it blank.
+  </div>
+</div>
+
+<script>
+// Shared populate helper for the single edit modal each page reuses across all
+// its trunks. Defined once; the macro renders more than once per page.
+if (!window.applySipMediaConfig) {
+  window.applySipMediaConfig = function (prefix, codecsCsv, locked, timeout) {
+    var selected = (codecsCsv || '').split(',').filter(Boolean);
+    var lock = document.getElementById(prefix + 'lockCodecs');
+    var boxes = document.querySelectorAll('.' + prefix + 'codec-box');
+    if (!lock) return;
+    lock.checked = !!locked && selected.length > 0;
+    boxes.forEach(function (b) {
+      // Unlocked trunks show every codec ticked — that IS the default state,
+      // and it means saving without touching anything is a no-op.
+      b.checked = lock.checked ? selected.indexOf(b.value) !== -1 : true;
+    });
+    var t = document.getElementById(prefix + 'mediaTimeout');
+    if (t) t.value = timeout || '';
+    // Re-run the warning/validity logic for the newly loaded values.
+    lock.dispatchEvent(new Event('change'));
+    if (t) t.dispatchEvent(new Event('input'));
+  };
+}
+
+(function () {
+  var boxes = document.querySelectorAll('.ibc_codec-box');
+  var lock = document.getElementById('ibc_lockCodecs');
+  var warn = document.getElementById('ibc_codecWarn');
+  var timeout = document.getElementById('ibc_mediaTimeout');
+  var twarn = document.getElementById('ibc_timeoutWarn');
+  if (!lock || !warn) return;
+
+  function ticked() {
+    return Array.prototype.filter.call(boxes, function (b) { return b.checked; });
+  }
+
+  function sync() {
+    var n = ticked().length;
+    // Warn only when the operator is actually NARROWING: the lock on with a
+    // real subset. Lock + all three is identical to the default, so warning
+    // there would train people to ignore it.
+    warn.classList.toggle('d-none', !(lock.checked && n > 0 && n < boxes.length));
+    // An empty selection with the lock on offers nothing and fails every call.
+    // The server rejects it too (import/clone/API bypass this), but blocking
+    // here gives an answer before the round-trip.
+    var invalid = lock.checked && n === 0;
+    boxes.forEach(function (b) {
+      b.setCustomValidity(invalid ? 'Select at least one codec, or untick the lock.' : '');
+    });
+  }
+
+  function syncTimeout() {
+    var v = parseInt(timeout.value, 10);
+    twarn.classList.toggle('d-none', !(v > 0));
+  }
+
+  boxes.forEach(function (b) { b.addEventListener('change', sync); });
+  lock.addEventListener('change', sync);
+  if (timeout) timeout.addEventListener('input', syncTimeout);
+  sync();
+  if (timeout) syncTimeout();
+})();
+</script>
+
+
+                            <div class="mb-3">
+                                <label for="metadata" class="form-label">Metadata (Optional) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Custom key-value data stored with the trunk. Accessible in your application for custom logic"></i></label>
+                                <textarea class="form-control" id="metadata" name="metadata" rows="2" placeholder="Additional metadata"></textarea>
+                            </div>
+                        </div>
+
+
+                        <!-- JSON Editor Tab -->
+                        <div class="tab-pane fade" id="create-json" role="tabpanel">
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-book"></i> Learn more in the
+                                <a href="https://docs.livekit.io/sip" target="_blank" class="text-info">docs</a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Create Trunk
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Trunk Modal -->
+<div class="modal fade" id="editTrunkModal" tabindex="-1" aria-labelledby="editTrunkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="https://vaai.aetosiot.com/telephony/inbound/trunk/update" id="editInboundTrunkForm">
+                <input type="hidden" name="csrf_token" value="IkEyRWs5Y25aSEtHODZCX085NUFCVnNURlIzaS0tc0ZqbXlPdi1MdkZzTmsi.aqgYLw.R7FDNCjc81nIWke8ag3dHsKuU8w">
+                <input type="hidden" id="edit_sip_trunk_id" name="sip_trunk_id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTrunkModalLabel">
+                        <i class="bi bi-pencil"></i> Edit Inbound Trunk
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="editTrunkTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="edit-details-tab" data-bs-toggle="tab" data-bs-target="#edit-details" type="button" role="tab">
+                                TRUNK DETAILS
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="edit-json-tab" data-bs-toggle="tab" data-bs-target="#edit-json" type="button" role="tab">
+                                JSON EDITOR
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="editTrunkTabContent">
+                        <!-- Details Tab -->
+                        <div class="tab-pane fade show active" id="edit-details" role="tabpanel">
+                            <div class="mb-3">
+                                <label for="edit_trunk_name" class="form-label">Trunk Name <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="A friendly name to identify this SIP trunk in the dashboard"></i></label>
+                                <input type="text" class="form-control" id="edit_trunk_name" name="trunk_name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_number_format" class="form-label">Number Format <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Choose whether incoming caller numbers include the + prefix. Twilio and most providers use +E.164 format (WITH +)"></i></label>
+                                <select class="form-select" id="edit_number_format" name="number_format">
+                                    <option value="no_plus">E.164 (NO +) - e.g., 61400123123</option>
+                                    <option value="with_plus">+E.164 (WITH +) - e.g., +61400123123</option>
+                                </select>
+                                <small class="form-text text-muted">Format for incoming caller numbers. Twilio uses "with +".</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_numbers" class="form-label">Phone Numbers <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Phone numbers accepted on this trunk. Always enter WITHOUT the + prefix (e.g., 61400123123 not +61400123123)"></i></label>
+                                <input type="text" class="form-control" id="edit_numbers" name="numbers" placeholder="e.g., 61400123123, 61400123124">
+                                <small class="form-text text-muted">Always enter WITHOUT the + (e.g., 61400123123). Comma-separated for multiple numbers.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_allowed_addresses" class="form-label">Allowed IP Addresses (Recommended) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="IP addresses allowed to send SIP traffic to this trunk. Restricting IPs improves security by preventing unauthorized calls"></i></label>
+                                <input type="text" class="form-control" id="edit_allowed_addresses" name="allowed_addresses">
+                                <small class="form-text text-muted">Comma-separated list. Leave empty to allow any IP.</small>
+                                <small class="form-text d-block mt-1" style="color: var(--bs-warning);"><i class="bi bi-shield-check"></i> <strong>Note:</strong> IPs added here are automatically whitelisted in Fail2ban security.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_allowed_numbers" class="form-label">Allowed Phone Numbers (Optional) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Only accept calls from these phone numbers. Useful for restricting who can call in"></i></label>
+                                <input type="text" class="form-control" id="edit_allowed_numbers" name="allowed_numbers">
+                                <small class="form-text text-muted">Comma-separated list. Leave empty to allow any number</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_username" class="form-label">Auth Username (Optional) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Username for SIP authentication. If set, callers must authenticate with these credentials"></i></label>
+                                    <input type="text" class="form-control" id="edit_username" name="username">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_password" class="form-label">Auth Password (Optional) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Password for SIP authentication. Leave blank to keep existing password"></i></label>
+                                    <input type="password" class="form-control" id="edit_password" name="password" placeholder="Leave empty to keep current">
+                                </div>
+                            </div>
+                            <small class="form-text d-block mb-3" style="color: var(--bs-warning);"><i class="bi bi-info-circle"></i> <strong>Note:</strong> If you want IP-based authentication, leave Auth Username/Password empty. Entering credentials will override IP-based auth with per-call challenge-response authentication.</small>
+                            <hr>
+                            
+
+
+<input type="hidden" name="codecs_present" value="1">
+
+<div class="mb-3">
+  <label class="form-label">Audio Codecs</label>
+  <div class="border rounded p-2">
+    
+    <div class="form-check">
+      <input class="form-check-input ibe_codec-box" type="checkbox"
+             name="codecs" value="PCMU" id="ibe_codecPCMU"
+             checked>
+      <label class="form-check-label" for="ibe_codecPCMU">
+        G.711 &micro;-law (PCMU)
+        <small class="text-muted d-block">Standard &mdash; supported by virtually every carrier</small>
+      </label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input ibe_codec-box" type="checkbox"
+             name="codecs" value="PCMA" id="ibe_codecPCMA"
+             checked>
+      <label class="form-check-label" for="ibe_codecPCMA">
+        G.711 A-law (PCMA)
+        <small class="text-muted d-block">Standard &mdash; common on AU/EU carriers</small>
+      </label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input ibe_codec-box" type="checkbox"
+             name="codecs" value="G722" id="ibe_codecG722"
+             checked>
+      <label class="form-check-label" for="ibe_codecG722">
+        G.722 (HD Voice)
+        <small class="text-muted d-block">Wideband 16&nbsp;kHz &mdash; better speech recognition, if your carrier offers it</small>
+      </label>
+    </div>
+    
+  </div>
+  <div class="form-check mt-2">
+    <input class="form-check-input" type="checkbox" name="only_listed_codecs"
+           value="on" id="ibe_lockCodecs" >
+    <label class="form-check-label" for="ibe_lockCodecs">
+      <strong>Only allow the codecs ticked above</strong>
+    </label>
+  </div>
+  <div class="form-text">
+    Leave this off (the default) to let your carrier choose, exactly as the trunk
+    behaves today. Ticking it restricts the call to your selection.
+  </div>
+  
+  <div class="alert alert-warning alert-permanent mt-2 d-none"
+       id="ibe_codecWarn" role="alert">
+    <strong>Calls may fail to connect.</strong> If your carrier cannot offer one
+    of the codecs you have ticked, it rejects the call with
+    <code>488 Not Acceptable Here</code> &mdash; inbound calls stop arriving and
+    outbound calls stop connecting. Most phone carriers offer only G.711
+    (PCMU/PCMA). Only narrow this if you know what your carrier supports, and
+    <strong>test a real call straight afterwards</strong>. To undo it, tick every
+    codec again and save.
+  </div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="ibe_mediaTimeout">
+    Media timeout (seconds)
+  </label>
+  <input type="number" class="form-control" name="media_timeout_s"
+         id="ibe_mediaTimeout" min="30" step="1" placeholder="Not set"
+         value="">
+  <div class="form-text">
+    Hangs up a call whose audio has stopped flowing, instead of leaving a silent
+    line open. <strong>Leave blank</strong> to keep the current behaviour.
+    Minimum 30 seconds. This is not the same as an agent's maximum call length &mdash;
+    that limits a healthy call, this one ends a dead one.
+  </div>
+  <div class="alert alert-warning alert-permanent mt-2 d-none"
+       id="ibe_timeoutWarn" role="alert">
+    <strong>Set this too low and live calls will drop.</strong> Some carriers stop
+    sending audio packets while nobody is speaking (silence suppression). On such
+    a carrier a quiet caller can trip this timeout and be hung up on mid-call. If
+    you are unsure, start at 60 seconds or leave it blank.
+  </div>
+</div>
+
+<script>
+// Shared populate helper for the single edit modal each page reuses across all
+// its trunks. Defined once; the macro renders more than once per page.
+if (!window.applySipMediaConfig) {
+  window.applySipMediaConfig = function (prefix, codecsCsv, locked, timeout) {
+    var selected = (codecsCsv || '').split(',').filter(Boolean);
+    var lock = document.getElementById(prefix + 'lockCodecs');
+    var boxes = document.querySelectorAll('.' + prefix + 'codec-box');
+    if (!lock) return;
+    lock.checked = !!locked && selected.length > 0;
+    boxes.forEach(function (b) {
+      // Unlocked trunks show every codec ticked — that IS the default state,
+      // and it means saving without touching anything is a no-op.
+      b.checked = lock.checked ? selected.indexOf(b.value) !== -1 : true;
+    });
+    var t = document.getElementById(prefix + 'mediaTimeout');
+    if (t) t.value = timeout || '';
+    // Re-run the warning/validity logic for the newly loaded values.
+    lock.dispatchEvent(new Event('change'));
+    if (t) t.dispatchEvent(new Event('input'));
+  };
+}
+
+(function () {
+  var boxes = document.querySelectorAll('.ibe_codec-box');
+  var lock = document.getElementById('ibe_lockCodecs');
+  var warn = document.getElementById('ibe_codecWarn');
+  var timeout = document.getElementById('ibe_mediaTimeout');
+  var twarn = document.getElementById('ibe_timeoutWarn');
+  if (!lock || !warn) return;
+
+  function ticked() {
+    return Array.prototype.filter.call(boxes, function (b) { return b.checked; });
+  }
+
+  function sync() {
+    var n = ticked().length;
+    // Warn only when the operator is actually NARROWING: the lock on with a
+    // real subset. Lock + all three is identical to the default, so warning
+    // there would train people to ignore it.
+    warn.classList.toggle('d-none', !(lock.checked && n > 0 && n < boxes.length));
+    // An empty selection with the lock on offers nothing and fails every call.
+    // The server rejects it too (import/clone/API bypass this), but blocking
+    // here gives an answer before the round-trip.
+    var invalid = lock.checked && n === 0;
+    boxes.forEach(function (b) {
+      b.setCustomValidity(invalid ? 'Select at least one codec, or untick the lock.' : '');
+    });
+  }
+
+  function syncTimeout() {
+    var v = parseInt(timeout.value, 10);
+    twarn.classList.toggle('d-none', !(v > 0));
+  }
+
+  boxes.forEach(function (b) { b.addEventListener('change', sync); });
+  lock.addEventListener('change', sync);
+  if (timeout) timeout.addEventListener('input', syncTimeout);
+  sync();
+  if (timeout) syncTimeout();
+})();
+</script>
+
+
+                            <div class="mb-3">
+                                <label for="edit_metadata" class="form-label">Metadata (Optional) <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Custom key-value data stored with the trunk. Accessible in your application for custom logic"></i></label>
+                                <textarea class="form-control" id="edit_metadata" name="metadata" rows="2"></textarea>
+                            </div>
+                        </div>
+
+                            <div class="form-group mb-0">
+                                <textarea class="form-control font-monospace" id="create_json_editor" name="json_data" rows="12" placeholder='{
+  "name": "My Inbound Trunk",
+  "numbers": ["1234567890"],
+  "allowed_addresses": ["192.168.1.1"],
+  "allowed_numbers": [],
+  "auth_username": "",
+  "auth_password": ""
+}'></textarea>
+                            </div>
+
+
+                        <!-- JSON Editor Tab -->
+                        <div class="tab-pane fade" id="edit-json" role="tabpanel">
+                            <div class="form-group mb-0">
+                                <textarea class="form-control font-monospace" id="edit_json_editor" name="json_data" rows="12"></textarea>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-book"></i> Learn more in the
+                                <a href="https://docs.livekit.io/sip" target="_blank" class="text-info">docs</a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Update Trunk
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Trunk Confirmation Modal -->
+<div class="modal fade" id="deleteTrunkModal" tabindex="-1" aria-labelledby="deleteTrunkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="https://vaai.aetosiot.com/telephony/inbound/trunk/delete">
+                <input type="hidden" name="csrf_token" value="IkEyRWs5Y25aSEtHODZCX085NUFCVnNURlIzaS0tc0ZqbXlPdi1MdkZzTmsi.aqgYLw.R7FDNCjc81nIWke8ag3dHsKuU8w">
+                <input type="hidden" id="delete_sip_trunk_id" name="sip_trunk_id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteTrunkModalLabel">
+                        <i class="bi bi-exclamation-triangle text-danger"></i> Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete trunk <strong id="delete_trunk_name"></strong>?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete Trunk
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Action buttons styling - match outbound page */
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-outline-secondary {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+    background-color: var(--bg-hover);
+}
+
+.btn-outline-primary {
+    color: var(--brand-primary);
+    border-color: var(--border-color);
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: var(--border-color);
+}
+
+.btn-outline-danger:hover {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+
+<script>
+// Copy Trunk ID to Clipboard
+function copyTrunkId(trunkId, button) {
+    function showSuccess() {
+        // Change icon to checked icon temporarily
+        var icon = button.querySelector('i');
+        var originalClass = icon.className;
+        icon.className = 'bi bi-check-circle-fill';
+        button.style.color = 'var(--success, #28a745)';
+        button.title = 'Copied!';
+        
+        // Reset after 2 seconds
+        setTimeout(function() {
+            icon.className = originalClass;
+            button.style.color = '';
+            button.title = 'Copy trunk ID';
+        }, 2000);
+    }
+    
+    // Try modern Clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(trunkId).then(function() {
+            showSuccess();
+        }).catch(function(err) {
+            console.error('Failed to copy: ', err);
+            // Fallback to older method
+            fallbackCopy(trunkId);
+        });
+    } else {
+        // Fallback to older method
+        fallbackCopy(trunkId);
+    }
+    
+    function fallbackCopy(text) {
+        // Create a temporary textarea element
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-999999px';
+        textarea.style.top = '-999999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        
+        try {
+            var successful = document.execCommand('copy');
+            if (successful) {
+                showSuccess();
+            } else {
+                alert('Failed to copy trunk ID. Please copy manually: ' + text);
+            }
+        } catch (err) {
+            console.error('Fallback copy failed: ', err);
+            alert('Failed to copy trunk ID. Please copy manually: ' + text);
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
+}
+
+// Build JSON from form fields for inbound trunk
+function buildInboundTrunkJson(isEdit) {
+    var prefix = isEdit ? 'edit_' : '';
+    var data = {};
+
+    var nameEl = document.getElementById(prefix + 'trunk_name');
+    if (nameEl && nameEl.value) data.name = nameEl.value;
+
+    var numbersEl = document.getElementById(prefix + 'numbers');
+    if (numbersEl && numbersEl.value) {
+        data.numbers = numbersEl.value.split(',').map(function(n) { return n.trim(); }).filter(function(n) { return n; });
+    }
+
+    var allowedAddressesEl = document.getElementById(prefix + 'allowed_addresses');
+    if (allowedAddressesEl && allowedAddressesEl.value) {
+        data.allowed_addresses = allowedAddressesEl.value.split(',').map(function(n) { return n.trim(); }).filter(function(n) { return n; });
+    }
+
+    var allowedNumbersEl = document.getElementById(prefix + 'allowed_numbers');
+    if (allowedNumbersEl && allowedNumbersEl.value) {
+        data.allowed_numbers = allowedNumbersEl.value.split(',').map(function(n) { return n.trim(); }).filter(function(n) { return n; });
+    }
+
+    var usernameEl = document.getElementById(prefix + 'username');
+    if (usernameEl && usernameEl.value) data.auth_username = usernameEl.value;
+
+    var passwordEl = document.getElementById(prefix + 'password');
+    if (passwordEl && passwordEl.value) data.auth_password = passwordEl.value;
+
+    var numberFormatEl = document.getElementById(prefix + 'number_format');
+    if (numberFormatEl && numberFormatEl.value) data.number_format = numberFormatEl.value;
+
+    var metadataEl = document.getElementById(prefix + 'metadata');
+    if (metadataEl && metadataEl.value) data.metadata = metadataEl.value;
+
+    return JSON.stringify(data, null, 2);
+}
+
+// Sync inbound trunk form to JSON editor
+function syncInboundTrunkToJson(isEdit) {
+    var prefix = isEdit ? 'edit_' : 'create_';
+    var jsonEditor = document.getElementById(prefix + 'json_editor');
+    if (jsonEditor) {
+        jsonEditor.value = buildInboundTrunkJson(isEdit);
+    }
+}
+
+// Sync JSON editor back to inbound trunk form
+function syncJsonToInboundTrunk(isEdit) {
+    var prefix = isEdit ? 'edit_' : '';
+    var jsonEditor = document.getElementById((isEdit ? 'edit_' : 'create_') + 'json_editor');
+
+    if (!jsonEditor || !jsonEditor.value.trim()) {
+        return;
+    }
+
+    try {
+        var data = JSON.parse(jsonEditor.value);
+
+        // Populate form fields from JSON
+        var nameEl = document.getElementById(prefix + 'trunk_name');
+        if (nameEl) nameEl.value = data.name || '';
+
+        var numbersEl = document.getElementById(prefix + 'numbers');
+        if (numbersEl) numbersEl.value = Array.isArray(data.numbers) ? data.numbers.join(', ') : '';
+
+        var allowedAddressesEl = document.getElementById(prefix + 'allowed_addresses');
+        if (allowedAddressesEl) allowedAddressesEl.value = Array.isArray(data.allowed_addresses) ? data.allowed_addresses.join(', ') : '';
+
+        var allowedNumbersEl = document.getElementById(prefix + 'allowed_numbers');
+        if (allowedNumbersEl) allowedNumbersEl.value = Array.isArray(data.allowed_numbers) ? data.allowed_numbers.join(', ') : '';
+
+        var usernameEl = document.getElementById(prefix + 'username');
+        if (usernameEl) usernameEl.value = data.auth_username || '';
+
+        var passwordEl = document.getElementById(prefix + 'password');
+        if (passwordEl) passwordEl.value = data.auth_password || '';
+
+        var numberFormatEl = document.getElementById(prefix + 'number_format');
+        if (numberFormatEl) numberFormatEl.value = data.number_format || 'no_plus';
+
+        var metadataEl = document.getElementById(prefix + 'metadata');
+        if (metadataEl) metadataEl.value = data.metadata || '';
+    } catch (e) {
+        console.error('Invalid JSON in trunk editor:', e);
+        // Don't update form if JSON is invalid
+    }
+}
+
+// Edit Trunk - using data attributes from buttons
+document.querySelectorAll('.edit-trunk-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var trunkId = this.getAttribute('data-trunk-id');
+        var name = this.getAttribute('data-trunk-name');
+        var numbers = this.getAttribute('data-trunk-numbers');
+        var allowedAddresses = this.getAttribute('data-trunk-allowed-addresses');
+        var allowedNumbers = this.getAttribute('data-trunk-allowed-numbers');
+        var username = this.getAttribute('data-trunk-auth-username');
+        var metadata = this.getAttribute('data-trunk-metadata');
+
+        // Extract number_format from metadata
+        var numberFormat = 'no_plus';
+        if (metadata) {
+            try {
+                var metaObj = JSON.parse(metadata);
+                numberFormat = metaObj.number_format || 'no_plus';
+            } catch (e) {
+                console.warn('Could not parse trunk metadata:', e);
+            }
+        }
+
+        document.getElementById('edit_sip_trunk_id').value = trunkId;
+
+        window.applySipMediaConfig('ibe_',
+            this.getAttribute('data-trunk-codecs'),
+            this.getAttribute('data-trunk-codec-lock'),
+            this.getAttribute('data-trunk-media-timeout'));
+        document.getElementById('edit_trunk_name').value = name || '';
+        document.getElementById('edit_numbers').value = numbers || '';
+        document.getElementById('edit_allowed_addresses').value = allowedAddresses || '';
+        document.getElementById('edit_allowed_numbers').value = allowedNumbers || '';
+        document.getElementById('edit_username').value = username || '';
+        document.getElementById('edit_metadata').value = metadata || '';
+        document.getElementById('edit_number_format').value = numberFormat;
+        document.getElementById('edit_password').value = ''; // Clear password field
+
+        // Pre-populate JSON editor with current values
+        setTimeout(function() {
+            syncInboundTrunkToJson(true);
+        }, 100);
+    });
+});
+
+// Delete Trunk - using data attributes from buttons
+document.querySelectorAll('.delete-trunk-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var trunkId = this.getAttribute('data-trunk-id');
+        var trunkName = this.getAttribute('data-trunk-name');
+
+        document.getElementById('delete_sip_trunk_id').value = trunkId;
+        document.getElementById('delete_trunk_name').textContent = trunkName;
+    });
+});
+
+// Tag-based trunk selection functions
+var selectedTrunks = new Set();
+var editSelectedTrunks = new Set();
+
+function addTrunkTag(trunkId, trunkName, isEdit) {
+    var containerId = isEdit ? 'edit_selected_trunks_container' : 'selected_trunks_container';
+    var noTrunksId = isEdit ? 'edit_no_trunks_selected' : 'no_trunks_selected';
+    var hiddenInputId = isEdit ? 'edit_trunk_ids_hidden' : 'trunk_ids_hidden';
+    var selectedSet = isEdit ? editSelectedTrunks : selectedTrunks;
+    
+    if (selectedSet.has(trunkId)) {
+        return; // Already selected
+    }
+    
+    selectedSet.add(trunkId);
+    
+    var container = document.getElementById(containerId);
+    var noTrunksMsg = document.getElementById(noTrunksId);
+    if (noTrunksMsg) {
+        noTrunksMsg.remove();
+    }
+    
+    // Create tag element
+    var tag = document.createElement('span');
+    tag.className = 'badge bg-primary';
+    tag.style.cssText = 'display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;';
+    tag.setAttribute('data-trunk-id', trunkId);
+    
+    var tagText = document.createElement('span');
+    tagText.textContent = trunkName + ' (' + trunkId.substring(0, 16) + '...)';
+    
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn-close btn-close-white';
+    removeBtn.style.cssText = 'font-size: 0.75rem;';
+    removeBtn.setAttribute('aria-label', 'Remove');
+    removeBtn.onclick = function() {
+        removeTrunkTag(trunkId, isEdit);
+    };
+    
+    tag.appendChild(tagText);
+    tag.appendChild(removeBtn);
+    container.appendChild(tag);
+    
+    // Update hidden input
+    updateTrunkIdsHidden(isEdit);
+    
+    // Hide the option from dropdown
+    var optionSelector = isEdit ? '.edit-trunk-option[data-trunk-id="' + trunkId + '"]' : '.trunk-option[data-trunk-id="' + trunkId + '"]';
+    var option = document.querySelector(optionSelector);
+    if (option) {
+        option.style.display = 'none';
+    }
+}
+
+function removeTrunkTag(trunkId, isEdit) {
+    var containerId = isEdit ? 'edit_selected_trunks_container' : 'selected_trunks_container';
+    var noTrunksId = isEdit ? 'edit_no_trunks_selected' : 'no_trunks_selected';
+    var selectedSet = isEdit ? editSelectedTrunks : selectedTrunks;
+    
+    selectedSet.delete(trunkId);
+    
+    var container = document.getElementById(containerId);
+    var tag = container.querySelector('[data-trunk-id="' + trunkId + '"]');
+    if (tag) {
+        tag.remove();
+    }
+    
+    // Show "No trunks selected" if empty
+    if (selectedSet.size === 0) {
+        var noTrunksMsg = document.createElement('span');
+        noTrunksMsg.id = noTrunksId;
+        noTrunksMsg.className = 'text-muted';
+        noTrunksMsg.style.cssText = 'align-self: center;';
+        noTrunksMsg.textContent = 'No trunks selected';
+        container.appendChild(noTrunksMsg);
+    }
+    
+    // Update hidden input
+    updateTrunkIdsHidden(isEdit);
+    
+    // Show the option in dropdown again
+    var optionSelector = isEdit ? '.edit-trunk-option[data-trunk-id="' + trunkId + '"]' : '.trunk-option[data-trunk-id="' + trunkId + '"]';
+    var option = document.querySelector(optionSelector);
+    if (option) {
+        option.style.display = 'block';
+    }
+}
+
+function updateTrunkIdsHidden(isEdit) {
+    var hiddenInputId = isEdit ? 'edit_trunk_ids_hidden' : 'trunk_ids_hidden';
+    var selectedSet = isEdit ? editSelectedTrunks : selectedTrunks;
+    var hiddenInput = document.getElementById(hiddenInputId);
+    if (hiddenInput) {
+        hiddenInput.value = Array.from(selectedSet).join(',');
+    }
+}
+
+function clearTrunkTags(isEdit) {
+    var containerId = isEdit ? 'edit_selected_trunks_container' : 'selected_trunks_container';
+    var noTrunksId = isEdit ? 'edit_no_trunks_selected' : 'no_trunks_selected';
+    var selectedSet = isEdit ? editSelectedTrunks : selectedTrunks;
+    
+    selectedSet.clear();
+    var container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+    var noTrunksMsg = document.createElement('span');
+    noTrunksMsg.id = noTrunksId;
+    noTrunksMsg.className = 'text-muted';
+    noTrunksMsg.style.cssText = 'align-self: center;';
+    noTrunksMsg.textContent = 'No trunks selected';
+    container.appendChild(noTrunksMsg);
+    
+    // Show all options in dropdown
+    var optionSelector = isEdit ? '.edit-trunk-option' : '.trunk-option';
+    var options = document.querySelectorAll(optionSelector);
+    options.forEach(function(option) {
+        option.style.display = 'block';
+    });
+    
+    updateTrunkIdsHidden(isEdit);
+}
+
+// Update dispatch rule fields visibility based on type
+function updateDispatchRuleFields(isEdit) {
+    var prefix = isEdit ? 'edit_' : '';
+    var typeSelect = document.getElementById(prefix + 'dispatch_rule_type');
+    
+    if (!typeSelect) return;
+    
+    var selectedType = typeSelect.value;
+    
+    // Get all field containers
+    var directFields = document.getElementById(prefix + 'direct_rule_fields');
+    var individualFields = document.getElementById(prefix + 'individual_rule_fields');
+    var calleeFields = document.getElementById(prefix + 'callee_rule_fields');
+    var calleeRandomizeFields = document.getElementById(prefix + 'callee_randomize_fields');
+    var pinFields = document.getElementById(prefix + 'pin_fields');
+    
+    // Sync room_prefix values between individual and callee fields before hiding
+    if (isEdit) {
+        var individualPrefixField = document.getElementById('edit_room_prefix');
+        var calleePrefixField = document.getElementById('edit_callee_room_prefix');
+        if (individualPrefixField && calleePrefixField) {
+            // Sync values when switching types
+            if (selectedType === 'individual' && calleePrefixField.value) {
+                individualPrefixField.value = calleePrefixField.value;
+            } else if (selectedType === 'callee' && individualPrefixField.value) {
+                calleePrefixField.value = individualPrefixField.value;
+            }
+        }
+    } else {
+        var individualPrefixField = document.getElementById('room_prefix');
+        var calleePrefixField = document.getElementById('callee_room_prefix');
+        if (individualPrefixField && calleePrefixField) {
+            // Sync values when switching types
+            if (selectedType === 'individual' && calleePrefixField.value) {
+                individualPrefixField.value = calleePrefixField.value;
+            } else if (selectedType === 'callee' && individualPrefixField.value) {
+                calleePrefixField.value = individualPrefixField.value;
+            }
+        }
+    }
+    
+    // Hide all fields first
+    if (directFields) directFields.style.display = 'none';
+    if (individualFields) individualFields.style.display = 'none';
+    if (calleeFields) calleeFields.style.display = 'none';
+    if (calleeRandomizeFields) calleeRandomizeFields.style.display = 'none';
+    if (pinFields) pinFields.style.display = 'none';
+    
+    // Show fields based on selected type
+    if (selectedType === 'direct') {
+        if (directFields) directFields.style.display = 'block';
+        if (pinFields) pinFields.style.display = 'block';
+    } else if (selectedType === 'individual') {
+        if (individualFields) individualFields.style.display = 'block';
+        if (pinFields) pinFields.style.display = 'block';
+    } else if (selectedType === 'callee') {
+        if (calleeFields) calleeFields.style.display = 'block';
+        if (calleeRandomizeFields) calleeRandomizeFields.style.display = 'block';
+        if (pinFields) pinFields.style.display = 'block';
+    }
+}
+
+// Sync form fields to JSON
+function syncFormToJson(isEdit) {
+    var prefix = isEdit ? 'edit_' : '';
+    var dispatchRuleTypeEl = document.getElementById(prefix + 'dispatch_rule_type');
+    if (!dispatchRuleTypeEl) return; // Form not ready yet
+    
+    var dispatchRuleType = dispatchRuleTypeEl.value;
+    var nameEl = document.getElementById(isEdit ? 'edit_rule_name' : 'rule_name');
+    var name = nameEl ? nameEl.value : '';
+    var trunkIdsHidden = document.getElementById(prefix + 'trunk_ids_hidden');
+    var trunkIds = trunkIdsHidden ? trunkIdsHidden.value : '';
+    var hidePhoneNumberEl = document.getElementById(prefix + 'hide_phone_number');
+    var hidePhoneNumber = hidePhoneNumberEl ? hidePhoneNumberEl.checked : false;
+    var metadataEl = document.getElementById(prefix + 'rule_metadata');
+    var metadata = metadataEl ? metadataEl.value : '';
+    var agentNameEl = document.getElementById(prefix + 'agent_name');
+    var agentName = agentNameEl ? agentNameEl.value : '';
+    var agentMetadataEl = document.getElementById(prefix + 'agent_metadata');
+    var agentMetadata = agentMetadataEl ? agentMetadataEl.value : '';
+    
+    var roomNameOrPrefix = '';
+    var roomPrefix = '';
+    var pin = '';
+    var randomize = false;
+    
+    if (dispatchRuleType === 'direct') {
+        roomNameOrPrefix = document.getElementById(prefix + 'room_name').value;
+        pin = document.getElementById(prefix + 'pin').value;
+    } else if (dispatchRuleType === 'individual') {
+        roomPrefix = document.getElementById(prefix + 'room_prefix').value;
+        pin = document.getElementById(prefix + 'pin').value;
+    } else if (dispatchRuleType === 'callee') {
+        roomPrefix = document.getElementById(prefix + 'callee_room_prefix').value;
+        pin = document.getElementById(prefix + 'pin').value;
+        var randomizeCheckbox = document.getElementById(prefix + 'randomize');
+        randomize = randomizeCheckbox ? randomizeCheckbox.checked : false;
+    }
+    
+    var ruleJson = buildRuleJson(dispatchRuleType, roomNameOrPrefix, pin, roomPrefix, randomize, name, trunkIds, hidePhoneNumber, metadata, agentName, agentMetadata);
+    var jsonEl = document.getElementById(prefix + 'plain_json');
+    if (jsonEl) {
+        jsonEl.value = ruleJson;
+    }
+}
+
+// Build JSON representation from rule data
+function buildRuleJson(dispatchRuleType, roomNameOrPrefix, pin, roomPrefix, randomize, name, trunkIds, hidePhoneNumber, metadata, agentName, agentMetadata) {
+    var ruleJson = {};
+    
+    // Build rule object based on type
+    if (dispatchRuleType === 'direct') {
+        ruleJson.rule = {
+            dispatch_rule_direct: {
+                room_name: roomNameOrPrefix || '',
+                pin: pin || ''
+            }
+        };
+    } else if (dispatchRuleType === 'individual') {
+        ruleJson.rule = {
+            dispatch_rule_individual: {
+                room_prefix: roomPrefix || roomNameOrPrefix || '',
+                pin: pin || ''
+            }
+        };
+    } else if (dispatchRuleType === 'callee') {
+        ruleJson.rule = {
+            dispatch_rule_callee: {
+                room_prefix: roomPrefix || roomNameOrPrefix || '',
+                pin: pin || '',
+                randomize: randomize === true || randomize === 'true'
+            }
+        };
+    }
+    
+    // Add other fields
+    if (name) {
+        ruleJson.name = name;
+    }
+    if (trunkIds) {
+        var trunkIdArray = trunkIds.split(',').map(id => id.trim()).filter(id => id.length > 0);
+        if (trunkIdArray.length > 0) {
+            ruleJson.trunk_ids = trunkIdArray;
+        }
+    }
+    if (hidePhoneNumber === true || hidePhoneNumber === 'true') {
+        ruleJson.hide_phone_number = true;
+    }
+    if (metadata) {
+        ruleJson.metadata = metadata;
+    }
+    if (agentName) {
+        ruleJson.room_config = {
+            agents: [{
+                agent_name: agentName,
+                metadata: agentMetadata || ''
+            }]
+        };
+    }
+    
+    return JSON.stringify(ruleJson, null, 2);
+}
+
+// Edit Rule
+function editRule(ruleId, name, trunkIds, dispatchRuleType, roomNameOrPrefix, pin, hidePhoneNumber, metadata, agentName, agentMetadata, roomPrefix, randomize, buttonElement) {
+    // Get server JSON from data attribute (base64 encoded)
+    var serverRuleJson = '';
+    if (buttonElement && buttonElement.getAttribute) {
+        var ruleJsonB64 = buttonElement.getAttribute('data-rule-json') || '';
+        if (ruleJsonB64) {
+            try {
+                // Decode base64
+                serverRuleJson = atob(ruleJsonB64);
+            } catch (e) {
+                console.warn('Failed to decode rule JSON:', e);
+            }
+        }
+    }
+    document.getElementById('edit_sip_dispatch_rule_id').value = ruleId;
+    document.getElementById('edit_rule_name').value = name || '';
+    
+    // Clear and populate trunk tags
+    clearTrunkTags(true);
+    if (trunkIds) {
+        var trunkIdArray = trunkIds.split(',').map(id => id.trim()).filter(id => id.length > 0);
+        trunkIdArray.forEach(function(trunkId) {
+            // Find the trunk name from the dropdown options
+            var option = document.querySelector('.edit-trunk-option[data-trunk-id="' + trunkId + '"]');
+            var trunkName = 'Unknown Trunk';
+            if (option) {
+                trunkName = option.getAttribute('data-trunk-name');
+            }
+            addTrunkTag(trunkId, trunkName, true);
+        });
+    }
+    
+    // Set dispatch rule type
+    if (dispatchRuleType) {
+        document.getElementById('edit_dispatch_rule_type').value = dispatchRuleType;
+    }
+    
+    // Update field visibility
+    updateDispatchRuleFields(true);
+    
+    // Set fields based on dispatch rule type
+    if (dispatchRuleType === 'direct') {
+        document.getElementById('edit_room_name').value = roomNameOrPrefix || '';
+    } else if (dispatchRuleType === 'individual') {
+        // For individual, use roomPrefix if available, otherwise use roomNameOrPrefix
+        var prefixValue = (roomPrefix && roomPrefix.trim()) ? roomPrefix : (roomNameOrPrefix || '');
+        document.getElementById('edit_room_prefix').value = prefixValue;
+    } else if (dispatchRuleType === 'callee') {
+        // For callee, use roomPrefix if available, otherwise use roomNameOrPrefix
+        var prefixValue = (roomPrefix && roomPrefix.trim()) ? roomPrefix : (roomNameOrPrefix || '');
+        document.getElementById('edit_callee_room_prefix').value = prefixValue;
+        if (randomize !== undefined) {
+            document.getElementById('edit_randomize').checked = randomize === true || randomize === 'true';
+        }
+    }
+    
+    document.getElementById('edit_pin').value = pin || '';
+    document.getElementById('edit_hide_phone_number').checked = hidePhoneNumber === true || hidePhoneNumber === 'true';
+    document.getElementById('edit_agent_name').value = agentName || '';
+    document.getElementById('edit_agent_metadata').value = agentMetadata || '';
+
+    // Parse auto_record from agent metadata
+    var autoRecordEnabled = false;
+    if (agentMetadata) {
+        try {
+            var metaObj = JSON.parse(agentMetadata);
+            autoRecordEnabled = metaObj.auto_record === true;
+        } catch (e) {
+            // Not valid JSON, check for string match
+            autoRecordEnabled = agentMetadata.indexOf('"auto_record": true') !== -1 ||
+                               agentMetadata.indexOf('"auto_record":true') !== -1;
+        }
+    }
+    document.getElementById('edit_auto_record').checked = autoRecordEnabled;
+    document.getElementById('edit_rule_metadata').value = metadata || '';
+    
+    // Populate JSON from server data if available, otherwise build from form fields
+    var ruleJson;
+    if (serverRuleJson && serverRuleJson.trim()) {
+        // Use server-provided JSON (more accurate, includes all fields from LiveKit)
+        try {
+            // Parse and re-stringify to ensure valid JSON and proper formatting
+            var parsed = JSON.parse(serverRuleJson);
+            ruleJson = JSON.stringify(parsed, null, 2);
+        } catch (e) {
+            // If parsing fails, fall back to building from form fields
+            console.warn('Failed to parse server JSON, using form fields:', e);
+            ruleJson = buildRuleJson(dispatchRuleType, roomNameOrPrefix, pin, roomPrefix, randomize, name, trunkIds, hidePhoneNumber, metadata, agentName, agentMetadata);
+        }
+    } else {
+        // Build from form fields
+        ruleJson = buildRuleJson(dispatchRuleType, roomNameOrPrefix, pin, roomPrefix, randomize, name, trunkIds, hidePhoneNumber, metadata, agentName, agentMetadata);
+    }
+    document.getElementById('edit_plain_json').value = ruleJson;
+    
+    var modal = new bootstrap.Modal(document.getElementById('editRuleModal'));
+    modal.show();
+}
+
+// Confirm Delete Rule
+function confirmDeleteRule(ruleId, ruleName) {
+    document.getElementById('delete_sip_dispatch_rule_id').value = ruleId;
+    document.getElementById('delete_rule_name').textContent = ruleName;
+    
+    var modal = new bootstrap.Modal(document.getElementById('deleteRuleModal'));
+    modal.show();
+}
+
+// Initialize trunk selection UI
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize dispatch rule fields visibility
+    updateDispatchRuleFields(false);
+    updateDispatchRuleFields(true);
+
+    // Handle Create Trunk modal - JSON tab syncing
+    var createJsonTab = document.getElementById('create-json-tab');
+    if (createJsonTab) {
+        createJsonTab.addEventListener('shown.bs.tab', function() {
+            syncInboundTrunkToJson(false);
+        });
+    }
+
+    // Handle Create Trunk modal - Details tab syncing (JSON to form)
+    var createDetailsTab = document.getElementById('create-details-tab');
+    if (createDetailsTab) {
+        createDetailsTab.addEventListener('shown.bs.tab', function() {
+            syncJsonToInboundTrunk(false);
+        });
+    }
+
+    // Handle Edit Trunk modal - JSON tab syncing
+    var editJsonTabTrunk = document.getElementById('edit-json-tab');
+    if (editJsonTabTrunk) {
+        editJsonTabTrunk.addEventListener('shown.bs.tab', function() {
+            syncInboundTrunkToJson(true);
+        });
+    }
+
+    // Handle Edit Trunk modal - Details tab syncing (JSON to form)
+    var editDetailsTab = document.getElementById('edit-details-tab');
+    if (editDetailsTab) {
+        editDetailsTab.addEventListener('shown.bs.tab', function() {
+            syncJsonToInboundTrunk(true);
+        });
+    }
+
+    // Reset Create Trunk modal tabs when closed
+    var createTrunkModal = document.getElementById('createTrunkModal');
+    if (createTrunkModal) {
+        createTrunkModal.addEventListener('hidden.bs.modal', function() {
+            // Reset to details tab
+            var detailsTab = document.getElementById('create-details-tab');
+            if (detailsTab) {
+                var tab = bootstrap.Tab.getInstance(detailsTab);
+                if (tab) {
+                    tab.show();
+                } else {
+                    var newTab = new bootstrap.Tab(detailsTab);
+                    newTab.show();
+                }
+            }
+            // Clear form
+            var form = document.getElementById('createInboundTrunkForm');
+            if (form) {
+                form.reset();
+            }
+            // Clear JSON editor
+            var jsonEditor = document.getElementById('create_json_editor');
+            if (jsonEditor) {
+                jsonEditor.value = '';
+            }
+        });
+    }
+
+    // Reset Edit Trunk modal tabs when closed
+    var editTrunkModal = document.getElementById('editTrunkModal');
+    if (editTrunkModal) {
+        editTrunkModal.addEventListener('hidden.bs.modal', function() {
+            // Reset to details tab
+            var detailsTab = document.getElementById('edit-details-tab');
+            if (detailsTab) {
+                var tab = bootstrap.Tab.getInstance(detailsTab);
+                if (tab) {
+                    tab.show();
+                } else {
+                    var newTab = new bootstrap.Tab(detailsTab);
+                    newTab.show();
+                }
+            }
+            // Clear JSON editor
+            var jsonEditor = document.getElementById('edit_json_editor');
+            if (jsonEditor) {
+                jsonEditor.value = '';
+            }
+        });
+    }
+    
+    // Handle tab switching for edit rule modal
+    var editFormTab = document.getElementById('edit-form-tab');
+    var editJsonTab = document.getElementById('edit-json-tab');
+    if (editFormTab && editJsonTab) {
+        editFormTab.addEventListener('shown.bs.tab', function() {
+            // When switching to form tab, ensure form fields are visible
+            updateDispatchRuleFields(true);
+            // Don't auto-sync to JSON - let user manually edit JSON if they want
+        });
+        editJsonTab.addEventListener('shown.bs.tab', function() {
+            // When switching to JSON tab, sync form to JSON for preview
+            syncFormToJson(true);
+        });
+    }
+    
+    // Handle tab switching for create rule modal
+    var createFormTab = document.getElementById('create-form-tab');
+    var createJsonTab = document.getElementById('create-json-tab');
+    if (createFormTab && createJsonTab) {
+        createFormTab.addEventListener('shown.bs.tab', function() {
+            // When switching to form tab, ensure form fields are visible
+            updateDispatchRuleFields(false);
+            // Don't auto-sync to JSON - let user manually edit JSON if they want
+        });
+        createJsonTab.addEventListener('shown.bs.tab', function() {
+            // When switching to JSON tab, sync form to JSON for preview
+            syncFormToJson(false);
+        });
+    }
+    
+    // Reset tabs when modals are closed
+    var createRuleModal = document.getElementById('createRuleModal');
+    if (createRuleModal) {
+        createRuleModal.addEventListener('hidden.bs.modal', function() {
+            // Reset to form tab
+            var formTab = bootstrap.Tab.getInstance(createFormTab);
+            if (formTab) {
+                formTab.show();
+            }
+        });
+    }
+    
+    var editRuleModal = document.getElementById('editRuleModal');
+    if (editRuleModal) {
+        editRuleModal.addEventListener('hidden.bs.modal', function() {
+            // Reset to form tab
+            var formTab = bootstrap.Tab.getInstance(editFormTab);
+            if (formTab) {
+                formTab.show();
+            }
+        });
+    }
+    
+    // Handle Create Rule modal - trunk selection
+    var createTrunkOptions = document.querySelectorAll('.trunk-option');
+    createTrunkOptions.forEach(function(option) {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            var trunkId = this.getAttribute('data-trunk-id');
+            var trunkName = this.getAttribute('data-trunk-name');
+            addTrunkTag(trunkId, trunkName, false);
+            
+            // Close dropdown
+            var dropdown = bootstrap.Dropdown.getInstance(document.getElementById('addTrunkDropdown'));
+            if (dropdown) {
+                dropdown.hide();
+            }
+        });
+    });
+    
+    // Handle Edit Rule modal - trunk selection
+    var editTrunkOptions = document.querySelectorAll('.edit-trunk-option');
+    editTrunkOptions.forEach(function(option) {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            var trunkId = this.getAttribute('data-trunk-id');
+            var trunkName = this.getAttribute('data-trunk-name');
+            addTrunkTag(trunkId, trunkName, true);
+            
+            // Close dropdown
+            var dropdown = bootstrap.Dropdown.getInstance(document.getElementById('editAddTrunkDropdown'));
+            if (dropdown) {
+                dropdown.hide();
+            }
+        });
+    });
+    
+    // Clear trunk tags when Create Rule modal is closed
+    var createRuleModal = document.getElementById('createRuleModal');
+    if (createRuleModal) {
+        createRuleModal.addEventListener('hidden.bs.modal', function() {
+            clearTrunkTags(false);
+        });
+    }
+    
+    // Clear trunk tags when Edit Rule modal is closed
+    var editRuleModal = document.getElementById('editRuleModal');
+    if (editRuleModal) {
+        editRuleModal.addEventListener('hidden.bs.modal', function() {
+            clearTrunkTags(true);
+        });
+    }
+    
+    // Handle form submission - values are already in hidden inputs
+    var createRuleForm = document.querySelector('form[action="/sip-inbound/rule/create"]');
+    if (createRuleForm) {
+        createRuleForm.addEventListener('submit', function(e) {
+            updateTrunkIdsHidden(false);
+            // Clear JSON field if user is on form tab (not JSON tab)
+            // Check which tab button is active
+            var createJsonTabButton = document.getElementById('create-json-tab');
+            var isJsonTabActive = createJsonTabButton && createJsonTabButton.classList.contains('active');
+            
+            if (!isJsonTabActive) {
+                // User is on form tab, clear JSON field so backend uses form fields
+                var jsonField = document.getElementById('plain_json');
+                if (jsonField) {
+                    jsonField.value = '';
+                }
+            }
+        });
+    }
+    
+    var editRuleForm = document.querySelector('form[action="/sip-inbound/rule/update"]');
+    if (editRuleForm) {
+        editRuleForm.addEventListener('submit', function(e) {
+            updateTrunkIdsHidden(true);
+            // Clear JSON field if user is on form tab (not JSON tab)
+            // Check which tab button is active
+            var editJsonTabButton = document.getElementById('edit-json-tab');
+            var isJsonTabActive = editJsonTabButton && editJsonTabButton.classList.contains('active');
+            
+            if (!isJsonTabActive) {
+                // User is on form tab, clear JSON field so backend uses form fields
+                var jsonField = document.getElementById('edit_plain_json');
+                if (jsonField) {
+                    jsonField.value = '';
+                }
+            }
+        });
+    }
+});
+
+// Auto-dismiss flash messages after 5 seconds (only dismissible alerts outside modals)
+setTimeout(function() {
+    var alerts = document.querySelectorAll('.alert.alert-dismissible:not(.modal .alert)');
+    alerts.forEach(function(alert) {
+        var bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+    });
+}, 5000);
+</script>
+
+
+
+<div class="modal fade" id="sipSetupWizardModal" tabindex="-1" aria-labelledby="sipSetupWizardLabel" aria-hidden="true" data-csrf-token="IkEyRWs5Y25aSEtHODZCX085NUFCVnNURlIzaS0tc0ZqbXlPdi1MdkZzTmsi.aqgYLw.R7FDNCjc81nIWke8ag3dHsKuU8w">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sipSetupWizardLabel">
+                    <i class="bi bi-magic"></i> SIP Provider Setup Wizard
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            
+            <div class="px-4 pt-3" id="wizardStepper">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="wizard-step active" data-step="1">
+                        <span class="wizard-step-num">1</span> <span class="wizard-step-label">Provider</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="2">
+                        <span class="wizard-step-num">2</span> <span class="wizard-step-label">Portal Setup</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="3">
+                        <span class="wizard-step-num">3</span> <span class="wizard-step-label">Credentials</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="4">
+                        <span class="wizard-step-num">4</span> <span class="wizard-step-label">Allowed IPs</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="5">
+                        <span class="wizard-step-num">5</span> <span class="wizard-step-label">Numbers</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="6">
+                        <span class="wizard-step-num">6</span> <span class="wizard-step-label">Confirm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                
+                <div class="alert alert-danger alert-permanent d-none" id="wizardError" role="alert"></div>
+
+                
+                <div class="wizard-pane" data-pane="1">
+                    <p class="text-muted mb-3">Choose the SIP provider you want to set up. The wizard will create the inbound trunk, outbound trunk, and dispatch rule for you.</p>
+                    <div class="row row-cols-2 row-cols-md-3 g-3 mb-3" id="wizardProviderTiles">
+                        
+                    </div>
+                    <div class="mb-2">
+                        <label for="wizardNamePrefix" class="form-label small fw-semibold">Name for these trunks <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="wizardNamePrefix" placeholder="e.g. Customer ABC, Sydney Office, Tronic Cloud" autocomplete="off">
+                        <small class="form-text text-muted">This becomes the prefix on all three objects: <code>«Name» Inbound</code>, <code>«Name» Outbound</code>, <code>«Name» Inbound Rule</code>.</small>
+                    </div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="2">
+                    <h6 class="mb-3" id="wizardPortalHeading">Set up your provider account</h6>
+                    <p class="text-muted" id="wizardPortalBlurb">Before continuing, log into your provider's portal and gather these values.</p>
+                    <div class="d-flex gap-2 mb-3 flex-wrap">
+                        <a href="inbound.html#" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm" id="wizardPortalUrlBtn">
+                            <i class="bi bi-box-arrow-up-right"></i> <span id="wizardPortalUrlLabel">Open Portal</span>
+                        </a>
+                        <a href="inbound.html#" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm" id="wizardGuideBtn">
+                            <i class="bi bi-file-earmark-text"></i> Open full setup guide
+                        </a>
+                    </div>
+                    <ul class="list-group" id="wizardChecklist">
+                        
+                    </ul>
+                    <div class="alert alert-info alert-permanent mt-3 mb-0 small d-none" id="wizardPortalNote"></div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="3">
+                    <h6 class="mb-3" id="wizardCredsHeading">Enter your credentials</h6>
+                    <p class="text-muted small" id="wizardCredsBlurb"></p>
+                    <div id="wizardCredsFields">
+                        
+                    </div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="4">
+                    <h6 class="mb-3" id="wizardIpsHeading">Inbound Allowed IPs</h6>
+                    <p class="text-muted small" id="wizardIpsBlurb">These are the IPs allowed to send SIP traffic to your inbound trunk. Pre-filled with the provider's published values where available — accept or edit. Adding IPs here also auto-whitelists them in fail2ban security.</p>
+                    <div class="mb-2">
+                        <textarea class="form-control font-monospace" id="wizardIps" rows="6" placeholder="1.2.3.4&#10;5.6.7.0/24"></textarea>
+                    </div>
+                    <small class="text-muted" id="wizardIpsHelp"></small>
+                    <div class="alert alert-info alert-permanent mt-3 mb-0 small d-none" id="wizardIpsSkipNote"></div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="5">
+                    <h6 class="mb-3">Your phone numbers</h6>
+                    <p class="text-muted small">Enter your DIDs in E.164 format, one per line. These will be attached to both the inbound and outbound trunks.</p>
+                    <div class="mb-2">
+                        <textarea class="form-control font-monospace" id="wizardNumbers" rows="5" placeholder="+61370548494&#10;+61370548495"></textarea>
+                    </div>
+                    <small class="text-muted">Numbers will be normalised automatically. <span id="wizardNumberCount" class="ms-2 badge bg-primary text-white">0 numbers</span></small>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="6">
+                    <h6 class="mb-3">Ready to create</h6>
+                    <p class="text-muted small">The wizard will create the following on your behalf. Click Create All to proceed.</p>
+                    <div class="card mb-2">
+                        <div class="card-body p-3">
+                            <h6 class="card-subtitle mb-2 text-muted small"><i class="bi bi-telephone-inbound"></i> Inbound Trunk</h6>
+                            <div id="wizardSummaryInbound" class="small"></div>
+                        </div>
+                    </div>
+                    <div class="card mb-2">
+                        <div class="card-body p-3">
+                            <h6 class="card-subtitle mb-2 text-muted small"><i class="bi bi-telephone-outbound"></i> Outbound Trunk</h6>
+                            <div id="wizardSummaryOutbound" class="small"></div>
+                        </div>
+                    </div>
+                    <div class="card mb-2">
+                        <div class="card-body p-3">
+                            <h6 class="card-subtitle mb-2 text-muted small"><i class="bi bi-diagram-3"></i> Dispatch Rule</h6>
+                            <div id="wizardSummaryRule" class="small"></div>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label for="wizardAgentSelect" class="form-label small fw-semibold mb-1">Voice Agent</label>
+                            <select class="form-select form-select-sm" id="wizardAgentSelect">
+                                <option value="">(None — assign later)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="wizardTimeProfileSelect" class="form-label small fw-semibold mb-1">Time Profile</label>
+                            <select class="form-select form-select-sm" id="wizardTimeProfileSelect">
+                                <option value="">(None — always active)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="wizardAutoRecord" checked>
+                        <label class="form-check-label small" for="wizardAutoRecord">
+                            <i class="bi bi-record-circle"></i> Auto-record all calls on this dispatch rule
+                        </label>
+                    </div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="success">
+                    <div class="text-center py-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3 mb-2">Setup complete</h5>
+                        <p class="text-muted small">Your inbound trunk, outbound trunk, and dispatch rule have been created.</p>
+                        <p class="small mt-3 mb-0">
+                            Next step: assign an agent to the new dispatch rule from the
+                            <a href="rules.html">Dispatch Rules page</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-link text-decoration-none" id="wizardBackBtn" disabled>
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="wizardCancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="wizardNextBtn" disabled>
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <button type="button" class="btn btn-success d-none" id="wizardCreateBtn">
+                        <i class="bi bi-magic"></i> Create All
+                    </button>
+                    <button type="button" class="btn btn-primary d-none" id="wizardDoneBtn" data-bs-dismiss="modal">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.wizard-step { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-secondary, #888); white-space: nowrap; }
+.wizard-step.active { color: var(--text-primary, #fff); font-weight: 600; }
+.wizard-step.complete { color: var(--bs-success, #10b981); }
+.wizard-step-num { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--bg-tertiary, #2a2a2a); font-weight: 600; font-size: 0.75rem; }
+.wizard-step.active .wizard-step-num { background: var(--bs-primary, #3b82f6); color: #fff; }
+.wizard-step.complete .wizard-step-num { background: var(--bs-success, #10b981); color: #fff; }
+.wizard-step-divider { flex: 1; height: 1px; background: var(--border-color, #333); margin: 0 0.5rem; }
+.wizard-step-label { display: none; }
+@media (min-width: 576px) { .wizard-step-label { display: inline; } }
+.wizard-provider-tile { cursor: pointer; padding: 1rem 0.75rem; border: 2px solid var(--border-color, #333); border-radius: 0.5rem; text-align: center; transition: border-color 0.15s, transform 0.15s; position: relative; height: 100%; }
+.wizard-provider-tile:hover { border-color: var(--bs-primary, #3b82f6); transform: translateY(-2px); }
+.wizard-provider-tile.selected { border-color: var(--bs-primary, #3b82f6); background: rgba(59, 130, 246, 0.06); }
+.wizard-provider-tile .tile-icon { font-size: 1.75rem; display: block; line-height: 1; }
+.wizard-provider-tile .tile-logo-chip { height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; border-radius: 8px; }
+.wizard-provider-tile .tile-logo-chip.has-img { background: #fff; padding: 5px 10px; }
+.wizard-provider-tile .tile-logo { max-height: 38px; max-width: 100%; width: auto; object-fit: contain; display: block; }
+/* on-dark logos (no white chip) can fill more of the tile */
+.wizard-provider-tile .tile-logo-chip:not(.has-img) .tile-logo { max-height: 46px; }
+.wizard-provider-tile .tile-name { font-weight: 600; }
+.wizard-provider-tile .tile-tag { font-size: 0.75rem; color: var(--text-secondary, #888); margin-top: 0.25rem; }
+.wizard-provider-tile .badge-recommended { position: absolute; top: -0.5rem; right: -0.5rem; }
+</style>
+<script src="../static/js/sip-setup-wizard.js@v=5802"></script>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IkEyRWs5Y25aSEtHODZCX085NUFCVnNURlIzaS0tc0ZqbXlPdi1MdkZzTmsi.aqgYLw.R7FDNCjc81nIWke8ag3dHsKuU8w">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Inbound SIP Trunks
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Configure SIP trunks for receiving incoming phone calls. Required for agents to answer calls from phone numbers.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> How Inbound Works
+                        </h6>
+                        
+                        <p class="text-muted">Your SIP provider sends calls to your LiveKit server. The inbound trunk tells LiveKit which providers are allowed to send calls and which numbers to expect.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Creating an Inbound Trunk
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Trunk Name</strong></td>
+                                        <td>Friendly name to identify this trunk in the dashboard (e.g., &#39;Twilio Inbound&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Number Format</strong></td>
+                                        <td>How incoming caller numbers are received from your provider. Twilio sends numbers WITH the + prefix, so select &#39;+E.164 (WITH +)&#39;. This tells the system what format to expect.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Phone Numbers</strong></td>
+                                        <td>Phone numbers that will receive calls on this trunk. ALWAYS enter WITHOUT the + prefix (e.g., 61400123123). These are numbers you&#39;ve purchased from your SIP provider.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Allowed IP Addresses</strong></td>
+                                        <td>IP addresses allowed to send SIP traffic to this trunk. Restricting IPs is recommended for security - it prevents unauthorized calls. Get these IPs from your SIP provider&#39;s documentation. IPs added here are automatically whitelisted in Fail2ban.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Allowed Phone Numbers</strong></td>
+                                        <td>Only accept calls FROM these caller IDs. Leave empty to allow calls from any number. Useful for restricting who can call in.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Auth Username</strong></td>
+                                        <td>Username for SIP authentication (optional). If set, incoming calls must authenticate with these credentials instead of IP-based auth.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Auth Password</strong></td>
+                                        <td>Password for SIP authentication (optional). Used with username for challenge-response authentication.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Metadata</strong></td>
+                                        <td>Custom JSON data stored with the trunk for your application logic</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Audio Codecs</strong></td>
+                                        <td>The format calls travel in. All three ticked by default and the carrier picks — identical to how trunks have always behaved. PCMU/PCMA are G.711, supported by nearly every carrier. G722 is HD Voice: more audio detail, which can improve recognition accuracy, but many carriers do not offer it.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Only allow the codecs ticked above</strong></td>
+                                        <td>Forces your selection instead of letting the carrier choose. ⚠️ On an INBOUND trunk the carrier makes the offer, so if it cannot offer one of your ticked codecs the call is rejected with SIP 488 and inbound calls stop arriving. Ticking a codec alone does nothing without this box. To undo, tick all three and save. Test a real inbound call immediately after narrowing.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Media timeout (seconds)</strong></td>
+                                        <td>Hangs up a call whose audio has stopped flowing. Blank (default) keeps today&#39;s behaviour. Minimum 30; 60 is a sensible start. ⚠️ Carriers using silence suppression stop sending audio while nobody speaks, so a low value can hang up on a quiet caller mid-call.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Number Format Explained
+                        </h6>
+                        
+                        <p class="text-muted">The Number Format setting tells the system how your SIP provider sends caller ID numbers. Twilio and most providers send numbers WITH the + prefix (e.g., +61400123123). Select the format that matches your provider. This does NOT affect how you enter numbers in the Phone Numbers field - always enter those WITHOUT the +.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> IP vs Credential Authentication
+                        </h6>
+                        
+                        <p class="text-muted">You can secure inbound calls two ways: 1) IP-based: Add your provider&#39;s IPs to Allowed Addresses (recommended), or 2) Credential-based: Set Auth Username/Password. If you use credentials, IP restrictions are bypassed and each call must authenticate.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Provider Configuration
+                        </h6>
+                        
+                        <p class="text-muted">Configure your SIP provider to send calls to your LiveKit server&#39;s SIP endpoint. The endpoint is typically your-server:5060 for UDP or your-server:5061 for TLS.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Import/Export
+                        </h6>
+                        
+                        <p class="text-muted">Export trunk configurations as JSON for backup. Import to quickly replicate trunks across servers (passwords are not exported for security).</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

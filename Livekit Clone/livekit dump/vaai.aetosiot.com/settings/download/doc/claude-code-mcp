@@ -1,0 +1,166 @@
+# Setting Up LiveKit Dashboard MCP in Claude Code
+
+## Prerequisites
+
+- Claude Code installed
+- An MCP API key from your LiveKit Dashboard
+- Your public IP address whitelisted on the dashboard
+
+---
+
+## Step 1: Create `.mcp.json` in your project root
+
+```json
+{
+  "mcpServers": {
+    "livekit-dashboard": {
+      "type": "streamable-http",
+      "url": "https://<YOUR_DASHBOARD_URL>/mcp",
+      "headers": {
+        "Authorization": "Bearer <YOUR_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+> **Note:** The native MCP connection may not work yet due to a server-side Accept header issue. The config is there for when it's fixed. For now, we use a curl workaround (see Step 2).
+
+---
+
+## Step 2: Create `CLAUDE.md` in your project root
+
+This tells Claude Code how to communicate with the MCP via curl:
+
+````markdown
+# LiveKit Dashboard MCP
+
+The LiveKit Dashboard MCP server is available at `https://<YOUR_DASHBOARD_URL>/mcp`.
+The native streamable-http connection does not work yet. Use curl to call the MCP directly.
+
+## How to call any MCP tool
+
+```bash
+curl -s -X POST https://<YOUR_DASHBOARD_URL>/mcp \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{...}}}'
+```
+
+Always include all three headers. Responses come as SSE `data:` lines containing JSON-RPC results.
+
+## Available Tools
+
+### Agent Management
+- `list_agents` — List all agents (no args)
+- `get_agent` — Get agent config (agent_id)
+- `get_agent_by_slug` — Look up by slug (slug)
+- `create_agent` — Create agent (name, slug required)
+- `update_agent_instructions` — Update prompt (agent_id, instructions)
+- `update_agent_config` — Update any field (agent_id required, all others optional)
+- `delete_agent` — Delete agent (agent_id)
+- `duplicate_agent` — Copy agent (agent_id)
+- `start_agent` / `stop_agent` — Start/stop agent (agent_id)
+
+### Call History
+- `list_calls` — List calls (optional: days, direction, agent_name, search, page, per_page)
+- `get_call_detail` — Call details + AI summary (call_id)
+- `get_call_transcript` — Transcript (call_id)
+- `get_call_statistics` — Aggregated stats (no args)
+
+### Analytics
+- `get_overview` — Dashboard KPIs (no args)
+- `get_call_volume` — Volume with comparison (days)
+- `get_agent_performance` — Per-agent stats (days)
+- `get_sentiment` — Sentiment trends (days)
+- `get_latency` — Latency percentiles (days)
+
+### Telephony
+- `list_dispatch_rules` — SIP dispatch rules (no args)
+- `list_sip_trunks` — All SIP trunks (no args)
+- `list_active_rooms` — Active rooms (no args)
+- `create_sip_inbound_trunk` — Create inbound trunk (name required; numbers, allowed_addresses, auth, number_format optional)
+- `update_sip_inbound_trunk` — Partial update (sip_trunk_id required; omitted fields keep their current values)
+- `create_sip_outbound_trunk` — Create outbound trunk (name, address required; transport, trunk_type pstn/pbx, auth, caller-ID numbers optional)
+- `update_sip_outbound_trunk` — Partial update (sip_trunk_id required)
+- `delete_sip_trunk` — Delete a trunk, inbound or outbound (sip_trunk_id)
+- `create_dispatch_rule` — Route inbound calls to an agent (name required; trunk_ids, agent_slug, rule_type, auto_record, time_profile_id optional)
+- `update_dispatch_rule` — Partial update; existing agent/trunk/recording settings are preserved (sip_dispatch_rule_id required)
+- `delete_dispatch_rule` — Delete a dispatch rule (sip_dispatch_rule_id)
+
+### Chatbot (Web Chat) Agents
+- `list_chatbot_agents` — List website chatbot agents (no args)
+- `get_chatbot_agent` — Full chatbot config incl. widget, avatar, and SMS/WhatsApp settings (agent_id)
+- `create_chatbot_agent` — Create a chatbot agent (name required)
+- `update_chatbot_agent` — Partial update; supports nested patches for widget_config, mem0_config, avatar_config, and sms_config (agent_id required)
+- `delete_chatbot_agent` — Delete a chatbot agent (agent_id)
+
+### Diagnostics & Help
+- `get_agent_logs` — Agent logs (agent_id, lines)
+- `get_dashboard_help` — Help by topic (topic)
+- `get_agent_config_reference` — Config reference for voice agents, chatbot agents, and SIP management (no args)
+- `get_admin_guide` — Full admin guide (no args)
+
+This is not the full list — call `{"method":"tools/list"}` to discover every available tool (tool configuration, knowledge base, memory, webhook tools, diagnostics, and more).
+````
+
+---
+
+## Step 3: Create `.claude/settings.local.json` in your project root
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl * https://<YOUR_DASHBOARD_URL>/mcp*)"
+    ]
+  }
+}
+```
+
+Replace `<YOUR_DASHBOARD_URL>` with your actual dashboard domain.
+
+This allows Claude Code to make curl calls to the MCP without prompting every time.
+
+---
+
+## Step 4: Whitelist your IP address
+
+When creating your MCP API key on the dashboard, click the **"Use My IP"** button to automatically add your current IP address to the allowlist.
+
+If your IP changes later, you'll need to update it in the API key settings on the dashboard.
+
+---
+
+## Step 5: Use it
+
+Open Claude Code from your project directory and just ask:
+
+- "List my LiveKit agents"
+- "Show call stats for the last 7 days"
+- "Get the transcript for the latest call"
+- "Update the greeting on agent X"
+
+Claude Code reads the `CLAUDE.md` automatically and knows how to call the MCP.
+
+---
+
+## Placeholders to replace
+
+| Placeholder | Replace with | Example |
+|---|---|---|
+| `<YOUR_DASHBOARD_URL>` | Your dashboard domain (no `https://`) | `dashboard.example.com` |
+| `<YOUR_API_KEY>` | Your MCP API key from the dashboard | `sk-mcp-abc123...` |
+
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+|---|---|
+| **403 — IP not in allowlist** | Update your IP in the API key settings on the dashboard |
+| **401 — Unauthorized** | Check your API key is correct |
+| **406 — Not Acceptable** | Make sure `Accept: application/json, text/event-stream` header is included |
+| **Getting prompted for every curl** | Check `settings.local.json` has the wildcard permission |
+| **Claude doesn't know about MCP** | Make sure you're in the directory with `CLAUDE.md` |

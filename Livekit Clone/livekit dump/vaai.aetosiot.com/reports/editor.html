@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Create Report - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="../static/images/custom_favicon.png@v=518979">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="../static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/style.css@v=5070.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IkxNcTBiS2MyZW5faWotWGdRTUVqOXNDWVZNR05DSW1sVWtmVHZSWjNqeWci.aqgYRg.b7lVHVoS5g1-9TnDhl2dyAHJCkI">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="../index.html" class="sidebar-brand">
+            
+            <img src="../static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="../settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="../index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="../reports.html" class="nav-link active">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="../rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="../call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="../chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="../egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="../tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="../knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="../agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="../web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="../telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="../telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="../telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="../telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="../agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="../simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="../autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="../improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="../settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="../settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Reports</h1>
+                
+<p class="page-subtitle">Create Automated Report</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="../userguide.html#reports" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="editor.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-file-earmark-bar-graph"></i> Create Report
+        </h5>
+        <div class="d-flex gap-2">
+            <a href="../reports.html" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveReport()">
+                <i class="bi bi-save"></i> Create Report
+            </button>
+            
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Report Name -->
+        <div class="mb-4">
+            <label for="reportName" class="form-label">Report Name</label>
+            <input type="text" class="form-control" id="reportName" placeholder="e.g. Post-Call Summary for Sales"
+                value="">
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Trigger Type -->
+                <div class="mb-4">
+                    <label for="triggerType" class="form-label">Trigger Type</label>
+                    <select class="form-select" id="triggerType" onchange="onTriggerTypeChange()">
+                        
+                        <option value="post_call" >
+                            Post-Call Summary
+                        </option>
+                        
+                        <option value="post_analysis" >
+                            AI Conversation Analysis
+                        </option>
+                        
+                        <option value="scheduled" >
+                            Scheduled Summary
+                        </option>
+                        
+                        <option value="campaign_complete" >
+                            Campaign Completion Report
+                        </option>
+                        
+                        <option value="auto_research" >
+                            AutoResearch Complete
+                        </option>
+                        
+                        <option value="llm_failover" >
+                            LLM Auto-Failover Alert
+                        </option>
+                        
+                        <option value="widget_abuse_alert" >
+                            Widget Abuse — Daily Limit Reached
+                        </option>
+                        
+                        <option value="simulation_complete" >
+                            Simulation Complete
+                        </option>
+                        
+                        <option value="improvement_lab" >
+                            Improvement Lab Complete
+                        </option>
+                        
+                    </select>
+                    <div class="form-text" id="triggerDescription"></div>
+                </div>
+
+                <!-- Schedule Options (visible for scheduled trigger) -->
+                <div id="scheduleOptions" style="display: none;">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="schedule" class="form-label">Frequency</label>
+                            <select class="form-select" id="schedule">
+                                <option value="daily" >Daily</option>
+                                <option value="weekly" >Weekly</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="scheduleTime" class="form-label">Time (UTC)</label>
+                            <input type="time" class="form-control" id="scheduleTime"
+                                value="08:00">
+                        </div>
+                        <div class="col-md-4" id="scheduleDayGroup" style="display: none;">
+                            <label for="scheduleDay" class="form-label">Day of Week</label>
+                            <select class="form-select" id="scheduleDay">
+                                
+                                <option value="monday" >
+                                    Monday
+                                </option>
+                                
+                                <option value="tuesday" >
+                                    Tuesday
+                                </option>
+                                
+                                <option value="wednesday" >
+                                    Wednesday
+                                </option>
+                                
+                                <option value="thursday" >
+                                    Thursday
+                                </option>
+                                
+                                <option value="friday" >
+                                    Friday
+                                </option>
+                                
+                                <option value="saturday" >
+                                    Saturday
+                                </option>
+                                
+                                <option value="sunday" >
+                                    Sunday
+                                </option>
+                                
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Options (visible for simulation_complete trigger) -->
+                
+                <div id="simKindOptions" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Send For</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="simKindSuite" value="suite"
+                                checked>
+                            <label class="form-check-label" for="simKindSuite">Suite runs (one email per suite)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="simKindSingle" value="single"
+                                checked>
+                            <label class="form-check-label" for="simKindSingle">Individual test runs</label>
+                        </div>
+                        <div class="form-text">Individual runs include scheduled tests — a test scheduled hourly sends 24 emails a day. Restrict busy installs to suite runs.</div>
+                    </div>
+                </div>
+
+                <!-- Agent Filter -->
+                <div class="mb-4">
+                    <label class="form-label">Agent Filter</label>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="agentFilter" id="agentFilterAll" value="all"
+                            checked
+                            onchange="toggleAgentSelect()">
+                        <label class="form-check-label" for="agentFilterAll">All Agents</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="agentFilter" id="agentFilterSpecific" value="specific"
+                            
+                            onchange="toggleAgentSelect()">
+                        <label class="form-check-label" for="agentFilterSpecific">Specific Agents</label>
+                    </div>
+                    <div id="agentSelectGroup" style="display: none;">
+                        
+                        <label for="agentIds" class="form-label small text-muted mb-1">Voice Agents</label>
+                        <select class="form-select mb-2" id="agentIds" multiple size="5">
+                            
+                        </select>
+                        <label for="chatAgentIds" class="form-label small text-muted mb-1">Chatbot Agents</label>
+                        <select class="form-select" id="chatAgentIds" multiple size="5">
+                            
+                        </select>
+                        <div class="form-text">Hold Ctrl/Cmd to select multiple agents. Chatbot sessions count as inbound for the Direction Filter.</div>
+                    </div>
+                </div>
+
+                <!-- Direction Filter -->
+                <div class="mb-4" id="directionFilterGroup">
+                    <label for="directionFilter" class="form-label">Direction Filter</label>
+                    <select class="form-select" id="directionFilter">
+                        <option value="all" selected>All Directions</option>
+                        <option value="inbound" >Inbound Only</option>
+                        <option value="outbound" >Outbound Only</option>
+                    </select>
+                </div>
+
+                <!-- Delivery Method -->
+                <div class="mb-4">
+                    <label for="deliveryMethod" class="form-label">Delivery Method</label>
+                    <select class="form-select" id="deliveryMethod" onchange="onDeliveryMethodChange()">
+                        <option value="email" selected>Email</option>
+                        <option value="webhook" >Webhook</option>
+                    </select>
+                </div>
+
+                <div id="emailDeliveryOptions">
+                <!-- Recipients -->
+                <div class="mb-4">
+                    <label for="recipientInput" class="form-label">Recipients</label>
+                    <div class="input-group mb-2">
+                        <input type="email" class="form-control" id="recipientInput" placeholder="email@example.com">
+                        <button class="btn btn-secondary" type="button" onclick="addRecipient()">
+                            <i class="bi bi-plus-lg"></i> Add
+                        </button>
+                    </div>
+                    <div id="recipientTags" class="d-flex flex-wrap gap-2">
+                        
+                    </div>
+                </div>
+
+                <!-- Email Template -->
+                <div class="mb-4">
+                    <label for="emailTemplate" class="form-label">Email Template</label>
+                    <select class="form-select" id="emailTemplate" onchange="updateTemplateSuggestion()">
+                        <option value="">-- Select Template --</option>
+                        
+                        <option value="invoice_monthly" >
+                            System-Invoice: Monthly Invoice (System)
+                        </option>
+                        
+                        <option value="llm_failover_alert" >
+                            System-LLM Auto-Failover Alert (System)
+                        </option>
+                        
+                        <option value="magic_link_signin" >
+                            System-Magic Link Sign-In (System)
+                        </option>
+                        
+                        <option value="password_reset" >
+                            System-Password Reset (System)
+                        </option>
+                        
+                        <option value="report_ai_analysis" >
+                            System-Report: AI Analysis (System)
+                        </option>
+                        
+                        <option value="report_auto_research" >
+                            System-Report: AutoResearch Complete (System)
+                        </option>
+                        
+                        <option value="report_campaign_complete" >
+                            System-Report: Campaign Completion (System)
+                        </option>
+                        
+                        <option value="report_improvement_lab" >
+                            System-Report: Improvement Lab Complete (System)
+                        </option>
+                        
+                        <option value="report_post_call_summary" >
+                            System-Report: Post-Call Summary (System)
+                        </option>
+                        
+                        <option value="report_scheduled_summary" >
+                            System-Report: Scheduled Summary (System)
+                        </option>
+                        
+                        <option value="report_simulation_complete" >
+                            System-Report: Simulation Complete (System)
+                        </option>
+                        
+                        <option value="resource_alert" >
+                            System-Resource High Alert (System)
+                        </option>
+                        
+                        <option value="service_down_alert" >
+                            System-Service Down Alert (System)
+                        </option>
+                        
+                        <option value="test" >
+                            System-Test Email (System)
+                        </option>
+                        
+                        <option value="widget_abuse_alert" >
+                            System-Widget Abuse Alert (System)
+                        </option>
+                        
+                    </select>
+                    <div class="alert alert-warning alert-permanent py-2 px-3 mt-2 mb-0" id="templateMismatchWarning" style="display: none; font-size: 13px;"></div>
+                    <div class="form-text">
+                        Select an email template for this report. Manage templates in
+                        <a href="../settings.html#email">Settings &gt; Email</a>.
+                    </div>
+                </div>
+                </div>
+
+                <!-- Webhook Delivery Options -->
+                <div id="webhookDeliveryOptions" style="display: none;">
+                    <div class="mb-4">
+                        <label for="webhookUrl" class="form-label">Webhook URL</label>
+                        <input type="url" class="form-control" id="webhookUrl" placeholder="https://example.com/webhook"
+                            value="">
+                        <div class="form-text">Report data will be sent as a JSON POST to this URL.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="webhookAuthType" class="form-label">Authentication</label>
+                        <select class="form-select" id="webhookAuthType" onchange="onWebhookAuthChange()">
+                            <option value="none" selected>None</option>
+                            <option value="bearer" >Bearer Token</option>
+                            <option value="basic" >Basic Auth</option>
+                            <option value="api_key_header" >API Key Header</option>
+                        </select>
+                    </div>
+
+                    <!-- Bearer token -->
+                    <div class="mb-4" id="webhookAuthBearer" style="display: none;">
+                        <label for="webhookBearerToken" class="form-label">Bearer Token</label>
+                        <input type="password" class="form-control" id="webhookBearerToken" placeholder="Enter token"
+                            value="">
+                    </div>
+
+                    <!-- Basic auth -->
+                    <div id="webhookAuthBasic" style="display: none;">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="webhookBasicUser" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="webhookBasicUser" placeholder="Username"
+                                    value="">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="webhookBasicPass" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="webhookBasicPass" placeholder="Password"
+                                    value="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API key header -->
+                    <div id="webhookAuthApiKey" style="display: none;">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="webhookApiKeyHeader" class="form-label">Header Name</label>
+                                <input type="text" class="form-control" id="webhookApiKeyHeader" placeholder="X-API-Key"
+                                    value="">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="webhookApiKeyValue" class="form-label">API Key</label>
+                                <input type="password" class="form-control" id="webhookApiKeyValue" placeholder="Enter API key"
+                                    value="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom headers -->
+                    <div class="mb-4">
+                        <label for="webhookCustomHeaders" class="form-label">Custom Headers <span class="text-muted">(optional)</span></label>
+                        <textarea class="form-control" id="webhookCustomHeaders" rows="3" placeholder="Header-Name: value&#10;Another-Header: value"></textarea>
+                        <div class="form-text">One header per line, format: <code>Header-Name: value</code></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variables Reference Panel -->
+            <div class="col-md-4">
+                <div class="card" style="background: var(--bg-tertiary); position: sticky; top: 80px;">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-braces"></i> Available Variables
+                        </h6>
+                    </div>
+                    <div class="card-body" id="variablesPanel" style="max-height: 500px; overflow-y: auto;">
+                        <p class="text-muted small">Select a trigger type to see available template variables.</p>
+                    </div>
+                </div>
+                <div id="postCallExtractionNote" class="alert alert-info mt-2 small" style="display: none;">
+                    <i class="bi bi-info-circle"></i>
+                    Need the agent's <strong>Data Extraction Fields</strong> in this report? Use the
+                    <strong>AI Conversation Analysis</strong> trigger instead — that one fires after the
+                    AI summary completes and exposes the captured fields.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const csrfToken = 'IkxNcTBiS2MyZW5faWotWGdRTUVqOXNDWVZNR05DSW1sVWtmVHZSWjNqeWci.aqgYRg.b7lVHVoS5g1-9TnDhl2dyAHJCkI';
+const reportTypes = {"post_call": {"display_name": "Post-Call Summary", "description": "Sends an email summary after each call ends with call details, transcription, and cost breakdown.", "variables": [{"name": "call_id", "description": "Call identifier"}, {"name": "agent_name", "description": "Agent that handled the call"}, {"name": "caller_number", "description": "Caller's phone number"}, {"name": "called_number", "description": "Dialed number"}, {"name": "direction", "description": "inbound / outbound"}, {"name": "duration", "description": "Formatted duration (e.g. 3m 42s)"}, {"name": "duration_seconds", "description": "Raw duration in seconds"}, {"name": "started_at", "description": "Call start time (formatted)"}, {"name": "ended_at", "description": "Call end time"}, {"name": "end_reason", "description": "How call ended"}, {"name": "turn_count", "description": "Conversation turns"}, {"name": "avg_latency_ms", "description": "Average TTFB in ms"}, {"name": "transcription", "description": "Full transcription text"}, {"name": "tool_calls", "description": "Structured list of tools the agent called \u2014 name, success/error status, result message, and arguments (voice agents only)"}, {"name": "tool_call_http_details", "description": "Adds HTTP status code + request/response bodies to each tool_calls entry; selecting it includes tool_calls automatically (bodies truncated to 4 KB)"}, {"name": "total_cost", "description": "Formatted total cost"}, {"name": "llm_cost", "description": "LLM cost"}, {"name": "stt_cost", "description": "STT cost"}, {"name": "tts_cost", "description": "TTS cost"}, {"name": "sip_cost", "description": "SIP trunk cost"}, {"name": "recording_url", "description": "Link to recording (if available)"}, {"name": "dashboard_link", "description": "Link to call detail page"}, {"name": "logo_url", "description": "Dashboard logo URL"}, {"name": "from_name", "description": "Sender display name"}, {"name": "callback_requested", "description": "True/False - whether a callback was requested for this call"}, {"name": "callback_phone", "description": "Phone number to call back (if callback was requested)"}, {"name": "callback_time", "description": "Preferred callback time or window"}, {"name": "callback_notes", "description": "Notes added for the callback"}]}, "post_analysis": {"display_name": "AI Conversation Analysis", "description": "Sends an email after AI analysis completes with summary, sentiment, intent, and extracted data.", "variables": [{"name": "call_id", "description": "Call identifier"}, {"name": "agent_name", "description": "Agent that handled the call"}, {"name": "caller_number", "description": "Caller's phone number"}, {"name": "called_number", "description": "Dialed number"}, {"name": "direction", "description": "inbound / outbound"}, {"name": "duration", "description": "Formatted duration (e.g. 3m 42s)"}, {"name": "duration_seconds", "description": "Raw duration in seconds"}, {"name": "started_at", "description": "Call start time (formatted)"}, {"name": "ended_at", "description": "Call end time"}, {"name": "end_reason", "description": "How call ended"}, {"name": "turn_count", "description": "Conversation turns"}, {"name": "avg_latency_ms", "description": "Average TTFB in ms"}, {"name": "transcription", "description": "Full transcription text"}, {"name": "tool_calls", "description": "Structured list of tools the agent called \u2014 name, success/error status, result message, and arguments (voice agents only)"}, {"name": "tool_call_http_details", "description": "Adds HTTP status code + request/response bodies to each tool_calls entry; selecting it includes tool_calls automatically (bodies truncated to 4 KB)"}, {"name": "total_cost", "description": "Formatted total cost"}, {"name": "llm_cost", "description": "LLM cost"}, {"name": "stt_cost", "description": "STT cost"}, {"name": "tts_cost", "description": "TTS cost"}, {"name": "sip_cost", "description": "SIP trunk cost"}, {"name": "recording_url", "description": "Link to recording (if available)"}, {"name": "dashboard_link", "description": "Link to call detail page"}, {"name": "logo_url", "description": "Dashboard logo URL"}, {"name": "from_name", "description": "Sender display name"}, {"name": "callback_requested", "description": "True/False - whether a callback was requested for this call"}, {"name": "callback_phone", "description": "Phone number to call back (if callback was requested)"}, {"name": "callback_time", "description": "Preferred callback time or window"}, {"name": "callback_notes", "description": "Notes added for the callback"}, {"name": "summary", "description": "Brief AI summary"}, {"name": "detailed_summary", "description": "Full AI summary"}, {"name": "caller_intent", "description": "What the caller wanted"}, {"name": "sentiment", "description": "Overall sentiment (positive/neutral/negative)"}, {"name": "sentiment_score", "description": "Sentiment score (0-1)"}, {"name": "key_topics", "description": "Comma-separated topics"}, {"name": "outcome", "description": "Call outcome classification"}, {"name": "outcome_details", "description": "Outcome specifics"}, {"name": "action_items", "description": "Follow-up actions needed"}, {"name": "follow_up_needed", "description": "Yes/No"}, {"name": "extracted_name", "description": "Caller name (if detected)"}, {"name": "extracted_email", "description": "Caller email (if detected)"}, {"name": "extracted_phone", "description": "Alternative phone (if detected)"}, {"name": "caller_talk_percent", "description": "Caller talk time %"}, {"name": "agent_talk_percent", "description": "Agent talk time %"}, {"name": "interruption_count", "description": "Total interruptions"}, {"name": "sentiment_trend", "description": "improving/declining/stable"}, {"name": "extracted_data", "description": "All custom Data Extraction Fields configured on the agent (JSON object \u2014 recommended for webhooks)"}, {"name": "extracted_data_html", "description": "Same data formatted as a ready-to-drop HTML block \u2014 use {{extracted_data_html}} in email templates"}]}, "scheduled": {"display_name": "Scheduled Summary", "description": "Sends a daily or weekly digest with aggregate call statistics and cost breakdown.", "variables": [{"name": "period", "description": "Daily / Weekly"}, {"name": "date_range", "description": "Formatted date range"}, {"name": "total_calls", "description": "Call count for period"}, {"name": "total_minutes", "description": "Total minutes"}, {"name": "avg_duration", "description": "Average call duration"}, {"name": "inbound_count", "description": "Inbound calls"}, {"name": "outbound_count", "description": "Outbound calls"}, {"name": "completed_count", "description": "Completed calls"}, {"name": "missed_count", "description": "Missed calls"}, {"name": "total_cost", "description": "Total cost for period"}, {"name": "avg_cost_per_call", "description": "Average cost per call"}, {"name": "top_agents", "description": "HTML table of top agents by call volume"}, {"name": "busiest_hour", "description": "Peak hour"}, {"name": "dashboard_link", "description": "Link to overview page"}, {"name": "logo_url", "description": "Dashboard logo URL"}, {"name": "from_name", "description": "Sender display name"}]}, "campaign_complete": {"display_name": "Campaign Completion Report", "description": "Sends an email report when an outbound campaign finishes, with a per-contact call log and AI call summaries.", "variables": [{"name": "campaign_name", "description": "Name of the campaign"}, {"name": "campaign_id", "description": "Campaign ID (short form)"}, {"name": "agent_name", "description": "Agent used for the campaign"}, {"name": "total_calls", "description": "Total numbers in the campaign"}, {"name": "completed_count", "description": "Successfully completed calls"}, {"name": "failed_count", "description": "Calls that failed to connect"}, {"name": "no_answer_count", "description": "Calls with no answer"}, {"name": "pending_count", "description": "Numbers not called (if cancelled early)"}, {"name": "success_rate", "description": "Percentage completed (e.g. '72%')"}, {"name": "started_at", "description": "Campaign start time (formatted)"}, {"name": "completed_at", "description": "Campaign completion time (formatted)"}, {"name": "duration", "description": "Total campaign wall-clock time"}, {"name": "contacts_table", "description": "Pre-built HTML table with per-contact call results"}, {"name": "dashboard_link", "description": "Link to the campaigns page"}, {"name": "logo_url", "description": "Custom logo URL (standard branding)"}, {"name": "from_name", "description": "Sender display name from email settings"}]}, "auto_research": {"display_name": "AutoResearch Complete", "description": "Sends a report when AutoResearch analysis completes with findings and prompt suggestions.", "variables": [{"name": "agent_name", "description": "Agent that was analyzed"}, {"name": "agent_id", "description": "Agent ID"}, {"name": "run_type", "description": "manual / scheduled"}, {"name": "engine", "description": "opro / dspy"}, {"name": "provider", "description": "LLM provider used"}, {"name": "model", "description": "Model used"}, {"name": "transcript_count", "description": "Number of transcripts analyzed"}, {"name": "overall_score", "description": "Prompt effectiveness score (percentage)"}, {"name": "overall_score_color", "description": "Color code for score (green/orange/red)"}, {"name": "analysis_summary", "description": "Executive summary of findings"}, {"name": "issue_count", "description": "Number of issues found"}, {"name": "issues_html", "description": "Pre-built HTML table of issues with severity coloring"}, {"name": "suggestion_count", "description": "Number of prompt suggestions generated"}, {"name": "suggestions_html", "description": "Pre-built HTML list of suggestion cards"}, {"name": "steps_completed", "description": "Comma-separated completed steps"}, {"name": "created_at", "description": "When the analysis ran"}, {"name": "dashboard_link", "description": "Link to agent editor"}, {"name": "logo_url", "description": "Dashboard logo URL"}, {"name": "from_name", "description": "Sender display name"}]}, "llm_failover": {"display_name": "LLM Auto-Failover Alert", "description": "Sends an alert whenever an agent auto-switches to a backup LLM provider, or fails back to the primary. Useful for knowing about provider outages before they affect call quality.", "variables": [{"name": "agent_name", "description": "Agent whose chain switched"}, {"name": "event_type", "description": "Human-readable switch reason (e.g. 'Switched to backup provider')"}, {"name": "event_type_raw", "description": "Machine-readable event type (switched_to_backup, failed_back_to_primary, switched_to_secondary)"}, {"name": "from_provider", "description": "Provider that was being used before the switch"}, {"name": "to_provider", "description": "Provider now being used for new calls"}, {"name": "reason", "description": "Why the switch fired (e.g. '3 consecutive critical probes')"}, {"name": "health_status", "description": "Current health status of the from-provider at the time of the event (healthy, amber, critical, or quarantined)"}, {"name": "switched_at", "description": "When the switch happened (ISO timestamp)"}, {"name": "recent_p50_ms", "description": "Median response time of the from-provider before the switch"}, {"name": "recent_p90_ms", "description": "p90 response time of the from-provider"}, {"name": "recent_success_pct", "description": "Success rate of recent probes against the from-provider"}, {"name": "dashboard_link", "description": "Link to the agent's editor"}, {"name": "logo_url", "description": "Dashboard logo URL"}, {"name": "from_name", "description": "Sender display name"}]}, "widget_abuse_alert": {"display_name": "Widget Abuse \u2014 Daily Limit Reached", "description": "Sends an alert when a chat-agent widget reaches its configured daily session cap. Fires once per agent per day. Use this to know when a widget has paused for the day \u2014 either normal high traffic or an attacker trying to drain your AI API credits.", "variables": [{"name": "agent_name", "description": "Chat agent that hit its limit"}, {"name": "agent_id", "description": "Chat agent ID"}, {"name": "cap", "description": "The daily session cap value"}, {"name": "hit_at", "description": "Time (UTC) the limit was reached"}, {"name": "dashboard_link", "description": "Link to the chat-agent editor"}, {"name": "logo_url", "description": "Dashboard logo URL"}, {"name": "from_name", "description": "Sender display name"}]}, "simulation_complete": {"display_name": "Simulation Complete", "description": "Sends a report when a simulation suite run or individual test run finishes, with pass/fail results and scores.", "variables": [{"name": "kind", "description": "suite / single"}, {"name": "agent_name", "description": "Agent the simulation ran against"}, {"name": "agent_id", "description": "Agent ID"}, {"name": "status", "description": "Run status (completed/error/interrupted/aborted_balance)"}, {"name": "status_label", "description": "Human status label"}, {"name": "status_color", "description": "Color code for the status banner"}, {"name": "headline_stat", "description": "Status-aware headline (pass rate, verdict, or error)"}, {"name": "started_at", "description": "When the run started (dashboard timezone)"}, {"name": "completed_at", "description": "When the run finished (dashboard timezone)"}, {"name": "is_suite", "description": "Section toggle: non-empty for suite runs"}, {"name": "is_single", "description": "Section toggle: non-empty for individual runs"}, {"name": "suite_name", "description": "Suite name (suite runs)"}, {"name": "test_count", "description": "Number of tests in the suite"}, {"name": "attempts_per_test", "description": "Attempts per test"}, {"name": "total_runs", "description": "Total attempt runs in the suite"}, {"name": "pass_rate", "description": "Suite pass rate (\u2014 when no verdicts)"}, {"name": "avg_score", "description": "Average score across scored attempts"}, {"name": "error_count", "description": "Attempts that errored / were skipped"}, {"name": "tests_table_html", "description": "Pre-built HTML table of per-test results"}, {"name": "test_details_html", "description": "Pre-built per-test detail cards: each attempt's verdict, score, judge feedback, and turn findings"}, {"name": "experiment_line_html", "description": "Pre-built A/B prompt-experiment note (empty when not an experiment)"}, {"name": "test_name", "description": "Test name (individual runs)"}, {"name": "persona", "description": "Caller persona used (individual runs)"}, {"name": "passed_label", "description": "Passed / Failed / Not scored"}, {"name": "passed_color", "description": "Color for the verdict tile"}, {"name": "score", "description": "Judge score (\u2014 when unscored)"}, {"name": "duration", "description": "Run duration"}, {"name": "turn_count", "description": "Conversation turns"}, {"name": "evaluation_summary", "description": "Judge feedback"}, {"name": "turn_findings_html", "description": "Pre-built turn-by-turn judge findings list (empty when none)"}, {"name": "transcript_section_html", "description": "Pre-built full transcript block (size-capped)"}, {"name": "dashboard_link", "description": "Link to the Simulation page"}, {"name": "logo_url", "description": "Dashboard logo URL"}, {"name": "from_name", "description": "Sender display name"}]}, "improvement_lab": {"display_name": "Improvement Lab Complete", "description": "Sends a report when an Improvement Lab replay run finishes (or fails), with per-variant transcription accuracy results.", "variables": [{"name": "run_id", "description": "Lab run ID"}, {"name": "status", "description": "Run status (done/error/aborted/interrupted)"}, {"name": "status_label", "description": "Human status label"}, {"name": "status_color", "description": "Color code for the status banner"}, {"name": "call_id", "description": "Source call the replay used"}, {"name": "agent_name", "description": "Agent the source call belonged to"}, {"name": "variant_count", "description": "Number of variants tested"}, {"name": "reference_line", "description": "Reference transcription provider/model"}, {"name": "best_variant", "description": "Winning variant (lowest WER; \u2014 when none scored)"}, {"name": "best_wer", "description": "The winning variant's WER"}, {"name": "best_wer_metric", "description": "Which WER metric ranked the winner (caller-only or full)"}, {"name": "variants_table_html", "description": "Pre-built HTML table of every variant's results"}, {"name": "variant_details_html", "description": "Pre-built per-variant detail: misheard words and transcript excerpts"}, {"name": "error_block_html", "description": "Pre-built error block (empty on success)"}, {"name": "started_at", "description": "When the run started (dashboard timezone)"}, {"name": "finished_at", "description": "When the run finished (dashboard timezone)"}, {"name": "duration", "description": "Run duration"}, {"name": "dashboard_link", "description": "Link to the Improvement Lab"}, {"name": "logo_url", "description": "Dashboard logo URL"}, {"name": "from_name", "description": "Sender display name"}]}};
+const existingReport = null;
+const isEdit = false;
+
+function onTriggerTypeChange() {
+    const type = document.getElementById('triggerType').value;
+    const info = reportTypes[type];
+
+    // Update description
+    document.getElementById('triggerDescription').textContent = info ? info.description : '';
+
+    // Toggle schedule options
+    document.getElementById('scheduleOptions').style.display = type === 'scheduled' ? '' : 'none';
+
+    // Toggle simulation run-kind options
+    const simKindOptions = document.getElementById('simKindOptions');
+    if (simKindOptions) {
+        simKindOptions.style.display = type === 'simulation_complete' ? '' : 'none';
+    }
+
+    // Toggle direction filter (only meaningful for call-scoped triggers)
+    document.getElementById('directionFilterGroup').style.display =
+        (type === 'scheduled' || type === 'campaign_complete' ||
+         type === 'simulation_complete' || type === 'improvement_lab') ? 'none' : '';
+
+    // Suggest the matching system email template for this trigger
+    updateTemplateSuggestion(type);
+
+    // Update variables panel
+    updateVariablesPanel(type);
+
+    // Toggle the post_call extraction-data hint
+    const extractionNote = document.getElementById('postCallExtractionNote');
+    if (extractionNote) {
+        extractionNote.style.display = (type === 'post_call') ? '' : 'none';
+    }
+
+    // Toggle weekly day selector
+    onScheduleChange();
+}
+
+// The system report template built for each trigger type (ids predate a
+// naming convention — keep this map in step with SYSTEM_TEMPLATES).
+const systemTemplateByTrigger = {
+    post_call: 'report_post_call_summary',
+    post_analysis: 'report_ai_analysis',
+    scheduled: 'report_scheduled_summary',
+    campaign_complete: 'report_campaign_complete',
+    auto_research: 'report_auto_research',
+    simulation_complete: 'report_simulation_complete',
+    improvement_lab: 'report_improvement_lab',
+};
+
+function updateTemplateSuggestion(type) {
+    // Soft trigger↔template guard: a rule pointed at a DIFFERENT trigger's
+    // system template renders raw placeholders — warn (never block), and
+    // auto-fill the matching template when none is chosen yet.
+    const select = document.getElementById('emailTemplate');
+    const warning = document.getElementById('templateMismatchWarning');
+    if (!select || !warning) return;
+    const triggerType = type || document.getElementById('triggerType').value;
+    const expectedId = systemTemplateByTrigger[triggerType] || '';
+    const hasOption = (id) => Array.from(select.options).some(o => o.value === id);
+
+    // Auto-select only when nothing is chosen — never clobber a saved choice.
+    if (!select.value && expectedId && hasOption(expectedId)) {
+        select.value = expectedId;
+    }
+
+    const value = select.value;
+    const knownSystemIds = Object.values(systemTemplateByTrigger);
+    if (value && knownSystemIds.includes(value) && value !== expectedId) {
+        const chosen = select.options[select.selectedIndex].text.trim();
+        warning.textContent = '"' + chosen + '" is built for a different trigger — its placeholders won\'t match this report\'s data.' +
+            (expectedId && hasOption(expectedId) ? ' Expected: ' + Array.from(select.options).find(o => o.value === expectedId).text.trim() : '');
+        warning.style.display = '';
+    } else {
+        warning.style.display = 'none';
+    }
+}
+
+function onScheduleChange() {
+    const schedule = document.getElementById('schedule').value;
+    document.getElementById('scheduleDayGroup').style.display = schedule === 'weekly' ? '' : 'none';
+}
+
+document.getElementById('schedule').addEventListener('change', onScheduleChange);
+
+function updateVariablesPanel(type) {
+    const panel = document.getElementById('variablesPanel');
+    const info = reportTypes[type];
+    const isWebhook = document.getElementById('deliveryMethod').value === 'webhook';
+
+    // Update panel header
+    const headerEl = document.querySelector('#variablesPanel').closest('.card').querySelector('.card-title');
+    if (headerEl) {
+        headerEl.innerHTML = isWebhook
+            ? '<i class="bi bi-check2-square"></i> Webhook Fields'
+            : '<i class="bi bi-braces"></i> Available Variables';
+    }
+
+    if (!info || !info.variables || info.variables.length === 0) {
+        panel.innerHTML = '<p class="text-muted small">No variables available.</p>';
+        return;
+    }
+
+    // Determine which fields are currently selected
+    const savedFields = (existingReport && existingReport.webhook_fields) ? existingReport.webhook_fields : [];
+    const allSelected = savedFields.length === 0; // empty = all selected
+
+    if (isWebhook) {
+        let html = '<div class="d-flex justify-content-between align-items-center mb-2">' +
+            '<small class="text-muted">Select fields to include in webhook payload</small>' +
+            '<a href="editor.html#" class="small" onclick="toggleAllWebhookFields(event)">Select All</a>' +
+            '</div>';
+        html += '<div class="list-group list-group-flush">';
+        for (const v of info.variables) {
+            if (v.name === 'logo_url' || v.name === 'from_name' || v.name === 'extracted_data_html') continue;
+            const checked = allSelected || savedFields.includes(v.name) ? 'checked' : '';
+            html += '<div class="list-group-item px-0 py-1" style="background: transparent; border-color: var(--border-color);">' +
+                '<div class="form-check">' +
+                '<input class="form-check-input" type="checkbox" value="' + v.name + '" id="wf_' + v.name + '" ' + checked + '>' +
+                '<label class="form-check-label" for="wf_' + v.name + '" style="font-size: 0.85em;">' +
+                '<code style="color: var(--brand-primary); font-size: 0.9em;">' + v.name + '</code>' +
+                '<div class="text-muted" style="font-size: 0.75em;">' + v.description + '</div>' +
+                '</label>' +
+                '</div>' +
+                '</div>';
+        }
+        html += '</div>';
+        panel.innerHTML = html;
+    } else {
+        let html = '<div class="list-group list-group-flush">';
+        for (const v of info.variables) {
+            // tool_calls / tool_call_http_details are webhook-only structured fields —
+            // they have no Jinja2 template value, so don't list them as email variables.
+            if (v.name === 'tool_calls' || v.name === 'tool_call_http_details') continue;
+            html += '<div class="list-group-item px-0 py-1" style="background: transparent; border-color: var(--border-color);">' +
+                '<code style="color: var(--brand-primary); font-size: 0.8em;">' + '&#123;&#123;' + v.name + '&#125;&#125;' + '</code>' +
+                '<div class="text-muted" style="font-size: 0.75em;">' + v.description + '</div>' +
+            '</div>';
+        }
+        html += '</div>';
+        panel.innerHTML = html;
+    }
+}
+
+function toggleAllWebhookFields(e) {
+    e.preventDefault();
+    const checkboxes = document.querySelectorAll('#variablesPanel .form-check-input');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+    e.target.textContent = allChecked ? 'Select All' : 'Deselect All';
+}
+
+function getSelectedWebhookFields() {
+    const checkboxes = document.querySelectorAll('#variablesPanel .form-check-input:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+function toggleAgentSelect() {
+    const specific = document.getElementById('agentFilterSpecific').checked;
+    document.getElementById('agentSelectGroup').style.display = specific ? '' : 'none';
+}
+
+function addRecipient() {
+    const input = document.getElementById('recipientInput');
+    const email = input.value.trim();
+    if (!email || !email.includes('@')) return;
+
+    // Check for duplicate
+    const existing = document.querySelectorAll('#recipientTags [data-email]');
+    for (const el of existing) {
+        if (el.dataset.email === email) return;
+    }
+
+    const tag = document.createElement('span');
+    tag.className = 'badge bg-secondary d-flex align-items-center gap-1';
+    tag.dataset.email = email;
+    tag.innerHTML = email + ' <button type="button" class="btn-close btn-close-white" style="font-size: 0.6em;" onclick="removeRecipient(this)"></button>';
+    document.getElementById('recipientTags').appendChild(tag);
+    input.value = '';
+}
+
+document.getElementById('recipientInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addRecipient(); }
+});
+
+function removeRecipient(btn) {
+    btn.parentElement.remove();
+}
+
+function onDeliveryMethodChange() {
+    const method = document.getElementById('deliveryMethod').value;
+    document.getElementById('emailDeliveryOptions').style.display = method === 'email' ? '' : 'none';
+    document.getElementById('webhookDeliveryOptions').style.display = method === 'webhook' ? '' : 'none';
+    // Re-render variables panel to switch between read-only and checkbox mode
+    const triggerType = document.getElementById('triggerType').value;
+    updateVariablesPanel(triggerType);
+}
+
+function onWebhookAuthChange() {
+    const authType = document.getElementById('webhookAuthType').value;
+    document.getElementById('webhookAuthBearer').style.display = authType === 'bearer' ? '' : 'none';
+    document.getElementById('webhookAuthBasic').style.display = authType === 'basic' ? '' : 'none';
+    document.getElementById('webhookAuthApiKey').style.display = authType === 'api_key_header' ? '' : 'none';
+}
+
+function parseCustomHeaders() {
+    const text = document.getElementById('webhookCustomHeaders').value.trim();
+    if (!text) return {};
+    const headers = {};
+    for (const line of text.split('\n')) {
+        const idx = line.indexOf(':');
+        if (idx > 0) {
+            const key = line.substring(0, idx).trim();
+            const val = line.substring(idx + 1).trim();
+            if (key) headers[key] = val;
+        }
+    }
+    return headers;
+}
+
+function getWebhookAuthConfig() {
+    const authType = document.getElementById('webhookAuthType').value;
+    if (authType === 'bearer') {
+        return { token: document.getElementById('webhookBearerToken').value };
+    } else if (authType === 'basic') {
+        return {
+            username: document.getElementById('webhookBasicUser').value,
+            password: document.getElementById('webhookBasicPass').value,
+        };
+    } else if (authType === 'api_key_header') {
+        return {
+            header_name: document.getElementById('webhookApiKeyHeader').value || 'X-API-Key',
+            token: document.getElementById('webhookApiKeyValue').value,
+        };
+    }
+    return {};
+}
+
+function getRecipients() {
+    const tags = document.querySelectorAll('#recipientTags [data-email]');
+    return Array.from(tags).map(t => t.dataset.email);
+}
+
+function saveReport() {
+    const name = document.getElementById('reportName').value.trim();
+    if (!name) { alert('Please enter a report name'); return; }
+
+    const deliveryMethod = document.getElementById('deliveryMethod').value;
+
+    let recipients = [];
+    let templateId = '';
+
+    if (deliveryMethod === 'email') {
+        recipients = getRecipients();
+        if (recipients.length === 0) { alert('Please add at least one recipient'); return; }
+        templateId = document.getElementById('emailTemplate').value;
+        if (!templateId) { alert('Please select an email template'); return; }
+    } else if (deliveryMethod === 'webhook') {
+        const webhookUrl = document.getElementById('webhookUrl').value.trim();
+        if (!webhookUrl) { alert('Please enter a webhook URL'); return; }
+        if (!webhookUrl.startsWith('http://') && !webhookUrl.startsWith('https://')) {
+            alert('Webhook URL must start with http:// or https://'); return;
+        }
+    }
+
+    const triggerType = document.getElementById('triggerType').value;
+    const trigger = { type: triggerType };
+
+    if (triggerType === 'scheduled') {
+        trigger.schedule = document.getElementById('schedule').value;
+        trigger.schedule_time = document.getElementById('scheduleTime').value || '08:00';
+        if (trigger.schedule === 'weekly') {
+            trigger.schedule_day = document.getElementById('scheduleDay').value;
+        }
+    }
+
+    if (triggerType === 'simulation_complete') {
+        // Lives INSIDE trigger — the save API whitelists top-level fields but
+        // passes the trigger object through whole.
+        const kinds = [];
+        if (document.getElementById('simKindSuite').checked) kinds.push('suite');
+        if (document.getElementById('simKindSingle').checked) kinds.push('single');
+        if (kinds.length === 0) {
+            alert('Select at least one simulation run type (suite runs or individual runs)');
+            return;
+        }
+        trigger.sim_run_kinds = kinds;
+    }
+
+    const agentFilterMode = document.querySelector('input[name="agentFilter"]:checked').value;
+    const agentFilter = { mode: agentFilterMode, agent_ids: [] };
+    if (agentFilterMode === 'specific') {
+        const voiceSel = document.getElementById('agentIds');
+        const chatSel = document.getElementById('chatAgentIds');
+        agentFilter.agent_ids = [...new Set([
+            ...Array.from(voiceSel.selectedOptions).map(o => o.value),
+            ...(chatSel ? Array.from(chatSel.selectedOptions).map(o => o.value) : []),
+        ])];
+    }
+
+    const directionFilter = document.getElementById('directionFilter').value;
+
+    const payload = {
+        name: name,
+        enabled: existingReport ? existingReport.enabled : true,
+        trigger: trigger,
+        agent_filter: agentFilter,
+        direction_filter: directionFilter,
+        delivery_method: deliveryMethod,
+        recipients: recipients,
+        email_template_id: templateId,
+    };
+
+    if (deliveryMethod === 'webhook') {
+        payload.webhook_url = document.getElementById('webhookUrl').value.trim();
+        payload.webhook_auth_type = document.getElementById('webhookAuthType').value;
+        payload.webhook_auth_config = getWebhookAuthConfig();
+        payload.webhook_headers = parseCustomHeaders();
+        payload.webhook_fields = getSelectedWebhookFields();
+    }
+
+    const url = isEdit ? '/api/reports/' + existingReport.id : '/api/reports';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken},
+        body: JSON.stringify(payload),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/reports';
+        } else {
+            alert('Error: ' + (data.error || data.detail || 'Failed to save report'));
+        }
+    })
+    .catch(() => alert('Network error'));
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+    onTriggerTypeChange();
+    toggleAgentSelect();
+    onDeliveryMethodChange();
+    onWebhookAuthChange();
+});
+</script>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IkxNcTBiS2MyZW5faWotWGdRTUVqOXNDWVZNR05DSW1sVWtmVHZSWjNqeWci.aqgYRg.b7lVHVoS5g1-9TnDhl2dyAHJCkI">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Automated Reports
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Configure email reports that send automatically based on triggers like call completion, AI analysis, or on a daily/weekly schedule.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Report Types
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Post-Call Summary</strong></td>
+                                        <td>Sends an email after each call ends with call details, transcription, and cost breakdown</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>AI Conversation Analysis</strong></td>
+                                        <td>Sends after AI analysis completes with summary, sentiment, intent, and extracted data</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Scheduled Summary</strong></td>
+                                        <td>Sends a daily or weekly digest with aggregate call statistics and cost breakdown</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>AutoResearch Complete</strong></td>
+                                        <td>Sends when an AutoResearch analysis finishes, with the score, issues found, and prompt suggestions</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Simulation Complete</strong></td>
+                                        <td>Sends when a simulation suite run or individual test finishes, with pass/fail results and scores. Covers scheduled tests and crash-interrupted runs; runs you cancel yourself stay silent. Choose whether the rule covers suite runs, individual runs, or both — a test scheduled hourly emails every hour if individual runs are on</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Improvement Lab Complete</strong></td>
+                                        <td>Sends when a Lab replay run finishes or fails, with each variant&#39;s word-error-rate results and the winning variant. Failed and interrupted runs email too, so a scheduled overnight run can&#39;t die silently — runs you abort yourself stay quiet</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Configuration
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Agent Filter</strong></td>
+                                        <td>Choose &#39;All Agents&#39; or select specific voice and/or chatbot agents to report on. Chatbot sessions count as inbound for the Direction Filter</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Direction Filter</strong></td>
+                                        <td>Filter by inbound, outbound, or all call directions</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Recipients</strong></td>
+                                        <td>Email addresses that will receive the report</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Email Template</strong></td>
+                                        <td>Select which email template to use — customise templates in Settings &gt; Email</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> How It Works
+                        </h6>
+                        
+                        <p class="text-muted">When a call ends or AI analysis completes, the agent worker pushes an event to a Redis queue. The report engine background task polls the queue every 30 seconds, matches events against your report rules, and sends emails to the configured recipients. Scheduled reports check their target time and run when due.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Requirements
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Email Configuration</strong></td>
+                                        <td>Email must be configured in Settings &gt; Email (SMTP or AWS SES) before reports can send</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Dashboard URL</strong></td>
+                                        <td>Set the Dashboard Public URL in Settings for links in emails to work correctly</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> n8n Failsafe Wizard
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>What it does</strong></td>
+                                        <td>Builds a lost-lead safety net: if a caller hangs up before their booking or enquiry is completed, an n8n workflow emails your team the caller&#39;s details for a callback. If the booking/cancellation tool ran successfully, or the caller was transferred to a person, nothing is sent. The wizard creates the report rule (webhook delivery pre-configured) AND a matching n8n workflow file you download and import</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Failsafe (tool check)</strong></td>
+                                        <td>Rule-based: you tick which tools count as &#39;handled&#39;. Alerts only when none of them completed SUCCESSFULLY — a tool that ran but failed still alerts. Optional AI step extracts the caller&#39;s name, spoken number and request from the transcript into the email</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Failsafe (AI classify)</strong></td>
+                                        <td>An AI reads each missed call and decides whether the request was completed before emailing. When in doubt it emails. Needs an OpenRouter credential in n8n</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>After creating</strong></td>
+                                        <td>The report is enabled immediately, so history shows failed rows until you import and ACTIVATE the workflow in n8n — that&#39;s expected. Alerts arrive ~1-2 minutes after a call ends. Use Send test event on the finish page, then check n8n → Executions</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Changing things later</strong></td>
+                                        <td>Recipients: edit the Config node in n8n directly. Security key: edit the report&#39;s API Key, save, re-download (JSON button on the report row) and re-import. Tools/keywords/thresholds: re-run the wizard, then delete the old report and deactivate the old workflow or you&#39;ll get duplicate alerts. Don&#39;t change the report&#39;s webhook field list — the workflow reads exactly those fields</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Privacy</strong></td>
+                                        <td>With AI extraction on, the call transcript is sent to OpenRouter through your own n8n credential. The downloaded file embeds the report&#39;s security key — treat it as confidential</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

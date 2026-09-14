@@ -1,0 +1,285 @@
+# Setup SIP Trunks with Twilio
+
+A step-by-step guide for configuring Twilio Elastic SIP Trunking to work with your LiveKit Voice AI Dashboard.
+
+---
+
+## Prerequisites
+
+- A Twilio Account
+- A purchased phone number in Twilio
+- Access to your LiveKit Dashboard
+- Your LiveKit Server's Public IP Address
+
+---
+
+## Part 1: Twilio Console Configuration
+
+### Step 1: Create an Elastic SIP Trunk
+
+1. Log in to the [Twilio Console](https://console.twilio.com)
+2. Navigate to **Elastic SIP Trunking** → **Trunks**
+   - If you can't find this, search for "Elastic SIP Trunking" in the top bar
+3. Click **Create new SIP Trunk**
+4. Give it a **Friendly Name** (e.g., `LiveKit Trunk`) and click **Create**
+
+### Step 2: Configure General Settings (Crucial for Audio)
+
+This ensures audio routes correctly to your cloud-hosted LiveKit server.
+
+1. You should be on the **General settings** page of your new trunk
+2. Scroll down to **General Settings** → **Symmetric RTP**
+3. Change **Symmetric RTP** to **Enabled**
+
+> **Important:** This ensures Twilio sends audio back to the correct IP address, preventing one-way audio issues.
+
+4. Ensure the following are **Disabled**:
+
+| Setting | Value |
+|---------|-------|
+| **Call Recording** | Disabled |
+| **Secure Trunking** | Disabled |
+| **Call Transfer (SIP REFER)** | Disabled |
+
+5. Click **Save** at the bottom
+
+### Step 3: Configure Termination (For Outbound Calls)
+
+This allows your LiveKit agent to place outbound calls through Twilio.
+
+1. Select **Termination** from the left menu
+2. **Termination SIP URI**: Enter a unique domain name (e.g., `your-company-livekit`)
+   - The full address will be `your-company-livekit.pstn.twilio.com`
+
+> **Note:** You will also see a list of **Localized SIP Domain URIs** on this page (e.g., `...pstn.sydney.twilio.com`). See the Reference section for regional endpoints.
+
+3. **Authentication** - IP Access Control Lists:
+   - Locate **IP Access Control Lists**
+   - Click **(+)** and create a list named `LiveKit Server IP`
+   - Enter your **LiveKit Server's Public IP Address**
+   - Ensure this list is selected/checked
+   - *(Optional: You can also add a Credential List here if you want to test with a softphone)*
+
+4. Click **Save**
+
+### Step 4: Configure Origination (For Inbound Calls)
+
+This routes calls coming into your Twilio number to your LiveKit server.
+
+1. Select **Origination** from the left menu
+2. **Origination URIs**: Click **Add new Origination URI**
+
+| Field | Value |
+|-------|-------|
+| **Origination SIP URI** | `sip:your-livekit-server.com` (your LiveKit server FQDN) |
+| **Priority** | `10` |
+| **Weight** | `10` |
+
+3. Click **Add**
+
+4. Configure additional settings:
+
+| Setting | Value |
+|---------|-------|
+| **CNAM Lookup** | Off (Disabled) |
+| **Disaster Recovery URL** | Leave Blank |
+
+5. Click **Save**
+
+### Step 5: Assign Numbers
+
+1. Select **Numbers** from the left menu
+2. Click **Add a Number**
+3. Select the phone number you purchased earlier to assign it to this trunk
+
+---
+
+## Part 2: LiveKit Dashboard Configuration
+
+### Step 6: Create Inbound SIP Trunk
+
+1. Log into your LiveKit Dashboard
+2. Navigate to **Telephony** → **Inbound Trunks**
+3. Click **+ Create Trunk**
+4. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Twilio Inbound` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Numbers** | Your Twilio number without the + (e.g., `61485008007`) |
+| **Allowed Addresses** | Paste the Twilio signaling IPs below |
+| **Username** | Leave empty |
+| **Password** | Leave empty |
+
+**Twilio Signaling IPs to whitelist:**
+
+These CIDR ranges cover all the individual IPs listed in Twilio's documentation:
+
+```
+54.172.60.0/30, 54.244.51.0/30, 54.171.127.192/30, 35.156.191.128/30, 54.65.63.192/30, 54.169.127.128/30, 54.252.254.64/30, 177.71.206.192/30
+```
+
+5. Click **Create**
+
+> **Important - Firewall Configuration:**
+> You must also allow these Twilio IP ranges in your cloud provider's firewall (AWS Security Groups, GCP Firewall Rules, etc.) for **both TCP and UDP on port 5060**. If your firewall blocks Twilio's IPs, calls will not reach your LiveKit server even if the LiveKit trunk configuration is correct.
+
+### Step 7: Create Dispatch Rule
+
+1. Navigate to **Telephony** → **Dispatch Rules**
+2. Click **+ Create Rule**
+3. Configure the rule:
+
+| Field | Value |
+|-------|-------|
+| **Trunk IDs** | Select `Twilio Inbound` |
+| **Dispatch Rule Type** | Choose based on your needs |
+| **Room Name** | `support-room` (or your target room) |
+| **Agent Name** | Select your AI Agent |
+
+4. Click **Create**
+
+### Step 8: Create Outbound SIP Trunk
+
+1. Navigate to **Telephony** → **Outbound Trunks**
+2. Click **Create new trunk**
+3. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Twilio Outbound` |
+| **Address** | `your-company-livekit.pstn.sydney.twilio.com` (see Reference for other regions) |
+| **Transport** | `UDP` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Username** | Leave Empty (Using IP Auth) |
+| **Password** | Leave Empty (Using IP Auth) |
+| **Numbers** | Your Twilio number without the + (e.g., `61485008007`) |
+
+> **Important - Choosing the Right Region:**
+> - Replace `your-company-livekit` with the Termination SIP URI you created in Step 3
+> - **You MUST include a region in the address** (e.g., `.pstn.sydney.twilio.com` not `.pstn.twilio.com`)
+> - Choose the region closest to your **LiveKit server location** for lowest latency
+> - For example: If your server is in AWS Sydney, use `sydney`. If in US East, use `ashburn`
+> - See the Reference section below for all available regions
+
+4. Click **Create**
+
+---
+
+## Part 3: Verification
+
+### Step 9: Test Inbound
+
+1. Call your Twilio number from a mobile phone or external line
+2. Check the **Rooms** page in the dashboard
+3. You should see a new room created when the call connects
+
+**If it fails:**
+- Verify **Allowed Addresses** are correct (Step 6)
+- Check that your Twilio number is assigned to the trunk (Step 5)
+- Ensure the Origination URI points to your LiveKit server (Step 4)
+
+### Step 10: Test Outbound
+
+1. Go to **Telephony** → **Outbound Trunks**
+2. Click **Create Outbound Call** (or use the Sandbox)
+3. Enter a destination number and call
+4. Verify caller ID displays correctly and audio works both ways
+
+---
+
+## Reference: Localized SIP Domain URIs
+
+**Choosing the right region is critical for call quality and latency.** Select the Twilio region closest to where your LiveKit server is hosted:
+
+- **Server in Australia** → Use `sydney`
+- **Server in US East (Virginia)** → Use `ashburn`
+- **Server in US West (Oregon)** → Use `umatilla`
+- **Server in Europe (Ireland)** → Use `dublin`
+- **Server in Europe (Germany)** → Use `frankfurt`
+- **Server in Asia (Japan)** → Use `tokyo`
+- **Server in Asia (Singapore)** → Use `singapore`
+- **Server in South America** → Use `sao-paulo`
+
+Replace `your-company-livekit` with your actual Termination SIP URI from Step 3:
+
+| Region | Localized SIP URI |
+|--------|-------------------|
+| **Asia Pacific Sydney** | `your-company-livekit.pstn.sydney.twilio.com` |
+| **North America Virginia** | `your-company-livekit.pstn.ashburn.twilio.com` |
+| **North America Oregon** | `your-company-livekit.pstn.umatilla.twilio.com` |
+| **Europe Dublin** | `your-company-livekit.pstn.dublin.twilio.com` |
+| **Europe Frankfurt** | `your-company-livekit.pstn.frankfurt.twilio.com` |
+| **Asia Pacific Tokyo** | `your-company-livekit.pstn.tokyo.twilio.com` |
+| **Asia Pacific Singapore** | `your-company-livekit.pstn.singapore.twilio.com` |
+| **South America Sao Paulo** | `your-company-livekit.pstn.sao-paulo.twilio.com` |
+
+> **Warning:** Do not omit the region from the address. Using `your-company-livekit.pstn.twilio.com` (without a region) will fail with a DNS resolution error.
+
+---
+
+## Troubleshooting Checklist
+
+| Issue | Check |
+|-------|-------|
+| Calls not arriving | Verify Origination SIP URI points to your LiveKit server |
+| "Trunk not found" | Ensure **Allowed Addresses** includes Twilio signaling IPs |
+| 407 Unauthorized | Remove Username/Password from inbound trunk (use IP auth instead) |
+| One-way audio | Verify **Symmetric RTP** is enabled in Twilio (Step 2) |
+| No room created | Check dispatch rule is linked to correct trunk ID |
+| Firewall blocked | Ensure TCP/UDP port 5060 is open for Twilio IPs in your cloud provider firewall (AWS Security Groups, GCP Firewall, etc.) |
+| Outbound calls failing | Verify your server IP is in the Termination IP Access Control List |
+| DNS resolution error / "no such host" | Ensure the Address includes a region (e.g., `.pstn.sydney.twilio.com` not `.pstn.twilio.com`). Check for typos like double dots (`..`) |
+| Wrong caller ID | Check **Numbers** field in outbound trunk configuration |
+
+---
+
+## Quick Reference: Configuration Summary
+
+**Twilio Side:**
+```
+Elastic SIP Trunk: LiveKit Trunk
+
+General Settings:
+  → Symmetric RTP: Enabled
+  → Call Recording: Disabled
+  → Secure Trunking: Disabled
+  → Call Transfer: Disabled
+
+Termination (Outbound):
+  → SIP URI: your-company-livekit.pstn.twilio.com
+  → IP ACL: Your LiveKit Server IP
+
+Origination (Inbound):
+  → SIP URI: sip:your-livekit-server.com
+  → Priority: 10, Weight: 10
+
+Numbers:
+  → Your purchased Twilio number assigned to trunk
+```
+
+**LiveKit Side:**
+```
+Inbound Trunk:
+  → Name: Twilio Inbound
+  → Number Format: +E.164 (WITH +)
+  → Numbers: Your Twilio number (without +)
+  → Allowed Addresses: Twilio signaling IPs
+
+Dispatch Rule:
+  → Linked to: Twilio Inbound trunk
+  → Type: Direct/Individual/Multi-Line (your choice)
+  → Agent: Your AI agent
+
+Outbound Trunk:
+  → Name: Twilio Outbound
+  → Address: your-company-livekit.pstn.sydney.twilio.com
+  → Transport: UDP
+  → Number Format: +E.164 (WITH +)
+  → Numbers: Your Twilio number (without +)
+```
+
+---
+
+This guide covers the complete end-to-end setup for both inbound and outbound calls via Twilio Elastic SIP Trunking with your LiveKit Voice AI Dashboard.

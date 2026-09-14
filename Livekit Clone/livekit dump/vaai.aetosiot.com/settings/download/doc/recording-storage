@@ -1,0 +1,241 @@
+# Troubleshooting: Local Recording Storage Not Working
+
+## Symptom
+
+Call recordings are not appearing in the dashboard when using local storage. The egress logs show recordings completing successfully:
+
+```
+INFO egress source/web.go:324 chrome: START_RECORDING
+INFO egress pipeline/watch.go:251 pipeline playing
+INFO egress source/web.go:328 chrome: END_RECORDING
+INFO egress pipeline/watch.go:115 pipeline received EOS
+```
+
+But no recordings appear in the Recordings section of the dashboard.
+
+---
+
+## Root Cause
+
+The LiveKit Egress container is missing the required **Docker volume mount** that maps the container's output directory to the host filesystem where the dashboard expects to find recordings.
+
+### How Recording Storage Works
+
+1. **Egress container** writes recordings to `/out/` (inside the container)
+2. **Docker volume mount** maps `/out/` (container) to the host directory
+3. **Dashboard** reads recordings from the path configured in `RECORDING_PATH` environment variable (defaults to `/var/livekit/egress`)
+
+**Important:** The `RECORDING_PATH` in the dashboard's `.env` file must match the host path used in the Docker volume mount.
+
+Without the volume mount, recordings are written inside the container's filesystem and are:
+- Inaccessible to the dashboard
+- Lost when the container restarts
+
+---
+
+## Diagnosis
+
+### Step 1: Check if the egress directory exists
+
+```bash
+ls -la /var/livekit/egress/
+```
+
+**Expected:** Directory exists (may be empty or contain `.mp4` files)
+
+**If missing:** The directory was never created during installation.
+
+### Step 2: Check the Docker volume mount
+
+```bash
+docker inspect livekit-egress | grep -A15 '"Mounts"'
+```
+
+**Expected output:**
+```json
+"Mounts": [
+    {
+        "Type": "bind",
+        "Source": "/var/livekit/egress",
+        "Destination": "/out",
+        "RW": true
+    }
+]
+```
+
+**If the `/var/livekit/egress:/out` mount is missing**, this is the problem.
+
+### Step 3: Check the egress configuration
+
+```bash
+cat /etc/livekit-egress/config.yaml
+```
+
+**Should contain:**
+```yaml
+file_output:
+  local: true
+  output_directory: /out
+```
+
+---
+
+## Solution
+
+### Step 1: Create the egress directory
+
+```bash
+sudo mkdir -p /var/livekit/egress
+sudo chmod 777 /var/livekit/egress
+```
+
+### Step 2: Stop and remove the existing egress container
+
+```bash
+docker stop livekit-egress
+docker rm livekit-egress
+```
+
+### Step 3: Start the egress container with the correct volume mount
+
+```bash
+docker run -d \
+  --name livekit-egress \
+  --network host \
+  --restart unless-stopped \
+  -v /etc/livekit-egress/config.yaml:/config.yaml:ro \
+  -v /var/livekit/egress:/out \
+  -e EGRESS_CONFIG_FILE=/config.yaml \
+  livekit/egress:latest
+```
+
+**Critical:** The `-v /var/livekit/egress:/out` mount is required for local recording storage to work.
+
+### Step 4: Verify the fix
+
+```bash
+# Check the container is running
+docker ps | grep livekit-egress
+
+# Check the mount is correct
+docker inspect livekit-egress | grep -A5 '"Mounts"'
+
+# Make a test recording and verify it appears
+ls -la /var/livekit/egress/
+```
+
+---
+
+## Prevention: Installation Requirements
+
+When installing LiveKit with the dashboard, the following must be configured:
+
+### 1. Create the egress directory
+
+```bash
+sudo mkdir -p /var/livekit/egress
+sudo chmod 777 /var/livekit/egress
+```
+
+### 2. Egress configuration file (`/etc/livekit-egress/config.yaml`)
+
+```yaml
+# Egress configuration
+log_level: info
+
+# LiveKit connection
+api_key: YOUR_API_KEY
+api_secret: YOUR_API_SECRET
+ws_url: wss://your-livekit-server.com
+
+# Redis connection
+redis:
+  address: 127.0.0.1:6379
+  password: YOUR_REDIS_PASSWORD
+  db: 0
+
+# Health check port
+health_port: 8080
+
+# Template port
+template_port: 7980
+
+# File output configuration - REQUIRED FOR LOCAL STORAGE
+file_output:
+  local: true
+  output_directory: /out
+```
+
+### 3. Docker run command must include the volume mount
+
+```bash
+docker run -d \
+  --name livekit-egress \
+  --network host \
+  --restart unless-stopped \
+  -v /etc/livekit-egress/config.yaml:/config.yaml:ro \
+  -v /var/livekit/egress:/out \
+  -e EGRESS_CONFIG_FILE=/config.yaml \
+  livekit/egress:latest
+```
+
+### 4. If using Docker Compose
+
+```yaml
+services:
+  livekit-egress:
+    image: livekit/egress:latest
+    container_name: livekit-egress
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - EGRESS_CONFIG_FILE=/config.yaml
+    volumes:
+      - /etc/livekit-egress/config.yaml:/config.yaml:ro
+      - /var/livekit/egress:/out  # REQUIRED for local storage
+```
+
+### 5. Dashboard .env Configuration
+
+Add to the dashboard's `.env` file:
+
+```bash
+# Recording Storage Path (must match Docker volume mount host path)
+RECORDING_PATH=/var/livekit/egress
+```
+
+**Note:** The `RECORDING_PATH` must match the host path used in the Docker volume mount (`-v /var/livekit/egress:/out`).
+
+---
+
+## Summary
+
+| Component | Path/Setting | Purpose |
+|-----------|--------------|---------|
+| Egress config | `/etc/livekit-egress/config.yaml` | Tells egress to write to `/out` |
+| Docker mount | `-v /var/livekit/egress:/out` | Maps container `/out` to host filesystem |
+| Host directory | `/var/livekit/egress/` | Where recordings are stored on host |
+| Dashboard .env | `RECORDING_PATH=/var/livekit/egress` | Tells dashboard where to find recordings |
+
+**Critical:** The Docker mount host path and `RECORDING_PATH` must match for recordings to appear in the dashboard.
+
+---
+
+## Quick Reference Commands
+
+```bash
+# Check if egress is running
+docker ps | grep egress
+
+# Check egress logs
+docker logs livekit-egress --tail 50
+
+# Check mounts
+docker inspect livekit-egress | grep -A15 Mounts
+
+# Check recordings directory
+ls -la /var/livekit/egress/
+
+# Restart egress
+docker restart livekit-egress
+```

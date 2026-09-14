@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aetos Voice Console</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="shell">
+  <aside class="rail" id="rail">
+    <a class="brand" href="#overview">
+      <span class="mark">AV</span>
+      <span class="brand-txt"><b>Aetos Voice</b><span>vaai.aetosiot.com</span></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <div class="rail-foot">
+      <span class="avatar">RK</span>
+      <span class="edition"><b>Community Edition</b>2 of 2 voice agents</span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn only-mobile" id="menuBtn" aria-label="Open navigation"></button>
+      <button class="icon-btn" id="panelBtn" aria-label="Collapse navigation"></button>
+      <div class="crumb"><h1 id="crumbTitle">Operations</h1><em id="crumbSub"></em></div>
+      <span class="spacer"></span>
+      <button class="search" id="searchBtn" aria-label="Search the console">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round"><path d="M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3"/></svg>
+        Search agents, calls, settings<kbd>⌘K</kbd></button>
+      <span class="live"><span class="dot"></span><span>3 rooms live</span></span>
+      <button class="icon-btn" id="bellBtn" aria-label="Notifications"></button>
+      <button class="icon-btn" id="themeBtn" aria-label="Switch theme"></button>
+    </header>
+    <main class="page" id="view"></main>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+
+<div class="scrim" id="pal" hidden>
+  <div class="pal" role="dialog" aria-label="Command palette">
+    <input id="palInput" placeholder="Jump to a screen — agents, trunks, storage…" autocomplete="off">
+    <div class="res" id="palRes"></div>
+    <div class="foot"><span>↵ open</span><span>esc close</span><span>⌘K anywhere</span></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+# Setup SIP Trunks with Vobiz
+
+A step-by-step guide for configuring Vobiz SIP Trunking to work with your LiveKit Voice AI Dashboard.
+
+---
+
+## Prerequisites
+
+- A Vobiz account
+- A purchased phone number (DID) in Vobiz
+- Access to your LiveKit Dashboard
+- Your LiveKit Server's Public IP Address and FQDN
+
+> **Reference:** Vobiz documentation for trunk configuration is at [www.docs.vobiz.ai/trunks](https://www.docs.vobiz.ai/trunks).
+
+> **Heads up:** Vobiz is a newer / smaller telephony provider. Their portal field labels and credential format are looser than the larger carriers (Twilio, Telnyx, etc.). When in doubt, **copy values literally** from the Vobiz portal — including any unusual capitalisation or punctuation — rather than trying to normalise them.
+
+---
+
+## Part 1: Vobiz Portal Configuration
+
+### Step 1: Log In to Vobiz
+
+1. Log in to the Vobiz dashboard (URL provided in your account welcome email)
+2. Navigate to **Trunks**
+
+### Step 2: Create a Trunk
+
+1. Click **Create Trunk** (or **Add New Trunk**)
+2. Configure basic details:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `LiveKit Trunk` |
+| **Description** | (Optional) `Trunk for LiveKit Voice AI Dashboard` |
+
+3. Save the trunk and open it for further configuration
+
+### Step 3: Note Your Per-Trunk Outbound Host
+
+After creation, Vobiz assigns a **per-trunk outbound domain** in the format:
+
+```
+<trunkId>.sip.vobiz.ai
+```
+
+The `<trunkId>` is unique per trunk and shown in the trunk detail page. **Save this hostname** — you'll paste it into LiveKit's Outbound Trunk **Address** field.
+
+### Step 4: Choose Authentication Method
+
+Vobiz supports three authentication modes:
+
+| Mode | When to use |
+|------|-------------|
+| **Digest auth only** (Username + Password) | Simple setup, dynamic IPs |
+| **IP ACL only** | Static LiveKit server IP, no creds management |
+| **Both** | Maximum security — recommended |
+
+For the **digest auth** path:
+
+1. In the trunk's **Authentication** section, click **Add Credentials**
+2. Set a username and password:
+
+| Field | Value |
+|-------|-------|
+| **Username** | A unique username (e.g., `livekit_user`) |
+| **Password** | A strong password |
+
+3. **Save these credentials** for the LiveKit configuration. Copy them literally — Vobiz field formatting is loose.
+
+For the **IP ACL** path:
+
+1. In the trunk's **Authentication** section, click **Add IP / CIDR**
+2. Add your **LiveKit Server's Public IP Address**
+
+You can configure both at the same time for layered security.
+
+### Step 5: Configure Origination URIs (For Inbound Calls)
+
+This routes calls **into** Vobiz back to your LiveKit server.
+
+1. In the trunk's **Origination** section, click **Add URI**
+2. Configure:
+
+| Field | Value |
+|-------|-------|
+| **URI** | `sip:your-livekit-server.com:5060` (your LiveKit FQDN) |
+| **Priority** | `10` (lower = higher priority) |
+| **Weight** | `10` (used for load-balance among same-priority URIs) |
+
+3. (Optional) Add additional URIs as failover targets — Vobiz will try them in priority order.
+
+> **Note:** Use **priority** for failover (try URI A first; if it fails, try URI B). Use **weight** for load-balance (split traffic across multiple URIs at the same priority).
+
+### Step 6: Assign Phone Numbers
+
+1. Navigate to **Phone Numbers** in the Vobiz dashboard
+2. Locate the DID(s) you want to use
+3. Attach each number to your trunk (or to an Application that points at the trunk)
+4. Save
+
+### Step 7: Region
+
+Vobiz operates a **single global region** at the time of writing — there are no documented regional endpoints. The per-trunk hostname (`<trunkId>.sip.vobiz.ai`) is what you use regardless of where your LiveKit server lives.
+
+---
+
+## Part 2: LiveKit Dashboard Configuration
+
+### Step 8: Create Inbound SIP Trunk
+
+1. Log into your LiveKit Dashboard
+2. Navigate to **Telephony** → **Inbound Trunks**
+3. Click **+ Create Trunk**
+4. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Vobiz Inbound` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Numbers** | Your Vobiz DID (e.g., `+14155551234`) |
+| **Allowed Addresses** | Vobiz signaling IPs / CIDR ranges (from Vobiz docs) |
+| **Username** | Your Vobiz Credentials username (from Step 4, if using digest) |
+| **Password** | Your Vobiz Credentials password (from Step 4, if using digest) |
+
+> **Note:** If you set up IP ACL only (no digest) in Step 4, leave Username and Password empty. If you set up both, fill in both.
+
+5. Click **Create**
+
+> **Important - Firewall Configuration:**
+> You must allow Vobiz's signaling IPs in your cloud provider's firewall (AWS Security Groups, GCP Firewall Rules, etc.) for **both TCP and UDP on port 5060**. If your firewall blocks Vobiz's IPs, calls will not reach your LiveKit server even if the LiveKit trunk configuration is correct.
+
+### Step 9: Create Dispatch Rule
+
+1. Navigate to **Telephony** → **Dispatch Rules**
+2. Click **+ Create Rule**
+3. Configure the rule:
+
+| Field | Value |
+|-------|-------|
+| **Trunk IDs** | Select `Vobiz Inbound` |
+| **Dispatch Rule Type** | Choose based on your needs (Direct/Individual/Multi-Line) |
+| **Room Name** | `support-room` (or your target room) |
+| **Agent Name** | Select your AI Agent |
+
+4. Click **Create**
+
+### Step 10: Create Outbound SIP Trunk
+
+1. Navigate to **Telephony** → **Outbound Trunks**
+2. Click **Create new trunk**
+3. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Vobiz Outbound` |
+| **Address** | `<trunkId>.sip.vobiz.ai` (your per-trunk host from Step 3 — paste literally) |
+| **Transport** | `UDP` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Username** | Your Vobiz Credentials username (or empty if IP ACL only) |
+| **Password** | Your Vobiz Credentials password (or empty if IP ACL only) |
+| **Numbers** | Your Vobiz DID (e.g., `+14155551234`) |
+
+4. Click **Create**
+
+> **Important:** The `<trunkId>` part of the address is unique per Vobiz trunk. Don't substitute a generic `sip.vobiz.ai` — Vobiz won't route traffic correctly without the trunk ID prefix.
+
+---
+
+## Part 3: Verification
+
+### Step 11: Test Inbound
+
+1. Call your Vobiz DID from a mobile phone or external line
+2. Check the **Rooms** page in the dashboard
+3. You should see a new room created when the call connects
+
+**If it fails:**
+- Verify the Origination URI in Vobiz points to your LiveKit FQDN on port 5060 (Step 5)
+- Confirm the DID is attached to the trunk in **Phone Numbers** (Step 6)
+- Check **Allowed Addresses** in LiveKit includes Vobiz's signaling IPs
+- If using digest, verify the credentials match exactly — copy from Vobiz portal verbatim
+
+### Step 12: Test Outbound
+
+1. Go to **Telephony** → **Outbound Trunks**
+2. Click **Create Outbound Call** (or use the Sandbox)
+3. Enter a destination number in E.164 format and call
+4. Verify caller ID displays correctly and audio works both ways
+
+---
+
+## Troubleshooting Checklist
+
+| Issue | Check |
+|-------|-------|
+| Calls not arriving | Verify Origination URI in Vobiz points to your LiveKit FQDN on port 5060 |
+| "Trunk not found" / 404 | Ensure **Allowed Addresses** in LiveKit includes Vobiz's signaling IPs |
+| 401 / 407 Unauthorized on outbound | Re-copy Username/Password from the Vobiz portal — match exact case and characters |
+| 403 Forbidden | If using IP ACL, verify your LiveKit server's public IP is in Vobiz's IP ACL list |
+| Outbound goes to wrong host | Use the exact `<trunkId>.sip.vobiz.ai` from your trunk page — not a generic Vobiz hostname |
+| One-way audio | Confirm UDP/RTP ports are open in your cloud firewall and `use_external_ip: true` is set in `livekit-sip` config if behind NAT |
+| No room created | Check dispatch rule is linked to the correct trunk ID |
+| Failover not working | Verify multiple Origination URIs configured with different priorities (Step 5) |
+| Caller ID wrong on outbound | Check the **Numbers** field on your LiveKit Outbound Trunk matches your Vobiz DID |
+
+---
+
+## Quick Reference: Configuration Summary
+
+**Vobiz Side:**
+```
+Trunk: LiveKit Trunk
+Outbound Host: <trunkId>.sip.vobiz.ai (per-trunk, auto-issued)
+
+Authentication:
+  → Digest: livekit_user / [password]   (optional)
+  → IP ACL: Your LiveKit Server Public IP   (optional)
+  → Use either or both
+
+Origination URIs (Inbound):
+  → URI: sip:your-livekit-server.com:5060
+  → Priority: 10, Weight: 10
+
+Region:
+  → Single global (no regional endpoints)
+
+Numbers:
+  → Attached via Phone Numbers → trunk/application
+```
+
+**LiveKit Side:**
+```
+Inbound Trunk:
+  → Name: Vobiz Inbound
+  → Number Format: +E.164 (WITH +)
+  → Numbers: Your Vobiz DID
+  → Allowed Addresses: Vobiz signaling IPs
+  → Auth: digest creds or empty (matches Vobiz auth mode)
+
+Dispatch Rule:
+  → Linked to: Vobiz Inbound trunk
+  → Type: Direct/Individual/Multi-Line (your choice)
+  → Agent: Your AI agent
+
+Outbound Trunk:
+  → Name: Vobiz Outbound
+  → Address: <trunkId>.sip.vobiz.ai
+  → Transport: UDP
+  → Number Format: +E.164 (WITH +)
+  → Auth: digest creds or empty (matches Vobiz auth mode)
+  → Numbers: Your Vobiz DID
+```
+
+---
+
+This guide covers the complete end-to-end setup for both inbound and outbound calls via Vobiz with your LiveKit Voice AI Dashboard.

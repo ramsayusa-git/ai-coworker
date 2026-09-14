@@ -1,0 +1,64 @@
+# Connecting SMS via n8n (Custom SMS Provider)
+
+Use **any SMS carrier** with your dashboard by routing messages through your own **n8n** instance. The dashboard ships two ready-made n8n workflows — downloaded pre-filled with your webhook address and a shared secret — so the only thing you build is the connection to your carrier.
+
+> **What this gives you:**
+> - The **send_sms voice-agent tool** can text callers through your carrier (send-only).
+> - A **Chatbot Agent** can hold full two-way SMS conversations through your carrier (send + receive).
+>
+> If your carrier is **Tronic Cloud, Twilio or Telnyx**, you don't need this guide — pick it from the provider dropdown and the dashboard configures itself from your keys in *Settings → Integrations*.
+
+---
+
+## Prerequisites
+
+- A running **n8n** instance (cloud or self-hosted) that your dashboard can reach over HTTP(S)
+- An account with your SMS carrier, and an n8n node or HTTP API for it (Twilio, MessageBird, ClickSend, Vonage, smstools, a plain HTTP gateway…)
+- Your dashboard reachable from your n8n instance (for two-way chatbot SMS)
+
+---
+
+## Part A — Voice agents: the send_sms tool
+
+1. Open **Tools** in the dashboard, find **send_sms**, click **Configure**.
+2. Set **SMS Provider** to **Custom (n8n)**.
+3. A shared secret is generated for you automatically. Enter your **From number** and click **Save**.
+4. Click **Download Send-SMS n8n workflow** and import the file into n8n (*Workflows → Import from File*).
+5. In n8n, replace the red **"REPLACE ME"** node with your carrier's node. The message fields are available as:
+   - `{{ $json.body.to }}` — destination number
+   - `{{ $json.body.from }}` — your From number
+   - `{{ $json.body.message }}` — the text
+6. **Activate** the workflow (top-right toggle), copy the webhook's **Production URL** (not the Test URL), and paste it into the tool's **n8n Send-webhook URL** field. Save again.
+7. Use the **Test Connection** panel: run the checks, then tick *"Send a real test SMS"* with your own mobile number. The message should arrive on your handset.
+
+> **Until you replace the placeholder node, tests will report failure on purpose** — the shipped workflow refuses to pretend a message was sent.
+
+## Part B — Chatbot agents: two-way SMS
+
+1. Open your chatbot in **Chatbot Agents**, go to the **SMS** tab.
+2. Enable SMS, set **Provider** to **Custom (n8n)**, and **save the chatbot** — this generates the chatbot's own shared secret.
+3. Re-open the SMS tab and download **both** workflows (Send-SMS and Inbound-SMS). Import both into n8n.
+4. **Send-SMS workflow:** replace the placeholder node with your carrier's node (same as Part A), activate, and paste its Production URL into the **n8n Send-webhook URL** field.
+5. **Inbound-SMS workflow:** activate it, copy its Production URL, and paste that into **your carrier's** inbound-message webhook setting. If your carrier's payload uses unusual field names, adjust the *"Map to dashboard fields"* node — Twilio-style (`From`/`To`/`Body`) and generic (`from`/`to`/`message`) names work out of the box.
+6. Save the chatbot, then use the **Test configuration** panel on the SMS tab: *Run checks* first, then *Send test SMS* to your own mobile.
+
+> **Note:** the *Webhook URL* field on the SMS tab is where your **n8n inbound workflow** delivers messages — it's already baked into the download. Your SMS **carrier** points at the n8n inbound workflow's URL, never directly at the dashboard.
+
+---
+
+## The shared secret
+
+Every message between the dashboard and n8n carries an `X-SMS-Secret` header. The dashboard generates the secret and bakes it into the downloaded workflows.
+
+- The **send_sms tool** and **each chatbot** have **different secrets** — the workflow files are labelled with which one they belong to. Don't mix them.
+- If you **Regenerate** a secret, the already-imported workflows keep the old one — **re-download and re-import** them, or messages will be rejected with a 403.
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+|---|---|
+| Test says "SMS provider not connected yet" | The placeholder node in the Send workflow was never replaced |
+| Sends return HTTP 404 from n8n | Workflow not **activated**, or you pasted the Test URL instead of the Production URL |
+| Sends return 403 "bad secret" | Secret was regenerated after the workflow was imported — re-download + re-import |
+| Chatbot never replies to inbound texts | Carrier not pointed at the n8n inbound workflow, or the field-mapping node doesn't match your carrier's payload |
+| "must not target private-network addresses" on save | On hosted multi-tenant deployments the n8n URL must be a public hostname |

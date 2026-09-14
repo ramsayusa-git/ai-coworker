@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Recording & Storage - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=424225">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=5209.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IkdHb0hXdHUxbUMtbWNaa2NScHJmN3B5N0ZjNVd4N0VoSGRYN2ZRX3VCdWci.aqgYKw.xRptWSI1-0kLfNhGe_hHSk2vkg4">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link active">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Recording & Storage</h1>
+                
+<p class="page-subtitle">Recording & Streaming Jobs</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#recordings" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="egress.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<!-- Info Alert -->
+<div class="alert alert-info alert-permanent" role="alert">
+    <i class="bi bi-info-circle"></i>
+    <strong>Auto-Recording:</strong> Enable automatic call recording in <a href="telephony/rules.html" class="alert-link">Telephony → Dispatch Rules</a>.
+    Check the <strong>"Auto-Record Calls"</strong> option when creating or editing a rule.
+</div>
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-archive"></i> Local Recordings
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    
+</div>
+
+<!-- Filters -->
+<div class="card mb-4" style="margin-top: 1.5rem;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-funnel"></i> Filters
+        </h5><a href="settings.html#storage" class="btn btn-secondary btn-sm">
+            <i class="bi bi-gear"></i> Storage Settings
+        </a></div>
+    <div class="card-body">
+        <form method="get" action="egress.html" class="row g-3 align-items-end" id="filterForm">
+            <div class="col-md-3">
+                <label class="form-label">Agent</label>
+                <select class="form-select" name="agent" id="filterAgent">
+                    <option value="">All Agents</option>
+                    
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" name="date_from" id="filterDateFrom"
+                       value="">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" name="date_to" id="filterDateTo"
+                       value="">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Search</label>
+                <input type="text" class="form-control" name="search" id="filterSearch"
+                       placeholder="Filename..." value="">
+            </div>
+            <div class="col-md-2">
+                <div class="form-check form-switch mt-4" title="Recordings of full-voice website chat sessions (Chat History) are hidden by default">
+                    <input class="form-check-input" type="checkbox" role="switch" id="filterIncludeChat" name="include_chat" value="1"  onchange="try{localStorage.setItem('egress_include_chat', this.checked ? '1' : '0');}catch(e){}; this.form.submit();">
+                    <label class="form-check-label" for="filterIncludeChat">Include chat sessions</label>
+                </div>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-search"></i> Search
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Local Recordings -->
+<div class="accordion" id="localRecordingsAccordion">
+    <div class="accordion-item">
+        
+        <div class="accordion-header egress-accordion-header d-flex justify-content-between align-items-center"
+             role="button" aria-expanded="true" aria-controls="localRecordingsCollapse">
+            <div class="d-flex align-items-center gap-3">
+                <h5 class="mb-0" style="color: var(--text-primary);">
+                    <i class="bi bi-archive"></i> Local Recordings
+                    <span class="badge badge-secondary ms-2" id="stored-count">0</span>
+                </h5>
+                <!-- Bulk Actions for Local Recordings -->
+                
+                
+                <div id="local-bulk-actions" class="d-flex align-items-center gap-2" style="display: none !important;" onclick="event.stopPropagation()">
+                    <span class="text-muted small" id="local-selected-count">0 selected</span>
+                    <button type="button" id="local-bulk-delete-btn" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); bulkDeleteLocalRecordings()">
+                        <i class="bi bi-trash"></i> Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); clearLocalSelection()">
+                        <i class="bi bi-x-lg"></i> Clear
+                    </button>
+                </div>
+                
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); refreshStoredRecordings()" title="Refresh">
+                    <i class="bi bi-arrow-clockwise" id="stored-refresh-icon"></i>
+                </button>
+                <i class="bi bi-chevron-down egress-collapse-chevron"></i>
+            </div>
+        </div>
+        <div id="localRecordingsCollapse" class="accordion-collapse collapse show">
+            <div class="accordion-body p-0" id="stored-recordings-content">
+                
+                
+
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <i class="bi bi-archive"></i>
+    </div>
+    <div class="empty-state-title">No local recordings</div>
+    <div class="empty-state-description">
+        Recordings stored locally will appear here after calls end.
+    </div>
+</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cloud Recordings -->
+
+
+<!-- Play Recording Modal -->
+<div class="modal fade" id="playRecordingModal" tabindex="-1" aria-labelledby="playRecordingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="playRecordingModalLabel">Play Recording</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 0;">
+                <video id="recordingPlayer" controls style="width: 100%; max-height: 70vh;">
+                    <source id="recordingSource" src="egress.html" type="video/mp4">
+                    Your browser does not support the video element.
+                </video>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<style>
+/* Refresh button spin animation */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 0.8s linear infinite;
+}
+
+/* Play Recording Modal styling */
+#playRecordingModal .modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+#playRecordingModal .modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+}
+
+#playRecordingModal .modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+#playRecordingModal video {
+    background-color: #000;
+}
+
+/* Pagination styling */
+.pagination-container {
+    padding: 0 0.5rem;
+}
+
+.pagination .page-link {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.pagination-per-page .form-select {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    padding: 0.25rem 2rem 0.25rem 0.5rem;
+}
+
+.pagination-per-page .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+/* Egress accordion headers */
+.egress-accordion-header {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.15s ease;
+}
+
+.egress-accordion-header:hover {
+    background-color: var(--bg-secondary);
+}
+
+.egress-accordion-header[aria-expanded="false"] {
+    border-bottom: none;
+}
+
+/* Chevron rotation */
+.egress-collapse-chevron {
+    transition: transform 0.3s ease;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.egress-accordion-header[aria-expanded="false"] .egress-collapse-chevron {
+    transform: rotate(-180deg);
+}
+
+/* Large, hard-to-miss confirmation toasts (e.g. "deleted N recordings") */
+#toast-container .toast.egress-toast {
+    width: min(440px, 92vw);   /* big on desktop, never overflows a phone viewport */
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.35);
+    border-radius: 0.75rem;
+}
+#toast-container .toast.egress-toast .toast-body {
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.35;
+    padding: 1.15rem 1.25rem;
+}
+#toast-container .toast.egress-toast .toast-body i {
+    font-size: 1.65rem;
+    vertical-align: -0.18rem;
+}
+#toast-container .toast.egress-toast .btn-close {
+    padding: 1.1rem;
+    transform: scale(1.25);
+}
+</style>
+
+<script>
+// Toast notification function
+function showToast(type, message) {
+    // Create toast container if it doesn't exist
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+    }
+
+    // Create toast element
+    const toastId = 'toast-' + Date.now();
+    const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : type === 'warning' ? 'bg-warning' : 'bg-info';
+    const icon = type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-x-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle';
+
+    const toastHtml = `
+        <div id="${toastId}" class="toast egress-toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi ${icon} me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', toastHtml);
+
+    const toastElement = document.getElementById(toastId);
+    // Success confirmations (e.g. "deleted N recordings") stay on screen until
+    // the user dismisses them so they can't be missed; other toasts auto-hide
+    // after 8 seconds.
+    const toast = new bootstrap.Toast(
+        toastElement,
+        type === 'success' ? { autohide: false } : { delay: 8000 }
+    );
+    toast.show();
+
+    // Remove toast element after it's hidden
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+
+// Track current pagination state
+// Filters must survive refresh/pagination fetches (they used to be dropped —
+// only page/per_page were sent — so chat rows and agent/date/search filters
+// silently un-applied on every refresh).
+function currentFilterQuery() {
+    var form = document.getElementById('filterForm');
+    if (!form) return '';
+    var q = '';
+    ['agent', 'date_from', 'date_to', 'search'].forEach(function (n) {
+        var el = form.elements[n]; if (el && el.value) q += '&' + n + '=' + encodeURIComponent(el.value);
+    });
+    var ic = document.getElementById('filterIncludeChat');
+    if (ic && ic.checked) q += '&include_chat=1';
+    return q;
+}
+// Remembered per browser: if the operator left "Include chat sessions" on and
+// arrives without the parameter, reload once with it applied.
+(function () {
+    try {
+        if (localStorage.getItem('egress_include_chat') === '1' && !/[?&]include_chat=/.test(location.search)) {
+            var u = new URL(location.href); u.searchParams.set('include_chat', '1'); location.replace(u.toString());
+        }
+    } catch (e) {}
+})();
+let paginationState = {
+    local: { page: 1, per_page: 10 },
+    cloud: { page: 1, per_page: 10 }
+};
+
+// Navigate to a specific page
+async function navigatePage(type, page, perPage) {
+    paginationState[type].page = page;
+    paginationState[type].per_page = parseInt(perPage);
+
+    if (type === 'local') {
+        await refreshStoredRecordings(page, parseInt(perPage));
+    } else if (type === 'cloud') {
+        await refreshCloudRecordings(page, parseInt(perPage));
+    }
+}
+
+// Refresh stored recordings via AJAX
+async function refreshStoredRecordings(page, perPage) {
+    const refreshIcon = document.getElementById('stored-refresh-icon');
+    const storedContent = document.getElementById('stored-recordings-content');
+    const storedCount = document.getElementById('stored-count');
+
+    // Use current state if not provided
+    page = page || paginationState.local.page;
+    perPage = perPage || paginationState.local.per_page;
+
+    // Add spinning animation
+    refreshIcon.classList.add('spin');
+
+    try {
+        const response = await fetch(`/egress/stored?page=${page}&per_page=${perPage}${currentFilterQuery()}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/html',
+            },
+            credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+            const html = await response.text();
+            storedContent.innerHTML = html;
+
+            // Update pagination state
+            paginationState.local.page = page;
+            paginationState.local.per_page = perPage;
+
+            // Update the count badge from the pagination info text
+            const paginationInfo = storedContent.querySelector('.pagination-info');
+            if (paginationInfo) {
+                const match = paginationInfo.textContent.match(/of (\d+)/);
+                if (match) {
+                    storedCount.textContent = match[1];
+                }
+            } else {
+                // Fallback: count table rows
+                const tableRows = storedContent.querySelectorAll('tbody tr');
+                storedCount.textContent = tableRows.length;
+            }
+        } else {
+            console.error('Failed to refresh stored recordings:', response.status);
+        }
+    } catch (error) {
+        console.error('Error refreshing stored recordings:', error);
+    } finally {
+        // Remove spinning animation
+        refreshIcon.classList.remove('spin');
+    }
+}
+
+// Refresh cloud recordings via AJAX
+async function refreshCloudRecordings(page, perPage) {
+    const refreshIcon = document.getElementById('cloud-refresh-icon');
+    const cloudContent = document.getElementById('cloud-recordings-content');
+    const cloudCount = document.getElementById('cloud-count');
+
+    if (!refreshIcon || !cloudContent) return;
+
+    // Use current state if not provided
+    page = page || paginationState.cloud.page;
+    perPage = perPage || paginationState.cloud.per_page;
+
+    // Add spinning animation
+    refreshIcon.classList.add('spin');
+
+    try {
+        const response = await fetch(`/egress/cloud?page=${page}&per_page=${perPage}${currentFilterQuery()}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/html',
+            },
+            credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+            const html = await response.text();
+            cloudContent.innerHTML = html;
+
+            // Update pagination state
+            paginationState.cloud.page = page;
+            paginationState.cloud.per_page = perPage;
+
+            // Update the count badge from the pagination info text
+            const paginationInfo = cloudContent.querySelector('.pagination-info');
+            if (paginationInfo) {
+                const match = paginationInfo.textContent.match(/of (\d+)/);
+                if (match && cloudCount) {
+                    cloudCount.textContent = match[1];
+                }
+            } else {
+                // Fallback: count table rows
+                const tableRows = cloudContent.querySelectorAll('tbody tr');
+                if (cloudCount) {
+                    cloudCount.textContent = tableRows.length;
+                }
+            }
+        } else {
+            console.error('Failed to refresh cloud recordings:', response.status);
+        }
+    } catch (error) {
+        console.error('Error refreshing cloud recordings:', error);
+    } finally {
+        // Remove spinning animation
+        refreshIcon.classList.remove('spin');
+    }
+}
+
+// Play recording function
+function playRecording(filename) {
+    const modalElement = document.getElementById('playRecordingModal');
+    const modal = new bootstrap.Modal(modalElement);
+    const player = document.getElementById('recordingPlayer');
+    const source = document.getElementById('recordingSource');
+    const title = document.getElementById('playRecordingModalLabel');
+
+    // Set the source URL and title
+    source.src = '/egress/files/' + encodeURIComponent(filename) + '/stream';
+    title.textContent = 'Playing: ' + filename;
+    player.load();
+    modal.show();
+
+    // Stop playback when modal closes
+    modalElement.addEventListener('hidden.bs.modal', function handler() {
+        player.pause();
+        player.currentTime = 0;
+        source.src = '';
+        modalElement.removeEventListener('hidden.bs.modal', handler);
+    });
+}
+
+// Play cloud recording function (uses proxy streaming through server)
+function playCloudRecording(storage, objectKey, filename) {
+    const modalElement = document.getElementById('playRecordingModal');
+    const modal = new bootstrap.Modal(modalElement);
+    const player = document.getElementById('recordingPlayer');
+    const source = document.getElementById('recordingSource');
+    const title = document.getElementById('playRecordingModalLabel');
+
+    // Determine media type from filename extension
+    const ext = filename.split('.').pop().toLowerCase();
+    const mimeTypes = {
+        'mp4': 'video/mp4',
+        'ogg': 'audio/ogg',
+        'mp3': 'audio/mpeg',
+        'wav': 'audio/wav'
+    };
+    const mediaType = mimeTypes[ext] || 'audio/ogg';
+
+    // Set the source URL to our proxy endpoint (streams through server, bypasses CORS)
+    source.src = '/egress/cloud/' + storage + '/' + objectKey + '/stream';
+    source.type = mediaType;
+    title.textContent = 'Playing: ' + filename;
+    player.load();
+    modal.show();
+
+    // Stop playback when modal closes
+    modalElement.addEventListener('hidden.bs.modal', function handler() {
+        player.pause();
+        player.currentTime = 0;
+        source.src = '';
+        modalElement.removeEventListener('hidden.bs.modal', handler);
+    });
+}
+
+// Clear all filters
+function clearFilters() {
+    document.getElementById('filterAgent').value = '';
+    document.getElementById('filterDateFrom').value = '';
+    document.getElementById('filterDateTo').value = '';
+    document.getElementById('filterSearch').value = '';
+    // Submit the form to reload without filters
+    document.getElementById('filterForm').submit();
+}
+
+// =========================================================================
+// Bulk Selection Functions - Local Recordings
+// =========================================================================
+
+function toggleSelectAllLocal(checkbox) {
+    const checkboxes = document.querySelectorAll('.local-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    updateLocalBulkActions();
+}
+
+function updateLocalBulkActions() {
+    const checkboxes = document.querySelectorAll('.local-checkbox:checked');
+    const bulkActions = document.getElementById('local-bulk-actions');
+    const selectedCount = document.getElementById('local-selected-count');
+    const selectAllCheckbox = document.getElementById('selectAllLocal');
+
+    if (bulkActions) {
+        if (checkboxes.length > 0) {
+            bulkActions.setAttribute('style', 'display: flex !important;');
+            selectedCount.textContent = checkboxes.length + ' selected';
+        } else {
+            bulkActions.setAttribute('style', 'display: none !important;');
+            selectedCount.textContent = '0 selected';
+        }
+    }
+
+    const allCheckboxes = document.querySelectorAll('.local-checkbox');
+    if (selectAllCheckbox && allCheckboxes.length > 0) {
+        selectAllCheckbox.checked = checkboxes.length === allCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+    }
+}
+
+function clearLocalSelection() {
+    const checkboxes = document.querySelectorAll('.local-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAllLocal');
+    checkboxes.forEach(cb => cb.checked = false);
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+    updateLocalBulkActions();
+}
+
+async function bulkDeleteLocalRecordings() {
+    const checkboxes = document.querySelectorAll('.local-checkbox:checked');
+    const filenames = Array.from(checkboxes).map(cb => cb.value);
+
+    if (filenames.length === 0) {
+        showToast('error', 'No recordings selected');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${filenames.length} recording(s)? This action cannot be undone.`)) {
+        return;
+    }
+
+    const deleteBtn = document.getElementById('local-bulk-delete-btn');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const filename of filenames) {
+        try {
+            const formData = new FormData();
+            formData.append('csrf_token', 'IkdHb0hXdHUxbUMtbWNaa2NScHJmN3B5N0ZjNVd4N0VoSGRYN2ZRX3VCdWci.aqgYKw.xRptWSI1-0kLfNhGe_hHSk2vkg4');
+
+            const response = await fetch(`/egress/files/${encodeURIComponent(filename)}/delete`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            if (response.ok || response.redirected) {
+                successCount++;
+            } else {
+                failCount++;
+            }
+        } catch (error) {
+            console.error(`Error deleting ${filename}:`, error);
+            failCount++;
+        }
+    }
+
+    if (deleteBtn) {
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Selected';
+    }
+
+    if (successCount > 0 && failCount === 0) {
+        showToast('success', `Successfully deleted ${successCount} recording(s)`);
+    } else if (successCount > 0 && failCount > 0) {
+        showToast('warning', `Deleted ${successCount} recording(s), ${failCount} failed`);
+    } else {
+        showToast('error', 'Failed to delete recordings');
+    }
+
+    clearLocalSelection();
+    refreshStoredRecordings();
+}
+
+// =========================================================================
+// Bulk Selection Functions - Cloud Recordings
+// =========================================================================
+
+function toggleSelectAllCloud(checkbox) {
+    const checkboxes = document.querySelectorAll('.cloud-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    updateCloudBulkActions();
+}
+
+function updateCloudBulkActions() {
+    const checkboxes = document.querySelectorAll('.cloud-checkbox:checked');
+    const bulkActions = document.getElementById('cloud-bulk-actions');
+    const selectedCount = document.getElementById('cloud-selected-count');
+    const selectAllCheckbox = document.getElementById('selectAllCloud');
+
+    if (bulkActions) {
+        if (checkboxes.length > 0) {
+            bulkActions.setAttribute('style', 'display: flex !important;');
+            selectedCount.textContent = checkboxes.length + ' selected';
+        } else {
+            bulkActions.setAttribute('style', 'display: none !important;');
+            selectedCount.textContent = '0 selected';
+        }
+    }
+
+    const allCheckboxes = document.querySelectorAll('.cloud-checkbox');
+    if (selectAllCheckbox && allCheckboxes.length > 0) {
+        selectAllCheckbox.checked = checkboxes.length === allCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+    }
+}
+
+function clearCloudSelection() {
+    const checkboxes = document.querySelectorAll('.cloud-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAllCloud');
+    checkboxes.forEach(cb => cb.checked = false);
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+    updateCloudBulkActions();
+}
+
+async function bulkDeleteCloudRecordings() {
+    const checkboxes = document.querySelectorAll('.cloud-checkbox:checked');
+
+    if (checkboxes.length === 0) {
+        showToast('error', 'No recordings selected');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${checkboxes.length} cloud recording(s)? This action cannot be undone.`)) {
+        return;
+    }
+
+    const deleteBtn = document.getElementById('cloud-bulk-delete-btn');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const checkbox of checkboxes) {
+        const storage = checkbox.dataset.storage;
+        const objectKey = checkbox.dataset.objectKey;
+
+        try {
+            const formData = new FormData();
+            formData.append('csrf_token', 'IkdHb0hXdHUxbUMtbWNaa2NScHJmN3B5N0ZjNVd4N0VoSGRYN2ZRX3VCdWci.aqgYKw.xRptWSI1-0kLfNhGe_hHSk2vkg4');
+
+            const response = await fetch(`/egress/cloud/${storage}/${objectKey}/delete`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            if (response.ok || response.redirected) {
+                successCount++;
+            } else {
+                failCount++;
+            }
+        } catch (error) {
+            console.error(`Error deleting cloud recording:`, error);
+            failCount++;
+        }
+    }
+
+    if (deleteBtn) {
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Selected';
+    }
+
+    if (successCount > 0 && failCount === 0) {
+        showToast('success', `Successfully deleted ${successCount} cloud recording(s)`);
+    } else if (successCount > 0 && failCount > 0) {
+        showToast('warning', `Deleted ${successCount} recording(s), ${failCount} failed`);
+    } else {
+        showToast('error', 'Failed to delete cloud recordings');
+    }
+
+    clearCloudSelection();
+    refreshCloudRecordings();
+}
+
+// Delete a single local recording
+async function deleteLocalRecording(filename, csrfToken) {
+    if (!confirm(`Delete ${filename} permanently?`)) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+
+        const response = await fetch(`/egress/files/${encodeURIComponent(filename)}/delete`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+        });
+
+        if (response.ok || response.redirected) {
+            showToast('success', `Deleted recording: ${filename}`);
+            refreshStoredRecordings();
+        } else {
+            showToast('error', 'Failed to delete recording');
+        }
+    } catch (error) {
+        console.error('Error deleting local recording:', error);
+        showToast('error', 'Failed to delete recording');
+    }
+}
+
+// Delete a single cloud recording
+async function deleteCloudRecording(storage, objectKey, filename, storageDisplay) {
+    if (!confirm(`Delete ${filename} from ${storageDisplay}?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/egress/cloud/${storage}/${objectKey}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('success', data.message);
+            refreshCloudRecordings();
+        } else {
+            showToast('error', data.error || data.detail || 'Failed to delete recording');
+        }
+    } catch (error) {
+        console.error('Error deleting cloud recording:', error);
+        showToast('error', 'Failed to delete recording');
+    }
+}
+
+// Accordion state persistence (localStorage) + explicit header toggling.
+// The header deliberately has NO data-bs-toggle: Bootstrap's delegated
+// collapse handler listens at document CAPTURE phase, so stopPropagation in
+// the header buttons could never stop it — any click on Refresh / Delete
+// Selected collapsed the accordion and saved "closed" as the preference.
+function initAccordionPersistence(collapseId, storageKey) {
+    const collapseEl = document.getElementById(collapseId);
+    if (!collapseEl) return;
+
+    // Restore saved state
+    const savedState = localStorage.getItem(storageKey);
+    const header = collapseEl.closest('.accordion-item').querySelector('.accordion-header');
+    if (savedState === 'closed') {
+        collapseEl.classList.remove('show');
+        if (header) header.setAttribute('aria-expanded', 'false');
+    }
+
+    // Explicit toggle: header background/title/chevron toggle; clicks on or
+    // inside any button (or the bulk-actions cluster) never do.
+    if (header) {
+        header.addEventListener('click', function(e) {
+            if (e.target.closest('button, a, input, select, label, [id$="-bulk-actions"]')) return;
+            bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false }).toggle();
+        });
+    }
+
+    // Save state on collapse/expand
+    collapseEl.addEventListener('shown.bs.collapse', function() {
+        localStorage.setItem(storageKey, 'open');
+        const header = collapseEl.closest('.accordion-item').querySelector('.accordion-header');
+        if (header) header.setAttribute('aria-expanded', 'true');
+    });
+
+    collapseEl.addEventListener('hidden.bs.collapse', function() {
+        localStorage.setItem(storageKey, 'closed');
+        const header = collapseEl.closest('.accordion-item').querySelector('.accordion-header');
+        if (header) header.setAttribute('aria-expanded', 'false');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize accordion persistence
+    initAccordionPersistence('localRecordingsCollapse', 'egress_local_accordion');
+    initAccordionPersistence('cloudRecordingsCollapse', 'egress_cloud_accordion');
+});
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IkdHb0hXdHUxbUMtbWNaa2NScHJmN3B5N0ZjNVd4N0VoSGRYN2ZRX3VCdWci.aqgYKw.xRptWSI1-0kLfNhGe_hHSk2vkg4">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Recording &amp; Storage
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Manage call recordings with local and cloud storage options, bulk operations, and automatic cleanup policies.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Active Recordings
+                        </h6>
+                        
+                        <p class="text-muted">Shows recordings currently in progress with status, room name, and duration.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Local Recordings
+                        </h6>
+                        
+                        <p class="text-muted">Browse recordings stored on the local server. Supports inline playback (MP4, OGG, WebM), download, and deletion. Use checkboxes for bulk delete operations. Recordings of full-voice website chat sessions (rooms named webchat-…) are hidden unless &#39;Include chat sessions&#39; is on.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Cloud Recordings
+                        </h6>
+                        
+                        <p class="text-muted">Browse recordings stored in AWS S3 or Google Cloud Storage. Supports streaming playback through the dashboard proxy, download, and bulk deletion.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Bulk Operations
+                        </h6>
+                        
+                        <p class="text-muted">Select multiple recordings using checkboxes, then use &#39;Delete Selected&#39; to remove them in bulk. &#39;Select All&#39; checkbox in header selects all visible recordings. Requires &#39;delete&#39; permission - checkboxes are hidden for users without this permission.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Storage Strategy Settings
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Strategy</strong></td>
+                                        <td>Local Only, Cloud Only, or Both (records to local then uploads to cloud)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Cloud Provider</strong></td>
+                                        <td>AWS S3 or Google Cloud Storage</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Bucket Name</strong></td>
+                                        <td>S3 bucket or GCS bucket name for cloud storage</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Region</strong></td>
+                                        <td>AWS region or GCS location</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Credentials</strong></td>
+                                        <td>AWS Access Key/Secret or GCS Service Account JSON</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Recording Retention
+                        </h6>
+                        
+                        <p class="text-muted">Recordings are kept forever by default. In Settings &gt; Storage &gt; Recording Storage you can set &#39;Delete after X days&#39; separately for recordings on this server (applies on every storage mode — local copies can exist even with cloud storage when &#39;Delete local after cloud upload&#39; is off) and for recordings archived in your S3/GCS bucket (asks for confirmation — cloud deletion is permanent). Audio files are the biggest storage users, so watch the disk usage gauge if you keep everything.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Call Recording Audio
+                        </h6>
+                        
+                        <p class="text-muted">Settings &gt; Storage &gt; Call Recording Audio controls how new recordings are made; settings apply from the next call with no restart. Recording Format: OGG (recommended, ~50% smaller than MP4 for voice, and required for the quality tiers&#39; full size savings) or MP4 (maximum compatibility). Recording Channels: &#39;Mixed&#39; blends everyone on both channels; &#39;Dual Channel&#39; puts the agent on the left channel and the caller on the right of the same file, which makes transcription diagnostics and speaker separation far more accurate (on headphones each party plays in one ear; very old installs keep recording mixed). Recording Quality: &#39;Standard&#39; keeps full quality; &#39;Efficient&#39; and &#39;Compact&#39; produce smaller files — the size savings apply fully with the OGG recording format (roughly half and a quarter respectively), while MP4 recordings currently shrink only slightly (a limitation of the recording component). Each recording keeps the layout and quality it was made with — switching back only affects future recordings. Defaults: new installs start with OGG + Dual Channel + Efficient; installs upgraded from earlier versions keep MP4 / Mixed / Standard until changed here.</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

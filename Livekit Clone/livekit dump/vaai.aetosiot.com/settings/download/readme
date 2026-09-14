@@ -1,0 +1,1465 @@
+# LiveKit Voice AI Dashboard
+
+A **self-hosted**, server-side rendered (SSR) dashboard for managing a private [LiveKit](https://livekit.io) server with AI voice agents, telephony, and real-time analytics. Built with **FastAPI** and **Jinja2** templates.
+
+**Current Version:** v1.39.0
+
+![Dashboard Overview](assets/dashboard-overview.png)
+
+---
+
+## ✨ Features
+
+### 🎯 Core Dashboard
+- **Real-Time Analytics** - Expandable sections for LiveKit, Telephony, Recording, Ingress, and Server Stats
+- **Room Management** - List, create, close rooms; view participants and tracks
+- **Live Session Cost** - Real-time cost tracking for active sessions
+- **Network Quality** - RTT monitoring with color-coded quality indicators
+- **Server Health** - CPU load, memory usage, disk space, and uptime tracking
+- **AI Insights** - Aggregate analytics from call summaries:
+  - Caller sentiment distribution (positive/neutral/negative)
+  - Top conversation topics across all calls
+  - LLM-analyzed call outcomes breakdown
+
+### 🤖 AI Agent Management
+- **Visual Agent Editor** - Configure LLM, STT, TTS, and voice settings via web UI
+- **Realtime Pipeline Mode** - Single audio-to-audio stream for ultra-low latency with 5 providers (Google, Google Cloud, OpenAI, xAI, AWS)
+  - Provider-aware advanced options: hidden when not supported by the selected provider
+  - Google/Google Cloud: language, proactivity, affective dialog, thinking budget, context compression, top_p, max tokens
+  - AWS: top_p and max_tokens support
+- **Multi-Provider Support** - OpenAI, Anthropic, Google (Consumer + Vertex AI), Deepgram, ElevenLabs (TTS + STT), Cartesia, AWS Bedrock
+- **Multi-Language Support** - 30+ languages for STT (Deepgram), 20+ languages for TTS (Google, Deepgram):
+  - STT: English variants, Spanish, French, German, Portuguese, Italian, Dutch, Japanese, Korean, Chinese, Hindi, Arabic, Turkish, Nordic languages, and more
+  - TTS: Language dropdown filters available voices; custom voice ID for unlisted languages
+- **TTS Voice Dropdowns** - Pre-populated voice selectors for ElevenLabs, Cartesia, Deepgram (including Australian accents)
+- **Multi-Agent Dispatch** - Route different phone numbers to different agents via dispatch rules
+- **Conversation Dynamics** - VAD settings, Turn Detector, response delays, interrupt handling, end call on silence detection
+- **Dynamic Endpointing** - Agent learns each caller's pause rhythm and adapts response timing automatically (livekit-agents 1.5.0)
+- **Echo Cancellation Warmup** - Prevents phone echo from triggering false barge-ins at call start (configurable, default 3s)
+- **False Interruption Recovery** - Agent resumes speech from where it left off after coughs, background noise, or brief acknowledgments
+- **Turn Detection** - MultilingualModel v0.4.1-intl (39% fewer false interruptions, 14 languages)
+- **Deepgram Flux Turn Detection** - Server-side turn detection with EOT threshold, timeout, and eager EOT options
+- **Agent Handoffs** - Transfer calls between agents with two handoff types:
+  - **Transfer** (Department Change) - Explicit handoff where the caller knows they're being transferred to a different agent/department
+  - **Transition** (Multi-Prompt) - Seamless workflow phase change where the caller doesn't notice a switch
+  - Sign-off prompt / bridge phrase, context modes (Full, Summary, Fresh), secondary greeting
+- **Knowledge Base (RAG)** - Retrieval-Augmented Generation with vector search:
+  - Create collections and upload documents (TXT, MD, CSV, PDF up to 10MB)
+  - Add URL sources (web pages, Google Docs, Google Sheets) with auto-refresh intervals
+  - Vector search with configurable chunk size, overlap, context expansion, and score threshold
+  - Automatic text extraction from PDFs, re-indexing, and document download
+  - Assign multiple collections per agent for real-time knowledge retrieval
+- **Process Management** - Start/stop agents directly from dashboard
+- **Export/Import v2.0** - Backup and restore agent configurations with handoff config and tool assignments
+- **Prompt Versioning** - Automatic version history for system prompts with visual diff comparison, one-click restore, and configurable retention (5-50 versions per agent). API-initiated edits (via MCP) also create version entries tagged `source=mcp` with the calling API key's name recorded, so browser edits and programmatic edits share the same audit trail
+- **AutoResearch** - AI-powered prompt optimization that analyzes real call transcripts to suggest improvements — manual or scheduled runs, reference call benchmarks, dual engine support (built-in OPRO + optional DSPy)
+- **MCP / API Control** - External tools (Claude Code, Cursor, Claude Desktop, custom scripts) can manage every aspect of agents through the built-in Model Context Protocol server at `/mcp`. Full coverage of all ~150 agent configuration fields — prompt, voices, LLM/STT/TTS, realtime, conversation dynamics, voicemail/IVR detection, LLM fallback, knowledge-base assignments, extraction fields, handoffs, resource limits. API-key authenticated with IP allowlists and per-key rate limiting
+- **Redis Caching** - 90% reduction in config file I/O with automatic fallback
+
+### 📊 Call History
+- **Call Tracking** - Automatic logging of all inbound/outbound calls
+- **Transcription Viewer** - Color-coded speaker transcriptions with timestamps (collapsible)
+- **Comprehensive Latency Monitoring** - Full round-trip latency tracking:
+  - **Component Breakdown** - STT, LLM (TTFT), and TTS latency measured separately
+  - **Percentile Tracking** - P50/P90/P99 metrics for performance analysis
+  - **Visual Dashboard** - Doughnut chart for component distribution, trend line charts
+  - **Per-Agent Analytics** - Compare latency performance across different agents
+  - **Slow Call Detection** - Automatic flagging of calls with >1000ms latency
+  - **Color-Coded Thresholds** - Green (<500ms), Yellow (500-1000ms), Red (>1000ms)
+- **Live Latency on Active Calls** - Real-time TTFB display in Rooms page with auto-refresh
+- **Filtering** - Filter by agent, direction, date range, phone number
+- **Export** - Download call records as CSV or JSON (last 100/200/500/1000 or selected calls)
+- **Bulk Delete** - Multi-select and delete multiple call records at once
+- **Cloud Storage** - Sync call history to S3/GCS for permanent backup
+- **Cloud Restore** - Restore call history from cloud storage to Redis
+- **Storage Provider Selection** - Choose between local (Redis), S3, or GCS
+- **AI-Powered Call Summary**:
+  - LLM-generated summaries (OpenAI, Anthropic, Google)
+  - **Key Topics** - Automatically extracted conversation topics as tags
+  - **Call Outcome Badge** - Visual indicator (appointment booked, issue resolved, etc.)
+  - **Action Items Checklist** - Follow-up tasks with interactive checkboxes
+  - **Caller Sentiment Journey** - VADER-based sentiment sparkline showing emotional progression
+  - **Interruption Analysis** - Track user vs agent interruptions
+- **Call Recording Playback** - Play recordings directly from Call Detail page
+
+### 🔧 Tools & Function Calling
+- **Tool Registry** - Auto-discovery of tool files in `tools/` directory
+- **Built-in Tools**:
+  - **System**: Hangup, Hold, Blind Transfer, Attended Transfer (warm consultation)
+  - **Communication**: SendSMS (HTTP API with auth options), SendEmail (SMTP/AWS SES)
+  - **Utility**: GetDateTime, CollectDTMF (keypad/voice input), ScheduleCallback, RecordNote, PlayAudio, LookupCaller
+- **Webhook Tools** - Custom HTTP integrations for n8n, make.com, Zapier:
+  - Response handling with JSONPath extraction
+  - Error handling with speak-on-error messages
+  - Retry logic with configurable status codes and delays
+  - Rate limiting (per-minute and per-session)
+  - Authentication (bearer, basic, API key header/query)
+  - Availability hours and condition expressions
+  - Mock mode for testing without real HTTP calls
+  - Execution logging for debugging
+- **MCP Server Integration** - Connect Model Context Protocol servers for external AI tools:
+  - Three transport types: SSE, Streamable HTTP, and Stdio (local subprocess via npx)
+  - Pre-configured templates for Brave Search, GitHub, Filesystem, and Fetch servers
+  - One-click sync to discover and cache available tools from connected servers
+  - MCP tools assignable to agents alongside built-in and webhook tools
+  - Automatic connection management with proper lifecycle cleanup
+  - Environment variables and HTTP headers for server authentication
+- **External Event Injection API** - Inject events into active calls from external systems
+- **Per-Agent Assignment** - Assign specific tools to each agent
+- **Max Tool Steps** - Configurable limit on consecutive tool calls per turn (default 3, increase for multi-step workflows)
+- **Tool Configuration** - Schema-based configuration for each tool
+- **Global Tool Configuration** - Configure built-in tools with API URLs, credentials, and settings via modal UI
+
+### 📞 Telephony (SIP)
+- **Inbound Trunks** - Dedicated page for inbound trunk management with export/import
+- **Outbound Trunks** - Dedicated page for outbound calling with test call feature
+- **Dispatch Rules** - Dedicated page for call routing with agent assignment and export/import
+- **Phone Number Inventory** - Virtual aggregator showing all numbers across trunks
+- **Outbound Campaigns** - Bulk calling system with CSV import, configurable concurrency, call pacing, scheduling, operating hours with timezone support, and real-time progress tracking
+- **Navigation Shortcuts** - Quick links between telephony pages
+- **Rule Statistics** - Total, direct, individual, and multi-line rule counts
+
+### 🎥 Recording & Storage
+- **Room Composite Recording** - Record entire rooms with layout options
+- **Audio-Only Mode** - Works on 2 vCPU instances (recommended)
+- **Recording Retention** - Configurable automatic cleanup of old recordings (1-365 days)
+- **Cloud Storage** - Optional S3/GCS upload for recordings
+- **Bulk Delete** - Multi-select and delete multiple recordings (local and cloud)
+- **CPU Warning** - Automatic detection of hardware limitations
+- **Proper Error Logging** - Full stack traces for debugging
+
+### ⚙️ Settings & Configuration
+- **API Key Management** - Store and manage AI provider keys with Test buttons to verify connections
+- **API Test Buttons** - One-click testing for LLM (OpenAI, Anthropic, Google, xAI) and STT/TTS (Deepgram, ElevenLabs, Cartesia) API keys with latency display
+- **System Resources** - Monitor/restart services, edit memory/CPU limits
+- **System Logs** - View logs for all services (Dashboard, Agent, LiveKit, SIP, Egress)
+- **Sub-User Management** - Create users with granular per-page permissions (view, create, edit, delete), monthly minutes quota, and hide technical details option
+- **Permission Templates** - Read Only, Power User, Full Access, Customer Access presets
+- **Route-Level Enforcement** - All routes enforce permissions; UI buttons hidden when user lacks permission
+- **Customer Access** - Multi-tenant support with agent-based data filtering
+- **Agent Assignment** - Assign specific agents to customer users for data isolation
+- **Phone Number Assignment** - Assign specific phone numbers to customer users for view-only access
+- **Call History Cloud Sync** - Sync call metadata to S3/GCS with restore capability
+- **Audit Logging** - Track login/logout and user management actions
+- **Two-Factor Authentication** - Optional TOTP-based 2FA
+- **Forgot Password** - Email-based password reset with secure one-time links
+- **Email Service** - Configure SMTP or AWS SES for dashboard emails (password resets, notifications)
+- **Pricing & Cost Analytics** - Track per-call costs across LLM, STT, TTS, and realtime providers with margin support and currency conversion
+- **Automated Reports** - Scheduled report generation with email delivery (daily, weekly, monthly)
+- **Agent Simulation** - Automated testing of voice agents with configurable scenarios
+- **Email Templates** - Customizable email templates with variable support and preview
+- **Notes Tab** - Quick reference guides for Realtime models, Transfer & Transition handoffs, Turn Detector, STT models, and troubleshooting
+
+### ❓ Contextual Help System
+- **Page-Specific Help** - Click (?) button on any page for relevant documentation
+- **Field Explanations** - Detailed descriptions of all configuration options
+- **Section Guides** - Step-by-step explanations for each dashboard area
+
+---
+
+## 🧠 AI Model Guide
+
+Voice AI agents use three core components: **LLM** (reasoning), **STT** (speech-to-text), and **TTS** (text-to-speech), or a single **Realtime** audio-to-audio stream. Choosing the right combination affects latency, quality, and cost.
+
+### LLM Models (Large Language Models)
+
+| Provider | Model | Latency (TTFT) | Quality | Cost | Best For |
+|----------|-------|----------------|---------|------|----------|
+| **OpenAI** | GPT-4o | 300-500ms | Excellent | $$ | Balanced quality/speed, general purpose |
+| | GPT-4o Mini | 200-300ms | Good | $ | Budget-friendly, simpler conversations |
+| | GPT-4.1 | 300-400ms | Excellent | $$ | Smarter than 4o, better reasoning |
+| | GPT-4.1 Mini | 150-250ms | Good | $ | Fast responses, good quality |
+| | GPT-4.1 Nano | 100-200ms | Basic | $ | Cheapest, simple Q&A |
+| | GPT-5.1 Instant | 200-350ms | Excellent | $$ | Latest reasoning model, instant mode |
+| | GPT-5.2 Instant | 250-400ms | Best | $$$ | Smartest OpenAI model, complex tasks |
+| **Google** | Gemini 2.5 Flash | 150-300ms | Excellent | $ | Fast, cost-effective, great quality |
+| | Gemini 3 Flash Preview | 150-300ms | Best | $ | Latest model, best Google quality |
+| **Anthropic** | Claude Haiku 4.5 | 200-350ms | Good | $ | Fast, affordable Claude |
+| | Claude Sonnet 5 | 300-500ms | Excellent | $$ | Best Claude for voice, nuanced |
+| **AWS Bedrock** | Claude Haiku 4.5 (AU) | 250-400ms | Good | $ | Data stays in Australia |
+| | Claude Sonnet 4.5 (AU) | 350-550ms | Excellent | $$ | Australian data residency |
+| | Amazon Nova Micro | 100-200ms | Basic | $ | Fastest AWS option, simple tasks |
+| | Amazon Nova Pro | 200-350ms | Good | $ | Better quality Nova model |
+| **xAI** | Grok-4 Fast | 150-300ms | Good | $$ | Fast, conversational |
+| | Grok-4.1 Fast | 150-300ms | Excellent | $$ | Newest Grok, improved quality |
+
+### STT Models (Speech-to-Text)
+
+| Provider | Model | Latency | Accuracy | Languages | Best For |
+|----------|-------|---------|----------|-----------|----------|
+| **Deepgram** ⭐ | Flux (Low Latency) | ~100ms | Good | English | **Best for real-time voice AI** - fastest |
+| | Nova 3 | ~150ms | Excellent | 36+ | Best accuracy, multilingual |
+| | Nova 2 | ~200ms | Good | 36+ | Stable, proven model |
+| **OpenAI** | Whisper v1 | 500-1000ms | Excellent | 99+ | Non-realtime, post-processing |
+| | GPT-4o Transcribe | 300-500ms | Best | 50+ | Highest accuracy, context-aware |
+| | GPT-4o Mini Transcribe | 200-400ms | Excellent | 50+ | Faster, still very accurate |
+| **Google** | Chirp 3 | 200-400ms | Excellent | 125+ | Best multilingual support |
+| | Chirp 2 | 200-400ms | Good | 125+ | Stable, many languages |
+| **ElevenLabs** | Scribe v2 Realtime | ~150ms | Excellent | 32 | Fast, good for voice AI |
+| **AWS** | Transcribe Streaming | 200-400ms | Good | 50+ | AWS integration, data residency |
+
+### TTS Models (Text-to-Speech)
+
+| Provider | Model | Latency (TTFB) | Quality | Best For |
+|----------|-------|----------------|---------|----------|
+| **ElevenLabs** ⭐ | Flash v2.5 | ~75ms | Excellent | **Best for voice AI** - fastest + natural |
+| | Turbo v2.5 | ~250ms | Best | Highest quality, slightly slower |
+| **Cartesia** | Sonic 2 (2024-11) | ~50ms | Good | Fastest TTS available |
+| | Sonic 3 (2025-01) | ~50ms | Excellent | Fastest + improved quality |
+| **Deepgram** | Aura-2 Voices | ~100ms | Good | Multi-language (EN, ES, FR, DE, IT, NL, JA) |
+| **OpenAI** | TTS-1 | ~200ms | Good | Budget option, adequate quality |
+| | TTS-1 HD | ~300ms | Excellent | Best OpenAI quality |
+| | GPT-4o Mini TTS | ~200ms | Excellent | Newest, expressive voices |
+| **Google** | Neural2 / Wavenet | ~250ms | Good | Many accents (US, AU, GB, IN) |
+| | Chirp 3 HD | ~200ms | Excellent | Latest Google voices, multilingual |
+
+### Recommended Configurations
+
+| Scenario | LLM | STT | TTS | Total Latency |
+|----------|-----|-----|-----|---------------|
+| **⚡ Lowest Latency** | GPT-4.1 Mini or Gemini 2.5 Flash | Deepgram Flux | Cartesia Sonic 3 or ElevenLabs Flash | ~350-500ms |
+| **🏆 Best Quality** | GPT-5.2 Instant or Claude Sonnet 5 | Deepgram Flux | ElevenLabs Turbo v2.5 | ~500-700ms |
+| **⚖️ Best Balance** | GPT-4o or Gemini 2.5 Flash | Deepgram Nova 3 | ElevenLabs Flash v2.5 | ~450-650ms |
+| **💰 Budget Friendly** | GPT-4o Mini or GPT-4.1 Nano | Deepgram Nova 2 | Deepgram Aura-2 or OpenAI TTS-1 | ~400-600ms |
+
+### Realtime Models (Audio-to-Audio)
+
+Realtime providers use a single audio-to-audio stream, combining STT, LLM, and TTS in one connection for ultra-low latency.
+
+| Provider | Models | Voices | Latency | Key Features | API Key |
+|----------|--------|--------|---------|--------------|---------|
+| **Google** ⭐ | Gemini 2.5 Flash Native Audio | Puck, Charon, Kore, Fenrir, Aoede + more | <200ms | Language, proactivity, affective dialog, thinking budget, context compression | `GOOGLE_API_KEY` |
+| **Google Cloud** | Gemini 2.5 Flash Native Audio | Same as Google | <200ms | Same as Google, enterprise Vertex AI integration | Service Account |
+| **OpenAI** | GPT-4o Realtime | alloy, echo, ash, ballad, coral, sage + more | ~300ms | Playback speed, turn detection, noise reduction, modalities | `OPENAI_API_KEY` |
+| **xAI** | Grok 2 Realtime | Ara, Rex, Sal, Eve, Leo | ~300ms | Playback speed, turn detection, noise reduction | `XAI_API_KEY` |
+| **AWS** | Amazon Nova 2 Sonic | tiffany, matthew, amy + more | ~300ms | AWS integration, top_p, max_tokens, turn detection sensitivity | AWS Credentials |
+
+### Tips for Low Latency
+
+1. **Use streaming models** - All recommended STT/TTS models support streaming for faster response
+2. **Keep prompts concise** - Shorter system prompts = faster LLM processing
+3. **Regional routing** - Use Bedrock AU/APAC if your users are in Australia/Asia
+4. **Responsiveness slider** - Higher values (0.7-0.9) make the agent respond faster but may cut off users
+5. **Choose the right quality level** - Not every use case needs the smartest model
+6. **Try Realtime mode** - Google Gemini Live offers <200ms latency with a single audio-to-audio stream
+
+---
+
+## 🏗️ Architecture
+
+```
+                    User Browser (HTTPS)
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                  Nginx (SSL Termination)                │
+│     dashboard.domain.com → :8000                        │
+│     livekit.domain.com → :7880                          │
+└─────────────────────────────────────────────────────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          ▼               ▼               ▼
+┌─────────────────┐ ┌─────────────┐ ┌─────────────┐
+│    Dashboard    │ │   LiveKit   │ │    Redis    │
+│   (systemd)     │ │   Server    │ │   (state)   │
+│   Port 8000     │ │  Port 7880  │ │  Port 6379  │
+└────────┬────────┘ └──────┬──────┘ └──────┬──────┘
+         │                 │               │
+         ▼                 ▼               │
+┌─────────────────┐ ┌─────────────────────┼──────────┐
+│  Agent Worker   │ │  Docker Containers  │          │
+│   (systemd)     │ │  ┌───────────────┐  │          │
+│                 │ │  │  livekit-sip  │◄─┼──────────┤
+└─────────────────┘ │  └───────────────┘  │          │
+                    │  ┌───────────────┐  │          │
+                    │  │livekit-egress │◄─┼──────────┘
+                    │  └───────────────┘  │
+                    └─────────────────────┘
+```
+
+### Key Design Principles
+
+- **Fully Self-Hosted** - Runs entirely on your own infrastructure with no LiveKit Cloud dependency. All features are verified to work with self-hosted LiveKit Server — no cloud API keys, no external inference endpoints, no data sent to LiveKit Cloud
+- **Hybrid Architecture** - Systemd services + Docker containers
+- **Stateless Dashboard** - All data fetched from LiveKit in real-time
+- **SSR with Progressive Enhancement** - Server-rendered HTML + HTMX
+- **Redis Caching** - Agent config cached with 60s TTL, automatic fallback
+- **Secure by Default** - Cookie-based auth, CSRF protection, security headers
+
+---
+
+## 📋 System Requirements
+
+### Minimum Hardware
+| Component | Requirement | Notes |
+|-----------|-------------|-------|
+| CPU | 2 vCPU | Audio-only recording; 4+ vCPU for video recording |
+| RAM | 4 GB | Recommended 8 GB for production |
+| Swap | 2 GB | Required to prevent OOM crashes during high load |
+| Disk | 20 GB | More for recordings |
+| OS | Ubuntu 22.04/24.04 | Tested on AWS EC2 t3.medium |
+
+### Required Ports
+
+#### General Access (allow all — `0.0.0.0/0`)
+| Port | Protocol | Service |
+|------|----------|---------|
+| 80 | TCP | HTTP (redirects to HTTPS) |
+| 443 | TCP | HTTPS (Dashboard + LiveKit) |
+| 7881 | TCP | LiveKit TCP fallback |
+| 7882 | UDP | LiveKit WebRTC |
+| 50000-60000 | UDP | WebRTC media |
+
+#### SSH (restrict to your IP only)
+| Port | Protocol | Service |
+|------|----------|---------|
+| 22 | TCP | SSH |
+
+> 🔒 **Lock down SSH to your own IP address only.** An open SSH port will attract brute-force login attempts. If Tronic Support needs to access your server, you will need to temporarily add their IP address as well.
+
+#### SIP Ports — Telephony (restrict to your SIP provider IPs only)
+| Port | Protocol | Service |
+|------|----------|---------|
+| 5060 | UDP | SIP signaling |
+| 10000-20000 | UDP | RTP media |
+
+> 🚨 **CRITICAL: Lock these ports down to your SIP provider's IP addresses only.** SIP is an inherently insecure protocol — an open SIP port will receive hundreds of hacking attempts per minute from automated scanners attempting to make fraudulent calls on your trunk. This can result in significant financial loss. Only allow traffic from your SIP trunk provider's published IP ranges (e.g., Twilio, Telnyx, Vonage). Never open these ports to `0.0.0.0/0`.
+
+### Supported Codecs
+
+**Audio Codecs:**
+| Codec | Support | Notes |
+|-------|---------|-------|
+| Opus | ✅ Primary | Default for WebRTC, best quality/compression |
+| G.711 μ-law (PCMU) | ✅ SIP | Standard for US telephony |
+| G.711 A-law (PCMA) | ✅ SIP | Standard for international telephony |
+| PCM (raw) | ✅ Internal | Used by voice pipelines/agents |
+
+**Video Codecs:**
+| Codec | Support | Notes |
+|-------|---------|-------|
+| VP8 | ✅ | WebRTC standard |
+| VP9 | ✅ | Better compression |
+| H.264 | ✅ | Hardware acceleration, wide compatibility |
+| AV1 | ✅ | Newest, best compression |
+
+**Audio File Formats (for hold music/play audio):**
+- MP3, WAV, OGG (max 10MB)
+
+> **Note:** LiveKit automatically transcodes between Opus (WebRTC) and G.711 (SIP) for telephony calls. No manual codec configuration is required.
+
+---
+
+## 🚀 Quick Start Installation
+
+### Prerequisites
+- Ubuntu 22.04 or 24.04 server
+- Python 3.11 - 3.13 (3.14+ not yet supported)
+- Domain names pointed to server (e.g., `dashboard.yourdomain.com`, `livekit.yourdomain.com`)
+- Minimum 4GB RAM (8GB recommended for production)
+
+### Step 1: System Setup
+
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl git build-essential python3-pip python3-dev python3-venv
+
+# Create swap file (required to prevent OOM crashes)
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Set swappiness to 0 (only use swap as emergency overflow, not proactively)
+sudo sysctl vm.swappiness=0
+echo 'vm.swappiness=0' | sudo tee /etc/sysctl.d/99-swappiness.conf
+```
+
+> **Note:** The `scripts/setup.sh` convenience script does NOT create a swap file automatically. You must create the swap file manually using the commands above. A swap file is required to prevent out-of-memory (OOM) crashes during high load periods. The swappiness value of 0 ensures swap is only used as emergency overflow when physical RAM is exhausted, rather than proactively moving data to disk.
+
+```bash
+# Install Poetry
+curl -sSL https://install.python-poetry.org | python3 -
+export PATH="/home/ubuntu/.local/bin:$PATH"
+echo 'export PATH="/home/ubuntu/.local/bin:$PATH"' >> ~/.bashrc
+```
+
+### Step 2: Install Redis
+
+```bash
+sudo apt install -y redis-server
+
+# Generate password
+REDIS_PASSWORD=$(openssl rand -base64 32)
+echo "Redis Password: $REDIS_PASSWORD" >> ~/livekit-credentials.txt
+
+# Configure authentication
+sudo sed -i "s/# requirepass foobared/requirepass $REDIS_PASSWORD/" /etc/redis/redis.conf
+sudo systemctl restart redis-server
+sudo systemctl enable redis-server
+```
+
+### Step 3: Install LiveKit Server
+
+```bash
+curl -sSL https://get.livekit.io | bash
+
+# Generate credentials
+LIVEKIT_API_KEY=$(openssl rand -hex 16)
+LIVEKIT_API_SECRET=$(openssl rand -base64 32)
+echo "LiveKit API Key: $LIVEKIT_API_KEY" >> ~/livekit-credentials.txt
+echo "LiveKit API Secret: $LIVEKIT_API_SECRET" >> ~/livekit-credentials.txt
+
+# Create config
+sudo mkdir -p /etc/livekit
+sudo tee /etc/livekit/config.yaml > /dev/null << EOF
+port: 7880
+bind_addresses:
+  - "127.0.0.1"
+
+rtc:
+  port_range_start: 50000
+  port_range_end: 60000
+  use_external_ip: true
+  udp_port: 7882
+
+redis:
+  address: localhost:6379
+  password: $REDIS_PASSWORD
+  db: 0
+
+keys:
+  $LIVEKIT_API_KEY: $LIVEKIT_API_SECRET
+
+room:
+  auto_create: true
+  empty_timeout: 60
+EOF
+```
+
+### Step 4: Install Dashboard
+
+```bash
+cd /home/ubuntu
+git clone https://github.com/ritzy1978/livekit-dashboard.git
+cd livekit-dashboard
+
+poetry install
+
+# Install sentiment analysis package (for Caller Sentiment Journey feature)
+poetry run pip install vaderSentiment
+
+# Generate credentials
+ADMIN_PASSWORD=$(openssl rand -base64 32)
+APP_SECRET_KEY=$(openssl rand -hex 32)
+echo "Admin Password: $ADMIN_PASSWORD" >> ~/livekit-credentials.txt
+
+# Create .env file
+cat > .env << EOF
+LIVEKIT_URL=https://livekit.yourdomain.com
+LIVEKIT_API_KEY=$LIVEKIT_API_KEY
+LIVEKIT_API_SECRET=$LIVEKIT_API_SECRET
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=$ADMIN_PASSWORD
+APP_SECRET_KEY=$APP_SECRET_KEY
+REDIS_URL=redis://:$REDIS_PASSWORD@localhost:6379/0
+DEBUG=false
+HOST=0.0.0.0
+PORT=8000
+ENABLE_SIP=true
+EOF
+```
+
+### Step 5: Create Systemd Services
+
+```bash
+# LiveKit Server service
+sudo tee /etc/systemd/system/livekit.service > /dev/null << 'EOF'
+[Unit]
+Description=LiveKit Server
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+ExecStart=/usr/local/bin/livekit-server --config /etc/livekit/config.yaml
+Restart=always
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Dashboard service
+sudo tee /etc/systemd/system/livekit-dashboard.service > /dev/null << 'EOF'
+[Unit]
+Description=LiveKit Dashboard
+After=network.target livekit.service redis-server.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/livekit-dashboard
+Environment="PATH=/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin"
+ExecStart=/home/ubuntu/.local/bin/poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Agent Worker service
+sudo tee /etc/systemd/system/livekit-agent.service > /dev/null << 'EOF'
+[Unit]
+Description=LiveKit Agent Worker
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/livekit-dashboard
+EnvironmentFile=/home/ubuntu/livekit-dashboard/.env
+ExecStart=/home/ubuntu/.local/bin/poetry run python scripts/run_agents.py start --url ws://127.0.0.1:7880
+Restart=always
+StandardOutput=append:/home/ubuntu/livekit-dashboard/logs/agent-service.log
+StandardError=append:/home/ubuntu/livekit-dashboard/logs/agent-service-error.log
+CPUQuota=80%
+MemoryMax=768M
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Create logs directory
+mkdir -p /home/ubuntu/livekit-dashboard/logs
+
+# Enable services
+sudo systemctl daemon-reload
+sudo systemctl enable livekit livekit-dashboard livekit-agent
+
+# Disable swap for LiveKit services (keeps them in RAM for performance)
+sudo mkdir -p /etc/systemd/system/livekit.service.d
+sudo mkdir -p /etc/systemd/system/livekit-agent.service.d
+sudo mkdir -p /etc/systemd/system/livekit-dashboard.service.d
+echo -e "[Service]\nMemorySwapMax=0" | sudo tee /etc/systemd/system/livekit.service.d/no-swap.conf
+echo -e "[Service]\nMemorySwapMax=0" | sudo tee /etc/systemd/system/livekit-agent.service.d/no-swap.conf
+echo -e "[Service]\nMemorySwapMax=0" | sudo tee /etc/systemd/system/livekit-dashboard.service.d/no-swap.conf
+sudo systemctl daemon-reload
+
+# Start services
+sudo systemctl start livekit livekit-dashboard livekit-agent
+```
+
+### Step 6: Configure Log Rotation
+
+```bash
+sudo tee /etc/logrotate.d/livekit-dashboard > /dev/null << 'EOF'
+# Uses copytruncate because the agent service holds open file descriptors
+# via systemd StandardOutput=append:. A rename would leave the service
+# writing to the old (renamed) file while the new file stays empty.
+/home/ubuntu/livekit-dashboard/logs/agent-service.log
+/home/ubuntu/livekit-dashboard/logs/agent-service-error.log {
+    daily
+    rotate 7
+    maxsize 10M
+    compress
+    delaycompress
+    notifempty
+    missingok
+    copytruncate
+    dateext
+    dateformat -%Y%m%d
+}
+
+/home/ubuntu/livekit-dashboard/logs/agent_*.log {
+    daily
+    rotate 7
+    maxsize 5M
+    compress
+    delaycompress
+    notifempty
+    missingok
+    create 0644 ubuntu ubuntu
+    dateext
+    dateformat -%Y%m%d
+}
+EOF
+```
+
+### Step 7: Install Nginx and SSL
+
+```bash
+sudo apt install -y nginx certbot python3-certbot-nginx
+
+# Create Nginx configs (replace yourdomain.com)
+sudo certbot --nginx -d dashboard.yourdomain.com -d livekit.yourdomain.com \
+  --non-interactive --agree-tos -m your-email@example.com --redirect
+```
+
+### Step 8: Install Docker Services (SIP & Egress)
+
+```bash
+sudo apt install -y docker.io
+sudo usermod -aG docker $USER
+
+# SIP Service
+sudo mkdir -p /etc/livekit-sip
+sudo tee /etc/livekit-sip/config.yaml > /dev/null << EOF
+log_level: info
+api_key: $LIVEKIT_API_KEY
+api_secret: $LIVEKIT_API_SECRET
+ws_url: ws://127.0.0.1:7880
+redis:
+  address: 127.0.0.1:6379
+  password: $REDIS_PASSWORD
+  db: 0
+sip:
+  port: 5060
+EOF
+
+sudo docker run -d --name livekit-sip --restart unless-stopped --network host \
+  -v /etc/livekit-sip/config.yaml:/sip/config.yaml:ro livekit/sip:latest
+
+# Egress Service (requires 4 vCPU for video recording)
+sudo mkdir -p /etc/livekit-egress /var/livekit/egress
+sudo tee /etc/livekit-egress/config.yaml > /dev/null << EOF
+log_level: info
+api_key: $LIVEKIT_API_KEY
+api_secret: $LIVEKIT_API_SECRET
+ws_url: ws://127.0.0.1:7880
+redis:
+  address: 127.0.0.1:6379
+  password: $REDIS_PASSWORD
+  db: 0
+health_port: 8080
+file_output:
+  local: true
+  output_directory: /out
+EOF
+
+sudo docker run -d --name livekit-egress --restart unless-stopped --network host \
+  -v /etc/livekit-egress/config.yaml:/config.yaml:ro \
+  -v /var/livekit/egress:/out livekit/egress:latest
+```
+
+### Step 9: Initialize Security (Fail2ban & Sudoers)
+
+```bash
+# Install fail2ban
+sudo apt install -y fail2ban
+
+# Run the security setup script
+cd /home/ubuntu/livekit-dashboard
+python3 -m app.scripts.init_security
+
+# Restart dashboard to enable security logging
+sudo systemctl restart livekit-dashboard
+
+# Verify fail2ban is running with LiveKit jails
+sudo fail2ban-client status
+```
+
+**What init_security.py configures:**
+- Fail2ban filters and jails for intrusion detection
+- Passwordless sudo for dashboard commands:
+  - Service management (restart livekit-dashboard, livekit-agent, livekit, fail2ban)
+  - Time/NTP (set timezone, chrony sync)
+  - System config (swappiness, fail2ban configs)
+
+This enables the dashboard to manage services without requiring SSH access.
+
+> **IMPORTANT:** After setup, go to **Settings > Security** and add your IP address to the whitelist to prevent accidental lockout.
+
+### Step 10: Verify Installation
+
+```bash
+# Check all services
+sudo systemctl status redis-server livekit livekit-dashboard livekit-agent fail2ban
+sudo docker ps
+
+# Check fail2ban jails
+sudo fail2ban-client status
+
+# View credentials
+cat ~/livekit-credentials.txt
+```
+
+Access your dashboard at `https://dashboard.yourdomain.com`
+
+---
+
+## 📖 Usage Guide
+
+### Overview Page (`/`)
+
+Expandable sections showing:
+- **Live Sessions** - Active rooms with cost tracking
+- **Recording & Storage** - Active recordings, success rate, storage used
+- **Telephony** - SIP trunk status, call volume
+- **Server Stats** - CPU, memory, disk, uptime
+
+### Call History (`/call-history`)
+
+- **Call Records** - View all inbound/outbound calls with filtering
+- **Transcriptions** - Color-coded speaker transcripts
+- **Metrics** - Duration, TTFB latency, end reason
+- **Export** - Download as CSV or JSON
+
+### Tools (`/tools`)
+
+- **Tool Registry** - View all available tools (built-in, webhook, and MCP)
+- **Webhook Tools** - Create custom HTTP integrations
+- **MCP Servers** - Connect MCP servers for external AI tools (web search, GitHub, etc.)
+- **Agent Assignment** - Assign tools to specific agents
+
+### Agents (`/agents`)
+
+- **Create/Edit Agents** - Full visual editor for all settings
+- **Multi-Agent Dispatch** - Route calls to different agents
+- **Start/Stop** - Control agent processes directly
+- **Export/Import** - Backup configurations as JSON
+
+### Recording & Storage (`/egress`)
+
+- **Start Recording** - Select room, layout, audio/video options
+- **CPU Warning** - Banner shows if hardware is limited
+- **Audio-Only Recommended** - Works on 2 vCPU instances
+
+> ⚠️ **Hardware Note:** Video recording requires 4 vCPU. Audio-only works on 2 vCPU.
+
+### Settings (`/settings`)
+
+**Tabs:**
+- **General** - Server info, connection status
+- **Integrations/API** - API keys for AI providers with Test buttons to verify connections (requires `settings.edit` permission to modify)
+- **Security** - Password change, 2FA setup
+- **User Management** - Sub-users with granular permissions (main admin only)
+- **Dependencies** - Install/update packages, view LiveKit plugins (requires `settings.edit` for changes)
+- **System Resources** - Monitor/restart services, edit limits (requires `settings.edit` for changes)
+- **System Logs** - View service logs (requires `settings.view` permission)
+- **Notes** - Quick reference guides
+
+**Permission Notes:** Sub-users with `settings.view` can see settings but cannot modify them. The `settings.edit` permission is required to change API keys, install packages, restart services, or modify resource limits.
+
+---
+
+## 🔧 Service Management
+
+### Dashboard
+```bash
+sudo systemctl status livekit-dashboard
+sudo systemctl restart livekit-dashboard
+sudo journalctl -u livekit-dashboard -f
+```
+
+### Agent Worker
+```bash
+sudo systemctl status livekit-agent
+sudo systemctl restart livekit-agent
+tail -f /home/ubuntu/livekit-dashboard/logs/agent-service.log
+```
+
+### LiveKit Server
+```bash
+sudo systemctl status livekit
+sudo journalctl -u livekit -f
+```
+
+### Docker Services
+```bash
+sudo docker ps
+sudo docker logs livekit-sip -f
+sudo docker logs livekit-egress -f
+sudo docker restart livekit-sip livekit-egress
+```
+
+---
+
+## 📁 File Locations
+
+```
+/home/ubuntu/livekit-dashboard/
+├── .env                    # Environment configuration
+├── agent_config.json       # Agent configurations (cached in Redis)
+├── logs/                   # Agent service logs
+├── app/                    # Dashboard application
+│   ├── routes/            # API routes
+│   │   └── telephony/     # Telephony routes (inbound, outbound, rules, numbers)
+│   ├── services/          # Business logic
+│   │   ├── livekit.py     # LiveKit SDK wrapper
+│   │   ├── call_history.py        # Call history storage
+│   │   ├── webhook_tools.py       # Webhook tool definitions
+│   │   ├── mcp_servers.py         # MCP server configs and tool discovery
+│   │   ├── system_resources.py    # Service monitoring
+│   │   ├── user_manager.py        # Sub-user management
+│   │   ├── audit_logger.py        # Audit logging
+│   │   └── help_content.py        # Contextual help content
+│   ├── templates/         # Jinja2 templates
+│   ├── static/            # CSS, JS, images
+│   └── utils/             # Utilities (Redis cache)
+├── tools/                  # Agent tools
+│   ├── base.py            # BaseTool abstract class
+│   ├── system.py          # Hangup, Hold, BlindTransfer, AttendedTransfer tools
+│   ├── communication.py   # SendSMS, SendEmail tools
+│   ├── utility.py         # GetDateTime, CollectDTMF, PlayAudio, etc.
+│   ├── webhook.py         # Webhook tool executor
+│   └── mcp_tool.py        # MCP tool adapter for remote MCP servers
+└── scripts/
+    └── run_agents.py      # Agent worker script
+
+/etc/livekit/config.yaml           # LiveKit Server config
+/etc/livekit-sip/config.yaml       # SIP service config
+/etc/livekit-egress/config.yaml    # Egress service config
+/etc/logrotate.d/livekit-dashboard # Log rotation config
+/var/livekit/egress/               # Recording output
+```
+
+---
+
+## 🛠️ Utility Scripts
+
+### Security Initialization
+```bash
+cd /home/ubuntu/livekit-dashboard
+python3 -m app.scripts.init_security
+```
+Sets up fail2ban jails and passwordless sudo for dashboard commands. Run once after installation and after updates to v1.5.2+.
+
+### Cleanup Old Versions
+```bash
+./scripts/cleanup_old_versions.sh           # Dry-run (shows what would be deleted)
+./scripts/cleanup_old_versions.sh --delete  # Actually delete old version directories
+```
+Removes leftover `livekit-dashboard-X.Y.Z` directories from updates.
+
+---
+
+## 🚨 Troubleshooting
+
+### Recording Not Working
+
+**Check egress logs:**
+```bash
+sudo docker logs livekit-egress --tail 50
+```
+
+**CPU Warning:** If you see `not enough cpu for some egress types`:
+- Your server has 2 vCPU, egress needs 4 for video
+- **Solution:** Use audio-only recording OR upgrade to t3.xlarge
+
+### No Audio on Calls (AWS Hairpin NAT)
+
+**Symptoms:** Calls connect but no audio, DTLS timeout errors
+
+**Cause:** AWS instances can't connect to their own public IP
+
+**Solution:** All services must use `ws://127.0.0.1:7880` (localhost), not public URL
+
+```bash
+# Check agent service
+sudo systemctl cat livekit-agent | grep ExecStart
+# Should show: --url ws://127.0.0.1:7880
+
+# Check SIP config
+sudo cat /etc/livekit-sip/config.yaml | grep ws_url
+# Should show: ws_url: ws://127.0.0.1:7880
+```
+
+### Dashboard 502 Bad Gateway
+
+```bash
+sudo systemctl status livekit-dashboard
+sudo journalctl -u livekit-dashboard -n 50
+```
+
+### Redis Connection Errors
+
+```bash
+redis-cli -a 'YOUR_PASSWORD' ping
+# Should return: PONG
+```
+
+---
+
+## 🔒 Security Features
+
+- ✅ Cookie-based authentication with HttpOnly, Secure, SameSite
+- ✅ CSRF protection on all forms
+- ✅ Optional Two-Factor Authentication (TOTP)
+- ✅ Security headers (X-Frame-Options, X-Content-Type-Options)
+- ✅ Login rate limiting with automatic lockout
+- ✅ File locking for concurrent-safe configuration writes
+- ✅ Redis caching with graceful degradation
+
+### Best Practices
+
+1. Use strong passwords: `openssl rand -base64 32`
+2. Enable 2FA in Settings > Security
+3. Use HTTPS in production
+4. Restrict SIP ports to provider IPs
+5. Regular backups of `.env` and `agent_config.json`
+
+### Fail2ban IP Protection (Optional)
+
+Fail2ban integration provides automatic IP blocking for:
+- **Authentication failures** (wrong password) - 3 attempts = 30 min ban
+- **Invalid email attempts** (non-existent accounts) - 5 attempts = 30 min ban
+- **Vulnerability scanners** (.env, .git, wp-admin probes) - 5 requests = 24 hr ban
+- **Rate limiting** - 100 requests in 10 sec = 10 min ban
+- **Recidive** (repeat offenders) - 3 bans in 24 hrs = 7 day ban
+
+**Installation (New Server):**
+
+```bash
+# Step 1: Install fail2ban
+sudo apt update
+sudo apt install -y fail2ban
+
+# Step 2: Run the security setup script (sets up fail2ban jails and sudoers config)
+cd /home/ubuntu/livekit-dashboard
+python3 -m app.scripts.init_security --install-fail2ban
+# Or if using poetry: poetry run python -m app.scripts.init_security --install-fail2ban
+
+# Step 3: Restart dashboard to enable security logging
+sudo systemctl restart livekit-dashboard
+```
+
+> **IMPORTANT:** After installation, immediately add your IP address to the whitelist to prevent accidental lockout. Go to **Settings > Security** tab and add your IP in the "Whitelisted IPs" section, or run:
+> ```bash
+> # Find your public IP
+> curl -s ifconfig.me
+>
+> # Add to whitelist via the settings file
+> nano /home/ubuntu/livekit-dashboard/data/security_settings.json
+> # Add to the "whitelist" array:
+> # {"ip": "YOUR_IP", "note": "Admin access", "added_at": "2026-01-21T00:00:00Z", "added_by": "admin"}
+> ```
+
+**Verify Installation:**
+
+```bash
+# Check fail2ban status
+sudo fail2ban-client status
+
+# Check LiveKit jails are active
+sudo fail2ban-client status livekit-auth
+sudo fail2ban-client status livekit-scanner
+
+# View recent bans
+sudo fail2ban-client banned
+```
+
+**Configuration:**
+
+Visit **Settings > Security** tab (main admin only) to:
+- View banned IPs and unban them
+- **Add your IP to whitelist** (prevents accidental lockout)
+- Adjust ban thresholds (max retries, find time, ban duration)
+- View security event logs in real-time
+
+**Lockout Recovery (Admin Banned):**
+
+If you're the admin and accidentally get banned (e.g., too many failed login attempts), use SSH to recover:
+
+**Step 1: Find your public IP address**
+```bash
+# From another device/network, or use:
+curl -s ifconfig.me
+```
+
+**Step 2: Check if your IP is banned**
+```bash
+ssh ubuntu@your-server
+sudo fail2ban-client status livekit-auth
+# Look for your IP in "Banned IP list"
+```
+
+**Step 3: Unban your IP from all jails**
+```bash
+# Replace YOUR_IP with your actual IP address
+sudo fail2ban-client set livekit-auth unbanip YOUR_IP
+sudo fail2ban-client set livekit-invalid-email unbanip YOUR_IP
+sudo fail2ban-client set livekit-scanner unbanip YOUR_IP
+sudo fail2ban-client set livekit-ratelimit unbanip YOUR_IP
+sudo fail2ban-client set livekit-2fa unbanip YOUR_IP
+
+# Verify unbanned
+sudo fail2ban-client status livekit-auth
+```
+
+**Step 4: Add your IP to the permanent whitelist**
+```bash
+# Edit the security settings file
+nano /home/ubuntu/livekit-dashboard/data/security_settings.json
+
+# Add your IP to the "whitelist" array:
+# {
+#   "whitelist": [
+#     {"ip": "127.0.0.1", "note": "Localhost", ...},
+#     {"ip": "YOUR_IP", "note": "Admin", "added_at": "2026-01-21T00:00:00Z", "added_by": "manual"}
+#   ],
+#   ...
+# }
+
+# Regenerate fail2ban config with new whitelist
+cd /home/ubuntu/livekit-dashboard
+python3 -c "from app.services.fail2ban import regenerate_config; regenerate_config()"
+```
+
+**Emergency: Completely disable fail2ban protection**
+```bash
+# Only use this if you can't recover any other way
+sudo rm /etc/fail2ban/jail.d/livekit.conf
+sudo fail2ban-client reload
+
+# Re-enable later by running:
+python3 -m app.scripts.init_security
+```
+
+**Uninstall Fail2ban Integration:**
+
+```bash
+python3 -m app.scripts.init_security --uninstall
+```
+
+---
+
+## 📊 Performance Optimizations
+
+### Redis Caching
+- Agent config cached with 60s TTL
+- 90% reduction in disk I/O
+- 10x faster config reads
+- Automatic fallback if Redis unavailable
+
+### Log Rotation
+- Daily rotation at midnight
+- 7-day retention with compression
+- Max 10MB per log file
+- Prevents disk exhaustion
+
+### Resource Limits
+- Agent worker: 80% CPU quota, 768MB memory max
+- Prevents runaway processes
+- Graceful resource management
+
+### Agent Latency Optimizations (v1.12.x)
+- **Anthropic / Bedrock Claude prompt caching** — opt-in per agent, cuts per-call LLM cost and TTFT when the system prompt is stable across calls
+- **Flux endpointing delay fix** — when Deepgram Flux turn detection is on, the dashboard's Response Delay no longer stacks on top of Flux's own EOT timeout
+- **Agent Warm Idle worker** — pre-spawns one agent worker process and preloads turn-detection imports at startup so the first call of the day responds 2-5s faster (adds ~100-200 MB baseline RAM; disable on 2 GB VPS in Settings → System)
+
+---
+
+## 📝 Changelog
+
+### v1.12.3 (April 2026)
+- **Agent latency pack** - Anthropic / Bedrock Claude prompt caching toggle (opt-in per agent; cuts TTFT and per-call cost on stable prompts), Flux endpointing delay fix (Response Delay no longer stacks on top of Flux's own EOT timeout), Agent Warm Idle worker (first call of the day 2-5s faster; toggle in Settings → System)
+- **MCP auto-versioning** - API-initiated prompt edits now create a prompt-history entry tagged `source=mcp` with the API key name recorded, so browser edits and programmatic edits share the same audit trail and one-click rollback
+- **MCP expanded coverage** - External Claude / Cursor / Claude Desktop clients can now read and write every agent configuration field (realtime, outbound detection, LLM fallback, voice fine-tuning, conversation dynamics, KB assignments, Azure deployments, etc.) — previously limited to a small subset
+- **MCP tool discovery** - Full list of writable fields, enums, and merge semantics is returned by the `get_agent_config_reference()` MCP tool under a new `mcp_write_coverage` block
+- **Help + README refresh** - Agent page Help covers the prompt-version audit trail and the MCP/API access surface; README includes the latency pack and MCP control features
+
+### v1.12.2 (April 2026)
+- **SIP codec display** - SIP trunk codec shown on the Call Detail page
+- **SIP robustness** - More reliable codec extraction and cleaner end-of-call handling when codec lookups time out
+
+### v1.12.1 (April 2026)
+- **Enrich Prompt UX** - Side-by-side and diff tabs in the Enrich Prompt modal
+- **AutoResearch improvements** - Side-by-side diff, always-show advanced, report type selector, mobile responsive layout
+
+### v1.12.0 (April 2026)
+- **Voice-agent quality fixes** - Bedrock prefill patch, LLM fallback chain (primary + up to 2 fallback providers), silence engagement, markdown-for-speech filter, refreshed model lists
+
+### v1.10.19 (March 2026)
+- **KB Search Improvements** - Context expansion for richer results, configurable score threshold, re-index collections, and document download
+- **KB URL Sources** - Add web page URLs, Google Docs, and Google Sheets as knowledge sources with configurable auto-refresh intervals (1h to 30d)
+- **PDF Upload Support** - Upload PDF documents (up to 10MB) to knowledge base collections with automatic text extraction
+
+### v1.10.18 (March 2026)
+- **Deepgram Aura-2 Speed Fix** - Corrected playback speed for Aura-2 TTS voices
+- **Live Monitoring** - Quality threshold tuning for active call monitoring
+
+### v1.10.17-beta (March 2026)
+- **Login Rate Limiting** - Automatic account lockout after repeated failed login attempts
+- **CSRF Token Expiry Fix** - Resolved session expiry issues with CSRF token validation
+- **Deepgram Aura-2 Voices** - Added new Aura-2 voice options for Deepgram TTS
+- **Pyarmor RFT Fix** - Fixed Pyarmor runtime obfuscation compatibility issue
+
+### v1.10.16-beta (March 2026)
+- **Login Rate Limiting** - Initial implementation of login attempt throttling
+
+### v1.10.15-beta (March 2026)
+- **Campaign Operating Hours** - Configure allowed calling hours with timezone support for outbound campaigns
+
+### v1.10.14-beta (March 2026)
+- **End Call on Silence** - Automatically end calls after configurable period of caller silence
+- **Sudoers Migration Fixes** - Improved reliability of sudoers configuration during updates
+
+### v1.10.11 - v1.10.13 (March 2026)
+- Various stability fixes and minor improvements
+
+### v1.8.2 (February 2026)
+- **MCP Server Integration** - Connect Model Context Protocol (MCP) servers to give agents access to external tools:
+  - Full CRUD management for MCP server configurations in the Tools page
+  - Three transport types: SSE, Streamable HTTP, and Stdio (local subprocess via npx)
+  - Pre-configured templates for Brave Search, GitHub, Filesystem, and Fetch servers
+  - One-click sync to discover and cache available tools from connected servers
+  - MCP tools assignable to agents alongside built-in and webhook tools
+  - Automatic connection management and lifecycle cleanup in agent runtime
+  - Environment variables and HTTP headers for server authentication
+- **Background Audio** - Built-in LiveKit audio clips and custom file uploads for ambient sounds during calls
+- **Call Summary Language** - AI summaries now respond in the transcription's detected language
+- **Vertex AI Summary Models** - Added Gemini 2.5 Pro to available summary models for Google Cloud
+- **Tools Page Help** - Updated contextual help with MCP documentation, added "How to" guide card
+
+### v1.6.0 (February 2026)
+- **API Test Buttons** - One-click testing for all configured API keys in Settings > Integrations:
+  - LLM providers: OpenAI, Anthropic, Google (Gemini), xAI (Grok)
+  - STT/TTS providers: Deepgram, ElevenLabs, Cartesia
+  - Shows success with latency (e.g., "OK 342ms") or specific error message
+  - Helps diagnose invalid keys, insufficient credits, or connection issues
+
+### v1.5.9 (January 2026)
+- **Email Templates** - Create and manage customizable email templates with variable support
+- **Forgot Password** - Users can reset their password via email
+- **Dashboard Email Service** - Configure SMTP or AWS SES for sending dashboard emails
+- **Template Variables** - Reference guide for available email template variables including custom logo support
+- **Send Email Tool Improvements** - Provider dropdown with conditional fields, AWS region selector
+
+### v1.5.8 (January 2026)
+- **Simplified Egress Page** - Cleaner interface with focused recording features
+- **Storage Provider Fix** - Auto-recordings now correctly use dashboard storage settings
+- **Security Tab Access** - Full Access users can now view the Security tab
+- **Bug Fixes** - Fixed egress page crash, package metadata handling, number format saving
+
+### v1.5.7 (January 2026)
+- **Outbound Call Status** - Real-time status showing call states (Dialing, Ringing, Connected, Failed, Ended)
+- **Hang Up Button** - End outbound calls directly from the modal when connected
+- **E.164 Number Format** - Option to include or exclude + prefix in phone number formatting
+- **Twilio Setup Guide** - Complete documentation for Elastic SIP Trunking with regional endpoints
+- **Campaigns Help** - Added comprehensive help content for the Campaigns page
+- **SIP Trunk Tooltips** - Added helpful tooltips to all form fields in trunk configuration modals
+
+### v1.5.4 (January 2026)
+- **Update Notification Badge** - Persistent sidebar badge shows when updates are available
+- **Microphone Test** - Audio visualizer works before connecting in Agent Tester
+- **Voice Transcription Display** - Real-time transcription shown in Agent Tester during voice calls
+- **Phone Number Format** - All SIP trunk phone fields now show E.164 format without + prefix
+
+### v1.5.3 (January 2026)
+- **Outbound Campaign Dialer** - Bulk calling system with CSV import, configurable concurrency, call pacing, scheduling, and real-time progress tracking
+- **Outbound SIP Calls Fix** - Fixed agent dispatch for outbound calls using participant metadata
+
+### v1.5.1 (January 2026)
+- **Fail2ban Controls** - Reload Config and Restart Service buttons in Security settings
+
+### v1.5.0 (January 2026)
+- **Agent Editor UX** - Improved agent editor interface with better layout and controls
+- **Fail2ban Improvements** - Better security log monitoring and updated default thresholds
+
+### v1.3.0 (January 2026)
+- **Agent Tester** - Test voice agents directly from the dashboard:
+  - Text mode: Send messages via data channels
+  - Voice mode: Real-time voice conversation with microphone
+  - LLM selection dropdown for text chat (GPT-4o, Claude, Gemini)
+  - Debug panel for connection events and transcriptions
+- **System Backup & Restore** - Comprehensive backup functionality:
+  - Full Redis data export (agents, users, call history, tools, settings)
+  - Config file backup (.env, credentials)
+  - Optional audio files backup (hold music, play audio)
+  - Cloud backup to S3/GCS with scheduling (daily/weekly/monthly)
+  - Backup time selection with server timezone display
+  - Max backups limit — auto-delete oldest cloud backups when exceeded (0 = unlimited)
+- **Google TTS Enhancements** - Split into Global and Geo-Located options:
+  - Google (Global) uses worldwide endpoints
+  - Google (Geo-Located) uses regional Vertex AI endpoints
+  - Added Neural2 and Wavenet voices for US, AU, GB English
+- **OpenAI TTS Voice Selection** - Dropdown with all 11 voices:
+  - Standard voices: Nova, Shimmer, Echo, Fable, Onyx, Alloy
+  - HD voices: Coral, Sage, Ash, Ballad, Verse
+- **Deepgram TTS Fixes** - Corrected voice names per language, removed unsupported languages
+- **Minimum Duration Filter** - Auto-delete short calls and recordings:
+  - Configurable threshold (1-300 seconds)
+  - Separate settings for call history and recordings
+- **LiveKit Upgrade Feature** - Upgrade server and agents from Settings:
+  - Version checking with upgrade buttons
+  - Changelog links to GitHub releases
+- **System Logs Expansion** - Added Agent, Nginx, and Redis log sources
+- **Swap Memory Monitoring** - View and configure swappiness in System Resources
+- **Security Stats on Overview** - Display banned and whitelisted IP counts
+- **Room Retention Improvements** - Look Inside button, remove ended rooms
+- **License Protection Hardening** - Defense-in-depth security improvements
+
+### v1.1.4 (January 2026)
+- **Multi-Language STT Support** - Expanded speech recognition to 30+ languages:
+  - English (US, AU, GB, IN, NZ), Spanish, French (+ Canadian), German, Portuguese (+ Brazilian)
+  - Italian, Dutch, Polish, Russian, Ukrainian
+  - Japanese, Korean, Chinese (Mandarin + Taiwan), Hindi, Thai, Vietnamese, Indonesian, Malay, Filipino
+  - Arabic, Turkish, Swedish, Danish, Norwegian, Finnish
+  - ElevenLabs Scribe auto-detects 90+ languages (no configuration needed)
+- **Multi-Language TTS Support** - Language-filtered voice selection for Google TTS and Deepgram:
+  - TTS language dropdown filters available voices by language
+  - Google TTS: Chirp 3 HD voices for 20+ languages
+  - Deepgram Aura: Multilingual voices (Thalia, Apollo, Asteria, Orion) for 18 languages
+  - Custom voice ID field for non-listed languages/voices
+
+### v1.1.3 (January 2026)
+- **Granular Permission Enforcement** - Complete permission system overhaul:
+  - Settings routes now use granular `view`/`edit` permission checks instead of just admin authentication
+  - Rooms page: Create and Delete buttons only visible to users with corresponding permissions
+  - Egress page: Manual Recording, Stop, and Delete buttons respect user permissions
+  - Bulk delete checkboxes hidden for users without delete permission
+  - Consistent permission enforcement at both route and UI levels
+- **xAI/Grok LLM Provider** - Added xAI support using OpenAI-compatible SDK:
+  - 6 Grok models including grok-3, grok-3-fast, grok-2-latest
+  - Uses `openai.LLM.with_x_ai()` method for integration
+  - XAI_API_KEY configuration in Settings → Integrations
+- **Knowledge Base Page** - New placeholder page for upcoming RAG capabilities
+- **LiveKit Plugins Section** - Dependencies tab now shows all LiveKit plugins with version detection
+- **Collect DTMF Tool** - New tool for collecting keypad input from callers:
+  - Uses LiveKit's `GetDtmfTask` for reliable DTMF detection
+  - Supports both keypad tones and spoken digits
+  - Configurable: number of digits, timeout, terminator key (#/*)
+  - Optional confirmation readback
+  - Mask option for sensitive data (PINs)
+- **Blind Transfer Tool** - Direct call transfer without consultation:
+  - Transfers caller to external phone number via SIP REFER
+  - Configurable transfer destinations with friendly names
+  - Optional dial tone playback during transfer
+- **Attended Transfer Tool** - Warm consultation transfer:
+  - Places caller on hold with optional hold music
+  - Agent consults with destination before completing transfer
+  - Actions: initiate, complete, cancel
+  - Configurable consultation timeout
+- **Agent Handoff Improvements**:
+  - Sign-off prompt: Agent speaks custom message before transfer
+  - Silent transfer: Skip "I'm transferring you" announcement
+  - Context modes: Full (complete history), Summary, Fresh (clean slate)
+  - Secondary agent greeting: Automatic greeting after receiving handoff
+- **Communication Tools Fixes**:
+  - SendSMS: Added token auth, fixed JSON escaping, phone validation
+  - SendEmail: Fixed email regex, SMTP TLS handling, async SES with aioboto3
+- **Turn Detection** - Now using MultilingualModel v0.4.1-intl:
+  - 39% reduction in false-positive interruptions
+  - 14 language support including English, Spanish, Chinese, Japanese
+  - Transformer-based with prosody and semantic understanding
+
+### v1.1.2 (January 2026)
+- **Agent Knowledge Base** - New field in agent configuration for factual information:
+  - Add business hours, address, contact details, policies
+  - Automatically included in the agent's system prompt under "## Knowledge Base"
+  - Positioned between System Prompt and Tool Usage Instructions
+- **Working Hold Music** - Hold tool now actually plays hold music during calls:
+  - Uses LiveKit's BackgroundAudioPlayer for audio playback
+  - Plays uploaded hold music file when caller is placed on hold
+  - Automatically stops when call is resumed
+- **Play Audio Tool** - Now fully functional with file upload:
+  - Upload audio files (MP3, WAV, OGG) for disclaimers, announcements
+  - Select default audio file in configuration
+  - Plays audio to caller using BackgroundAudioPlayer
+- **Audio File Upload for Tools** - Upload custom audio files directly in tool configuration modals:
+  - **Hold Music Upload** - Upload hold music in the Hold tool configuration
+  - **Play Audio Upload** - Upload audio files for disclaimers/announcements in the Play Audio tool
+  - Support for MP3, WAV, OGG audio formats (max 10MB)
+  - In-modal audio preview and management
+  - Recommended format: Mono, 16-bit, 16kHz or 8kHz for telephony
+- **Tool Calls in Transcription** - Tool usage now appears inline in Call Detail transcriptions:
+  - Purple-styled segments showing tool name, arguments, and results
+  - Includes hangup, transfer, get_datetime, and all other tools
+  - Pre-logging for call-ending tools ensures they appear even when call ends
+- **Hangup Tool Improvements** - Now properly ends SIP calls:
+  - Uses LiveKit API to remove all participants from the room
+  - Ensures both agent and caller are disconnected properly
+- **GetDateTime Human-Readable Formats** - Configuration now uses dropdown menus with human-readable format options:
+  - Date formats like "Tuesday, 14 January 2025" instead of Python strftime codes
+  - Time formats like "2:30 PM" or "14:30"
+- **Tool Configuration Fixes** - Fixed show_when conditions for checkbox fields (e.g., Hold Music File dropdown)
+- **Eager EOT Checkbox Fix** - Fixed checkbox persistence issue after save
+
+### v1.1.1 (January 2026)
+- **Comprehensive Latency Monitoring** - Full round-trip latency tracking for voice AI pipeline:
+  - Component-level breakdown: STT, LLM (TTFT), TTS latency measured separately
+  - Percentile tracking: P50/P90/P99 metrics with color-coded thresholds
+  - Latency Metrics card on Call History page with Chart.js visualizations
+  - Per-agent latency comparison table
+  - Visual component bar on Call Details page showing STT/LLM/TTS proportions
+  - Live TTFB column in Rooms page with 5-second auto-refresh
+  - Slow call detection with >1000ms warning
+- **Real-Time Metrics Service** - Redis-based live metrics for active calls
+- **New API Endpoints**:
+  - GET /api/call-history/latency-stats - Aggregated latency analytics
+  - GET /api/rooms/active-metrics - Live metrics for all active calls
+  - GET /api/rooms/{room_name}/metrics - Live metrics for specific call
+
+### v1.1.0 (January 2026)
+- **Telephony Reorganization** - Separated SIP management into dedicated pages:
+  - Inbound Trunks - Dedicated page for inbound trunk management
+  - Outbound Trunks - Dedicated page for outbound trunk management
+  - Dispatch Rules - Dedicated page with stats (total, direct, individual, multi-line counts)
+  - Navigation shortcuts between telephony pages
+- **Dispatch Rules Export/Import** - Export individual rules as JSON, import from JSON files
+- **Call History Export Improvements** - Export last 100/200/500/1000 calls or selected calls only
+- **Help System Enhancements** - Prominent Help button with comprehensive documentation
+- **Auto-Refresh Dropdown** - Configurable refresh intervals (30s, 60s, 2min) replacing toggle button
+- **Date Range Dropdown** - More options (Today, Yesterday, 7/14/30/60/90 days)
+- **SIP Trunk Import Fix** - Fixed missing fields (attributes_to_headers, include_headers)
+
+### v1.0.16 (January 2026)
+- **Enhanced Call Summary UI**:
+  - **Key Topics** - Automatically extracted conversation topics displayed as tags
+  - **Call Outcome Badge** - Prominent visual indicator (appointment booked, issue resolved, transferred, etc.)
+  - **Action Items Checklist** - Interactive checkboxes for follow-up tasks from AI analysis
+- **Caller Sentiment Journey** - VADER-based sentiment analysis showing caller emotional progression:
+  - Sparkline visualization of sentiment through the conversation
+  - Start/end sentiment indicators with emoji representation
+  - Trend detection (improving, stable, declining)
+- **Interruption Analysis** - Track conversation dynamics:
+  - User interrupted agent count
+  - Agent interrupted user count
+  - Total interruption rate percentage
+- **AI Insights on Overview** - Aggregate analytics from all call summaries:
+  - Sentiment distribution donut chart (positive/neutral/negative)
+  - Top conversation topics across all analyzed calls
+  - LLM-analyzed call outcomes breakdown
+- **Collapsible Transcription** - Accordion-style transcription viewer with message count badge
+- **Bulk Delete** - Multi-select delete for Call History and Recordings (local + cloud)
+- **Call Recording Playback** - Play recordings directly from Call Detail page
+- **OpenAI Model Fix** - Use `max_completion_tokens` for GPT-4o/GPT-5 series models
+- **Dependencies** - Added vaderSentiment for sentiment analysis
+
+### v1.0.15 (January 2026)
+- **Phone Number Assignment** - Assign specific phone numbers to customer users:
+  - Multi-select picker in User Management create/edit forms
+  - Customer users only see assigned phone numbers in Telephony → Phone Numbers
+  - Add/Remove buttons hidden for non-admin users (read-only view)
+- **Call History Cloud Sync** - Full sync functionality for call metadata:
+  - Sync Redis call history to AWS S3 or Google Cloud Storage
+  - Restore from cloud storage to Redis for recovery
+  - Storage provider selection (local/s3/gcs) with UI
+  - Real-time status showing Redis vs Cloud call counts
+  - API endpoints for programmatic sync operations
+- **Settings UI Improvements** - Merged AWS S3 and GCS into unified Cloud Storage card
+
+### v1.0.14 (January 2026)
+- **Customer Access** - New permission template for multi-tenant access with agent-based data filtering:
+  - Assign multiple agents to customer users
+  - Overview analytics filtered to assigned agents only
+  - Call History shows only assigned agents' calls
+  - Agents list restricted to assigned agents
+  - Recordings filtered via call linkage to assigned agents
+  - Navigation automatically hides inaccessible pages
+- **Expanded Analytics** - New Calls and Agents tabs in Overview with charts for call volume, outcomes, direction, hourly distribution, and per-agent performance
+- **Custom Data Extraction** - Define per-agent fields to extract from transcriptions during AI summary generation
+- **AI Call Summaries** - Auto-generate summaries using OpenAI, Anthropic, or Google LLMs with conversation analysis
+- **Call History** - Complete call tracking with transcriptions, TTFB metrics, filtering, and CSV/JSON export
+- **Tool Registry** - Auto-discovery system for agent tools with built-in hangup, transfer, and hold tools
+- **Enhanced Webhook Tools** - Custom HTTP integrations for n8n, make.com, Zapier with:
+  - Response handling: JSONPath extraction, success conditions, error message paths
+  - Error handling: speak-on-error, speak-on-delay with threshold
+  - Retry logic: configurable count, delay, and status codes
+  - Rate limiting: per-minute and per-session limits
+  - Authentication: bearer, basic, API key (header/query)
+  - Availability: condition expressions and hours of operation
+  - Mock mode: testing without real HTTP calls
+  - Execution logging: track all webhook calls
+- **New Built-in Tools**:
+  - Communication: SendSMS (HTTP API), SendEmail (SMTP/SES)
+  - Utility: GetDateTime, ScheduleCallback, RecordNote, LookupCaller
+- **External Event Injection API** - Inject events into active calls from external systems:
+  - POST /api/calls/inject - Generic event injection
+  - Supported events: speak, end_call, transfer, send_dtmf, set_context
+  - API key authentication with expiration
+  - Shorthand endpoints: /api/calls/{room}/speak, /end, /transfer, /context
+  - GET /api/calls/active - List active calls
+  - Real-time event processing via Redis PubSub
+  - AgentEventListener with session registration/unregistration
+- **Global Tool Configuration** - Configure built-in tools with API URLs, credentials, and settings
+- **Multi-Agent Dispatch** - Route different phone numbers to different agents via dispatch rule metadata
+- **System Resources Monitoring** - Monitor all services, restart from UI, edit memory/CPU limits
+- **Recording Retention** - Configurable automatic cleanup of old local recordings (1-365 days)
+- **Cloud Storage for Call History** - Optional S3/GCS backup for call records
+- Fixed livekit-agents v1.3 API migration (FunctionContext → ToolContext)
+- Fixed agent OOM crash (increased memory limit to 768MB)
+- Fixed transcription duplicates in call history
+- Security: Updated aiohttp to 3.13.3 (CVE-2025-69223, CVE-2025-69226, CVE-2025-69228)
+- **Contextual Help System** - Page-specific (?) help button with field explanations for all pages
+- **Agent Export/Import v2.0** - Now includes handoff configurations and tool assignments
+- **Enhanced Permission Templates** - Fixed Quick Set buttons with complete page/action coverage
+
+### v1.0.14 (January 2026)
+- **ElevenLabs Scribe v2 STT** - New speech-to-text provider option
+  - Scribe v2 Realtime with 150ms latency
+  - Auto language detection for 90+ languages
+  - Uses existing ElevenLabs API key (same as TTS)
+- Overview page stats improvements (Running Agents, Connection Minutes, Live Cost, Network Quality)
+- Call History auto-generate summaries background task
+- Summary column indicator in Call History table
+
+### v1.0.13 (January 2026)
+- **Gemini 3 Flash Preview** - Support via Vertex AI global endpoint
+- **Flux Turn Detection Fixes** - Properly disables Silero VAD when Flux handles detection
+- Fixed auto-create agent_config.json from template if missing
+
+### v1.0.12 (January 2026)
+- **Deepgram Flux Turn Detection** - Server-side turn detection for Flux STT models
+  - EOT Threshold slider (0.5-0.9) - confidence for detecting end of speech
+  - EOT Timeout slider (500-10000ms) - maximum silence before forcing end-of-turn
+  - Eager EOT option (0.3-0.9) - preemptive response generation
+  - Mutual exclusivity with Silero VAD - automatically disables local VAD when Flux turn detection is enabled
+- **Min Silence Duration** - Configurable VAD setting (was hardcoded to 500ms, now 100-500ms)
+- **Package Update UI** - LiveKit plugins now visible in update tracker
+- Fixed missing `vad_min_silence` in agent update function
+
+### v1.0.11 (January 2026)
+- Sub-User Management with granular per-page permissions
+- Audit logging for user actions (login/logout, user CRUD)
+- Permission templates (Read Only, Power User, Full Access)
+- AJAX refresh for Stored Recordings and Rooms pages
+- Fixed CSRF token handling in settings forms
+
+### v1.0.10 (January 2026)
+- Turn Detector v1.3.10 upgrade (39% fewer false interruptions)
+- Redis caching for agent config (90% I/O reduction)
+- Log rotation configuration
+- Enhanced documentation guides in Settings
+
+### v1.0.9 (December 2025)
+- OpenAI Whisper STT models
+- Dashboard widgets (Live Cost, Network Quality)
+- Flux STT fix
+- Export/Import agent improvements
+
+---
+
+## 📚 External Documentation
+
+- [LiveKit Documentation](https://docs.livekit.io/)
+- [LiveKit Agents](https://docs.livekit.io/agents/)
+- [LiveKit SIP](https://docs.livekit.io/sip/)
+- [LiveKit Egress](https://docs.livekit.io/egress/)
+
+### Provider Guides
+- [Setup SIP Trunks with Telnyx](DOCS/Setup%20SIP%20Trunks%20with%20Telnyx.md) - Complete guide for configuring inbound SIP trunks and dispatch rules with Telnyx
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+## 🙏 Acknowledgments
+
+Built with:
+- [LiveKit](https://livekit.io/) - Real-time communication platform
+- [FastAPI](https://fastapi.tiangolo.com/) - Python web framework
+- [Bootstrap 5](https://getbootstrap.com/) - UI framework
+- [Chart.js](https://www.chartjs.org/) - Data visualization
+- [HTMX](https://htmx.org/) - Progressive enhancement
+
+---
+
+**LiveKit Voice AI Dashboard © 2026 | [Tronic Cloud](https://tronic.com.au)**

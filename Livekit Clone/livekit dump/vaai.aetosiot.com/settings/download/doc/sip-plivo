@@ -1,0 +1,259 @@
+# Setup SIP Trunks with Plivo
+
+A step-by-step guide for configuring Plivo Zentrunk SIP Trunking to work with your LiveKit Voice AI Dashboard.
+
+---
+
+## Prerequisites
+
+- A Plivo account
+- A purchased phone number (DID) in Plivo
+- Access to your LiveKit Dashboard
+- Your LiveKit Server's Public IP Address and FQDN
+
+> **Reference:** LiveKit's official Plivo guide is at [docs.livekit.io/telephony/start/providers/plivo/](https://docs.livekit.io/telephony/start/providers/plivo/).
+
+---
+
+## Part 1: Plivo Console Configuration
+
+### Step 1: Open Zentrunk
+
+1. Log in to the [Plivo Console](https://console.plivo.com)
+2. Navigate to **Voice** → **Zentrunk**
+
+Zentrunk is Plivo's SIP trunking product — it's a separate section from Plivo's standard Voice API.
+
+### Step 2: Create a Credentials List (Outbound Auth)
+
+Plivo supports digest authentication for outbound calls (calls leaving LiveKit through Plivo to the PSTN).
+
+1. Within Zentrunk, navigate to **Authentication** → **Credentials Lists**
+2. Click **Create New Credentials List**
+3. Add a username and password:
+
+| Field | Value |
+|-------|-------|
+| **Username** | A unique username (e.g., `livekit_user`) |
+| **Password** | A strong password |
+
+4. **Save these credentials** for the LiveKit configuration
+
+### Step 3: Create an IP ACL (Outbound Auth)
+
+In addition to digest auth, you can — and should — also pin the trunk to your LiveKit server's IP.
+
+1. Navigate to **Authentication** → **IP ACL**
+2. Click **Create New IP ACL**
+3. Add your **LiveKit Server's Public IP Address**
+
+### Step 4: Create an Outbound Trunk
+
+1. Navigate to **Outbound Trunks**
+2. Click **Create New Outbound Trunk**
+3. Configure:
+
+| Field | Value |
+|-------|-------|
+| **Name** | `LiveKit Outbound` |
+| **Credentials List** | Select the list from Step 2 |
+| **IP ACL** | Select the ACL from Step 3 |
+
+4. **Region Pinning (CRITICAL — see Step 5)**
+5. Click **Create**
+
+### Step 5: Pick the Right Plivo Region (PoP)
+
+Plivo runs **7 regional PoPs**. The trunk's outbound domain (the address you'll use in LiveKit) is shown in the trunk detail page after creation — it is **NOT** a fixed `sip.plivo.com`. It will look something like `mytrunk.outbound.plivo.com` and route through the region you choose.
+
+| Code | Region | Use For |
+|------|--------|---------|
+| **CA** | California (US West) | West Coast US, Pacific |
+| **VA** | Virginia (US East) | East Coast US, Canada, LATAM |
+| **FRA** | Frankfurt | Europe |
+| **BOM** | Mumbai | India, South Asia |
+| **SIN** | Singapore | Southeast Asia |
+| **SYD** | Sydney | Australia, NZ, Oceania |
+| **GRU** | São Paulo | Brazil, South America |
+
+> **Critical — India / Asia compliance:** If any of your DIDs are **Indian numbers**, or you're calling **Indian or other Asian numbers**, you **MUST** pin the trunk to **Mumbai (BOM)** or **Singapore (SIN)**. India has regulatory restrictions on calls routed through non-Indian PoPs. Calls will fail or get blocked otherwise.
+
+### Step 6: Note Your Trunk's Outbound Domain
+
+1. Open the trunk you just created
+2. Copy the **Outbound Trunk Domain** shown on the page (e.g., `mytrunk.outbound.plivo.com`)
+3. **Save this domain** — you'll paste it into LiveKit's Outbound Trunk **Address** field
+
+### Step 7: Create an Inbound Trunk (For Receiving Calls)
+
+1. Navigate to **Inbound Trunks**
+2. Click **Create New Inbound Trunk**
+3. Configure:
+
+| Field | Value |
+|-------|-------|
+| **Name** | `LiveKit Inbound` |
+| **Primary URI** | `sip:your-livekit-server.com:5060` (your LiveKit FQDN) |
+| **Fallback URI** | (Optional) a backup LiveKit endpoint |
+
+4. Click **Create**
+
+### Step 8: Assign Numbers (DIDs) to the Inbound Trunk
+
+1. Navigate to **Phone Numbers** → **Your Numbers** in the Plivo Console
+2. Click on the number you want to use
+3. Under **Application Type**, select **Zentrunk**
+4. Choose your `LiveKit Inbound` trunk
+5. Save
+
+---
+
+## Part 2: LiveKit Dashboard Configuration
+
+### Step 9: Create Inbound SIP Trunk
+
+1. Log into your LiveKit Dashboard
+2. Navigate to **Telephony** → **Inbound Trunks**
+3. Click **+ Create Trunk**
+4. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Plivo Inbound` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Numbers** | Your Plivo DID (e.g., `+14155551234`) |
+| **Allowed Addresses** | Plivo's signaling subnets (see note below) |
+| **Username** | Leave empty (Plivo authenticates inbound by IP) |
+| **Password** | Leave empty |
+
+**Plivo Signaling Subnets:**
+
+Pull the current list from Plivo's docs — they're documented at the LiveKit Plivo guide and Plivo's own docs portal. The IPs differ per region; include all regions you plan to use.
+
+5. Click **Create**
+
+> **Important - Firewall Configuration:**
+> You must allow Plivo's regional signaling subnets in your cloud provider's firewall (AWS Security Groups, GCP Firewall Rules, etc.) for **both TCP and UDP on port 5060**. If your firewall blocks Plivo's IPs, calls will not reach your LiveKit server even if the LiveKit trunk configuration is correct.
+
+### Step 10: Create Dispatch Rule
+
+1. Navigate to **Telephony** → **Dispatch Rules**
+2. Click **+ Create Rule**
+3. Configure the rule:
+
+| Field | Value |
+|-------|-------|
+| **Trunk IDs** | Select `Plivo Inbound` |
+| **Dispatch Rule Type** | Choose based on your needs (Direct/Individual/Multi-Line) |
+| **Room Name** | `support-room` (or your target room) |
+| **Agent Name** | Select your AI Agent |
+
+4. Click **Create**
+
+### Step 11: Create Outbound SIP Trunk
+
+1. Navigate to **Telephony** → **Outbound Trunks**
+2. Click **Create new trunk**
+3. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Plivo Outbound` |
+| **Address** | Your Plivo Outbound Trunk Domain (from Step 6, e.g., `mytrunk.outbound.plivo.com`) |
+| **Transport** | `UDP` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Username** | Plivo Credentials username (from Step 2) |
+| **Password** | Plivo Credentials password (from Step 2) |
+| **Numbers** | Your Plivo DID (e.g., `+14155551234`) |
+
+4. Click **Create**
+
+> **Important — Region:**
+> The outbound domain you copied from Plivo is region-pinned. If you need to call Indian or Asian numbers, that domain MUST be on the BOM or SIN PoP (set in Step 5). If it's pinned to a US PoP, calls into India will fail.
+
+---
+
+## Part 3: Verification
+
+### Step 12: Test Inbound
+
+1. Call your Plivo DID from a mobile phone or external line
+2. Check the **Rooms** page in the dashboard
+3. You should see a new room created when the call connects
+
+**If it fails:**
+- Verify the Inbound Trunk Primary URI points to your LiveKit server (Step 7)
+- Confirm the number is assigned to the Inbound Trunk in **Phone Numbers** (Step 8)
+- Check **Allowed Addresses** in LiveKit includes Plivo's regional signaling IPs
+
+### Step 13: Test Outbound
+
+1. Go to **Telephony** → **Outbound Trunks**
+2. Click **Create Outbound Call** (or use the Sandbox)
+3. Enter a destination number in E.164 format and call
+4. Verify caller ID displays correctly and audio works both ways
+
+---
+
+## Troubleshooting Checklist
+
+| Issue | Check |
+|-------|-------|
+| Calls not arriving | Verify Plivo Inbound Trunk Primary URI points to your LiveKit FQDN on port 5060 |
+| "Trunk not found" / 404 | Ensure **Allowed Addresses** in LiveKit includes Plivo's signaling IPs |
+| 401 / 407 Unauthorized on outbound | Check Username and Password match the Plivo Credentials List exactly |
+| 403 Forbidden | Verify your LiveKit server IP is in Plivo's IP ACL |
+| Calls into India fail | Confirm trunk is region-pinned to BOM (Mumbai) or SIN (Singapore) |
+| One-way audio | Confirm UDP/RTP ports are open in your cloud firewall and `use_external_ip: true` is set in `livekit-sip` config if behind NAT |
+| No room created | Check dispatch rule is linked to the correct trunk ID |
+| High latency / lag | Verify the trunk's PoP is in a region close to your LiveKit server |
+| Outbound dialing wrong number | Check the **Numbers** field on your LiveKit Outbound Trunk matches your Plivo DID |
+
+---
+
+## Quick Reference: Configuration Summary
+
+**Plivo Side:**
+```
+Zentrunk:
+  → Credentials List: livekit_user / [password]
+  → IP ACL: Your LiveKit Server Public IP
+
+Outbound Trunk: LiveKit Outbound
+  → Linked to: Credentials List + IP ACL
+  → Region (PoP): CA / VA / FRA / BOM / SIN / SYD / GRU
+  → Outbound Domain: mytrunk.outbound.plivo.com (auto-issued)
+
+Inbound Trunk: LiveKit Inbound
+  → Primary URI: sip:your-livekit-server.com:5060
+
+Numbers:
+  → Assigned via Phone Numbers → Your Numbers → Application Type: Zentrunk
+```
+
+**LiveKit Side:**
+```
+Inbound Trunk:
+  → Name: Plivo Inbound
+  → Number Format: +E.164 (WITH +)
+  → Numbers: Your Plivo DID
+  → Allowed Addresses: Plivo's regional signaling IPs
+  → Auth: None (IP-based)
+
+Dispatch Rule:
+  → Linked to: Plivo Inbound trunk
+  → Type: Direct/Individual/Multi-Line (your choice)
+  → Agent: Your AI agent
+
+Outbound Trunk:
+  → Name: Plivo Outbound
+  → Address: [Your Plivo outbound domain from Console]
+  → Transport: UDP
+  → Number Format: +E.164 (WITH +)
+  → Auth: Credentials List username + password
+  → Numbers: Your Plivo DID
+```
+
+---
+
+This guide covers the complete end-to-end setup for both inbound and outbound calls via Plivo Zentrunk with your LiveKit Voice AI Dashboard.

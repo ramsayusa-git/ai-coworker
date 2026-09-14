@@ -1,0 +1,320 @@
+# Connecting Dashboard to 3CX via SIP URI
+
+A step-by-step guide for setting up your LiveKit Voice AI Dashboard so its agents can transfer calls directly to **3CX extensions, ring groups, and call queues** via SIP URI.
+
+> **What this gives you:** when an inbound caller asks to speak to a person, the AI agent fires its `blind_transfer` (or `attended_transfer`) tool, which dials a SIP URI like `sip:391@your-3cx.example.com`. 3CX rings the matching extension/queue and bridges the caller through. With the dashboard's **AUTO Caller-ID** mode, the destination phone shows the **real caller's mobile number** so the 3CX user can see who's calling and call them back.
+
+---
+
+## Prerequisites
+
+- A 3CX PBX (v18 or v20 verified) with admin access to **Voice & Chat → SIP Trunks**
+- Your 3CX **SIP domain or public IP** (e.g. `your-3cx.example.com`)
+- Knowledge of the **public IP** the dashboard sends SIP traffic from (the LiveKit SIP server's egress IP — see Part 3)
+- One or more 3CX **extensions, ring groups, or queues** you want to be reachable
+- Access to your LiveKit Dashboard with permission to edit Telephony → Outbound Trunks and Agent tools
+
+---
+
+## Part 1 — 3CX side
+
+### Step 0 — Open the firewall ports
+
+Before configuring the SIP trunk, make sure 3CX's firewall (and any cloud security group / network ACL in front of it) accepts inbound traffic from the dashboard's SIP egress IP on these ports:
+
+| Port | Protocol | Purpose |
+|---|---|---|
+| **5060** | **TCP** | SIP signaling (Step 4A configures the trunk for TCP — leave 5060 UDP closed unless you have another reason to open it) |
+| **9000 – 10999** | **UDP** | RTP media (3CX's default RTP range — if you've customised it under 3CX → Settings → Network → Public, open that range instead) |
+| 5061 | TCP | SIP/TLS signaling — **only if** you choose TLS instead of TCP (see FAQ at the bottom) |
+
+Source the rules to the **dashboard's SIP egress IP only** (find it via Step 6 in Part 2 below) — not `0.0.0.0/0`. RTP is bidirectional once the call is established; most stateful firewalls allow the return traffic automatically.
+
+> **Two layers to check.** Even if the OS-level firewall allows the traffic, 3CX has its own **Anti-Hacking** module that can independently block an IP after a few failed attempts. After opening the ports, also whitelist the dashboard's egress IP at **3CX → Security → Anti-Hacking → Whitelist** (Step 6 in Part 2 covers this).
+
+### Step 1 — Create the SIP trunk
+
+1. Log into the 3CX admin panel.
+2. Go to **Voice & Chat → SIP Trunks**.
+3. Click **+ Add SIP Trunk**.
+4. On the *Choose your SIP Trunk VoIP Provider* screen, set:
+   - **Country**: `Worldwide`
+   - **Provider**: `Generic SIP Trunk (IP Based)`
+5. Click **OK / Next**.
+
+### Step 2 — General tab
+
+| Field | Value |
+|---|---|
+| **Name** | `Livekit Dashboard` |
+| **Main Trunk Number** | `1234` (mandatory but unused for routing — any placeholder works) |
+| **Default Route** | `End Call` (or a failsafe IVR/voicemail of your choice) |
+| **Authentication ID** | *Leave blank* |
+| **Authentication Password** | *Leave blank* |
+| **Type of Authentication** | **`Do not require - IP based`** ← critical |
+| **Registrar / Server** | The dashboard's SIP egress IP (see Part 3 below) |
+| **Port** | `5060` |
+| **Outbound Proxy** | *Leave blank* |
+
+Click **Save**.
+
+### Step 3 — DID Numbers tab
+
+Add **one row per destination** the AI should be able to reach. Click **+ Add** for each.
+
+| DID Number | Assigned To |
+|---|---|
+| `391` | User → e.g. Troy Paas (Ext 391) |
+| `826` | Ring Group → e.g. Test RG (826) |
+| `920` | Queue → e.g. test (920) |
+| *(add more)* | Any extension, ring group, or queue you want reachable |
+
+> The DID number must **exactly match** the user-part of the SIP URI the dashboard dials. So `INVITE sip:391@your-3cx.example.com` requires a DID row with `391`. Calls to numbers NOT in this list hit the trunk's Default Route. To add new destinations later, just add rows here — no dashboard change needed.
+
+Click **Save**.
+
+### Step 4 — Options tab
+
+**4A — Configuration settings**
+
+| Field | Value |
+|---|---|
+| Allow inbound calls | ✅ checked |
+| Allow outbound calls | ✅ checked |
+| **Transport Protocol** | **TCP** ← must be TCP, not UDP |
+| SRTP Mode | Disabled |
+| Simultaneous calls per trunk | `5` (raise as needed) |
+| PBX delivers audio | ✅ checked |
+| Disable Video | ✅ checked |
+| **Include diversion header support** | ✅ **checked — required** |
+| Allow carrier-side transfers (REFER) | ❌ unchecked |
+| Support Reinvite | ❌ unchecked |
+| Support Replaces | ❌ unchecked |
+
+> **Why diversion header support matters**: the dashboard adds a `Diversion:` header to every outbound transfer INVITE so 3CX records the call as `creation_method=divert` in the CDR with the original inbound DID. Without this option enabled, 3CX may silently strip the header and the CDR loses transfer context.
+
+**4B — Codec priority**
+
+Remove every existing codec, then add in this exact order:
+
+| Priority | Codec |
+|---|---|
+| 1 | **PCMU** |
+| 2 | **PCMA** |
+
+Remove `G.729`, `G.722`, and any other codec if present.
+
+> The dashboard's `livekit-sip` server does **not** support G.729. If 3CX offers it first, the call will fail with `488 Not Acceptable Here`. PCMU + PCMA guarantees a successful negotiation.
+
+Click **Save**.
+
+### Step 5 — Verify on 3CX
+
+Click **Check SIP Trunk** at the top of the trunk page → it should return green / OK. If it returns red, double-check Step 2's IP and Step 4's TCP transport before continuing.
+
+---
+
+## Part 2 — Dashboard side
+
+### Step 6 — Find the dashboard's SIP egress IP
+
+This is the IP that 3CX needs to whitelist (Step 2's "Registrar / Server"). Several ways to find it:
+
+- **Tronic Cloud installs**: the dashboard's egress IP is shown in the Settings → System tab under "Public IP".
+- **Self-hosted installs**: SSH into the box and run `curl -s https://api.ipify.org` — that's the public IP livekit-sip uses.
+- **Anti-hacking note**: 3CX automatically blocks IPs after too many failed auth attempts. **Add the dashboard's egress IP to 3CX → Security → Anti-Hacking → Whitelist** as a belt-and-braces step before testing.
+
+### Step 7 — Create the outbound trunk in the dashboard
+
+1. Go to **Telephony → Outbound Trunks** in the dashboard.
+2. Click **+ Add Trunk**.
+3. Choose **Trunk Type → PBX**. The form will reshape itself for PBX use.
+4. Fill in:
+
+| Field | Value |
+|---|---|
+| **Trunk Name** | e.g. `My 3CX` |
+| **Address** | Your 3CX SIP domain or IP, plus the port (e.g. `your-3cx.example.com:5060`) |
+| **Transport** | TCP |
+| **Caller-ID to show on transfers (optional)** | **Leave blank** — see Step 8 |
+| Username / Password | Leave both blank (3CX is configured for IP-based auth) |
+| **From URI host (Advanced)** | Same as the address host (e.g. `your-3cx.example.com`); blank to inherit |
+| **Caller display name (Advanced)** | Optional — e.g. `AI Receptionist` |
+
+Click **Save**.
+
+### Step 8 — Choose Caller-ID mode (the important step)
+
+The "Caller-ID to show on transfers (optional)" field has **two modes**:
+
+#### AUTO mode (recommended) — leave the field BLANK
+
+When the AI transfers an inbound call, the destination phone shows the **real caller's mobile/PSTN number**. The 3CX user immediately sees who's actually calling and can call them back from their CDR.
+
+Internally this is what the dashboard sends to 3CX:
+
+```
+INVITE sip:391@your-3cx.example.com SIP/2.0
+From: <sip:61416059519@your-3cx.example.com>;tag=…   ← real caller's number
+Diversion: <sip:61370548494@your-3cx.example.com>;reason=unconditional
+```
+
+The trunk edit modal shows a green **AUTO** badge under the field when blank.
+
+#### MANUAL mode — type a fixed value
+
+Every transfer shows that fixed value, regardless of who's calling. Useful when you want the destination phone to always show e.g. your main DID or `AIReceptionist`.
+
+The trunk edit modal shows a blue **MANUAL** badge under the field when filled.
+
+> **For most 3CX integrations you want AUTO mode.** The destination user benefits from seeing the real caller's number. Only use MANUAL when you have a regulatory or branding reason to show a single fixed value.
+
+### Step 9 — Configure transfer destinations on the agent
+
+1. Open your agent in **Agents → Edit**.
+2. Go to the **Tools** tab.
+3. Add **`blind_transfer`** (and/or **`attended_transfer`** for warm transfers).
+4. For each destination you want the AI to be able to pick by name, add a row with:
+
+| Column | Value |
+|---|---|
+| **Name** | Friendly name the AI uses (e.g. `Troy`, `Reception`, `Sales`) |
+| **Type** | `SIP URI` |
+| **SIP URI** | `sip:391@your-3cx.example.com` (replace `391` with the matching 3CX DID number from Step 3, and the host with your 3CX SIP domain) |
+| **Trunk** | The PBX trunk you created in Step 7 |
+
+Repeat for each extension, ring group, or queue. The AI picks by name based on the caller's request ("can I speak to Troy?").
+
+### Step 10 — Update the agent's system prompt
+
+Add a line to the agent's system prompt so it knows when to use the transfer tool. Example:
+
+> *When the caller asks to speak to a human, use the `blind_transfer` tool to transfer them to the appropriate destination. Don't ask for confirmation — transfer immediately.*
+
+For attended transfer (the AI stays on the line and announces the caller to the destination before merging), use:
+
+> *When the caller asks to speak to a person, use the `attended_transfer` tool. Wait for the destination to answer, briefly explain who's calling and why, then merge the call.*
+
+### Step 11 — Save and restart the agent
+
+The dashboard auto-restarts the agent worker when you save the agent — no manual restart needed.
+
+---
+
+## Part 3 — Verify end-to-end
+
+### Smoke test 1 — Trunk health (dashboard side)
+
+1. In **Telephony → Outbound Trunks**, click the **Test Call** button on your new PBX trunk.
+2. Enter a test extension (e.g. `391`).
+3. The destination phone should ring. Pick it up and confirm two-way audio.
+
+If this works, the trunk and 3CX-side configuration are correct.
+
+### Smoke test 2 — AI transfer on a real call
+
+1. Place a real inbound call to your AI line from a mobile phone.
+2. Ask the agent to transfer you ("can you put me through to Troy?").
+3. The AI says its goodbye phrase and the destination phone (ext 391) rings.
+4. **Confirm caller-ID display**: the 3CX phone screen should show your **mobile number** (AUTO mode) or your fixed value (MANUAL mode).
+5. Pick up — you should be bridged with the original caller.
+
+### What to check if a transfer fails
+
+| Symptom | Most likely cause | Where to look |
+|---|---|---|
+| AI says "transferring" but call drops | DID not in the 3CX trunk's DID list | 3CX → SIP Trunks → DIDs |
+| 3CX plays "destination cannot be reached" | The user-part of the SIP URI doesn't match a configured DID | Step 3 — add the missing DID row |
+| Destination phone rings then voicemail | 3CX extension's no-answer follow-me rule sent it to voicemail | 3CX → Extension → Forwarding Rules |
+| `488 Not Acceptable Here` in 3CX event log | Codec mismatch | Step 4B — remove G.729 / keep PCMU + PCMA only |
+| `403 Forbidden` in 3CX event log | Dashboard egress IP doesn't match 3CX trunk's "Server" or is blocked by anti-hacking | 3CX → Security → Anti-Hacking → Whitelist |
+| Destination phone shows "Livekit" or weird text | Trunk's Caller-ID extension is set to a non-numeric value | Step 8 — set blank for AUTO, or a real number for MANUAL |
+| Anonymous / withheld caller's number not flowing through | The dashboard sanitizes anonymized callers (e.g. `anonymous`, `+0000000000`) and falls back to the trunk default — this is intentional | No action — expected behaviour |
+
+### Read the SIP traffic for diagnosis
+
+If a transfer test fails and you have shell access on the dashboard host, watch the SIP wire activity:
+
+```
+docker logs livekit-sip --tail 100 -f 2>&1 | grep -E 'INVITE|From|Diversion|fromUser|toUser'
+```
+
+For a successful AUTO-mode transfer to ext 391 from a caller `61416059519`, you should see the egress INVITE with:
+
+```
+"fromUser": "61416059519",  "toUser": "391",  "toHost": "your-3cx.example.com:5060"
+```
+
+Plus a `Diversion:` header. If you see `"fromUser": "<placeholder>"` instead, the trunk is in MANUAL mode — set the Caller-ID extension field to blank and re-save.
+
+---
+
+## Quick reference — both sides
+
+### 3CX trunk
+
+| Setting | Value |
+|---|---|
+| Name | `Livekit Dashboard` |
+| Main Trunk Number | `1234` (placeholder) |
+| Default Route | `End Call` |
+| Auth ID / Password | both blank |
+| Authentication type | `Do not require - IP based` |
+| Registrar / Server | dashboard SIP egress IP |
+| Port | `5060` |
+| Transport | TCP |
+| SRTP | Disabled |
+| Simultaneous calls | `5` |
+| PBX delivers audio | Yes |
+| Disable Video | Yes |
+| Include diversion header | Yes |
+| SIP REFER | No |
+| Codec 1 | PCMU |
+| Codec 2 | PCMA |
+| DID Numbers | one row per extension / ring group / queue |
+
+### Dashboard outbound trunk
+
+| Setting | Value |
+|---|---|
+| Trunk Type | PBX |
+| Address | `your-3cx.example.com:5060` |
+| Transport | TCP |
+| **Caller-ID to show on transfers** | **Blank for AUTO (real caller's number) — recommended** |
+| Username / Password | both blank |
+| From URI host (Advanced) | same as address host (or blank) |
+| Caller display name (Advanced) | `AI Receptionist` (optional) |
+
+### Agent transfer destinations
+
+| Name | Type | SIP URI |
+|---|---|---|
+| Troy | SIP URI | `sip:391@your-3cx.example.com` |
+| Reception | SIP URI | `sip:920@your-3cx.example.com` |
+| Sales RG | SIP URI | `sip:826@your-3cx.example.com` |
+
+---
+
+## FAQ
+
+**Q: Do I need to register the dashboard with 3CX (SIP REGISTER)?**
+No. The dashboard's `livekit-sip` is a SIP gateway, not a UA — it doesn't register. 3CX must be set to "IP-based, do not require registration", which is exactly what Step 2's `Type of Authentication: Do not require - IP based` does.
+
+**Q: Will calls work over UDP?**
+Avoid UDP. SIP over UDP is fragile across NAT and the dashboard expects TCP. Set 3CX's transport to TCP (Step 4A) and the dashboard's trunk transport to TCP (Step 7).
+
+**Q: Can the dashboard use SIP REFER instead of bridging?**
+Yes — in the agent's `blind_transfer` tool config, change `transfer_mode` to `refer`. But for 3CX integrations, **bridge mode is recommended** because the dashboard keeps the agent on the call until the destination answers, providing a fallback if the destination doesn't pick up. REFER also doesn't yet propagate the Caller-ID override to the destination on this code path (a future enhancement).
+
+**Q: My 3CX uses TLS on port 5061. Can I still set this up?**
+Yes, but you'll need to change Step 4A's transport to TLS, change the dashboard trunk's transport to TLS, and use `your-3cx.example.com:5061` (explicit port) in the trunk address. TLS support in livekit-sip is verified working on `:5061`.
+
+**Q: What if my 3CX is behind NAT or on a private IP?**
+The dashboard needs to reach 3CX directly. If 3CX is on a private LAN, the dashboard host must be on the same network or have a VPN/routed connection. There's no STUN/TURN traversal for the SIP trunk itself.
+
+**Q: What about caller-ID for outbound campaigns (the dashboard calling out)?**
+This guide is about agent-initiated transfers from inbound calls. For outbound campaigns the dashboard places using a separate trunk to a PSTN provider (Twilio/Telnyx/etc.) — the From URI on those calls is governed by the PSTN provider's caller-ID rules, not this 3CX trunk. Use the SIP provider setup guides in Settings → Notes for that flow.
+
+---
+
+If you hit something this guide doesn't cover, send a copy of the relevant 3CX event-log line (or `docker logs livekit-sip` line) to support — having the SIP error code makes it diagnosable in one round-trip.

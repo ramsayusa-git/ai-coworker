@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Call History - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=626041">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=9136.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="ImQ2TFViMzIxaDFuR0RHNlVYTDMxSmpXYTJKQkRJeTd1Tlo2cy1JNlc2djAi.aqgYKQ.xS2d9zEqhQSnL1xMi-0J-uuyt_s">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link active">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Call History</h1>
+                
+<p class="page-subtitle">View and analyze call records</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#call-history" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="call-history.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-telephone"></i> Total Calls
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-calendar-day"></i> Today
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-clock"></i> Avg Duration
+        </div>
+        <div class="stat-value info">
+            0s
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-telephone-inbound"></i> Inbound
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-telephone-outbound"></i> Outbound
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    
+</div>
+
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-funnel"></i> Filters
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="call-history.html" class="row g-2 align-items-end" id="filterForm">
+            <div class="col">
+                <label class="form-label">Search</label>
+                <input type="text" class="form-control" name="search" id="filterSearch"
+                       placeholder="Phone number or Call ID..." value="">
+            </div>
+            <div class="col">
+                <label class="form-label">Agent</label>
+                <select class="form-select" name="agent" id="filterAgent">
+                    <option value="">All Agents</option>
+                    
+                </select>
+            </div>
+            <div class="col">
+                <label class="form-label">Direction</label>
+                <select class="form-select" name="direction" id="filterDirection">
+                    <option value="">All Directions</option>
+                    <option value="inbound" >Inbound</option>
+                    <option value="outbound" >Outbound</option>
+                </select>
+            </div>
+            <div class="col">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" name="date_from" id="filterDateFrom"
+                       value="">
+            </div>
+            <div class="col">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" name="date_to" id="filterDateTo"
+                       value="">
+            </div>
+            <div class="col">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status_filter" id="filterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="none" >Needs Review</option>
+                    <option value="in_progress" >In Progress</option>
+                    <option value="reviewed" >Reviewed</option>
+                    <option value="flagged" >Flagged</option>
+                    <option value="agent_issue" >Agent Issue</option>
+                    <option value="callback_requested" >Callback</option>
+                    <option value="escalated" >Escalated</option>
+                    <option value="resolved" >Resolved</option>
+                </select>
+            </div>
+            <div class="col">
+                <label class="form-label">Health</label>
+                <select class="form-select" name="health" id="filterHealth">
+                    <option value="">All Health</option>
+                    <option value="excellent" >Excellent</option>
+                    <option value="good" >Good</option>
+                    <option value="fair" >Fair</option>
+                    <option value="poor" >Poor</option>
+                    <option value="critical" >Critical</option>
+                    <option value="not_scored" >Not Scored</option>
+                </select>
+            </div>
+            <div class="col">
+                <label class="form-label">LLM Model</label>
+                <select class="form-select" name="model" id="filterModel" onchange="refreshCalls(1)">
+                    <option value="">All Models</option>
+                    
+                </select>
+            </div>
+            <div class="col">
+                <label class="form-label">Sort by</label>
+                <select class="form-select" name="sort_by" id="filterSortBy" onchange="refreshCalls(1)">
+                    <option value="">Newest first</option>
+                    <option value="cost_desc" >Cost (high to low)</option>
+                    <option value="cost_asc" >Cost (low to high)</option>
+                </select>
+            </div>
+            <div class="col-auto d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-search"></i> Search
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Call History Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-clock-history"></i> Call Records
+                <span class="badge badge-secondary ms-2" id="calls-count">0</span>
+                <small class="ms-3" style="font-weight: 600; font-size: 0.85rem; color: var(--brand-primary);"><i class="bi bi-info-circle"></i> Click a record for further call details</small>
+            </h5>
+            <!-- Bulk Actions (hidden by default, shown when items selected) -->
+            
+            <div id="bulk-actions" class="d-flex align-items-center gap-2" style="display: none !important;">
+                <span class="text-muted small" id="selected-count">0 selected</span>
+                <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteCalls()" title="Delete call records only">
+                    <i class="bi bi-trash"></i> Delete Selected
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteCallsWithRecordings()" title="Delete call records and their recordings">
+                    <i class="bi bi-trash-fill"></i> Delete with Recordings
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearSelection()">
+                    <i class="bi bi-x-lg"></i> Clear
+                </button>
+            </div>
+            
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshCalls()" title="Refresh">
+                <i class="bi bi-arrow-clockwise" id="refresh-icon"></i>
+            </button>
+            
+            <div class="dropdown">
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-download"></i> Export
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><h6 class="dropdown-header">Export Selected</h6></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportSelectedCalls('csv')">
+                        <i class="bi bi-filetype-csv"></i> Selected to CSV
+                    </a></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportSelectedCalls('json')">
+                        <i class="bi bi-filetype-json"></i> Selected to JSON
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">Export Recent (CSV)</h6></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportCalls('csv', 100)">
+                        <i class="bi bi-filetype-csv"></i> Last 100 calls
+                    </a></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportCalls('csv', 200)">
+                        <i class="bi bi-filetype-csv"></i> Last 200 calls
+                    </a></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportCalls('csv', 500)">
+                        <i class="bi bi-filetype-csv"></i> Last 500 calls
+                    </a></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportCalls('csv', 1000)">
+                        <i class="bi bi-filetype-csv"></i> Last 1000 calls
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">Export Recent (JSON)</h6></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportCalls('json', 100)">
+                        <i class="bi bi-filetype-json"></i> Last 100 calls
+                    </a></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportCalls('json', 200)">
+                        <i class="bi bi-filetype-json"></i> Last 200 calls
+                    </a></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportCalls('json', 500)">
+                        <i class="bi bi-filetype-json"></i> Last 500 calls
+                    </a></li>
+                    <li><a class="dropdown-item" href="call-history.html#" onclick="exportCalls('json', 1000)">
+                        <i class="bi bi-filetype-json"></i> Last 1000 calls
+                    </a></li>
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+    <div class="card-body" id="calls-table-content">
+        
+
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <i class="bi bi-clock-history"></i>
+    </div>
+    <div class="empty-state-title">No call records</div>
+    <div class="empty-state-description">
+        
+        Call records will appear here when calls are handled by your voice agents.
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<style>
+/* Refresh button spin animation */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 0.8s linear infinite;
+}
+
+/* Pagination styling */
+.pagination-container {
+    padding: 0 0.5rem;
+}
+
+.pagination .page-link {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+/* Call direction badges */
+.direction-inbound {
+    color: #22c55e;
+    white-space: nowrap;
+}
+
+.direction-outbound {
+    color: #3b82f6;
+    white-space: nowrap;
+}
+
+/* Transcription indicator */
+.transcription-indicator {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.transcription-indicator.has-transcription {
+    color: #22c55e;
+}
+
+/* Summary indicator */
+.summary-indicator {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.summary-indicator.has-summary {
+    color: #8b5cf6;
+}
+
+/* Click row styling */
+.table-container table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.table-container table tbody tr:hover {
+    background-color: var(--bg-tertiary);
+}
+
+/* Filter form styling */
+#filterForm .form-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+/* Dropdown menu dark theme */
+.dropdown-menu {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+}
+
+.dropdown-item {
+    color: var(--text-primary);
+}
+
+.dropdown-item:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.dropdown-item i {
+    margin-right: 0.5rem;
+    color: var(--text-secondary);
+}
+
+/* Toast styling — large, hard-to-miss confirmation popups (e.g. "deleted N call records") */
+#toast-container .toast {
+    width: min(440px, 92vw);   /* big on desktop, never overflows a phone viewport */
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.35);
+    border-radius: 0.75rem;
+}
+#toast-container .toast .toast-body {
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.35;
+    padding: 1.15rem 1.25rem;
+}
+#toast-container .toast .toast-body i {
+    font-size: 1.65rem;
+    vertical-align: -0.18rem;
+}
+#toast-container .toast .btn-close {
+    padding: 1.1rem;
+    transform: scale(1.25);
+}
+
+/* Cost method badges (Phase 4 — themed neutrally so Agent V can refine in a single place) */
+.cost-method-badge {
+    font-size: 0.6rem;
+    font-weight: 500;
+    padding: 0.1rem 0.35rem;
+    line-height: 1;
+}
+.cost-method-actual {
+    background: rgba(34, 197, 94, 0.18);
+    color: #22c55e;
+}
+.cost-method-estimated {
+    background: rgba(245, 158, 11, 0.18);
+    color: #f59e0b;
+}
+.cost-method-legacy {
+    background: rgba(148, 163, 184, 0.18);
+    color: #94a3b8;
+}
+</style>
+
+<script>
+// Current filter state
+let filterState = {
+    agent: '',
+    direction: '',
+    date_from: '',
+    date_to: '',
+    search: '',
+    status_filter: '',
+    sort_by: '',
+    model: '',
+    page: 1,
+    per_page: 20
+};
+
+// Clear all filters
+function clearFilters() {
+    document.getElementById('filterAgent').value = '';
+    document.getElementById('filterDirection').value = '';
+    document.getElementById('filterDateFrom').value = '';
+    document.getElementById('filterDateTo').value = '';
+    document.getElementById('filterSearch').value = '';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterHealth').value = '';
+    const modelSel = document.getElementById('filterModel'); if (modelSel) modelSel.value = '';
+    const sortSel = document.getElementById('filterSortBy'); if (sortSel) sortSel.value = '';
+    document.getElementById('filterForm').submit();
+}
+
+// Build query string from current filter state
+function buildQueryString() {
+    const params = new URLSearchParams();
+    if (filterState.agent) params.append('agent', filterState.agent);
+    if (filterState.direction) params.append('direction', filterState.direction);
+    if (filterState.date_from) params.append('date_from', filterState.date_from);
+    if (filterState.date_to) params.append('date_to', filterState.date_to);
+    if (filterState.search) params.append('search', filterState.search);
+    if (filterState.status_filter) params.append('status_filter', filterState.status_filter);
+    if (filterState.sort_by) params.append('sort_by', filterState.sort_by);
+    if (filterState.model) params.append('model', filterState.model);
+    if (filterState.page > 1) params.append('page', filterState.page);
+    if (filterState.per_page && filterState.per_page !== 20) params.append('per_page', filterState.per_page);
+    return params.toString();
+}
+
+// Toggle cost sort from header arrows (called via data-sort-cost attr in the partial)
+function setCostSort(value) {
+    filterState.sort_by = value || '';
+    const sortSel = document.getElementById('filterSortBy');
+    if (sortSel) sortSel.value = filterState.sort_by;
+    filterState.page = 1;
+    refreshCalls(1);
+}
+
+// Change rows per page
+function changePerPage(value) {
+    filterState.per_page = parseInt(value);
+    filterState.page = 1;  // Reset to first page when changing per_page
+    refreshCalls();
+}
+
+// Refresh calls table via AJAX
+async function refreshCalls(page) {
+    const refreshIcon = document.getElementById('refresh-icon');
+    const tableContent = document.getElementById('calls-table-content');
+    const callsCount = document.getElementById('calls-count');
+
+    if (page) {
+        filterState.page = page;
+    }
+
+    // Update filter state from form
+    filterState.agent = document.getElementById('filterAgent').value;
+    filterState.direction = document.getElementById('filterDirection').value;
+    filterState.date_from = document.getElementById('filterDateFrom').value;
+    filterState.date_to = document.getElementById('filterDateTo').value;
+    filterState.search = document.getElementById('filterSearch').value;
+    filterState.status_filter = document.getElementById('filterStatus')?.value || '';
+    filterState.model = document.getElementById('filterModel')?.value || '';
+    filterState.sort_by = document.getElementById('filterSortBy')?.value || '';
+
+    // Add spinning animation
+    if (refreshIcon) refreshIcon.classList.add('spin');
+
+    try {
+        const queryString = buildQueryString();
+        const response = await fetch(`/call-history/calls?${queryString}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/html',
+            },
+            credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+            const html = await response.text();
+            tableContent.innerHTML = html;
+
+            // Update count badge from pagination info
+            const paginationInfo = tableContent.querySelector('.pagination-info');
+            if (paginationInfo && callsCount) {
+                const match = paginationInfo.textContent.match(/of (\d+)/);
+                if (match) {
+                    callsCount.textContent = match[1];
+                }
+            }
+            initCostBreakdownTooltips();
+        } else {
+            console.error('Failed to refresh calls:', response.status);
+        }
+    } catch (error) {
+        console.error('Error refreshing calls:', error);
+    } finally {
+        if (refreshIcon) refreshIcon.classList.remove('spin');
+    }
+}
+
+// Navigate to page
+function navigatePage(page) {
+    filterState.page = page;
+    refreshCalls(page);
+}
+
+// Export calls with optional limit
+async function exportCalls(format, limit = null) {
+    const params = new URLSearchParams();
+    params.append('format', format);
+    if (limit) params.append('limit', limit);
+    if (filterState.agent) params.append('agent', filterState.agent);
+    if (filterState.direction) params.append('direction', filterState.direction);
+    if (filterState.date_from) params.append('date_from', filterState.date_from);
+    if (filterState.date_to) params.append('date_to', filterState.date_to);
+
+    // Create form for POST request
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/call-history/export?${params.toString()}`;
+    form.style.display = 'none';
+
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = 'ImQ2TFViMzIxaDFuR0RHNlVYTDMxSmpXYTJKQkRJeTd1Tlo2cy1JNlc2djAi.aqgYKQ.xS2d9zEqhQSnL1xMi-0J-uuyt_s';
+    form.appendChild(csrfInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+// Export selected calls only
+async function exportSelectedCalls(format) {
+    const selected = getSelectedCallIds();
+    if (selected.length === 0) {
+        showToast('warning', 'Please select at least one call to export');
+        return;
+    }
+
+    const params = new URLSearchParams();
+    params.append('format', format);
+    params.append('call_ids', selected.join(','));
+
+    // Create form for POST request
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/call-history/export?${params.toString()}`;
+    form.style.display = 'none';
+
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = 'ImQ2TFViMzIxaDFuR0RHNlVYTDMxSmpXYTJKQkRJeTd1Tlo2cy1JNlc2djAi.aqgYKQ.xS2d9zEqhQSnL1xMi-0J-uuyt_s';
+    form.appendChild(csrfInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+// View call detail
+function viewCall(callId) {
+    window.location.href = `/call-history/${callId}`;
+}
+
+// Copy a full Call ID to the clipboard (the cell shows a truncated preview).
+// Guard for non-HTTPS contexts where navigator.clipboard is undefined.
+function copyCallId(id, el) {
+    if (!navigator.clipboard) { return; }
+    navigator.clipboard.writeText(id).then(function () {
+        el.textContent = 'Copied ✓';
+        // Restore the truncated preview from the id itself — robust to rapid
+        // re-clicks (capturing live textContent could leave it stuck on "Copied ✓").
+        setTimeout(function () { el.textContent = id.slice(0, 8) + '…'; }, 1000);
+    }).catch(function () {});
+}
+
+// =========================================================================
+// Bulk Selection Functions
+// =========================================================================
+
+// Toggle select all checkboxes
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.call-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    updateBulkActions();
+}
+
+// Update bulk actions visibility and selected count
+function updateBulkActions() {
+    const checkboxes = document.querySelectorAll('.call-checkbox:checked');
+    const bulkActions = document.getElementById('bulk-actions');
+    const selectedCount = document.getElementById('selected-count');
+    const selectAllCheckbox = document.getElementById('selectAllCalls');
+
+    if (bulkActions) {
+        if (checkboxes.length > 0) {
+            bulkActions.setAttribute('style', 'display: flex !important;');
+            selectedCount.textContent = checkboxes.length + ' selected';
+        } else {
+            bulkActions.setAttribute('style', 'display: none !important;');
+            selectedCount.textContent = '0 selected';
+        }
+    }
+
+    // Update select all checkbox state
+    const allCheckboxes = document.querySelectorAll('.call-checkbox');
+    if (selectAllCheckbox && allCheckboxes.length > 0) {
+        selectAllCheckbox.checked = checkboxes.length === allCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+    }
+}
+
+// Clear all selections
+function clearSelection() {
+    const checkboxes = document.querySelectorAll('.call-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAllCalls');
+    checkboxes.forEach(cb => cb.checked = false);
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+    updateBulkActions();
+}
+
+// Get selected call IDs
+function getSelectedCallIds() {
+    const checkboxes = document.querySelectorAll('.call-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// Bulk delete selected calls
+async function bulkDeleteCalls() {
+    const selectedIds = getSelectedCallIds();
+
+    if (selectedIds.length === 0) {
+        showToast('error', 'No calls selected');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} call record(s)? This action cannot be undone.`)) {
+        return;
+    }
+
+    // Show loading state
+    const deleteBtn = document.querySelector('#bulk-actions button[onclick="bulkDeleteCalls()"]');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    // Delete calls one by one
+    for (const callId of selectedIds) {
+        try {
+            const response = await fetch(`/call-history/${callId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': 'ImQ2TFViMzIxaDFuR0RHNlVYTDMxSmpXYTJKQkRJeTd1Tlo2cy1JNlc2djAi.aqgYKQ.xS2d9zEqhQSnL1xMi-0J-uuyt_s'
+                },
+                credentials: 'same-origin'
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                successCount++;
+            } else {
+                failCount++;
+            }
+        } catch (error) {
+            console.error(`Error deleting call ${callId}:`, error);
+            failCount++;
+        }
+    }
+
+    // Reset button state
+    const deleteBtnReset = document.querySelector('#bulk-actions button[onclick="bulkDeleteCalls()"]');
+    if (deleteBtnReset) {
+        deleteBtnReset.disabled = false;
+        deleteBtnReset.innerHTML = '<i class="bi bi-trash"></i> Delete Selected';
+    }
+
+    // Show result message
+    if (successCount > 0 && failCount === 0) {
+        showToast('success', `Successfully deleted ${successCount} call record(s)`);
+    } else if (successCount > 0 && failCount > 0) {
+        showToast('warning', `Deleted ${successCount} call(s), ${failCount} failed`);
+    } else {
+        showToast('error', 'Failed to delete call records');
+    }
+
+    // Refresh the table
+    clearSelection();
+    refreshCalls();
+}
+
+// Bulk delete selected calls AND their recordings
+async function bulkDeleteCallsWithRecordings() {
+    const selectedIds = getSelectedCallIds();
+
+    if (selectedIds.length === 0) {
+        showToast('error', 'No calls selected');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} call record(s) AND their associated recordings? This action cannot be undone.`)) {
+        return;
+    }
+
+    // Show loading state
+    const deleteBtn = document.querySelector('#bulk-actions button[onclick="bulkDeleteCallsWithRecordings()"]');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+    let noRecordingCount = 0;
+    let recordingFailedCount = 0;
+    let recordingPendingCount = 0;
+    let recordingMissingCount = 0;
+
+    // Delete calls and recordings one by one
+    for (const callId of selectedIds) {
+        try {
+            const response = await fetch(`/call-history/${callId}/with-recording`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': 'ImQ2TFViMzIxaDFuR0RHNlVYTDMxSmpXYTJKQkRJeTd1Tlo2cy1JNlc2djAi.aqgYKQ.xS2d9zEqhQSnL1xMi-0J-uuyt_s'
+                },
+                credentials: 'same-origin'
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                successCount++;
+                if (data.no_recording) {
+                    noRecordingCount++;
+                }
+                if (data.recording_pending) {
+                    recordingPendingCount++;
+                }
+                if (data.recording_missing) {
+                    recordingMissingCount++;
+                }
+            } else {
+                failCount++;
+                if (data.recording_failed) {
+                    recordingFailedCount++;
+                }
+            }
+        } catch (error) {
+            console.error(`Error deleting call ${callId}:`, error);
+            failCount++;
+        }
+    }
+
+    // Reset button state
+    const deleteBtnReset = document.querySelector('#bulk-actions button[onclick="bulkDeleteCallsWithRecordings()"]');
+    if (deleteBtnReset) {
+        deleteBtnReset.disabled = false;
+        deleteBtnReset.innerHTML = '<i class="bi bi-trash-fill"></i> Delete with Recordings';
+    }
+
+    // Show result message
+    if (successCount > 0 && failCount === 0) {
+        const notes = [];
+        if (recordingPendingCount > 0) {
+            notes.push(`${recordingPendingCount} recording(s) not in storage yet — they will be removed automatically if they appear`);
+        }
+        if (recordingMissingCount > 0) {
+            notes.push(`${recordingMissingCount} recording(s) could not be scheduled for removal`);
+        }
+        if (noRecordingCount > 0) {
+            notes.push(`${noRecordingCount} call(s) had no recording`);
+        }
+        if (notes.length > 0) {
+            showToast('success', `Deleted ${successCount} call(s). ${notes.join('; ')}.`);
+        } else {
+            showToast('success', `Successfully deleted ${successCount} call(s) and their recordings`);
+        }
+    } else if (recordingFailedCount > 0) {
+        showToast('warning', `Deleted ${successCount} call(s). ${recordingFailedCount} kept because their recording could not be deleted — please try again.`);
+    } else if (successCount > 0 && failCount > 0) {
+        showToast('warning', `Deleted ${successCount} call(s), ${failCount} failed`);
+    } else {
+        showToast('error', 'Failed to delete call records');
+    }
+
+    // Refresh the table
+    clearSelection();
+    refreshCalls();
+}
+
+// Toast notification helper
+function showToast(type, message) {
+    // Create toast container if it doesn't exist
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '1100';
+        document.body.appendChild(container);
+    }
+
+    // Create toast element
+    const toastId = 'toast-' + Date.now();
+    const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : type === 'warning' ? 'bg-warning' : 'bg-info';
+    const toast = document.createElement('div');
+    toast.id = toastId;
+    toast.className = `toast align-items-center text-white ${bgClass} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    container.appendChild(toast);
+
+    // Show toast
+    // Success confirmations (e.g. "deleted N call records") stay on screen until
+    // the user dismisses them so they can't be missed; others auto-hide after 8s.
+    const bsToast = new bootstrap.Toast(toast, type === 'success' ? { autohide: false } : { delay: 8000 });
+    bsToast.show();
+
+    // Remove from DOM after hidden
+    toast.addEventListener('hidden.bs.toast', function() {
+        toast.remove();
+    });
+}
+
+function initCostBreakdownTooltips() {
+    if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+    document.querySelectorAll('#calls-table-content [data-bs-toggle="tooltip"]').forEach(function(el) {
+        const existing = bootstrap.Tooltip.getInstance(el);
+        if (existing) existing.dispose();
+        new bootstrap.Tooltip(el);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize dropdowns
+    const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+    dropdownElementList.forEach(function(dropdownToggle) {
+        new bootstrap.Dropdown(dropdownToggle);
+    });
+    initCostBreakdownTooltips();
+});
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="ImQ2TFViMzIxaDFuR0RHNlVYTDMxSmpXYTJKQkRJeTd1Tlo2cy1JNlc2djAi.aqgYKQ.xS2d9zEqhQSnL1xMi-0J-uuyt_s">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Call History
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">View and analyze past calls with AI-powered summaries, transcriptions, sentiment analysis, and comprehensive latency monitoring.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Call List
+                        </h6>
+                        
+                        <p class="text-muted">Browse all past calls with filtering by date range, agent, direction (inbound/outbound), and status. Use checkboxes for bulk delete operations.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Bulk Operations
+                        </h6>
+                        
+                        <p class="text-muted">Select multiple calls using checkboxes, then use &#39;Delete Selected&#39; to remove them. &#39;Select All&#39; selects all visible calls on the current page.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Possible STT Stall Warning
+                        </h6>
+                        
+                        <p class="text-muted">Calls where the caller was heard speaking but speech-to-text produced no transcription are flagged with an orange warning triangle in the call list and a notice on the call detail page. This usually indicates the speech-to-text provider silently stalled mid-call. If the agent&#39;s STT Recovery option is off, the notice links to the agent editor so you can enable automatic recovery. The detection threshold adapts to each agent&#39;s configuration; setting STT_TRANSCRIPTION_TIMEOUT_S=0 in the server&#39;s .env file disables the diagnostic entirely (calls already flagged keep their historical warning).</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Latency Metrics Card
+                        </h6>
+                        
+                        <p class="text-muted">Collapsible section showing comprehensive latency analytics. Expand to see overall stats, component breakdown, and per-agent performance. Data loads on expansion.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Latency Overview Stats
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Avg TTFB</strong></td>
+                                        <td>Average Time-To-First-Byte across all calls - how long until agent starts speaking</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>P50</strong></td>
+                                        <td>50th percentile (median) latency - half of calls are faster than this</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>P90</strong></td>
+                                        <td>90th percentile latency - 90% of calls are faster than this</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>P99</strong></td>
+                                        <td>99th percentile latency - identifies worst-case outliers</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Component Breakdown Chart
+                        </h6>
+                        
+                        <p class="text-muted">Doughnut chart showing how latency is distributed across components: STT (speech-to-text, green), LLM (language model thinking time, blue), and TTS (text-to-speech, orange).</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Latency Trend Chart
+                        </h6>
+                        
+                        <p class="text-muted">Line chart showing P50 and P90 latency by hour. Helps identify patterns like increased latency during peak hours. Filter by 24h, 7 days, or 30 days.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Per-Agent Latency Table
+                        </h6>
+                        
+                        <p class="text-muted">Compare latency performance across different agents. Shows average TTFB, P50, P90, and sample count per agent. Lower numbers are better.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Slow Calls Warning
+                        </h6>
+                        
+                        <p class="text-muted">Alert shown when calls with latency &gt;1000ms are detected. Target: &lt;500ms for natural conversation, 500-1000ms is noticeable, &gt;1000ms feels broken.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Call Details - Latency Breakdown
+                        </h6>
+                        
+                        <p class="text-muted">Each call&#39;s detail page shows a visual component bar with STT/LLM/TTS proportions, percentile metrics, and turn count for that specific call.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> SIP Codec
+                        </h6>
+                        
+                        <p class="text-muted">For SIP trunk calls, the call detail page shows the negotiated audio codec (e.g., G.711 µ-law, G.711 A-law, G.722 HD). This is the codec used between LiveKit and the SIP trunk provider.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> AI Call Summary
+                        </h6>
+                        
+                        <p class="text-muted">AI-generated analysis including conversation summary, key topics discussed, sentiment analysis, action items, and call outcome classification.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Sentiment Journey
+                        </h6>
+                        
+                        <p class="text-muted">Visual sparkline chart showing caller emotional journey throughout the call. Tracks sentiment changes from start to end with trend indicator (improving/stable/declining).</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Interruption Analysis
+                        </h6>
+                        
+                        <p class="text-muted">Estimates speaking overlaps between user and agent. Shows &#39;User interrupted AI&#39; vs &#39;AI interrupted User&#39; counts. Warning displayed for high interruption rates.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Transcriptions
+                        </h6>
+                        
+                        <p class="text-muted">Full call transcript with speaker labels, timestamps, and per-segment sentiment coloring. Expandable/collapsible for long calls.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Tool Calls in Transcription
+                        </h6>
+                        
+                        <p class="text-muted">When an agent uses tools during a call (hangup, transfer, get_datetime, etc.), they appear inline in the transcription with purple styling. Shows tool name, arguments passed, and result returned.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Call History Storage
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Local Storage</strong></td>
+                                        <td>Store call history in Redis on the local server</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Cloud Sync</strong></td>
+                                        <td>Sync to AWS S3 or Google Cloud Storage for backup and cross-instance sharing</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>AI Summary Settings</strong></td>
+                                        <td>Configure LLM provider/model for generating call summaries</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Call Audio Processing (Settings &gt; Storage)
+                        </h6>
+                        
+                        <p class="text-muted">How the server processes the caller&#39;s voice during calls. Three options: &lt;strong&gt;24 kHz — standard&lt;/strong&gt; (how the system always worked; installs upgraded from earlier versions stay here until changed, while new installs start on 16 kHz for all agents), &lt;strong&gt;16 kHz for all agents&lt;/strong&gt; (lighter on the server for phone calls — phone lines carry narrow-band audio, so callers hear no difference; AI providers that need 24 kHz are detected automatically and keep it), or &lt;strong&gt;Choose per agent&lt;/strong&gt; (adds an &#39;Audio Processing Rate&#39; choice to each voice agent&#39;s editor under Speech Recognition &gt; Audio Input Settings; agents without their own choice — including chatbot and realtime agents — follow the server default). Changes apply from the next call, no restart needed.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> History Retention (Settings &gt; Storage)
+                        </h6>
+                        
+                        <p class="text-muted">Everything is kept forever by default — nothing is deleted unless you set a period. Three independent controls: &lt;strong&gt;Call History&lt;/strong&gt; (voice call records + transcripts, fixed rule: X days after the call), &lt;strong&gt;Chat History&lt;/strong&gt; (chatbot conversations + widget messages + SMS threads under one sliding rule: X days after the last message, plus an optional max-messages-per-conversation cap), and &lt;strong&gt;Recording Storage&lt;/strong&gt; (audio files, X days after recording). Each has a separate &#39;on this server&#39; and &#39;in the cloud (S3/GCS)&#39; setting — cloud deletion is permanent, asks for confirmation, and never touches backups or diagnostics data. Widget messages and SMS always live on the server (never in cloud storage). Each section also has a &lt;strong&gt;Daily clean-up time&lt;/strong&gt; (default 3:00 AM) deciding when its daily deletion run happens, in the time zone set in Settings &gt; Time &amp;amp; Date; if the dashboard was off over that time, the run catches up shortly after it comes back. Saving a deletion rule still cleans up immediately as well. Widget/SMS messages are exact-expiry and ignore the clean-up time. API note: retention_days 0 in /api/call-history/backup/config means &#39;keep forever&#39;.</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

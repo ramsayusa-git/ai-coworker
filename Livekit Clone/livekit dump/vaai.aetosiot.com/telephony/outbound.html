@@ -1,0 +1,3289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SIP Trunks - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="../static/images/custom_favicon.png@v=460176">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="../static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/style.css@v=7391.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="ImRjZUQ5TWpOUFhOOWJFbERSQnJuOVZmMjVEMXI4b0pjRnVIbzZwd3RkZjQi.aqgYNg.k2KkPGYi7JVWFetVuzYothJfiL0">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="../index.html" class="sidebar-brand">
+            
+            <img src="../static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="../settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="../index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="../reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="../rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="../call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="../chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="../egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="../tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="../knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="../agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="../web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="inbound.html" class="nav-link active">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="../agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="../simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="../autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="../improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="../settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="../settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Telephony</h1>
+                
+<p class="page-subtitle">Configuration - SIP Trunks</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="../userguide.html#sip-trunks" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="outbound.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<!-- SIP Trunks tabs -->
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="inbound.html">
+            <i class="bi bi-telephone-inbound"></i> Inbound
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link active" href="outbound.html" aria-current="page">
+            <i class="bi bi-telephone-outbound"></i> Outbound
+        </a>
+    </li>
+</ul>
+
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-telephone-outbound"></i> Total Outbound Trunks
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+</div>
+
+<!-- Outbound Trunks -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">
+            <i class="bi bi-telephone-outbound"></i> Outbound Trunks
+        </h5>
+        <div class="d-flex gap-2">
+            
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#importTrunkModal" title="Import trunk">
+                <i class="bi bi-upload"></i> Import
+            </button>
+            
+            
+            <button type="button" class="btn btn-sm" style="background-color: #3b82f6; color: #fff; border-color: #3b82f6;" onclick="openSipSetupWizard()" title="Guided setup for Twilio, Telnyx, Vonage, Plivo, Cloudonix, Vobiz or Tronic Cloud">
+                <i class="bi bi-magic"></i> Setup Wizard
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createTrunkModal">
+                <i class="bi bi-plus-circle"></i> Create new trunk
+            </button>
+            
+        </div>
+    </div>
+    <div class="card-body">
+        
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-telephone"></i>
+            </div>
+            <div class="empty-state-title">No outbound trunks configured</div>
+            <div class="empty-state-description">
+                Configure SIP trunks in your LiveKit server to enable outbound calls
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Create Call Button -->
+
+
+
+
+<!-- Create Call Modal -->
+<div class="modal fade" id="createCallModal" tabindex="-1" aria-labelledby="createCallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCallModalLabel">Create Outbound Call</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="https://vaai.aetosiot.com/sip-outbound" id="createCallForm">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="ImRjZUQ5TWpOUFhOOWJFbERSQnJuOVZmMjVEMXI4b0pjRnVIbzZwd3RkZjQi.aqgYNg.k2KkPGYi7JVWFetVuzYothJfiL0">
+
+                    <!-- Call Status Box -->
+                    <div id="callStatusBox" class="call-status-box" style="display: none;">
+                        <div class="call-status-header">
+                            <i class="bi bi-telephone-outbound" id="callStatusIcon"></i>
+                            <span id="callStatusTitle">Call Status</span>
+                        </div>
+                        <div class="call-status-body">
+                            <div id="callStatusMessage">Initializing...</div>
+                            <div id="callStatusDetails" class="call-status-details"></div>
+                        </div>
+                        <div id="callStatusProgress" class="call-status-progress">
+                            <div class="progress-bar-animated"></div>
+                        </div>
+                    </div>
+
+                    <!-- Form Fields -->
+                    <div id="callFormFields">
+                        <div class="form-group">
+                            <label for="sip_trunk_id" class="form-label">SIP Trunk *</label>
+                            <select class="form-select" id="sip_trunk_id" name="sip_trunk_id" required>
+                                <option value="">Select trunk...</option>
+                                
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="agent_id" class="form-label">Agent *</label>
+                            <select class="form-select" id="agent_id" name="agent_id" required>
+                                <option value="">Select agent...</option>
+                                
+                            </select>
+                            <small class="text-muted">The AI agent that will handle the call</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="sip_call_to" class="form-label">Phone Number *</label>
+                            <input type="text" class="form-control" id="sip_call_to" name="sip_call_to"
+                                   placeholder="1234567890" required>
+                            <small class="text-muted">Include country code (e.g., 1 for US, 61 for AUS)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="room_name" class="form-label">Room Name *</label>
+                            <input type="text" class="form-control" id="room_name" name="room_name"
+                                   placeholder="my-room" required>
+                            <small class="text-muted">The LiveKit room to connect the call to</small>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="participant_identity" class="form-label">Participant Identity *</label>
+                            <input type="text" class="form-control" id="participant_identity" name="participant_identity"
+                                   placeholder="sip-caller-1" required>
+                            <small class="text-muted">Unique identifier for this participant</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="callCancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="callSubmitBtn">
+                        <i class="bi bi-telephone-outbound"></i> Initiate Call
+                    </button>
+                    <button type="button" class="btn btn-danger" id="callHangupBtn" style="display: none;">
+                        <i class="bi bi-telephone-x"></i> Hang Up
+                    </button>
+                    <button type="button" class="btn btn-primary" id="callNewBtn" style="display: none;">
+                        <i class="bi bi-plus-circle"></i> New Call
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Import Trunk Modal -->
+
+<div class="modal fade" id="importTrunkModal" tabindex="-1" aria-labelledby="importTrunkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importTrunkModalLabel">
+                    <i class="bi bi-upload"></i> Import Outbound Trunk
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="https://vaai.aetosiot.com/telephony/outbound/import" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="ImRjZUQ5TWpOUFhOOWJFbERSQnJuOVZmMjVEMXI4b0pjRnVIbzZwd3RkZjQi.aqgYNg.k2KkPGYi7JVWFetVuzYothJfiL0">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Import a previously exported SIP outbound trunk configuration.
+                    </div>
+                    <div class="mb-3">
+                        <label for="import_file" class="form-label">Select JSON File</label>
+                        <input type="file" class="form-control" id="import_file" name="import_file" accept=".json" required>
+                        <small class="form-text text-muted">Select a JSON file exported from this dashboard.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Create Trunk Modal -->
+<div class="modal fade" id="createTrunkModal" tabindex="-1" aria-labelledby="createTrunkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createTrunkModalLabel">Create a new trunk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="https://vaai.aetosiot.com/telephony/outbound/trunk/create" id="createTrunkFormWrapper">
+                <input type="hidden" name="csrf_token" value="ImRjZUQ5TWpOUFhOOWJFbERSQnJuOVZmMjVEMXI4b0pjRnVIbzZwd3RkZjQi.aqgYNg.k2KkPGYi7JVWFetVuzYothJfiL0">
+                <div class="modal-body">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-3" id="trunkTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                            TRUNK DETAILS
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="json-tab" data-bs-toggle="tab" data-bs-target="#json" type="button" role="tab">
+                            JSON EDITOR
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="trunkTabContent">
+                    <!-- Trunk Details Tab -->
+                    <div class="tab-pane fade show active" id="details" role="tabpanel">
+                            <div class="form-group">
+                                <label for="trunk_type" class="form-label">
+                                    Trunk Type *
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="PSTN: dial public phone numbers via a SIP carrier (Twilio, Telnyx, etc.). PBX: dial internal extensions or queues on a customer's phone system (3CX, Asterisk, FreePBX, Yeastar)."></i>
+                                </label>
+                                <select class="form-select trunk-type-select" id="trunk_type" name="trunk_type" data-prefix="">
+                                    <option value="pstn" selected>PSTN — call public phone numbers via a SIP carrier</option>
+                                    <option value="pbx">PBX — dial extensions inside a customer's phone system</option>
+                                </select>
+                            </div>
+
+                            <div class="alert alert-info py-2 pbx-help-block" id="pbx_help_block" style="display: none;">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>PBX trunk:</strong> destinations are extensions, queues, or SIP users (e.g.&nbsp;<code>101</code>, <code>queue302</code>, <code>reception</code>) — not phone numbers.
+                                <br>
+                                LiveKit&#39;s SIP service does <strong>not</strong> send SIP REGISTER. Configure your PBX in IP-trunk mode (3CX: &quot;Do not require — IP Based&quot;; Asterisk pjsip: <code>registration=none</code> with <code>permit=&lt;livekit-sip-IP&gt;</code>).
+                                <br>
+                                Codec: PCMU, PCMA, and G.722 are supported. <strong>G.729 is not supported</strong> — if your PBX offers only G.729 the call will fail with <code>488 Not Acceptable Here</code>; enable G.711 on the PBX.
+                            </div>
+
+                            <div class="form-group">
+                                <label for="trunk_name" class="form-label">
+                                    Trunk name
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="A friendly name to identify this SIP trunk in the dashboard"></i>
+                                </label>
+                                <input type="text" class="form-control" id="trunk_name" name="trunk_name" placeholder="My trunk">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="address" class="form-label">
+                                    Address *
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="The SIP server hostname or IP address. Include port (e.g., :5060) to bypass DNS SRV lookup."></i>
+                                </label>
+                                <input type="text" class="form-control trunk-address" id="address" name="address" placeholder="sip.provider.com or 192.0.2.0:5060" required>
+                                <small class="text-muted trunk-address-hint">SIP server address for outbound calls (e.g., sip.twilio.com, sip.provider.com:5060)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transport" class="form-label">
+                                    Transport
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="UDP (fast, connectionless), TCP (reliable; recommended for PBX), or TLS (encrypted; requires explicit :5061 in address)."></i>
+                                </label>
+                                <select class="form-select" id="transport" name="transport">
+                                    <option value="tcp">TCP</option>
+                                    <option value="udp">UDP</option>
+                                    <option value="tls">TLS</option>
+                                </select>
+                                <small class="text-muted pbx-transport-hint" style="display: none;">Recommended: TCP. Compatible with all major PBXes including 3CX. For TLS, set the address to <code>host:5061</code> explicitly.</small>
+                            </div>
+
+                            <div class="form-group pstn-only-row" id="number_format_row">
+                                <label for="number_format" class="form-label">
+                                    Number Format
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Choose whether phone numbers include the + prefix. Twilio and most providers require +E.164 format (WITH +)"></i>
+                                </label>
+                                <select class="form-select" id="number_format" name="number_format">
+                                    <option value="no_plus">E.164 (NO +) - e.g., 61400123123</option>
+                                    <option value="with_plus">+E.164 (WITH +) - e.g., +61400123123</option>
+                                </select>
+                                <small class="text-muted">Twilio requires "with +", some providers work without it</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="numbers" class="form-label trunk-numbers-label">
+                                    Numbers
+                                    <i class="bi bi-info-circle text-muted trunk-numbers-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="PSTN: caller-ID numbers shown to the recipient."></i>
+                                </label>
+                                <input type="text" class="form-control trunk-numbers-input" id="numbers" name="numbers" placeholder="61400123123,61400123124">
+                                <small class="text-muted trunk-numbers-hint">Always enter WITHOUT the + (e.g., 61400123123). Comma-separated for multiple numbers.</small>
+                                <div class="pbx-only-callerid-explainer alert alert-info py-2 mt-2 mb-0" style="display:none; font-size: 0.875rem;">
+                                    <strong class="d-block mb-2"><i class="bi bi-info-circle"></i> What this field does on transfers:</strong>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3 mb-md-0">
+                                            <strong class="text-success">If blank</strong>
+                                            <div class="text-muted small">When the AI transfers an inbound call, the destination phone shows the <strong>real caller's number</strong>.</div>
+                                            <div class="small mt-1 text-break" aria-hidden="true">Destination phone shows: <code class="caller-example-blank">61416059519</code></div>
+                                            <div class="text-muted small mt-1">Best when the destination user wants to see who's actually calling and call them back.</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong class="text-info">If you type a value</strong>
+                                            <div class="text-muted small">Every transfer shows that <strong>fixed value</strong>, regardless of who's calling.</div>
+                                            <div class="small mt-1 text-break" aria-hidden="true">Destination phone shows: <code class="caller-example-fixed">YOUR-VALUE</code></div>
+                                            <div class="text-muted small mt-1">Best when locking caller-ID to a single value (e.g. your main DID, or "AIReceptionist").</div>
+                                        </div>
+                                    </div>
+                                    <div class="caller-id-live-preview mt-2 pt-2 border-top small" aria-live="polite" aria-atomic="true">
+                                        <strong>Right now:</strong>
+                                        <span class="caller-id-mode-badge badge bg-secondary">—</span>
+                                        <span class="caller-id-mode-text text-muted">— enter or clear the field above to preview —</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Optional Settings -->
+                            <div class="optional-settings">
+                                <div class="fw-semibold text-secondary mb-2">Optional settings</div>
+
+                                <div id="optionalSettings">
+                                    <div class="form-group">
+                                        <label for="username" class="form-label">
+                                            Username
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Username for SIP digest authentication. For PBX trunks: only required for digest challenge auth — leave blank for IP-based trunks (typical 3CX/Asterisk setup)."></i>
+                                        </label>
+                                        <input type="text" class="form-control trunk-username-input" id="username" name="username" placeholder="Username">
+                                        <small class="text-muted pbx-username-hint" style="display: none;">Only required for digest challenge auth. Leave blank for IP-based trunks.</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="password" class="form-label">
+                                            Password
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Password for SIP authentication with your provider. Stored securely and not displayed after saving"></i>
+                                        </label>
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Strong_password">
+                                    </div>
+
+                                    <!-- Advanced SIP options (PBX-only) -->
+                                    <div class="pbx-advanced-block" id="pbx_advanced_create" style="display: none;">
+                                        <div class="fw-semibold text-secondary mb-2">Advanced SIP options</div>
+                                        <div id="pbxAdvancedSettingsCreate">
+                                            <div class="form-group">
+                                                <label for="from_host" class="form-label">From URI host (optional)</label>
+                                                <input type="text" class="form-control" id="from_host" name="from_host" placeholder="pbx.customer.com.au">
+                                                <small class="text-muted">For 3CX: set to your 3CX SIP domain (Admin → SIP Trunks). For Asterisk: usually the same as the trunk address. Leave blank to inherit the trunk address.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="display_name" class="form-label">Caller display name (optional)</label>
+                                                <input type="text" class="form-control" id="display_name" name="display_name" placeholder="AI Receptionist" maxlength="128">
+                                                <small class="text-muted">Caller name shown to the destination phone. Max 128 chars; no line breaks.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <hr>
+                                    
+
+
+<input type="hidden" name="codecs_present" value="1">
+
+<div class="mb-3">
+  <label class="form-label">Audio Codecs</label>
+  <div class="border rounded p-2">
+    
+    <div class="form-check">
+      <input class="form-check-input obc_codec-box" type="checkbox"
+             name="codecs" value="PCMU" id="obc_codecPCMU"
+             checked>
+      <label class="form-check-label" for="obc_codecPCMU">
+        G.711 &micro;-law (PCMU)
+        <small class="text-muted d-block">Standard &mdash; supported by virtually every carrier</small>
+      </label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input obc_codec-box" type="checkbox"
+             name="codecs" value="PCMA" id="obc_codecPCMA"
+             checked>
+      <label class="form-check-label" for="obc_codecPCMA">
+        G.711 A-law (PCMA)
+        <small class="text-muted d-block">Standard &mdash; common on AU/EU carriers</small>
+      </label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input obc_codec-box" type="checkbox"
+             name="codecs" value="G722" id="obc_codecG722"
+             checked>
+      <label class="form-check-label" for="obc_codecG722">
+        G.722 (HD Voice)
+        <small class="text-muted d-block">Wideband 16&nbsp;kHz &mdash; better speech recognition, if your carrier offers it</small>
+      </label>
+    </div>
+    
+  </div>
+  <div class="form-check mt-2">
+    <input class="form-check-input" type="checkbox" name="only_listed_codecs"
+           value="on" id="obc_lockCodecs" >
+    <label class="form-check-label" for="obc_lockCodecs">
+      <strong>Only allow the codecs ticked above</strong>
+    </label>
+  </div>
+  <div class="form-text">
+    Leave this off (the default) to let your carrier choose, exactly as the trunk
+    behaves today. Ticking it restricts the call to your selection.
+  </div>
+  
+  <div class="alert alert-warning alert-permanent mt-2 d-none"
+       id="obc_codecWarn" role="alert">
+    <strong>Calls may fail to connect.</strong> If your carrier cannot offer one
+    of the codecs you have ticked, it rejects the call with
+    <code>488 Not Acceptable Here</code> &mdash; inbound calls stop arriving and
+    outbound calls stop connecting. Most phone carriers offer only G.711
+    (PCMU/PCMA). Only narrow this if you know what your carrier supports, and
+    <strong>test a real call straight afterwards</strong>. To undo it, tick every
+    codec again and save.
+  </div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="obc_mediaTimeout">
+    Media timeout (seconds)
+  </label>
+  <input type="number" class="form-control" name="media_timeout_s"
+         id="obc_mediaTimeout" min="30" step="1" placeholder="Not set"
+         value="">
+  <div class="form-text">
+    Hangs up a call whose audio has stopped flowing, instead of leaving a silent
+    line open. <strong>Leave blank</strong> to keep the current behaviour.
+    Minimum 30 seconds. This is not the same as an agent's maximum call length &mdash;
+    that limits a healthy call, this one ends a dead one.
+  </div>
+  <div class="alert alert-warning alert-permanent mt-2 d-none"
+       id="obc_timeoutWarn" role="alert">
+    <strong>Set this too low and live calls will drop.</strong> Some carriers stop
+    sending audio packets while nobody is speaking (silence suppression). On such
+    a carrier a quiet caller can trip this timeout and be hung up on mid-call. If
+    you are unsure, start at 60 seconds or leave it blank.
+  </div>
+</div>
+
+<script>
+// Shared populate helper for the single edit modal each page reuses across all
+// its trunks. Defined once; the macro renders more than once per page.
+if (!window.applySipMediaConfig) {
+  window.applySipMediaConfig = function (prefix, codecsCsv, locked, timeout) {
+    var selected = (codecsCsv || '').split(',').filter(Boolean);
+    var lock = document.getElementById(prefix + 'lockCodecs');
+    var boxes = document.querySelectorAll('.' + prefix + 'codec-box');
+    if (!lock) return;
+    lock.checked = !!locked && selected.length > 0;
+    boxes.forEach(function (b) {
+      // Unlocked trunks show every codec ticked — that IS the default state,
+      // and it means saving without touching anything is a no-op.
+      b.checked = lock.checked ? selected.indexOf(b.value) !== -1 : true;
+    });
+    var t = document.getElementById(prefix + 'mediaTimeout');
+    if (t) t.value = timeout || '';
+    // Re-run the warning/validity logic for the newly loaded values.
+    lock.dispatchEvent(new Event('change'));
+    if (t) t.dispatchEvent(new Event('input'));
+  };
+}
+
+(function () {
+  var boxes = document.querySelectorAll('.obc_codec-box');
+  var lock = document.getElementById('obc_lockCodecs');
+  var warn = document.getElementById('obc_codecWarn');
+  var timeout = document.getElementById('obc_mediaTimeout');
+  var twarn = document.getElementById('obc_timeoutWarn');
+  if (!lock || !warn) return;
+
+  function ticked() {
+    return Array.prototype.filter.call(boxes, function (b) { return b.checked; });
+  }
+
+  function sync() {
+    var n = ticked().length;
+    // Warn only when the operator is actually NARROWING: the lock on with a
+    // real subset. Lock + all three is identical to the default, so warning
+    // there would train people to ignore it.
+    warn.classList.toggle('d-none', !(lock.checked && n > 0 && n < boxes.length));
+    // An empty selection with the lock on offers nothing and fails every call.
+    // The server rejects it too (import/clone/API bypass this), but blocking
+    // here gives an answer before the round-trip.
+    var invalid = lock.checked && n === 0;
+    boxes.forEach(function (b) {
+      b.setCustomValidity(invalid ? 'Select at least one codec, or untick the lock.' : '');
+    });
+  }
+
+  function syncTimeout() {
+    var v = parseInt(timeout.value, 10);
+    twarn.classList.toggle('d-none', !(v > 0));
+  }
+
+  boxes.forEach(function (b) { b.addEventListener('change', sync); });
+  lock.addEventListener('change', sync);
+  if (timeout) timeout.addEventListener('input', syncTimeout);
+  sync();
+  if (timeout) syncTimeout();
+})();
+</script>
+
+
+                                    <div class="form-group">
+                                        <label for="metadata" class="form-label">
+                                            Metadata
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Custom key-value data stored with the trunk. Accessible in your application for custom logic or tracking"></i>
+                                        </label>
+                                        <textarea class="form-control font-monospace" id="metadata" name="metadata" rows="3" placeholder='{"key": "value"}'></textarea>
+                                        <small class="text-muted">Custom metadata as JSON object. Trunk Type and Display Name are managed by the dropdown/Advanced fields above and merged in on save — don&#39;t duplicate them here.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="headers" class="form-label">
+                                            Custom SIP Headers
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Additional SIP headers to include in outbound INVITE requests. Useful for passing custom data to your SIP provider"></i>
+                                        </label>
+                                        <textarea class="form-control font-monospace" id="headers" name="headers" rows="3" placeholder='{"X-Custom-Header": "value"}'></textarea>
+                                        <small class="text-muted">Custom SIP headers as JSON object (e.g., {"X-Custom": "value"})</small>
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <label for="headers_to_attributes" class="form-label">
+                                            Headers to Attributes Mapping
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Map SIP headers from responses to LiveKit participant attributes. Allows you to access SIP data in your application"></i>
+                                        </label>
+                                        <textarea class="form-control font-monospace" id="headers_to_attributes" name="headers_to_attributes" rows="3" placeholder='{"X-User-ID": "user_id"}'></textarea>
+                                        <small class="text-muted">Map incoming SIP headers to participant attributes</small>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                    </div>
+
+                    <!-- JSON Editor Tab -->
+                    <div class="tab-pane fade" id="json" role="tabpanel">
+                        <div class="form-group mb-0">
+                            <textarea class="form-control font-monospace" id="create_json_editor" name="json_data" rows="12" placeholder='{
+  "name": "My trunk",
+  "address": "sip.provider.com:5060",
+  "transport": "tcp",
+  "numbers": ["18005550123"],
+  "auth_username": "user",
+  "auth_password": "pass"
+}'></textarea>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-book"></i> Learn more in the 
+                            <a href="https://docs.livekit.io/sip" target="_blank" class="text-info">docs</a>
+                        </small>
+                    </div>
+                </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Trunk Modal -->
+<div class="modal fade" id="updateTrunkModal" tabindex="-1" aria-labelledby="updateTrunkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateTrunkModalLabel">Update trunk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="https://vaai.aetosiot.com/telephony/outbound/trunk/update" id="updateTrunkForm">
+                <input type="hidden" name="csrf_token" value="ImRjZUQ5TWpOUFhOOWJFbERSQnJuOVZmMjVEMXI4b0pjRnVIbzZwd3RkZjQi.aqgYNg.k2KkPGYi7JVWFetVuzYothJfiL0">
+                <input type="hidden" name="sip_trunk_id" id="update_sip_trunk_id">
+                <div class="modal-body">
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="updateTrunkTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="update-details-tab" data-bs-toggle="tab" data-bs-target="#update-details" type="button" role="tab">
+                                TRUNK DETAILS
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="update-json-tab" data-bs-toggle="tab" data-bs-target="#update-json" type="button" role="tab">
+                                JSON EDITOR
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="updateTrunkTabContent">
+                        <!-- Trunk Details Tab -->
+                        <div class="tab-pane fade show active" id="update-details" role="tabpanel">
+                            <div class="form-group">
+                                <label for="update_trunk_type" class="form-label">
+                                    Trunk Type *
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="PSTN: dial public phone numbers via a SIP carrier. PBX: dial internal extensions on a customer's phone system."></i>
+                                </label>
+                                <select class="form-select trunk-type-select" id="update_trunk_type" name="trunk_type" data-prefix="update_">
+                                    <option value="pstn">PSTN — call public phone numbers via a SIP carrier</option>
+                                    <option value="pbx">PBX — dial extensions inside a customer's phone system</option>
+                                </select>
+                            </div>
+
+                            <div class="alert alert-info py-2 pbx-help-block" id="update_pbx_help_block" style="display: none;">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>PBX trunk:</strong> destinations are extensions, queues, or SIP users (e.g.&nbsp;<code>101</code>, <code>queue302</code>, <code>reception</code>) — not phone numbers.
+                                <br>
+                                LiveKit&#39;s SIP service does <strong>not</strong> send SIP REGISTER. Configure your PBX in IP-trunk mode (3CX: &quot;Do not require — IP Based&quot;).
+                                <br>
+                                Codec: PCMU, PCMA, G.722 supported. <strong>G.729 not supported</strong>.
+                            </div>
+
+                            <div class="form-group">
+                                <label for="update_trunk_name" class="form-label">
+                                    Trunk name
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="A friendly name to identify this SIP trunk in the dashboard"></i>
+                                </label>
+                                <input type="text" class="form-control" id="update_trunk_name" name="trunk_name" placeholder="My trunk">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="update_address" class="form-label">
+                                    Address
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="The SIP server hostname or IP address. Include port (e.g., :5060) to bypass DNS SRV lookup."></i>
+                                </label>
+                                <input type="text" class="form-control trunk-address" id="update_address" name="address" placeholder="192.0.2.0">
+                                <small class="text-muted trunk-address-hint">SIP server address for outbound calls (e.g., sip.twilio.com, sip.provider.com:5060)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="update_transport" class="form-label">
+                                    Transport
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="UDP (fast), TCP (recommended for PBX), TLS (encrypted; needs explicit :5061 in address)."></i>
+                                </label>
+                                <select class="form-select" id="update_transport" name="transport">
+                                    <option value="tcp">TCP</option>
+                                    <option value="udp">UDP</option>
+                                    <option value="tls">TLS</option>
+                                </select>
+                                <small class="text-muted pbx-transport-hint" style="display: none;">Recommended: TCP. For TLS, set address to <code>host:5061</code> explicitly.</small>
+                            </div>
+
+                            <div class="form-group pstn-only-row" id="update_number_format_row">
+                                <label for="update_number_format" class="form-label">
+                                    Number Format
+                                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Choose whether phone numbers include the + prefix. Twilio and most providers require +E.164 format (WITH +)"></i>
+                                </label>
+                                <select class="form-select" id="update_number_format" name="number_format">
+                                    <option value="no_plus">E.164 (NO +) - e.g., 61400123123</option>
+                                    <option value="with_plus">+E.164 (WITH +) - e.g., +61400123123</option>
+                                </select>
+                                <small class="text-muted">Twilio requires "with +", some providers work without it</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="update_numbers" class="form-label trunk-numbers-label">
+                                    Numbers
+                                    <i class="bi bi-info-circle text-muted trunk-numbers-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="PSTN: caller-ID numbers shown to the recipient."></i>
+                                </label>
+                                <input type="text" class="form-control trunk-numbers-input" id="update_numbers" name="numbers" placeholder="61400123123,61400123124">
+                                <small class="text-muted trunk-numbers-hint">Always enter WITHOUT the + (e.g., 61400123123). Comma-separated for multiple numbers.</small>
+                                <div class="pbx-only-callerid-explainer alert alert-info py-2 mt-2 mb-0" style="display:none; font-size: 0.875rem;">
+                                    <strong class="d-block mb-2"><i class="bi bi-info-circle"></i> What this field does on transfers:</strong>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3 mb-md-0">
+                                            <strong class="text-success">If blank</strong>
+                                            <div class="text-muted small">When the AI transfers an inbound call, the destination phone shows the <strong>real caller's number</strong>.</div>
+                                            <div class="small mt-1 text-break" aria-hidden="true">Destination phone shows: <code class="caller-example-blank">61416059519</code></div>
+                                            <div class="text-muted small mt-1">Best when the destination user wants to see who's actually calling and call them back.</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong class="text-info">If you type a value</strong>
+                                            <div class="text-muted small">Every transfer shows that <strong>fixed value</strong>, regardless of who's calling.</div>
+                                            <div class="small mt-1 text-break" aria-hidden="true">Destination phone shows: <code class="caller-example-fixed">YOUR-VALUE</code></div>
+                                            <div class="text-muted small mt-1">Best when locking caller-ID to a single value (e.g. your main DID, or "AIReceptionist").</div>
+                                        </div>
+                                    </div>
+                                    <div class="caller-id-live-preview mt-2 pt-2 border-top small" aria-live="polite" aria-atomic="true">
+                                        <strong>Right now:</strong>
+                                        <span class="caller-id-mode-badge badge bg-secondary">—</span>
+                                        <span class="caller-id-mode-text text-muted">— enter or clear the field above to preview —</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Optional Settings -->
+                            <div class="optional-settings">
+                                <div class="fw-semibold text-secondary mb-2">Optional settings</div>
+
+                                <div id="updateOptionalSettings">
+                                    <div class="form-group">
+                                        <label for="update_username" class="form-label">
+                                            Username
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Username for SIP authentication. PBX trunks: only required for digest challenge auth — leave blank for IP-based trunks."></i>
+                                        </label>
+                                        <input type="text" class="form-control trunk-username-input" id="update_username" name="username" placeholder="Username">
+                                        <small class="text-muted pbx-username-hint" style="display: none;">Only required for digest challenge auth. Leave blank for IP-based trunks.</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="update_password" class="form-label">
+                                            Password
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Password for SIP authentication with your provider. Leave blank to keep existing password"></i>
+                                        </label>
+                                        <input type="password" class="form-control" id="update_password" name="password" placeholder="Strong_password">
+                                        <small class="text-muted">Leave blank to keep existing password</small>
+                                    </div>
+
+                                    <!-- Advanced SIP options (PBX-only) -->
+                                    <div class="pbx-advanced-block" id="pbx_advanced_update" style="display: none;">
+                                        <div class="fw-semibold text-secondary mb-2">Advanced SIP options</div>
+                                        <div id="pbxAdvancedSettingsUpdate">
+                                            <div class="form-group">
+                                                <label for="update_from_host" class="form-label">From URI host (optional)</label>
+                                                <input type="text" class="form-control" id="update_from_host" name="from_host" placeholder="pbx.customer.com.au">
+                                                <small class="text-muted">For 3CX: set to your 3CX SIP domain. For Asterisk: usually the same as the trunk address. Leave blank to inherit the trunk address.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="update_display_name" class="form-label">Caller display name (optional)</label>
+                                                <input type="text" class="form-control" id="update_display_name" name="display_name" placeholder="AI Receptionist" maxlength="128">
+                                                <small class="text-muted">Caller name shown to the destination phone. Max 128 chars; no line breaks.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <hr>
+                                    
+
+
+<input type="hidden" name="codecs_present" value="1">
+
+<div class="mb-3">
+  <label class="form-label">Audio Codecs</label>
+  <div class="border rounded p-2">
+    
+    <div class="form-check">
+      <input class="form-check-input obe_codec-box" type="checkbox"
+             name="codecs" value="PCMU" id="obe_codecPCMU"
+             checked>
+      <label class="form-check-label" for="obe_codecPCMU">
+        G.711 &micro;-law (PCMU)
+        <small class="text-muted d-block">Standard &mdash; supported by virtually every carrier</small>
+      </label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input obe_codec-box" type="checkbox"
+             name="codecs" value="PCMA" id="obe_codecPCMA"
+             checked>
+      <label class="form-check-label" for="obe_codecPCMA">
+        G.711 A-law (PCMA)
+        <small class="text-muted d-block">Standard &mdash; common on AU/EU carriers</small>
+      </label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input obe_codec-box" type="checkbox"
+             name="codecs" value="G722" id="obe_codecG722"
+             checked>
+      <label class="form-check-label" for="obe_codecG722">
+        G.722 (HD Voice)
+        <small class="text-muted d-block">Wideband 16&nbsp;kHz &mdash; better speech recognition, if your carrier offers it</small>
+      </label>
+    </div>
+    
+  </div>
+  <div class="form-check mt-2">
+    <input class="form-check-input" type="checkbox" name="only_listed_codecs"
+           value="on" id="obe_lockCodecs" >
+    <label class="form-check-label" for="obe_lockCodecs">
+      <strong>Only allow the codecs ticked above</strong>
+    </label>
+  </div>
+  <div class="form-text">
+    Leave this off (the default) to let your carrier choose, exactly as the trunk
+    behaves today. Ticking it restricts the call to your selection.
+  </div>
+  
+  <div class="alert alert-warning alert-permanent mt-2 d-none"
+       id="obe_codecWarn" role="alert">
+    <strong>Calls may fail to connect.</strong> If your carrier cannot offer one
+    of the codecs you have ticked, it rejects the call with
+    <code>488 Not Acceptable Here</code> &mdash; inbound calls stop arriving and
+    outbound calls stop connecting. Most phone carriers offer only G.711
+    (PCMU/PCMA). Only narrow this if you know what your carrier supports, and
+    <strong>test a real call straight afterwards</strong>. To undo it, tick every
+    codec again and save.
+  </div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="obe_mediaTimeout">
+    Media timeout (seconds)
+  </label>
+  <input type="number" class="form-control" name="media_timeout_s"
+         id="obe_mediaTimeout" min="30" step="1" placeholder="Not set"
+         value="">
+  <div class="form-text">
+    Hangs up a call whose audio has stopped flowing, instead of leaving a silent
+    line open. <strong>Leave blank</strong> to keep the current behaviour.
+    Minimum 30 seconds. This is not the same as an agent's maximum call length &mdash;
+    that limits a healthy call, this one ends a dead one.
+  </div>
+  <div class="alert alert-warning alert-permanent mt-2 d-none"
+       id="obe_timeoutWarn" role="alert">
+    <strong>Set this too low and live calls will drop.</strong> Some carriers stop
+    sending audio packets while nobody is speaking (silence suppression). On such
+    a carrier a quiet caller can trip this timeout and be hung up on mid-call. If
+    you are unsure, start at 60 seconds or leave it blank.
+  </div>
+</div>
+
+<script>
+// Shared populate helper for the single edit modal each page reuses across all
+// its trunks. Defined once; the macro renders more than once per page.
+if (!window.applySipMediaConfig) {
+  window.applySipMediaConfig = function (prefix, codecsCsv, locked, timeout) {
+    var selected = (codecsCsv || '').split(',').filter(Boolean);
+    var lock = document.getElementById(prefix + 'lockCodecs');
+    var boxes = document.querySelectorAll('.' + prefix + 'codec-box');
+    if (!lock) return;
+    lock.checked = !!locked && selected.length > 0;
+    boxes.forEach(function (b) {
+      // Unlocked trunks show every codec ticked — that IS the default state,
+      // and it means saving without touching anything is a no-op.
+      b.checked = lock.checked ? selected.indexOf(b.value) !== -1 : true;
+    });
+    var t = document.getElementById(prefix + 'mediaTimeout');
+    if (t) t.value = timeout || '';
+    // Re-run the warning/validity logic for the newly loaded values.
+    lock.dispatchEvent(new Event('change'));
+    if (t) t.dispatchEvent(new Event('input'));
+  };
+}
+
+(function () {
+  var boxes = document.querySelectorAll('.obe_codec-box');
+  var lock = document.getElementById('obe_lockCodecs');
+  var warn = document.getElementById('obe_codecWarn');
+  var timeout = document.getElementById('obe_mediaTimeout');
+  var twarn = document.getElementById('obe_timeoutWarn');
+  if (!lock || !warn) return;
+
+  function ticked() {
+    return Array.prototype.filter.call(boxes, function (b) { return b.checked; });
+  }
+
+  function sync() {
+    var n = ticked().length;
+    // Warn only when the operator is actually NARROWING: the lock on with a
+    // real subset. Lock + all three is identical to the default, so warning
+    // there would train people to ignore it.
+    warn.classList.toggle('d-none', !(lock.checked && n > 0 && n < boxes.length));
+    // An empty selection with the lock on offers nothing and fails every call.
+    // The server rejects it too (import/clone/API bypass this), but blocking
+    // here gives an answer before the round-trip.
+    var invalid = lock.checked && n === 0;
+    boxes.forEach(function (b) {
+      b.setCustomValidity(invalid ? 'Select at least one codec, or untick the lock.' : '');
+    });
+  }
+
+  function syncTimeout() {
+    var v = parseInt(timeout.value, 10);
+    twarn.classList.toggle('d-none', !(v > 0));
+  }
+
+  boxes.forEach(function (b) { b.addEventListener('change', sync); });
+  lock.addEventListener('change', sync);
+  if (timeout) timeout.addEventListener('input', syncTimeout);
+  sync();
+  if (timeout) syncTimeout();
+})();
+</script>
+
+
+                                    <div class="form-group">
+                                        <label for="update_metadata" class="form-label">
+                                            Metadata
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Custom key-value data stored with the trunk. Accessible in your application for custom logic or tracking"></i>
+                                        </label>
+                                        <textarea class="form-control font-monospace" id="update_metadata" name="metadata" rows="3" placeholder='{"key": "value"}'></textarea>
+                                        <small class="text-muted">Custom metadata as JSON object. Trunk Type and Display Name are managed by the dropdown/Advanced fields above and merged in on save — don&#39;t duplicate them here.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="update_headers" class="form-label">
+                                            Custom SIP Headers
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Additional SIP headers to include in outbound INVITE requests. Useful for passing custom data to your SIP provider"></i>
+                                        </label>
+                                        <textarea class="form-control font-monospace" id="update_headers" name="headers" rows="3" placeholder='{"X-Custom-Header": "value"}'></textarea>
+                                        <small class="text-muted">Custom SIP headers as JSON object (e.g., {"X-Custom": "value"})</small>
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <label for="update_headers_to_attributes" class="form-label">
+                                            Headers to Attributes Mapping
+                                            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Map SIP headers from responses to LiveKit participant attributes. Allows you to access SIP data in your application"></i>
+                                        </label>
+                                        <textarea class="form-control font-monospace" id="update_headers_to_attributes" name="headers_to_attributes" rows="3" placeholder='{"X-User-ID": "user_id"}'></textarea>
+                                        <small class="text-muted">Map incoming SIP headers to participant attributes</small>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- JSON Editor Tab -->
+                        <div class="tab-pane fade" id="update-json" role="tabpanel">
+                            <div class="form-group mb-0">
+                                <textarea class="form-control font-monospace" id="update_json_editor" name="json_data" rows="12"></textarea>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-book"></i> Learn more in the 
+                                <a href="https://docs.livekit.io/sip" target="_blank" class="text-info">docs</a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Trunk Modal -->
+<div class="modal fade" id="deleteTrunkModal" tabindex="-1" aria-labelledby="deleteTrunkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTrunkModalLabel">Delete trunk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="https://vaai.aetosiot.com/telephony/outbound/trunk/delete" id="deleteTrunkForm">
+                <input type="hidden" name="csrf_token" value="ImRjZUQ5TWpOUFhOOWJFbERSQnJuOVZmMjVEMXI4b0pjRnVIbzZwd3RkZjQi.aqgYNg.k2KkPGYi7JVWFetVuzYothJfiL0">
+                <input type="hidden" name="sip_trunk_id" id="delete_sip_trunk_id">
+                <div class="modal-body">
+                    <div class="alert alert-warning d-flex align-items-start" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                        <div>
+                            <strong>Warning:</strong> This action cannot be undone.
+                        </div>
+                    </div>
+                    <p>Are you sure you want to delete the trunk <strong id="delete_trunk_name"></strong>?</p>
+                    <p class="text-muted mb-0">All associated configurations will be permanently removed.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="sipSetupWizardModal" tabindex="-1" aria-labelledby="sipSetupWizardLabel" aria-hidden="true" data-csrf-token="ImRjZUQ5TWpOUFhOOWJFbERSQnJuOVZmMjVEMXI4b0pjRnVIbzZwd3RkZjQi.aqgYNg.k2KkPGYi7JVWFetVuzYothJfiL0">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sipSetupWizardLabel">
+                    <i class="bi bi-magic"></i> SIP Provider Setup Wizard
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            
+            <div class="px-4 pt-3" id="wizardStepper">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="wizard-step active" data-step="1">
+                        <span class="wizard-step-num">1</span> <span class="wizard-step-label">Provider</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="2">
+                        <span class="wizard-step-num">2</span> <span class="wizard-step-label">Portal Setup</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="3">
+                        <span class="wizard-step-num">3</span> <span class="wizard-step-label">Credentials</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="4">
+                        <span class="wizard-step-num">4</span> <span class="wizard-step-label">Allowed IPs</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="5">
+                        <span class="wizard-step-num">5</span> <span class="wizard-step-label">Numbers</span>
+                    </div>
+                    <div class="wizard-step-divider"></div>
+                    <div class="wizard-step" data-step="6">
+                        <span class="wizard-step-num">6</span> <span class="wizard-step-label">Confirm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                
+                <div class="alert alert-danger alert-permanent d-none" id="wizardError" role="alert"></div>
+
+                
+                <div class="wizard-pane" data-pane="1">
+                    <p class="text-muted mb-3">Choose the SIP provider you want to set up. The wizard will create the inbound trunk, outbound trunk, and dispatch rule for you.</p>
+                    <div class="row row-cols-2 row-cols-md-3 g-3 mb-3" id="wizardProviderTiles">
+                        
+                    </div>
+                    <div class="mb-2">
+                        <label for="wizardNamePrefix" class="form-label small fw-semibold">Name for these trunks <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="wizardNamePrefix" placeholder="e.g. Customer ABC, Sydney Office, Tronic Cloud" autocomplete="off">
+                        <small class="form-text text-muted">This becomes the prefix on all three objects: <code>«Name» Inbound</code>, <code>«Name» Outbound</code>, <code>«Name» Inbound Rule</code>.</small>
+                    </div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="2">
+                    <h6 class="mb-3" id="wizardPortalHeading">Set up your provider account</h6>
+                    <p class="text-muted" id="wizardPortalBlurb">Before continuing, log into your provider's portal and gather these values.</p>
+                    <div class="d-flex gap-2 mb-3 flex-wrap">
+                        <a href="outbound.html#" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm" id="wizardPortalUrlBtn">
+                            <i class="bi bi-box-arrow-up-right"></i> <span id="wizardPortalUrlLabel">Open Portal</span>
+                        </a>
+                        <a href="outbound.html#" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm" id="wizardGuideBtn">
+                            <i class="bi bi-file-earmark-text"></i> Open full setup guide
+                        </a>
+                    </div>
+                    <ul class="list-group" id="wizardChecklist">
+                        
+                    </ul>
+                    <div class="alert alert-info alert-permanent mt-3 mb-0 small d-none" id="wizardPortalNote"></div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="3">
+                    <h6 class="mb-3" id="wizardCredsHeading">Enter your credentials</h6>
+                    <p class="text-muted small" id="wizardCredsBlurb"></p>
+                    <div id="wizardCredsFields">
+                        
+                    </div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="4">
+                    <h6 class="mb-3" id="wizardIpsHeading">Inbound Allowed IPs</h6>
+                    <p class="text-muted small" id="wizardIpsBlurb">These are the IPs allowed to send SIP traffic to your inbound trunk. Pre-filled with the provider's published values where available — accept or edit. Adding IPs here also auto-whitelists them in fail2ban security.</p>
+                    <div class="mb-2">
+                        <textarea class="form-control font-monospace" id="wizardIps" rows="6" placeholder="1.2.3.4&#10;5.6.7.0/24"></textarea>
+                    </div>
+                    <small class="text-muted" id="wizardIpsHelp"></small>
+                    <div class="alert alert-info alert-permanent mt-3 mb-0 small d-none" id="wizardIpsSkipNote"></div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="5">
+                    <h6 class="mb-3">Your phone numbers</h6>
+                    <p class="text-muted small">Enter your DIDs in E.164 format, one per line. These will be attached to both the inbound and outbound trunks.</p>
+                    <div class="mb-2">
+                        <textarea class="form-control font-monospace" id="wizardNumbers" rows="5" placeholder="+61370548494&#10;+61370548495"></textarea>
+                    </div>
+                    <small class="text-muted">Numbers will be normalised automatically. <span id="wizardNumberCount" class="ms-2 badge bg-primary text-white">0 numbers</span></small>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="6">
+                    <h6 class="mb-3">Ready to create</h6>
+                    <p class="text-muted small">The wizard will create the following on your behalf. Click Create All to proceed.</p>
+                    <div class="card mb-2">
+                        <div class="card-body p-3">
+                            <h6 class="card-subtitle mb-2 text-muted small"><i class="bi bi-telephone-inbound"></i> Inbound Trunk</h6>
+                            <div id="wizardSummaryInbound" class="small"></div>
+                        </div>
+                    </div>
+                    <div class="card mb-2">
+                        <div class="card-body p-3">
+                            <h6 class="card-subtitle mb-2 text-muted small"><i class="bi bi-telephone-outbound"></i> Outbound Trunk</h6>
+                            <div id="wizardSummaryOutbound" class="small"></div>
+                        </div>
+                    </div>
+                    <div class="card mb-2">
+                        <div class="card-body p-3">
+                            <h6 class="card-subtitle mb-2 text-muted small"><i class="bi bi-diagram-3"></i> Dispatch Rule</h6>
+                            <div id="wizardSummaryRule" class="small"></div>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label for="wizardAgentSelect" class="form-label small fw-semibold mb-1">Voice Agent</label>
+                            <select class="form-select form-select-sm" id="wizardAgentSelect">
+                                <option value="">(None — assign later)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="wizardTimeProfileSelect" class="form-label small fw-semibold mb-1">Time Profile</label>
+                            <select class="form-select form-select-sm" id="wizardTimeProfileSelect">
+                                <option value="">(None — always active)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="wizardAutoRecord" checked>
+                        <label class="form-check-label small" for="wizardAutoRecord">
+                            <i class="bi bi-record-circle"></i> Auto-record all calls on this dispatch rule
+                        </label>
+                    </div>
+                </div>
+
+                
+                <div class="wizard-pane d-none" data-pane="success">
+                    <div class="text-center py-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3 mb-2">Setup complete</h5>
+                        <p class="text-muted small">Your inbound trunk, outbound trunk, and dispatch rule have been created.</p>
+                        <p class="small mt-3 mb-0">
+                            Next step: assign an agent to the new dispatch rule from the
+                            <a href="rules.html">Dispatch Rules page</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-link text-decoration-none" id="wizardBackBtn" disabled>
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="wizardCancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="wizardNextBtn" disabled>
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <button type="button" class="btn btn-success d-none" id="wizardCreateBtn">
+                        <i class="bi bi-magic"></i> Create All
+                    </button>
+                    <button type="button" class="btn btn-primary d-none" id="wizardDoneBtn" data-bs-dismiss="modal">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.wizard-step { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-secondary, #888); white-space: nowrap; }
+.wizard-step.active { color: var(--text-primary, #fff); font-weight: 600; }
+.wizard-step.complete { color: var(--bs-success, #10b981); }
+.wizard-step-num { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--bg-tertiary, #2a2a2a); font-weight: 600; font-size: 0.75rem; }
+.wizard-step.active .wizard-step-num { background: var(--bs-primary, #3b82f6); color: #fff; }
+.wizard-step.complete .wizard-step-num { background: var(--bs-success, #10b981); color: #fff; }
+.wizard-step-divider { flex: 1; height: 1px; background: var(--border-color, #333); margin: 0 0.5rem; }
+.wizard-step-label { display: none; }
+@media (min-width: 576px) { .wizard-step-label { display: inline; } }
+.wizard-provider-tile { cursor: pointer; padding: 1rem 0.75rem; border: 2px solid var(--border-color, #333); border-radius: 0.5rem; text-align: center; transition: border-color 0.15s, transform 0.15s; position: relative; height: 100%; }
+.wizard-provider-tile:hover { border-color: var(--bs-primary, #3b82f6); transform: translateY(-2px); }
+.wizard-provider-tile.selected { border-color: var(--bs-primary, #3b82f6); background: rgba(59, 130, 246, 0.06); }
+.wizard-provider-tile .tile-icon { font-size: 1.75rem; display: block; line-height: 1; }
+.wizard-provider-tile .tile-logo-chip { height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; border-radius: 8px; }
+.wizard-provider-tile .tile-logo-chip.has-img { background: #fff; padding: 5px 10px; }
+.wizard-provider-tile .tile-logo { max-height: 38px; max-width: 100%; width: auto; object-fit: contain; display: block; }
+/* on-dark logos (no white chip) can fill more of the tile */
+.wizard-provider-tile .tile-logo-chip:not(.has-img) .tile-logo { max-height: 46px; }
+.wizard-provider-tile .tile-name { font-weight: 600; }
+.wizard-provider-tile .tile-tag { font-size: 0.75rem; color: var(--text-secondary, #888); margin-top: 0.25rem; }
+.wizard-provider-tile .badge-recommended { position: absolute; top: -0.5rem; right: -0.5rem; }
+</style>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<script src="../static/js/sip-setup-wizard.js@v=5659"></script>
+<style>
+/* Custom styles for modals */
+#createTrunkModal .modal-dialog,
+#updateTrunkModal .modal-dialog {
+    max-width: 600px;
+}
+
+#createCallModal .modal-dialog,
+#deleteTrunkModal .modal-dialog {
+    max-width: 500px;
+}
+
+/* Shared modal styles */
+#createTrunkModal .modal-content,
+#updateTrunkModal .modal-content,
+#createCallModal .modal-content,
+#deleteTrunkModal .modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+}
+
+#createTrunkModal .modal-header,
+#updateTrunkModal .modal-header,
+#createCallModal .modal-header,
+#deleteTrunkModal .modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+}
+
+#createTrunkModal .modal-title,
+#updateTrunkModal .modal-title,
+#createCallModal .modal-title,
+#deleteTrunkModal .modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+#createTrunkModal .modal-body,
+#updateTrunkModal .modal-body,
+#createCallModal .modal-body,
+#deleteTrunkModal .modal-body {
+    padding: 1.5rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+#createTrunkModal .modal-footer,
+#updateTrunkModal .modal-footer,
+#createCallModal .modal-footer,
+#deleteTrunkModal .modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+    background-color: transparent;
+}
+
+/* Scrollbar styling for modal body */
+#createTrunkModal .modal-body::-webkit-scrollbar,
+#updateTrunkModal .modal-body::-webkit-scrollbar,
+#createCallModal .modal-body::-webkit-scrollbar,
+#deleteTrunkModal .modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#createTrunkModal .modal-body::-webkit-scrollbar-track,
+#updateTrunkModal .modal-body::-webkit-scrollbar-track,
+#createCallModal .modal-body::-webkit-scrollbar-track,
+#deleteTrunkModal .modal-body::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+#createTrunkModal .modal-body::-webkit-scrollbar-thumb,
+#updateTrunkModal .modal-body::-webkit-scrollbar-thumb,
+#createCallModal .modal-body::-webkit-scrollbar-thumb,
+#deleteTrunkModal .modal-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+#createTrunkModal .modal-body::-webkit-scrollbar-thumb:hover,
+#updateTrunkModal .modal-body::-webkit-scrollbar-thumb:hover,
+#createCallModal .modal-body::-webkit-scrollbar-thumb:hover,
+#deleteTrunkModal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--border-hover);
+}
+
+/* Tabs styling */
+.nav-tabs {
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border: none;
+    background: transparent;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--text-primary);
+    border: none;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--brand-primary);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--brand-primary);
+}
+
+/* Radio button styling */
+.trunk-direction-option {
+    flex: 1;
+}
+
+.trunk-direction-option .btn {
+    width: 100%;
+}
+
+.btn-check {
+    position: absolute;
+    clip: rect(0,0,0,0);
+    pointer-events: none;
+}
+
+.btn-check:checked + .btn-outline-secondary {
+    background-color: rgba(91, 139, 255, 0.2);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+}
+
+.btn-outline-secondary {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+    background-color: var(--bg-hover);
+}
+
+/* Optional settings */
+.optional-settings .btn-link {
+    text-decoration: none;
+    font-size: 0.875rem;
+    padding: 0;
+}
+
+.optional-settings .btn-link:hover {
+    color: var(--text-primary) !important;
+}
+
+.optional-settings .btn-link i {
+    transition: transform 0.2s;
+}
+
+.optional-settings .btn-link[aria-expanded="true"] i.bi-chevron-right {
+    transform: rotate(90deg);
+}
+
+.optional-settings .btn-link[aria-expanded="false"] i.bi-chevron-right {
+    transform: rotate(0deg);
+}
+
+/* Form styling within modals */
+#createTrunkModal .form-group,
+#createCallModal .form-group {
+    margin-bottom: 1.25rem;
+}
+
+#createTrunkModal .form-label,
+#createCallModal .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+#createTrunkModal .form-label i,
+#createCallModal .form-label i {
+    font-size: 0.875rem;
+    cursor: help;
+}
+
+#createTrunkModal small,
+#createCallModal small {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+/* JSON editor styling */
+.font-monospace {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+#createTrunkModal textarea.font-monospace {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Link styling */
+#createTrunkModal a {
+    color: var(--brand-primary);
+    text-decoration: none;
+}
+
+#createTrunkModal a:hover {
+    text-decoration: underline;
+}
+
+/* Action buttons styling */
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-outline-primary {
+    color: var(--brand-primary);
+    border-color: var(--border-color);
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: var(--border-color);
+}
+
+.btn-outline-danger:hover {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Alert styling for delete modal */
+#deleteTrunkModal .alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: var(--text-primary);
+}
+
+#deleteTrunkModal .alert-warning i {
+    color: #ffc107;
+}
+
+/* Call Status Box Styles */
+.call-status-box {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.call-status-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.call-status-header i {
+    font-size: 1.25rem;
+}
+
+.call-status-body {
+    padding: 1rem;
+}
+
+#callStatusMessage {
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.call-status-details {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.call-status-progress {
+    height: 3px;
+    background: var(--bg-card);
+    overflow: hidden;
+}
+
+.call-status-progress .progress-bar-animated {
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary, #8b5cf6));
+    animation: progressSlide 1.5s ease-in-out infinite;
+}
+
+@keyframes progressSlide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+}
+
+/* Status variants */
+.call-status-box.status-dialing {
+    border-color: var(--brand-primary);
+}
+
+.call-status-box.status-dialing .call-status-header {
+    background: rgba(91, 139, 255, 0.1);
+    color: var(--brand-primary);
+}
+
+.call-status-box.status-ringing {
+    border-color: #f59e0b;
+}
+
+.call-status-box.status-ringing .call-status-header {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.call-status-box.status-connected {
+    border-color: #10b981;
+}
+
+.call-status-box.status-connected .call-status-header {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.call-status-box.status-connected .call-status-progress {
+    display: none;
+}
+
+.call-status-box.status-failed {
+    border-color: #ef4444;
+}
+
+.call-status-box.status-failed .call-status-header {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.call-status-box.status-failed .call-status-progress {
+    display: none;
+}
+
+.call-status-box.status-ended {
+    border-color: var(--text-muted);
+}
+
+.call-status-box.status-ended .call-status-header {
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+}
+
+.call-status-box.status-ended .call-status-progress {
+    display: none;
+}
+</style>
+
+<script>
+// Per-trunk type map injected by the outbound_index route. Used by the
+// test-call modal to relabel "Phone Number *" to "Extension or SIP User *"
+// for PBX trunks. Default to {} so this script is a no-op when the dict
+// isn't passed (e.g. by a partial template render).
+const TRUNK_TYPES = {};
+
+// Show/hide PBX-only or PSTN-only fields in a create/update trunk modal.
+// Pass "" for the create modal, "update_" for the edit modal.
+function updateTrunkTypeFields(prefix) {
+    const sel = document.getElementById(prefix + 'trunk_type');
+    if (!sel) return;
+    const isPbx = sel.value === 'pbx';
+    const root = sel.closest('.modal') || document;
+
+    // Toggle PSTN-only rows (Number Format)
+    root.querySelectorAll('.pstn-only-row').forEach(el => {
+        el.style.display = isPbx ? 'none' : '';
+    });
+    // Toggle PBX-only blocks (help block, advanced collapsible, transport hint, username hint)
+    root.querySelectorAll('.pbx-help-block, .pbx-advanced-block, .pbx-transport-hint, .pbx-username-hint').forEach(el => {
+        el.style.display = isPbx ? '' : 'none';
+    });
+
+    // Address placeholder + helper text swap
+    const addr = root.querySelector('.trunk-address');
+    if (addr) {
+        addr.placeholder = isPbx
+            ? 'pbx.customer.com.au:5060 (recommended) or 192.168.1.10:5060'
+            : 'sip.provider.com or 192.0.2.0:5060';
+    }
+    const addrHint = root.querySelector('.trunk-address-hint');
+    if (addrHint) {
+        addrHint.textContent = isPbx
+            ? "Your PBX's reachable hostname or IP. Include :port to bypass DNS SRV (recommended)."
+            : 'SIP server address for outbound calls (e.g., sip.twilio.com, sip.provider.com:5060)';
+    }
+
+    // Numbers field label/placeholder/hint swap
+    const numLabel = root.querySelector('.trunk-numbers-label');
+    const numInput = root.querySelector('.trunk-numbers-input');
+    const numHint = root.querySelector('.trunk-numbers-hint');
+    if (numLabel) {
+        numLabel.childNodes[0].textContent = isPbx ? 'Caller-ID to show on transfers (optional) ' : 'Numbers ';
+    }
+    if (numInput) {
+        numInput.placeholder = isPbx ? '(blank = real caller flows through; or type a fixed value)' : '61400123123,61400123124';
+    }
+    if (numHint) {
+        numHint.textContent = isPbx
+            ? 'See the box below for what blank vs filled does.'
+            : 'Always enter WITHOUT the + (e.g., 61400123123). Comma-separated for multiple numbers.';
+    }
+    // Show/hide the PBX-only Caller-ID explainer block
+    root.querySelectorAll('.pbx-only-callerid-explainer').forEach(el => {
+        el.style.display = isPbx ? 'block' : 'none';
+    });
+
+    // Username field placeholder swap (PBX clarifies "blank for IP trunks")
+    const userInput = root.querySelector('.trunk-username-input');
+    if (userInput && isPbx) {
+        userInput.placeholder = 'Leave blank for IP-based trunks';
+    } else if (userInput) {
+        userInput.placeholder = 'Username';
+    }
+
+    // Refresh the Caller-ID live preview on every trunk-type swap so the
+    // badge reflects the current input value when switching pstn → pbx.
+    if (isPbx) {
+        if (numInput) {
+            const explainer = root.querySelector('.pbx-only-callerid-explainer');
+            if (explainer) updateCallerIdPreview(numInput, explainer);
+        }
+    }
+}
+
+// Caller-ID live preview: AUTO mode (blank) vs MANUAL mode (filled).
+// Uses textContent exclusively for any user-typed value (XSS-safe).
+function updateCallerIdPreview(input, container) {
+    if (!input || !container) return;
+    const badge = container.querySelector('.caller-id-mode-badge');
+    const text = container.querySelector('.caller-id-mode-text');
+    const fixedExample = container.querySelector('.caller-example-fixed');
+    if (!text) return;
+    const v = (input.value || '').trim();
+    if (!v) {
+        if (badge) {
+            badge.textContent = 'AUTO';
+            badge.className = 'caller-id-mode-badge badge bg-success';
+        }
+        text.textContent = "Transfers will show the original caller's real number.";
+        if (fixedExample) fixedExample.textContent = 'YOUR-VALUE';
+    } else {
+        if (badge) {
+            badge.textContent = 'MANUAL';
+            badge.className = 'caller-id-mode-badge badge bg-info text-dark';
+        }
+        text.textContent = `Every transfer will show "${v}" as the caller-ID.`;
+        if (fixedExample) fixedExample.textContent = v;
+    }
+}
+
+// Wire up live-preview listeners on every Caller-ID input. Run once on
+// DOMContentLoaded; modal open/close keeps the same DOM nodes so we don't
+// need to re-attach.
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.trunk-numbers-input').forEach(function(inp) {
+        const form = inp.closest('form');
+        const explainer = (form || document).querySelector('.pbx-only-callerid-explainer');
+        if (!explainer) return;
+        inp.addEventListener('input', function() { updateCallerIdPreview(inp, explainer); });
+        updateCallerIdPreview(inp, explainer);  // initialize
+    });
+});
+
+// Test-call modal: relabel destination input based on chosen trunk's type.
+function updateTestCallDestinationLabel() {
+    const sel = document.getElementById('sip_trunk_id');
+    const destInput = document.getElementById('sip_call_to');
+    if (!sel || !destInput) return;
+    const label = document.querySelector('label[for="sip_call_to"]');
+    const hint = destInput.parentElement.querySelector('small.text-muted');
+    const trunkId = sel.value;
+    const isPbx = trunkId && TRUNK_TYPES[trunkId] === 'pbx';
+
+    if (label) label.textContent = isPbx ? 'Extension or SIP User *' : 'Phone Number *';
+    destInput.placeholder = isPbx ? '101, queue302, reception' : '1234567890';
+    if (hint) {
+        hint.textContent = isPbx
+            ? 'PBX destination — extension, queue, or named SIP user (letters, digits, ., _, - only).'
+            : 'Include country code (e.g., 1 for US, 61 for AUS)';
+    }
+    // If the user switches PSTN <-> PBX with a stale value, clear it so a
+    // PBX extension can't accidentally be sent against a PSTN trunk.
+    if (destInput.dataset.lastTrunkType && destInput.dataset.lastTrunkType !== (isPbx ? 'pbx' : 'pstn')) {
+        destInput.value = '';
+    }
+    destInput.dataset.lastTrunkType = isPbx ? 'pbx' : 'pstn';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Pre-fill the create-trunk modal from URL query params (deep-link from
+    // the blind_transfer / attended_transfer destinations form when no trunk
+    // matches the SIP URI's host). Auto-opens the modal so the operator
+    // doesn't have to hunt for the button.
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const prefillAddress = params.get('prefill_address');
+        if (prefillAddress) {
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el && val) {
+                    el.value = val;
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            };
+            setVal('trunk_type', params.get('prefill_type') || 'pbx');
+            setVal('address', prefillAddress);
+            setVal('transport', params.get('prefill_transport') || 'tcp');
+            // Suggest a default name based on the host, if blank
+            const nameEl = document.getElementById('trunk_name');
+            if (nameEl && !nameEl.value) {
+                nameEl.value = `Trunk for ${prefillAddress}`;
+            }
+            // Open the create modal
+            const modalEl = document.getElementById('createTrunkModal');
+            if (modalEl) {
+                const m = new bootstrap.Modal(modalEl);
+                m.show();
+            }
+        }
+    } catch (e) {
+        console.error('Trunk prefill from query params failed:', e);
+    }
+
+    // Wire trunk-type selectors (create + edit modals) to the show/hide logic
+    document.querySelectorAll('.trunk-type-select').forEach(sel => {
+        const prefix = sel.dataset.prefix || '';
+        sel.addEventListener('change', () => updateTrunkTypeFields(prefix));
+        // Apply on initial load (handles the create modal default and any
+        // pre-populated edit modal that just had its values set)
+        updateTrunkTypeFields(prefix);
+    });
+
+    // Re-apply visibility every time a trunk modal is shown (defensive: handles
+    // the case where the click handler set the value before the modal CSS
+    // transition started)
+    ['createTrunkModal', 'updateTrunkModal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('shown.bs.modal', () => {
+            const sel = el.querySelector('.trunk-type-select');
+            if (sel) updateTrunkTypeFields(sel.dataset.prefix || '');
+        });
+    });
+
+    // Test-call modal: relabel on trunk change AND on modal open
+    const testCallTrunkSelect = document.getElementById('sip_trunk_id');
+    if (testCallTrunkSelect) {
+        testCallTrunkSelect.addEventListener('change', updateTestCallDestinationLabel);
+    }
+    const createCallModal = document.getElementById('createCallModal');
+    if (createCallModal) {
+        createCallModal.addEventListener('shown.bs.modal', updateTestCallDestinationLabel);
+    }
+
+    // Initialize Create Trunk Modal
+    const trunkModalElement = document.getElementById('createTrunkModal');
+    
+    if (trunkModalElement) {
+        // Initialize Bootstrap modal
+        const trunkModal = new bootstrap.Modal(trunkModalElement, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+        });
+        
+        // Handle optional settings toggle
+        const optionalSettingsButton = document.querySelector('[data-bs-target="#optionalSettings"]');
+        if (optionalSettingsButton) {
+            optionalSettingsButton.addEventListener('click', function() {
+                const icon = this.querySelector('i.bi-chevron-right');
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                
+                // Update icon rotation
+                if (icon) {
+                    if (isExpanded) {
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        icon.style.transform = 'rotate(90deg)';
+                    }
+                }
+                
+                // Toggle aria-expanded
+                this.setAttribute('aria-expanded', !isExpanded);
+            });
+        }
+        
+        // Handle form tab switching - sync form data
+        const detailsTab = document.getElementById('details-tab');
+        const jsonTab = document.getElementById('json-tab');
+        const jsonTextarea = document.getElementById('create_json_editor');
+        const trunkForm = document.getElementById('createTrunkFormWrapper');
+        
+        // When switching to JSON tab, populate JSON from form
+        if (jsonTab && trunkForm && jsonTextarea) {
+            jsonTab.addEventListener('click', function() {
+                try {
+                    const formData = {
+                        name: trunkForm.trunk_name.value || undefined,
+                        direction: trunkForm.direction.value,
+                        address: trunkForm.address.value || undefined,
+                        transport: trunkForm.transport.value || undefined,
+                        numbers: trunkForm.numbers.value ? trunkForm.numbers.value.split(',').map(n => n.trim()) : undefined,
+                        auth_username: trunkForm.username.value || undefined,
+                        auth_password: trunkForm.password.value || undefined,
+                        metadata: trunkForm.metadata.value || undefined
+                    };
+                    
+                    // Parse JSON fields
+                    if (trunkForm.headers.value) {
+                        try {
+                            formData.headers = JSON.parse(trunkForm.headers.value);
+                        } catch (e) {
+                            console.warn('Invalid JSON in headers field');
+                        }
+                    }
+                    
+                    if (trunkForm.headers_to_attributes.value) {
+                        try {
+                            formData.headers_to_attributes = JSON.parse(trunkForm.headers_to_attributes.value);
+                        } catch (e) {
+                            console.warn('Invalid JSON in headers_to_attributes field');
+                        }
+                    }
+                    
+                    // Remove undefined values
+                    Object.keys(formData).forEach(key => formData[key] === undefined && delete formData[key]);
+                    
+                    jsonTextarea.value = JSON.stringify(formData, null, 2);
+                } catch (e) {
+                    console.error('Error generating JSON:', e);
+                }
+            });
+        }
+        
+        // Reset form when modal is closed
+        trunkModalElement.addEventListener('hidden.bs.modal', function() {
+            if (trunkForm) {
+                trunkForm.reset();
+            }
+            if (jsonTextarea) {
+                jsonTextarea.value = '';
+            }
+            
+            // Reset to first tab
+            const firstTab = document.getElementById('details-tab');
+            if (firstTab) {
+                const tab = new bootstrap.Tab(firstTab);
+                tab.show();
+            }
+            
+            // Collapse optional settings
+            const optionalSettings = document.getElementById('optionalSettings');
+            if (optionalSettings && optionalSettings.classList.contains('show')) {
+                const collapseInstance = bootstrap.Collapse.getInstance(optionalSettings);
+                if (collapseInstance) {
+                    collapseInstance.hide();
+                }
+            }
+        });
+    }
+    
+    // Initialize Create Call Modal with status tracking
+    const callModalElement = document.getElementById('createCallModal');
+
+    if (callModalElement) {
+        // Initialize Bootstrap modal
+        const callModal = new bootstrap.Modal(callModalElement, {
+            backdrop: 'static',
+            keyboard: false,
+            focus: true
+        });
+
+        const callForm = document.getElementById('createCallForm');
+        const callStatusBox = document.getElementById('callStatusBox');
+        const callFormFields = document.getElementById('callFormFields');
+        const callStatusIcon = document.getElementById('callStatusIcon');
+        const callStatusTitle = document.getElementById('callStatusTitle');
+        const callStatusMessage = document.getElementById('callStatusMessage');
+        const callStatusDetails = document.getElementById('callStatusDetails');
+        const callSubmitBtn = document.getElementById('callSubmitBtn');
+        const callCancelBtn = document.getElementById('callCancelBtn');
+        const callHangupBtn = document.getElementById('callHangupBtn');
+        const callNewBtn = document.getElementById('callNewBtn');
+
+        let statusPollInterval = null;
+        let currentRoomName = null;
+        let currentCsrfToken = null;
+
+        // Update call status UI
+        function updateCallStatus(status, message, details = '', icon = 'bi-telephone-outbound') {
+            callStatusBox.className = 'call-status-box status-' + status;
+            callStatusIcon.className = 'bi ' + icon;
+            callStatusMessage.textContent = message;
+            callStatusDetails.textContent = details;
+
+            // Update title based on status
+            const titles = {
+                'dialing': 'Dialing...',
+                'ringing': 'Ringing...',
+                'connected': 'Connected',
+                'failed': 'Call Failed',
+                'ended': 'Call Ended'
+            };
+            callStatusTitle.textContent = titles[status] || 'Call Status';
+        }
+
+        // Poll for room/participant status
+        function pollCallStatus(roomName, phoneNumber) {
+            currentRoomName = roomName;
+            let pollCount = 0;
+            const maxPolls = 90; // Poll for up to 90 seconds
+            let lastStatus = 'dialing';
+            let roomFound = false;
+
+            statusPollInterval = setInterval(async () => {
+                pollCount++;
+
+                try {
+                    // Use the specific room endpoint for detailed info
+                    const response = await fetch(`/api/rooms/${encodeURIComponent(roomName)}`);
+
+                    if (response.ok) {
+                        const room = await response.json();
+
+                        if (room.exists) {
+                            roomFound = true;
+                            const participantCount = room.num_participants || 0;
+                            const participants = room.participants || [];
+
+                            // Check for SIP participant
+                            const sipParticipant = participants.find(p =>
+                                p.identity?.startsWith('sip_') ||
+                                p.identity?.toLowerCase().includes('sip') ||
+                                p.identity?.includes(phoneNumber.replace(/\D/g, ''))
+                            );
+
+                            // Check for agent participant
+                            const agentParticipant = participants.find(p =>
+                                p.identity?.startsWith('agent-') ||
+                                p.identity?.toLowerCase().includes('agent')
+                            );
+
+                            if (sipParticipant && agentParticipant) {
+                                // Both SIP and agent connected - call is active
+                                updateCallStatus('connected', 'Call connected',
+                                    `Room: ${roomName} | Participants: ${participantCount}`, 'bi-telephone-fill');
+                                lastStatus = 'connected';
+                                // Keep polling to detect when call ends
+                            } else if (sipParticipant) {
+                                // SIP connected but waiting for agent
+                                updateCallStatus('ringing', 'Connected, waiting for agent...',
+                                    `Phone connected | Room: ${roomName}`, 'bi-telephone-outbound');
+                                lastStatus = 'ringing';
+                            } else if (participantCount > 0) {
+                                // Room has participants but no SIP yet - dialing
+                                updateCallStatus('dialing', 'Dialing...',
+                                    `Connecting to ${phoneNumber}`, 'bi-telephone-outbound');
+                                lastStatus = 'dialing';
+                            } else {
+                                // Room exists but empty
+                                updateCallStatus('dialing', 'Room created, dialing...',
+                                    `Phone: ${phoneNumber}`, 'bi-telephone-outbound');
+                                lastStatus = 'dialing';
+                            }
+                        } else if (roomFound && lastStatus === 'connected') {
+                            // Room was found before but now gone - call ended
+                            updateCallStatus('ended', 'Call ended',
+                                `Duration tracked in Call History`, 'bi-telephone-x');
+                            stopPolling();
+                            showNewCallButton();
+                            return;
+                        }
+                    } else if (response.status === 404) {
+                        // Room not found
+                        if (roomFound && lastStatus === 'connected') {
+                            // Was connected, now room is gone - call ended
+                            updateCallStatus('ended', 'Call ended',
+                                `Duration tracked in Call History`, 'bi-telephone-x');
+                            stopPolling();
+                            showNewCallButton();
+                            return;
+                        } else if (pollCount > 10 && !roomFound) {
+                            // Been polling for a while and room never appeared - might have failed
+                            updateCallStatus('dialing', 'Waiting for connection...',
+                                `Phone: ${phoneNumber} | No room yet`, 'bi-telephone-outbound');
+                        } else if (pollCount <= 10) {
+                            // Still early, keep waiting
+                            updateCallStatus('dialing', 'Initiating call...',
+                                `Connecting to ${phoneNumber}`, 'bi-telephone-outbound');
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error polling status:', e);
+                    // Don't update UI on network errors, just keep trying
+                }
+
+                // Stop polling after max time
+                if (pollCount >= maxPolls) {
+                    if (lastStatus === 'connected') {
+                        updateCallStatus('connected', 'Call in progress',
+                            `Room: ${roomName} | Monitoring stopped`, 'bi-telephone-fill');
+                    } else {
+                        updateCallStatus('ended', 'Status monitoring ended',
+                            'Check Rooms page for call status', 'bi-telephone-x');
+                    }
+                    stopPolling();
+                    showNewCallButton();
+                }
+            }, 1500); // Poll every 1.5 seconds
+        }
+
+        function stopPolling() {
+            if (statusPollInterval) {
+                clearInterval(statusPollInterval);
+                statusPollInterval = null;
+            }
+        }
+
+        function showHangupButton() {
+            callSubmitBtn.style.display = 'none';
+            callHangupBtn.style.display = 'inline-block';
+            callHangupBtn.disabled = false;
+            callHangupBtn.innerHTML = '<i class="bi bi-telephone-x"></i> Hang Up';
+            callNewBtn.style.display = 'none';
+        }
+
+        function showNewCallButton() {
+            callSubmitBtn.style.display = 'none';
+            callHangupBtn.style.display = 'none';
+            callNewBtn.style.display = 'inline-block';
+            callCancelBtn.textContent = 'Close';
+        }
+
+        function resetCallModal() {
+            stopPolling();
+            callStatusBox.style.display = 'none';
+            callStatusBox.className = 'call-status-box';
+            callFormFields.style.display = 'block';
+            callSubmitBtn.style.display = 'inline-block';
+            callSubmitBtn.disabled = false;
+            callSubmitBtn.innerHTML = '<i class="bi bi-telephone-outbound"></i> Initiate Call';
+            callHangupBtn.style.display = 'none';
+            callNewBtn.style.display = 'none';
+            callCancelBtn.textContent = 'Cancel';
+            currentRoomName = null;
+            currentCsrfToken = null;
+            if (callForm) {
+                callForm.reset();
+            }
+        }
+
+        // Hang up the call by deleting the room
+        async function hangupCall() {
+            if (!currentRoomName) return;
+
+            callHangupBtn.disabled = true;
+            callHangupBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Hanging up...';
+
+            try {
+                const formData = new FormData();
+                formData.append('csrf_token', currentCsrfToken);
+
+                const response = await fetch(`/rooms/${encodeURIComponent(currentRoomName)}/delete`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok || response.redirected) {
+                    updateCallStatus('ended', 'Call ended',
+                        'You hung up the call', 'bi-telephone-x');
+                    stopPolling();
+                    showNewCallButton();
+                } else {
+                    // Try to end anyway
+                    updateCallStatus('ended', 'Call ended',
+                        'Hang up request sent', 'bi-telephone-x');
+                    stopPolling();
+                    showNewCallButton();
+                }
+            } catch (e) {
+                console.error('Error hanging up:', e);
+                updateCallStatus('ended', 'Call ended',
+                    'Hang up request sent', 'bi-telephone-x');
+                stopPolling();
+                showNewCallButton();
+            }
+        }
+
+        // Handle form submission via AJAX
+        callForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(callForm);
+            const phoneNumber = formData.get('sip_call_to');
+            const roomName = formData.get('room_name');
+
+            // Save for later use
+            currentRoomName = roomName;
+            currentCsrfToken = formData.get('csrf_token');
+
+            // Show status box and hide form
+            callStatusBox.style.display = 'block';
+            callFormFields.style.display = 'none';
+            callSubmitBtn.disabled = true;
+            callSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Initiating...';
+
+            updateCallStatus('dialing', 'Initiating call...', `Dialing ${phoneNumber}`, 'bi-telephone-outbound');
+
+            try {
+                const response = await fetch('/api/sip/outbound-call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        csrf_token: formData.get('csrf_token'),
+                        sip_trunk_id: formData.get('sip_trunk_id'),
+                        sip_call_to: phoneNumber,
+                        room_name: roomName,
+                        participant_identity: formData.get('participant_identity'),
+                        agent_id: formData.get('agent_id')
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    updateCallStatus('dialing', 'Call initiated',
+                        `Connecting to ${phoneNumber}...`, 'bi-telephone-outbound');
+
+                    // Show hang up button
+                    showHangupButton();
+
+                    // Start polling for call status
+                    pollCallStatus(roomName, phoneNumber);
+                } else {
+                    updateCallStatus('failed', 'Failed to initiate call',
+                        result.error || result.detail || 'Unknown error occurred', 'bi-telephone-x');
+                    showNewCallButton();
+                }
+            } catch (error) {
+                console.error('Error initiating call:', error);
+                updateCallStatus('failed', 'Failed to initiate call',
+                    error.message || 'Network error', 'bi-telephone-x');
+                showNewCallButton();
+            }
+        });
+
+        // Handle hang up button
+        callHangupBtn.addEventListener('click', function() {
+            hangupCall();
+        });
+
+        // Handle new call button
+        callNewBtn.addEventListener('click', function() {
+            resetCallModal();
+        });
+
+        // Reset form when modal is closed
+        callModalElement.addEventListener('hidden.bs.modal', function() {
+            resetCallModal();
+        });
+
+        // Focus on first input when modal opens
+        callModalElement.addEventListener('shown.bs.modal', function() {
+            const firstInput = callForm.querySelector('select[name="sip_trunk_id"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        });
+    }
+    
+    // Initialize Update Trunk Modal
+    const updateTrunkModalElement = document.getElementById('updateTrunkModal');
+    
+    if (updateTrunkModalElement) {
+        // Initialize Bootstrap modal
+        const updateTrunkModal = new bootstrap.Modal(updateTrunkModalElement, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+        });
+        
+        // Handle edit button clicks
+        document.querySelectorAll('.edit-trunk-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const trunkId = this.getAttribute('data-trunk-id');
+                const trunkName = this.getAttribute('data-trunk-name');
+                const trunkAddress = this.getAttribute('data-trunk-address');
+                let trunkTransport = this.getAttribute('data-trunk-transport');
+                const trunkNumbers = this.getAttribute('data-trunk-numbers');
+                const trunkAuthUsername = this.getAttribute('data-trunk-auth-username');
+                const trunkMetadata = this.getAttribute('data-trunk-metadata');
+                const trunkFromHost = this.getAttribute('data-trunk-from-host') || '';
+
+                // Normalize transport value (handle enum values like SIPTransport.SIP_TRANSPORT_TCP)
+                if (trunkTransport) {
+                    trunkTransport = trunkTransport.toLowerCase();
+                    // Extract just the transport type from various formats
+                    if (trunkTransport.includes('tcp')) {
+                        trunkTransport = 'tcp';
+                    } else if (trunkTransport.includes('udp')) {
+                        trunkTransport = 'udp';
+                    } else if (trunkTransport.includes('tls')) {
+                        trunkTransport = 'tls';
+                    } else {
+                        trunkTransport = 'tcp'; // default
+                    }
+                } else {
+                    trunkTransport = 'tcp';
+                }
+
+                // Extract structured fields from metadata
+                let numberFormat = 'no_plus';
+                let trunkType = 'pstn';
+                let displayName = '';
+                let callerIdDynamic = false;
+                if (trunkMetadata) {
+                    try {
+                        const metaObj = JSON.parse(trunkMetadata);
+                        numberFormat = metaObj.number_format || 'no_plus';
+                        const tt = metaObj.trunk_type;
+                        trunkType = (tt === 'pbx') ? 'pbx' : 'pstn';
+                        displayName = metaObj.display_name || '';
+                        // PBX trunks in AUTO mode (caller_id_dynamic=true) store
+                        // an auto-derived placeholder in numbers[0] so LiveKit's
+                        // len(numbers)>0 check passes, but the user-facing field
+                        // should display blank — that's what they actually saved.
+                        callerIdDynamic = metaObj.caller_id_dynamic === true || metaObj.caller_id_dynamic === 'true';
+                    } catch (e) {
+                        console.warn('Could not parse trunk metadata:', e);
+                    }
+                }
+
+                // Populate form fields
+                document.getElementById('update_sip_trunk_id').value = trunkId || '';
+
+                window.applySipMediaConfig('obe_',
+                    button.getAttribute('data-trunk-codecs'),
+                    button.getAttribute('data-trunk-codec-lock'),
+                    button.getAttribute('data-trunk-media-timeout'));
+                document.getElementById('update_trunk_name').value = trunkName || '';
+                document.getElementById('update_address').value = trunkAddress || '';
+                document.getElementById('update_transport').value = trunkTransport;
+                // For PBX trunks in AUTO mode, show the field blank (the
+                // stored value is just the placeholder we auto-derived).
+                document.getElementById('update_numbers').value = (trunkType === 'pbx' && callerIdDynamic) ? '' : (trunkNumbers || '');
+                document.getElementById('update_username').value = trunkAuthUsername || '';
+                document.getElementById('update_number_format').value = numberFormat;
+
+                // PBX-trunk fields (synchronous so updateTrunkTypeFields below
+                // sees the correct value)
+                const ttSelect = document.getElementById('update_trunk_type');
+                if (ttSelect) ttSelect.value = trunkType;
+                const fhInput = document.getElementById('update_from_host');
+                if (fhInput) fhInput.value = trunkFromHost;
+                const dnInput = document.getElementById('update_display_name');
+                if (dnInput) dnInput.value = displayName;
+
+                // Apply PBX/PSTN visibility immediately
+                if (typeof updateTrunkTypeFields === 'function') {
+                    updateTrunkTypeFields('update_');
+                }
+
+                // Clear password field
+                document.getElementById('update_password').value = '';
+            });
+        });
+        
+        // Handle optional settings toggle for update modal
+        const updateOptionalSettingsButton = document.querySelector('[data-bs-target="#updateOptionalSettings"]');
+        if (updateOptionalSettingsButton) {
+            updateOptionalSettingsButton.addEventListener('click', function() {
+                const icon = this.querySelector('i.bi-chevron-right');
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                
+                // Update icon rotation
+                if (icon) {
+                    if (isExpanded) {
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        icon.style.transform = 'rotate(90deg)';
+                    }
+                }
+                
+                // Toggle aria-expanded
+                this.setAttribute('aria-expanded', !isExpanded);
+            });
+        }
+        
+        // Handle form tab switching - sync form data for update modal
+        const updateDetailsTab = document.getElementById('update-details-tab');
+        const updateJsonTab = document.getElementById('update-json-tab');
+        const updateJsonTextarea = document.getElementById('update_json_editor');
+        const updateTrunkForm = document.getElementById('updateTrunkForm');
+        
+        // When switching to JSON tab, populate JSON from form
+        if (updateJsonTab && updateTrunkForm && updateJsonTextarea) {
+            updateJsonTab.addEventListener('click', function() {
+                try {
+                    // Numbers handling: for PBX trunks, an empty field means
+                    // "AUTO mode" — send [] explicitly so the backend flips
+                    // caller_id_dynamic on. For PSTN trunks, blank = "don't
+                    // change" (preserve legacy behavior, send undefined).
+                    const numbersValue = document.getElementById('update_numbers').value;
+                    const updateTrunkTypeVal = document.getElementById('update_trunk_type') ?
+                        document.getElementById('update_trunk_type').value : 'pstn';
+                    let numbersField;
+                    if (numbersValue) {
+                        numbersField = numbersValue.split(',').map(n => n.trim()).filter(Boolean);
+                    } else if (updateTrunkTypeVal === 'pbx') {
+                        numbersField = [];  // explicit clear → AUTO mode
+                    } else {
+                        numbersField = undefined;
+                    }
+                    const formData = {
+                        sip_trunk_id: document.getElementById('update_sip_trunk_id').value,
+                        name: document.getElementById('update_trunk_name').value || undefined,
+                        address: document.getElementById('update_address').value || undefined,
+                        transport: document.getElementById('update_transport').value || undefined,
+                        numbers: numbersField,
+                        auth_username: document.getElementById('update_username').value || undefined,
+                        metadata: document.getElementById('update_metadata').value || undefined,
+                        number_format: document.getElementById('update_number_format').value || undefined
+                    };
+
+                    // Only include password if it's not empty
+                    const password = document.getElementById('update_password').value;
+                    if (password) {
+                        formData.auth_password = password;
+                    }
+
+                    // Parse JSON fields
+                    const headersValue = document.getElementById('update_headers').value;
+                    if (headersValue) {
+                        try {
+                            formData.headers = JSON.parse(headersValue);
+                        } catch (e) {
+                            console.warn('Invalid JSON in headers field');
+                        }
+                    }
+
+                    const headersToAttrsValue = document.getElementById('update_headers_to_attributes').value;
+                    if (headersToAttrsValue) {
+                        try {
+                            formData.headers_to_attributes = JSON.parse(headersToAttrsValue);
+                        } catch (e) {
+                            console.warn('Invalid JSON in headers_to_attributes field');
+                        }
+                    }
+
+                    // Remove undefined values
+                    Object.keys(formData).forEach(key => formData[key] === undefined && delete formData[key]);
+
+                    updateJsonTextarea.value = JSON.stringify(formData, null, 2);
+                } catch (e) {
+                    console.error('Error generating JSON:', e);
+                }
+            });
+        }
+        
+        // Reset form when modal is closed
+        updateTrunkModalElement.addEventListener('hidden.bs.modal', function() {
+            if (updateTrunkForm) {
+                updateTrunkForm.reset();
+            }
+            if (updateJsonTextarea) {
+                updateJsonTextarea.value = '';
+            }
+            
+            // Reset to first tab
+            const firstTab = document.getElementById('update-details-tab');
+            if (firstTab) {
+                const tab = new bootstrap.Tab(firstTab);
+                tab.show();
+            }
+            
+            // Collapse optional settings
+            const updateOptionalSettings = document.getElementById('updateOptionalSettings');
+            if (updateOptionalSettings && updateOptionalSettings.classList.contains('show')) {
+                const collapseInstance = bootstrap.Collapse.getInstance(updateOptionalSettings);
+                if (collapseInstance) {
+                    collapseInstance.hide();
+                }
+            }
+        });
+    }
+    
+    // Initialize Delete Trunk Modal
+    const deleteTrunkModalElement = document.getElementById('deleteTrunkModal');
+    
+    if (deleteTrunkModalElement) {
+        // Initialize Bootstrap modal
+        const deleteTrunkModal = new bootstrap.Modal(deleteTrunkModalElement, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+        });
+        
+        // Handle delete button clicks
+        document.querySelectorAll('.delete-trunk-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const trunkId = this.getAttribute('data-trunk-id');
+                const trunkName = this.getAttribute('data-trunk-name');
+                
+                // Populate modal
+                document.getElementById('delete_sip_trunk_id').value = trunkId;
+                document.getElementById('delete_trunk_name').textContent = trunkName;
+            });
+        });
+        
+        // Reset form when modal is closed
+        deleteTrunkModalElement.addEventListener('hidden.bs.modal', function() {
+            const deleteTrunkForm = document.getElementById('deleteTrunkForm');
+            if (deleteTrunkForm) {
+                deleteTrunkForm.reset();
+            }
+        });
+    }
+});
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="ImRjZUQ5TWpOUFhOOWJFbERSQnJuOVZmMjVEMXI4b0pjRnVIbzZwd3RkZjQi.aqgYNg.k2KkPGYi7JVWFetVuzYothJfiL0">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Outbound SIP Trunks
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Configure SIP trunks for making outgoing phone calls. Required for agents to dial out to phone numbers or to PBX extensions.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Two Trunk Types: PSTN vs PBX
+                        </h6>
+                        
+                        <p class="text-muted">PSTN trunks dial public phone numbers via a SIP carrier (Twilio, Telnyx, Vonage, SignalWire). PBX trunks point at a customer&#39;s existing phone system (3CX, Asterisk, FreePBX, Yeastar) and dial internal extensions, queues, or named SIP users (e.g. 101, queue302, reception). Pick the trunk type when you create or edit the trunk.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> What is a SIP Trunk?
+                        </h6>
+                        
+                        <p class="text-muted">A SIP trunk connects your LiveKit server to the telephone network (PSTN trunk) or to a customer&#39;s PBX (PBX trunk). For PSTN you need an account with a SIP provider; for PBX you need the PBX&#39;s address and either an extension&#39;s credentials or IP-based whitelisting on the PBX side.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Creating an Outbound Trunk
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Trunk Type</strong></td>
+                                        <td>PSTN (default) for public phone network, or PBX for direct dialing into a customer&#39;s phone system. Once set, the dashboard adapts every input on this page (number format, caller-ID handling, the test-call form, the campaign CSV behaviour).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Trunk Name</strong></td>
+                                        <td>Friendly name to identify this trunk in the dashboard (e.g., &#39;Twilio Production&#39; or &#39;Joel&#39;s Garage 3CX&#39;)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Address</strong></td>
+                                        <td>SIP server hostname or IP address. For PSTN: your provider&#39;s address (e.g., sip.twilio.com). For PBX: your PBX&#39;s reachable hostname/IP. Include the port (e.g. :5060) to bypass DNS SRV lookup — recommended.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Transport</strong></td>
+                                        <td>UDP (fast), TCP (reliable; recommended for PBX), or TLS (encrypted; needs explicit :5061 in the address — domain-only TLS is currently broken in livekit-sip).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Number Format</strong></td>
+                                        <td>PSTN-only. Choose whether phone numbers include the + prefix when sent to your provider. Twilio and most providers require &#39;+E.164 (WITH +)&#39;. Hidden when Trunk Type = PBX.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Numbers</strong></td>
+                                        <td>PSTN: caller-ID numbers (always WITHOUT the + prefix; the Number Format setting handles the +). PBX (labelled &#39;Caller-ID to show on transfers&#39;): leave BLANK to forward the original inbound caller&#39;s real number on transfers (destination phone shows who&#39;s actually calling); type a value to lock the From-URI user-part to that fixed value (e.g. your main DID or &#39;AIReceptionist&#39;).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Username</strong></td>
+                                        <td>SIP authentication username. PSTN: from your provider. PBX: only required for digest challenge auth — leave blank for IP-based PBX trunks.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Password</strong></td>
+                                        <td>SIP authentication password (PSTN: from provider; PBX: only with digest auth)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>From URI host (PBX, Advanced)</strong></td>
+                                        <td>Optional. Override the domain in the SIP From header. For 3CX: set to your 3CX SIP domain (3CX Admin → SIP Trunks). For Asterisk: usually the same as the trunk address. Leave blank to inherit the trunk address.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Caller display name (PBX, Advanced)</strong></td>
+                                        <td>Optional. Caller name shown to the destination phone (e.g. &#39;AI Receptionist&#39;). Max 128 chars; no line breaks.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Metadata</strong></td>
+                                        <td>Custom JSON data stored with the trunk for your application logic. Trunk Type and Display Name are managed by the dropdown/Advanced fields above and merged into your metadata on save — do not duplicate them here.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Audio Codecs</strong></td>
+                                        <td>The format calls travel in. All three are ticked by default and the carrier picks — identical to how trunks have always behaved. PCMU/PCMA are G.711, the standard telephone format nearly every carrier supports. G722 is HD Voice: roughly twice the audio detail, which can improve how accurately the agent understands callers, but many carriers do not offer it.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Only allow the codecs ticked above</strong></td>
+                                        <td>Forces your selection instead of letting the carrier choose. ⚠️ If the carrier cannot offer one of your ticked codecs it refuses the call with SIP 488 — inbound calls stop arriving and outbound calls stop connecting. Ticking a codec alone does nothing without this box; the list only ADDS to LiveKit&#39;s defaults. To undo, tick all three codecs and save. Always make a test call immediately after narrowing.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Media timeout (seconds)</strong></td>
+                                        <td>Hangs up a call whose audio has stopped flowing, instead of leaving a silent line open. Blank (default) keeps today&#39;s behaviour. Minimum 30; 60 is a sensible start. ⚠️ Carriers using silence suppression legitimately stop sending audio while nobody speaks, so a low value can hang up on a quiet caller mid-call. This is not the same as an agent&#39;s maximum call duration — that caps a healthy call, this ends a dead one.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> PBX Setup — Critical Notes
+                        </h6>
+                        
+                        <p class="text-muted">1) livekit-sip does NOT send SIP REGISTER. Configure your PBX as an IP-based trunk (3CX: &#39;Do not require — IP Based&#39;; Asterisk pjsip: registration=none with permit=&lt;livekit-sip-IP&gt;). Putting an extension&#39;s credentials in Username/Password only authenticates the outgoing INVITE on a digest challenge — it does not register the dashboard as that extension. 2) Codec support: PCMU, PCMA, and G.722 work out of the box. G.729 is NOT supported — if your PBX offers only G.729 the call will fail with 488 Not Acceptable Here. Enable G.711 (µ-law or A-law) on the PBX. 3) Concurrent-call limits: PBXes throttle total simultaneous calls by license (e.g. 3CX Simultaneous Call units, Yeastar channel limits). Campaigns dialing many contacts at once will exhaust these — check your PBX&#39;s capacity before running a large campaign.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Number Format Explained (PSTN only)
+                        </h6>
+                        
+                        <p class="text-muted">The Number Format setting determines how phone numbers are formatted when making calls. Your SIP provider expects numbers in a specific format. Twilio requires the + prefix, while some providers work without it. Always enter numbers in the Numbers field WITHOUT the + — the system adds it automatically based on this setting. PBX trunks ignore this setting because the destination is an extension, not a phone number.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Testing Outbound Calls
+                        </h6>
+                        
+                        <p class="text-muted">After creating a trunk, use the &#39;Create Outbound Call&#39; button to test. PSTN trunks ask for a Phone Number; PBX trunks ask for an Extension or SIP User. Verify caller ID displays correctly and audio works both ways.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Import/Export
+                        </h6>
+                        
+                        <p class="text-muted">Export trunk configurations as JSON for backup. Import to quickly replicate trunks across servers (passwords are not exported for security). Trunk Type, From URI host, and Display Name are included in the export and round-trip cleanly.</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

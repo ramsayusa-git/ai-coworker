@@ -1,0 +1,196 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sandbox</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+  
+  <style>
+    /* an iframe is its own document — it does NOT inherit the parent page's
+       background, and a bare/transparent body falls back to the browser's
+       default WHITE. Pin the dashboard's dark background explicitly. */
+    body { padding: 1rem; background-color: var(--bg-primary); }
+    /* the shared body centres itself with offset-md-2 for the full page — the
+       iframe is already narrow, so use the full width here */
+    .row > .col-md-8.offset-md-2 { flex: 0 0 100%; max-width: 100%; margin-left: 0 !important; }
+  </style>
+</head>
+<body data-bs-theme="dark">
+  
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <!-- Info Box (dismissible with localStorage persistence) -->
+        <div class="alert alert-info alert-permanent mb-4 position-relative" id="sandboxInfoBox" style="border-left: 4px solid var(--bs-info);">
+            <button type="button" class="btn-close position-absolute" style="top: 0.75rem; right: 0.75rem;" aria-label="Dismiss" onclick="dismissInfoBox()"></button>
+            <h5 class="alert-heading mb-2"><i class="bi bi-info-circle"></i> What is this?</h5>
+            <p class="mb-2">
+                This tool generates <strong>JWT tokens</strong> for joining LiveKit rooms as a web participant.
+                It's primarily used for <strong>debugging and testing</strong>.
+            </p>
+            <hr class="my-2">
+            <p class="mb-1"><strong>Common use cases:</strong></p>
+            <ul class="mb-0 small">
+                <li><strong>Debug a live call</strong> - Join a room to listen to an active voice agent conversation</li>
+                <li><strong>Test room connectivity</strong> - Verify your LiveKit server is accessible</li>
+                <li><strong>Developer testing</strong> - Generate tokens for custom web/mobile client development</li>
+            </ul>
+            <p class="mt-2 mb-0 small text-muted">
+                <i class="bi bi-telephone"></i> Note: Voice agents connect via SIP trunks, not these tokens.
+                This is a developer utility, not required for normal agent operations.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <p class="lead">
+                    Generate temporary join tokens for testing LiveKit client connections.
+                    These tokens are created on-the-fly and never stored.
+                </p>
+
+                <form method="post" action="https://vaai.aetosiot.com/sandbox/generate">
+                    <input type="hidden" name="csrf_token" value="InpqOUV2bXNJRzZGbVdmaHd2cDB5cnQwY19NVFNVZWZOMWlXNjE1bVhERUUi.aqgYOw.ADCfgqBIOgFB8y8qglaWQ0KbIIg">
+                    <input type="hidden" name="embed" value="1">
+
+                    <div class="mb-3">
+                        <label for="room" class="form-label">Room Name *</label>
+                        <input type="text" class="form-control" id="room" name="room"
+                               value="" required>
+                        <div class="form-text">The room the participant will join</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="identity" class="form-label">Identity *</label>
+                        <input type="text" class="form-control" id="identity" name="identity"
+                               value="" required>
+                        <div class="form-text">Unique identifier for the participant</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Display Name</label>
+                        <input type="text" class="form-control" id="name" name="name"
+                               value="">
+                        <div class="form-text">Optional display name for the participant</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ttl" class="form-label">Token TTL (seconds)</label>
+                        <input type="number" class="form-control" id="ttl" name="ttl"
+                               value="3600">
+                        <div class="form-text">How long the token is valid (default: 3600s = 1 hour)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="metadata" class="form-label">Metadata (optional)</label>
+                        <textarea class="form-control" id="metadata" name="metadata" rows="2"></textarea>
+                        <div class="form-text">Custom metadata attached to the participant</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Permissions</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="can_publish" name="can_publish"
+                                   checked>
+                            <label class="form-check-label" for="can_publish">
+                                Can Publish (audio/video)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="can_subscribe" name="can_subscribe"
+                                   checked>
+                            <label class="form-check-label" for="can_subscribe">
+                                Can Subscribe (receive streams)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="can_publish_data" name="can_publish_data"
+                                   checked>
+                            <label class="form-check-label" for="can_publish_data">
+                                Can Publish Data
+                            </label>
+                        </div>
+                    </div>
+
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-key"></i> Generate Token
+                    </button>
+                    
+                </form>
+
+                
+            </div>
+        </div>
+
+        <!-- HMAC Verification Helper -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-shield-check"></i> Webhook HMAC Verification</h5>
+            </div>
+            <div class="card-body">
+                <p>Use this helper to verify webhook signatures from LiveKit.</p>
+
+                <div class="mb-3">
+                    <label for="webhook_payload" class="form-label">Webhook Payload</label>
+                    <textarea class="form-control font-monospace" id="webhook_payload" rows="4"
+                              placeholder='{"event": "room_started", "room": {...}}'></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="webhook_signature" class="form-label">Signature Header</label>
+                    <input type="text" class="form-control font-monospace" id="webhook_signature"
+                           placeholder="sha256=...">
+                </div>
+
+                <button type="button" class="btn btn-secondary" onclick="verifyWebhook()">
+                    <i class="bi bi-check-circle"></i> Verify Signature
+                </button>
+
+                <div id="webhookResult" class="mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+  
+<script>
+// Check if info box was dismissed and hide it on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('sandboxInfoBoxDismissed') === 'true') {
+        const infoBox = document.getElementById('sandboxInfoBox');
+        if (infoBox) {
+            infoBox.style.display = 'none';
+        }
+    }
+});
+
+function dismissInfoBox() {
+    const infoBox = document.getElementById('sandboxInfoBox');
+    if (infoBox) {
+        infoBox.style.display = 'none';
+        localStorage.setItem('sandboxInfoBoxDismissed', 'true');
+    }
+}
+
+function copyToken() {
+    const tokenInput = document.getElementById('generatedToken');
+    tokenInput.select();
+    document.execCommand('copy');
+    alert('Token copied to clipboard!');
+}
+
+function copyUrl() {
+    const urlInput = document.getElementById('testUrl');
+    urlInput.select();
+    document.execCommand('copy');
+    alert('URL copied to clipboard!');
+}
+
+function verifyWebhook() {
+    alert('Webhook verification is a placeholder. Implement HMAC verification logic here.');
+}
+</script>
+</body>
+</html>

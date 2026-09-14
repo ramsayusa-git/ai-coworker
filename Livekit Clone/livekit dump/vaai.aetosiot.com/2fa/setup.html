@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Setup Two-Factor Authentication - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="../static/images/custom_favicon.png@v=230917">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="../static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/style.css@v=4308.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="&lt;function csrf_token_function at 0x78ee0ab3a5c0&gt;">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="../index.html" class="sidebar-brand">
+            
+            <img src="../static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="../settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="../index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="../reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="../rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="../call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="../chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="../egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="../tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="../knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="../agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="../web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="../telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="../telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="../telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="../telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="../agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="../simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="../autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="../improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="../settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="../settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Security Settings</h1>
+                
+<p class="page-subtitle">Setup Two-Factor Authentication (2FA)</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="../userguide.html" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="setup.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-shield-lock"></i> Enable Two-Factor Authentication
+                </h5>
+            </div>
+            <div class="card-body">
+                
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Step 1: Scan QR Code</h6>
+                        <p class="text-muted small">
+                            Scan this QR code with your authenticator app (Google Authenticator, Authy, 1Password, etc.)
+                        </p>
+                        <div class="text-center p-4 bg-white rounded mb-3">
+                            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcIAAAHCAQAAAABUY/ToAAADo0lEQVR4nO2cW2rrSBCGvxoJ8tiGLMBLae1glhSyM2spXsBA6zEg8c9DV+viM4eBEE/sTNWDoWV9tBqKuksmPifjH58EIcgggwwyyCCDDPLxSHPpYTwBTD0wtcvD1GPDtvzmpw3yIcksSSpgA0vVEhvoRC7AeP4woJMk6Uh+fs8gfxg5uX3RZerRe1UagDRDLqALUE3VV+0Z5M8g+5u1kf6q1zSeOgSdbLRfwSc7Z5D/HSldX2TD9CJgsRoeZUk23G3PIH8GmaTqrQZAlzRD1tyWk1VLJGn+uj2D/FHkaGZmJ79ob9eeaozytccGumqWzMzsSH5+zyB/COmxz7oWzECa0Xj+MI2nri4hHdsiz3XOIO9HskvXcwGgE1nzmu93ck+X5urkaoZ/ea5zBnk/0jVCUtUcXZJrjlS2u1yvJIUOBXkrboeSRN40J81QNad0zQTRyctFoUNB7sWN0KYqaTVGq82phoeWl4UOBbmXGlNbNTxTj+WyYLmAQSfLl6XXOHjYva81Ptc5g7wf6b6surFqbjoBnRueC1TDszU8Ih4K8h/JNFM782/y8iI0bQIWq3XHet+3P22Qj0SuvbECpLmH6XWG6QS5vGK5vCKmE4x/FhnpW582yMclbWAxmHr0foKWl+HjROOpU50pyteXmP0I8kY8uvFKdI2M2OIhlTVkkif4EQ8FeZSWujcFuSSt9cRDzSi3BD9y+yAPsub2RZYFlq8G0MlIBcZza5XVIaJUWoL/XOcM8n7kzlHhHqxVG1Wo1cZ2q/8bdijIo+zq1FtklLfqdCtb117+Gh6FDgW5Sgt7OATMaV9tbA19vLUfdijIvazzQ8JIBcsXvNeRtZiYTj7CWItEZ0U8FOSN7OzQOvGxi4Jq3x7/16+FHQpyL7uYevdTtkCpqVRelxEPBflbcurRu/W0tthiZmeJXBbzP/Cx/Qd42iAfhDzk9skztJqDXdZweh2SVcwxBvmrNB3SLuxp8ZCPUu/u3pxc6FCQTXSUdrlrCX6bbfQhoq1w9FznDPJ+JDeas7XKvEvW8jJvxsY8dZC/Ibek6/0EjNbDeNZOadrXG7qY/QjyRrb6UFWQ9UWOJs36bMuwQ0H+C7mYvV1f1F7u+LD6PRl3bYtV1/YoTxvk45HjWS0AuvbA1AYXx7Pn+zZ89Z5BPjW5z+3VfJl7q7QPrLdXP8KXBXmU27zM3633a14ugvaadCHysiCPYvGN8yCDDDLIIIMM8n9O/g2FaljE+7hrzwAAAABJRU5ErkJggg==" alt="2FA QR Code" style="max-width: 200px;">
+                        </div>
+                        <p class="text-muted small">
+                            <strong>Can't scan?</strong> Enter this code manually:
+                        </p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control font-monospace" value="FJSVWDLB25R4ILSNVYRPIZ2CZJFD432B" readonly id="secret-code">
+                            <button class="btn btn-outline-secondary" type="button" onclick="copySecret()">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Step 2: Enter Verification Code</h6>
+                        <p class="text-muted small">
+                            Enter the 6-digit code from your authenticator app to verify setup:
+                        </p>
+                        <form method="POST" action="setup.html">
+                            <div class="mb-3">
+                                <input
+                                    type="text"
+                                    class="form-control text-center"
+                                    id="code"
+                                    name="code"
+                                    placeholder="000000"
+                                    maxlength="6"
+                                    pattern="[0-9]{6}"
+                                    inputmode="numeric"
+                                    autocomplete="one-time-code"
+                                    style="font-size: 1.5rem; letter-spacing: 0.5rem; font-family: monospace;"
+                                    required
+                                >
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-check-circle"></i> Enable 2FA
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup Codes -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-key"></i> Backup Codes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Important:</strong> Save these backup codes in a secure location. Each code can only be used once.
+                    You'll need these if you lose access to your authenticator app.
+                </div>
+
+                <div class="row">
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">8B6972E9</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">2DD6D83C</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">A030068E</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">F59BC497</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">CF4640FB</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">1AD08AB4</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">07A44434</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">E659B270</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">39C35BD2</code>
+                    </div>
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-2">
+                        <code class="d-block p-2 bg-dark text-light rounded text-center">BC2B3E12</code>
+                    </div>
+                    
+                </div>
+
+                <div class="mt-3">
+                    <button class="btn btn-outline-secondary" onclick="copyBackupCodes()">
+                        <i class="bi bi-clipboard"></i> Copy All Codes
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="downloadBackupCodes()">
+                        <i class="bi bi-download"></i> Download Codes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="../settings.html" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-info-circle"></i> About 2FA
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">
+                    Two-factor authentication adds an extra layer of security to your account.
+                    After enabling 2FA, you'll need to enter a code from your authenticator app
+                    in addition to your password when logging in.
+                </p>
+                <h6 class="mt-3">Recommended Apps:</h6>
+                <ul class="small text-muted">
+                    <li>Google Authenticator</li>
+                    <li>Microsoft Authenticator</li>
+                    <li>Authy</li>
+                    <li>1Password</li>
+                    <li>Bitwarden</li>
+                </ul>
+                <h6 class="mt-3">Remember Device:</h6>
+                <p class="small text-muted">
+                    When logging in, you can choose to trust your device for 30 days.
+                    This means you won't need to enter a 2FA code on that device for a month.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<script>
+    const backupCodes = ["8B6972E9", "2DD6D83C", "A030068E", "F59BC497", "CF4640FB", "1AD08AB4", "07A44434", "E659B270", "39C35BD2", "BC2B3E12"];
+
+    function copySecret() {
+        const input = document.getElementById('secret-code');
+        input.select();
+        document.execCommand('copy');
+        alert('Secret code copied to clipboard!');
+    }
+
+    function copyBackupCodes() {
+        const codesText = backupCodes.join('\n');
+        navigator.clipboard.writeText(codesText).then(() => {
+            alert('Backup codes copied to clipboard!');
+        });
+    }
+
+    function downloadBackupCodes() {
+        const brandName = "Powered By Aetos Techlabs LLP";
+        const codesText = brandName + ' - 2FA Backup Codes\n' +
+            '=====================================\n\n' +
+            'Store these codes in a safe place.\n' +
+            'Each code can only be used once.\n\n' +
+            backupCodes.join('\n') +
+            '\n\n=====================================\n' +
+            'Generated: ' + new Date().toISOString();
+
+        const blob = new Blob([codesText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '2fa-backup-codes.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Only allow digits in code input
+    document.getElementById('code').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="&lt;function csrf_token_function at 0x78ee0ab3a5c0&gt;">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Overview Dashboard
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">The Overview page provides analytics and monitoring across 9 tabs: Overview, Calls &amp; Rooms, Latency, AI Insights, Agents, Media, Telephony, Price, and Server Stats. The top bar has a date-range dropdown (Today / Yesterday / Last 7-90 days / Custom range…), an auto-refresh toggle, and Export. Picking &#39;Custom range…&#39; opens a small popover where you can choose any two dates up to 90 days apart. Export downloads the currently active tab as CSV or JSON for whichever range is active.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Date Range &amp; Export
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Date Range</strong></td>
+                                        <td>Filter data by time period (Today, Yesterday, 7/14/30/60/90 days). Defaults to Today for faster loading.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Custom Range</strong></td>
+                                        <td>Pick any two dates up to 90 days apart. Select &#39;Custom range…&#39; from the Date Range dropdown — a small picker appears with From and To date boxes and an Apply button. Click Apply to load the charts for exactly those dates, or Cancel (or press Escape, or click outside the picker) to close it without changing anything. The picker pre-fills with the preset you were on, so switching from &#39;Last 7 days&#39; to Custom starts with a 7-day window selected. Once applied, all charts, pricing, and the Export button use the custom window.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Auto-Refresh</strong></td>
+                                        <td>Enable to update the page automatically every 30s, 60s, or 2min.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Export</strong></td>
+                                        <td>Download the currently active tab&#39;s data as CSV or JSON for the selected date range — works with both preset ranges and custom date ranges. Available on all tabs including Media, Telephony, Price, and Server Stats.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Overview Tab
+                        </h6>
+                        
+                        <p class="text-muted">Consolidated dashboard with key metrics: Room Connection Rate, Estimated Cost (configurable in Settings &gt; Analytics), Answer Rate, Active Rooms, Calls Today, Running Agents, and summarized stats from other tabs including Trunk Status, SIP Success Rate, Total Calls, Total Minutes, Avg Duration, Avg Sentiment. Includes Success Status Breakdown pie chart and Call Trends graph.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Calls &amp; Rooms Tab
+                        </h6>
+                        
+                        <p class="text-muted">Comprehensive call analytics including total calls, answer rate, call volume trends, outcomes (completed/transferred/missed/failed), direction (inbound/outbound), hourly distribution, and real-time room analytics with historical room trends. New metrics: Room Connection Rate, Longest/Shortest Call, Busiest Day/Hour, Talk Time Breakdown chart, and Call Distribution Heatmap showing call density by day and hour.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Latency Tab
+                        </h6>
+                        
+                        <p class="text-muted">Response latency metrics including API Latency, TTFB percentiles (Avg, P50, P90, P99), component breakdown (STT/LLM/TTS), hourly latency trend, and per-agent latency breakdown. Industry targets: &lt;500ms (natural), 500-1000ms (acceptable), &gt;1000ms (noticeable pause).</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> AI Insights Tab
+                        </h6>
+                        
+                        <p class="text-muted">AI-powered call analysis showing average sentiment score, pending action items, interruption rate, sentiment distribution (positive/neutral/negative), top topics extracted from calls, LLM-analyzed call outcomes, and Call End Reasons breakdown (Customer-ended vs Agent-ended with detailed reason table).</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Agents Tab
+                        </h6>
+                        
+                        <p class="text-muted">Agent performance metrics including total agents, agents active today, average success rate, top performer, detailed performance table with calls/answered/success rate/minutes/duration per agent, and calls by agent chart.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Media Tab
+                        </h6>
+                        
+                        <p class="text-muted">Recording &amp; Storage section showing active jobs, success rate, egress types chart, and storage used. Ingress/Streaming section showing active streams, connection quality, stream types, and average bitrate.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Telephony Tab
+                        </h6>
+                        
+                        <p class="text-muted">SIP trunk analytics (only visible if SIP is enabled) showing total trunks, connection success rate, trunk status, dispatch rules count, and call volume. Quick links to manage outbound/inbound trunks and dispatch rules.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Price Tab
+                        </h6>
+                        
+                        <p class="text-muted">Pricing analytics showing cost breakdown by service (LLM, STT, TTS, Realtime), total estimated cost, cost per call, cost per minute, and margin revenue. Realtime agents (audio-to-audio) appear as a separate category in the doughnut chart and stacked bar chart. Includes provider cost comparison charts, daily cost trends, and per-agent cost breakdown. Configure provider pricing rates in Settings &gt; Analytics. Margin settings allow sub-users to see adjusted pricing with your markup applied.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Server Stats Tab
+                        </h6>
+                        
+                        <p class="text-muted">System health monitoring with Total CPU Load (1/5/15 min averages as percentages), memory usage, swap usage, disk usage, uptime, network I/O, and process count. Service Status cards show CPU% and memory for each service (Dashboard, LiveKit, Agent, Redis, SIP, Egress). CPU Usage History chart displays per-service CPU over 24 hours with auto-scaling Y-axis that adjusts to actual usage levels. CPU samples are recorded every 60 seconds.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> New Metrics Reference
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Room Connection Rate</strong></td>
+                                        <td>Percentage of successful LiveKit room connections</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Success Status Breakdown</strong></td>
+                                        <td>Pie chart showing call completion status (Success/Failure/Unknown)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Call Distribution Heatmap</strong></td>
+                                        <td>Day x Hour grid showing call density patterns</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Talk Time Breakdown</strong></td>
+                                        <td>Total vs Average talk time per day</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Busiest Day/Hour</strong></td>
+                                        <td>Day and hour with highest call volume</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Longest/Shortest Call</strong></td>
+                                        <td>Duration of longest and shortest calls in period</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Call End Reasons</strong></td>
+                                        <td>Who terminated calls - Customer, Agent, or Other</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

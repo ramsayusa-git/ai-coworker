@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Improvement Lab - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=872450">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=6997.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IkVVUkdPZXpobWRITTR1UGJ4UDQ1TDFKWXp2eVZRaWp1SjZGbkZJZ0ppQlEi.aqgYNA.-L85i1CuNdZ0LAce_AE7dWtl67o">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link active">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Improvement Lab</h1>
+                <p class="page-subtitle">Replay, score, and improve your agents using their real calls</p>
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#improvement-lab" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="improvement-lab.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<style>
+  /* Recorded-call picker (feedback): HOVER = grey, SELECTED = solid blue like
+     the buttons — and selection must WIN over hover (a selected row stays blue
+     even while the mouse is over it). The #labCallPicker id gives these rules
+     the specificity to beat the theme's table-hover + Bootstrap defaults. */
+  #labCallPicker tbody tr:hover > td { background-color: var(--bg-hover) !important; }
+  #labCallPicker tbody tr.lab-call-selected > td,
+  #labCallPicker tbody tr.lab-call-selected:hover > td {
+      background-color: #0d6efd !important; color: #fff !important; font-weight: 600; }
+  #labCallPicker tbody tr.lab-call-selected > td .badge { background-color: rgba(255,255,255,.25) !important; }
+</style>
+
+<!-- ============ STT Lab | Scoring | Improve tabs (Simulation-page style) ============ -->
+<ul class="nav nav-tabs mb-4" id="labTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="sttTabBtn" data-bs-toggle="tab"
+        data-bs-target="#labTabStt" data-hash="#stt" type="button" role="tab">
+      <i class="bi bi-soundwave"></i> STT Lab
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="scoringTabBtn" data-bs-toggle="tab"
+        data-bs-target="#labTabScoring" data-hash="#scoring" type="button" role="tab">
+      <i class="bi bi-clipboard-check"></i> Scoring
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="improveTabBtn" data-bs-toggle="tab"
+        data-bs-target="#labTabImprove" data-hash="#improve" type="button" role="tab">
+      <i class="bi bi-graph-up-arrow"></i> Improve
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="ncTabBtn" data-bs-toggle="tab"
+        data-bs-target="#labTabNc" data-hash="#nc" type="button" role="tab">
+      <i class="bi bi-mic-mute"></i> Noise Cancellation
+    </button>
+  </li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane fade show active" id="labTabStt" role="tabpanel">
+<div class="row g-4">
+  <!-- ============ Step 1: pick a call ============ -->
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><strong>1. Pick a recorded call</strong></div>
+      <div class="card-body" style="max-height: 420px; overflow-y: auto;">
+        
+        <div class="text-center py-5">
+          <i class="bi bi-clipboard2-pulse" style="font-size: 3rem; color: var(--text-muted);"></i>
+          <h5 class="mt-3">No calls yet</h5>
+          <p class="text-muted">Once your agents take recorded calls, pick one here to replay it.</p>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Step 2: build the matrix ============ -->
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>2. What should we compare?</strong>
+        <span id="selectedCallLabel" class="text-muted small">no call selected</span>
+      </div>
+      <div class="card-body">
+        <div class="mb-3 d-flex flex-wrap gap-2">
+          <button class="btn btn-secondary btn-sm" onclick="applyPreset('live_vs_raw')">
+            Live config vs no noise cancellation</button>
+          <button class="btn btn-secondary btn-sm" onclick="applyPreset('engine_shootout')">
+            Engine shoot-out (best possible)</button>
+          <button class="btn btn-secondary btn-sm" onclick="addVariantRow()">
+            <i class="bi bi-plus-lg"></i> Add custom row</button>
+        </div>
+        <div id="presetWarnings"></div>
+        <table class="table table-sm align-middle" id="variantTable">
+          <thead><tr>
+            <th>Label</th><th>Engine</th><th>Model</th><th>Noise cancellation</th>
+            <th title="STACK = streamed like a live call ('what the agent actually heard'). DIRECT = the provider's batch service ('best possible transcription').">Mode</th><th></th>
+          </tr></thead>
+          <tbody id="variantRows"></tbody>
+        </table>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <small class="text-muted">Streamed rows replay in real time — a 3-minute call takes about 3 minutes per streamed row.</small>
+          <button class="btn btn-primary" id="estimateBtn" onclick="showEstimate()" disabled>
+            See cost &amp; run</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Run panel (HTMX-polled once a run starts) ============ -->
+    <div id="labRunPanel" class="mt-4"></div>
+  </div>
+</div>
+
+<!-- ============ Scheduled runs (partial renders nothing when empty) ============ -->
+<div id="labSchedules" hx-get="/improvement-lab/schedules"
+     hx-trigger="load, every 60s, labSchedulesRefresh from:body"></div>
+
+<!-- ============ History ============ -->
+<div class="card mt-4">
+  <div class="card-header"><strong>Past experiments</strong></div>
+  <div class="card-body" id="labHistory" hx-get="/improvement-lab/history"
+       hx-trigger="load, labHistoryRefresh from:body">
+    <div class="text-muted">Loading…</div>
+  </div>
+</div>
+</div><!-- /labTabStt -->
+
+<div class="tab-pane fade" id="labTabScoring" role="tabpanel"
+     hx-get="/improvement-lab/scoring" hx-trigger="labScoringLoad once"
+     hx-swap="innerHTML">
+  <div class="text-muted p-4">Loading scoring…</div>
+</div>
+
+<div class="tab-pane fade" id="labTabImprove" role="tabpanel"
+     hx-get="/improvement-lab/improve" hx-trigger="labImproveLoad once"
+     hx-swap="innerHTML">
+  <div class="text-muted p-4">Loading improve…</div>
+</div>
+<div class="tab-pane fade" id="labTabNc" role="tabpanel"
+     hx-swap="innerHTML">
+  <div class="text-center py-5 text-muted"><span class="spinner-border spinner-border-sm"></span> Loading…</div>
+</div>
+</div><!-- /tab-content -->
+
+<!-- ============ Estimate / confirm modal ============ -->
+<div class="modal fade" id="estimateModal" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Cost &amp; time estimate</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div id="estimateBody"></div>
+      <div id="scheduleSection" class="d-none border-top pt-3 mt-3">
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label small" for="schedMode">How often</label>
+            <select id="schedMode" class="form-select form-select-sm" onchange="schedModeChanged()">
+              <option value="once" selected>Once</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label small" for="schedTime">Time</label>
+            <input type="time" id="schedTime" class="form-control form-control-sm" value="23:00">
+          </div>
+          <div class="col-6" id="schedDateWrap">
+            <label class="form-label small" for="schedDate">Date</label>
+            <input type="date" id="schedDate" class="form-control form-control-sm">
+          </div>
+          <div class="col-6 d-none" id="schedDayWrap">
+            <label class="form-label small" for="schedDay">Day</label>
+            <select id="schedDay" class="form-select form-select-sm">
+              <option value="monday">Monday</option><option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option><option value="thursday">Thursday</option>
+              <option value="friday">Friday</option><option value="saturday">Saturday</option>
+              <option value="sunday">Sunday</option>
+            </select>
+          </div>
+          <div class="col-6 d-none" id="schedMaxWrap">
+            <label class="form-label small" for="schedMaxRuns">Stop after (runs, optional)</label>
+            <input type="number" id="schedMaxRuns" class="form-control form-control-sm" min="1" max="365" placeholder="no limit">
+          </div>
+        </div>
+        <p class="text-muted small mt-2 mb-0">
+          Timezone: Australia/Sydney. <strong>The estimated cost above is
+          charged each time this schedule runs</strong> — whether or not the run
+          succeeds. If the server is busy at the scheduled time it retries for up
+          to 4 hours, then reports why it couldn't run.
+        </p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button class="btn btn-outline-secondary" id="scheduleToggleBtn" onclick="toggleScheduleSection()">Schedule for later…</button>
+      <button class="btn btn-primary" id="confirmRunBtn" onclick="confirmRun()">Run it</button>
+      <button class="btn btn-primary d-none" id="confirmScheduleBtn" onclick="confirmSchedule()">Schedule it</button>
+    </div>
+  </div></div>
+</div>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<script>
+const CSRF_TOKEN = 'IkVVUkdPZXpobWRITTR1UGJ4UDQ1TDFKWXp2eVZRaWp1SjZGbkZJZ0ppQlEi.aqgYNA.-L85i1CuNdZ0LAce_AE7dWtl67o';
+
+// Tabs: lazy-load Scoring/Improve panes on first open, and keep the URL
+// hash in sync BOTH ways (Simulation-page pattern — simulation/index.html.j2)
+document.getElementById('scoringTabBtn').addEventListener('shown.bs.tab',
+  () => htmx.trigger('#labTabScoring', 'labScoringLoad'));
+document.getElementById('improveTabBtn').addEventListener('shown.bs.tab',
+  () => htmx.trigger('#labTabImprove', 'labImproveLoad'));
+document.getElementById('ncTabBtn').addEventListener('shown.bs.tab', () => {
+  // Direct fetch with a loaded flag rather than the custom-event trigger: a
+  // #nc deep link shows the tab before htmx has initialised, and a custom
+  // event fired then is simply lost (2026-09-03 screenshot drill).
+  const pane = document.getElementById('labTabNc');
+  if (pane.dataset.loaded) return;
+  pane.dataset.loaded = '1';
+  htmx.ajax('GET', '/improvement-lab/nc', { target: '#labTabNc', swap: 'innerHTML' });
+});
+function showLabTabFromHash() {
+  const btn = document.querySelector(
+    '#labTabs button[data-hash="' + location.hash + '"]');
+  if (btn && !btn.classList.contains('active')) {
+    new bootstrap.Tab(btn).show();
+  }
+}
+// Defer until DOMContentLoaded so htmx (which initialises on the same event,
+// registered earlier from <head>) has processed the panes' hx-trigger
+// attributes before a deep-linked tab fires its lazy-load event.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', showLabTabFromHash);
+} else {
+  showLabTabFromHash();
+}
+window.addEventListener('hashchange', showLabTabFromHash);
+document.querySelectorAll('#labTabs button[data-bs-toggle="tab"]').forEach(btn => {
+  btn.addEventListener('shown.bs.tab', e => {
+    history.replaceState(null, '', e.target.dataset.hash);
+  });
+});
+
+// ===================== Noise Cancellation tab (plan 7) =====================
+// All behaviour is delegated from here: the tab, its calls list and its
+// status panel are HTMX fragments (re-rendered), so they carry no scripts.
+(function () {
+  const root = () => document.getElementById('ncTabRoot');
+  const q = (sel) => root() ? root().querySelector(sel) : null;
+  const csrf = () => (root() && root().dataset.csrf) || CSRF_TOKEN;
+  let currentSweep = null;
+
+  function showErr(msg) {
+    const el = q('#ncError'); if (!el) return;
+    el.textContent = msg || ''; el.classList.toggle('d-none', !msg);
+  }
+  function selection() {
+    const agent = q('#ncAgent') ? q('#ncAgent').value : '';
+    const calls = [...root().querySelectorAll('input[data-nc="call"]:checked')].map(i => i.value);
+    const arms = [...root().querySelectorAll('.nc-arm')].filter(r => r.querySelector('input[data-nc="arm"]').checked).map(r => {
+      const a = { provider: r.dataset.provider };
+      const st = r.querySelector('input[data-nc="strength"]'); if (st) a.strength = parseFloat(st.value);
+      const md = r.querySelector('select[data-nc="model"]'); if (md) a.model = md.value;
+      return a;
+    });
+    return { agent_id: agent, call_ids: calls, arms };
+  }
+  function refreshReady() {
+    const sel = selection();
+    const ok = sel.agent_id && sel.call_ids.length && sel.arms.length;
+    const btn = q('#ncEstimateBtn'); if (btn) btn.disabled = !ok;
+    const hint = q('#ncHint');
+    if (hint) hint.textContent = ok ? `${sel.call_ids.length} call(s) × ${sel.arms.length} setting(s)` : 'Pick at least one call and one setting.';
+    const est = q('#ncEstimate'); if (est) est.classList.add('d-none');
+    const ack = q('#ncCostAck'); if (ack) ack.checked = false;
+    const start = q('#ncStartBtn'); if (start) start.disabled = true;
+  }
+  function markCurrentArm() {
+    const d = q('#ncCallsData'); if (!d) return;
+    root().querySelectorAll('.nc-arm').forEach(r => {
+      const badge = r.querySelector('.nc-current-badge');
+      const isCur = r.dataset.provider === d.dataset.currentProvider;
+      if (badge) badge.classList.toggle('d-none', !isCur);
+      if (isCur && d.dataset.currentStrength) { const st = r.querySelector('input[data-nc="strength"]'); if (st) st.value = d.dataset.currentStrength; }
+      if (isCur && d.dataset.currentModel) { const md = r.querySelector('select[data-nc="model"]'); if (md) md.value = d.dataset.currentModel; }
+    });
+  }
+  async function post(url, body, method) {
+    const r = await fetch(url, { method: method || 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+                                 body: body === undefined ? undefined : JSON.stringify(Object.assign({ csrf_token: csrf() }, body || {})) });
+    let data = {}; try { data = await r.json(); } catch (e) {}
+    if (!r.ok && !data.error) data.error = `Request failed (${r.status})`;
+    return data;
+  }
+  function pointStatusAt(sweepId) {
+    currentSweep = sweepId;
+    const panel = q('#ncStatusPanel'); if (!panel) return;
+    panel.innerHTML = '<div class="text-muted small"><span class="spinner-border spinner-border-sm"></span> Loading…</div>';
+    panel.setAttribute('hx-get', `/improvement-lab/nc/sweeps/${sweepId}/status`);
+    panel.setAttribute('hx-trigger', 'load, every 3s');
+    panel.setAttribute('hx-swap', 'innerHTML');
+    htmx.process(panel);
+    const hint = q('#ncStatusHint'); if (hint) hint.textContent = '';
+  }
+  document.body.addEventListener('htmx:afterSwap', (e) => {
+    if (!root()) return;
+    if (e.detail.target && e.detail.target.id === 'ncStatusPanel') {
+      // 286 already stops the poll; also drop the trigger so a re-process can't revive it
+      if (e.detail.xhr && e.detail.xhr.status === 286) e.detail.target.removeAttribute('hx-trigger');
+      htmx.trigger(document.body, 'ncHistoryRefresh');
+    }
+    if (e.detail.target && e.detail.target.id === 'ncCalls') { markCurrentArm(); refreshReady(); }
+  });
+  document.body.addEventListener('change', (e) => {
+    if (!root() || !root().contains(e.target)) return;
+    if (e.target.id === 'ncAgent') {
+      const box = q('#ncCalls');
+      if (!e.target.value) { box.innerHTML = 'Pick an agent to list its recorded calls.'; refreshReady(); return; }
+      htmx.ajax('GET', `/improvement-lab/nc/calls?agent_id=${encodeURIComponent(e.target.value)}`, { target: '#ncCalls', swap: 'innerHTML' });
+      return;
+    }
+    if (e.target.id === 'ncCostAck') { q('#ncStartBtn').disabled = !e.target.checked; return; }
+    if (e.target.matches('[data-nc="call"],[data-nc="arm"],[data-nc="strength"],[data-nc="model"]')) refreshReady();
+  });
+  document.body.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-nc],[data-play]');
+    if (!btn || !root() || !root().contains(btn)) return;
+    if (btn.dataset.play) {
+      const card = q('#ncPlayerCard'), player = q('#ncPlayer');
+      card.hidden = false; q('#ncNowPlaying').textContent = btn.dataset.title || '';
+      player.src = btn.dataset.play; player.play().catch(() => {});
+      return;
+    }
+    const action = btn.dataset.nc;
+    if (action === 'estimate') {
+      showErr(''); btn.disabled = true;
+      const d = await post('/improvement-lab/nc/estimate', selection());
+      btn.disabled = false;
+      if (!d.ok) { showErr(d.error); return; }
+      const est = d.estimate, lines = [];
+      lines.push(`<div><strong>${est.calls} call(s) × ${est.arms} setting(s)</strong>` +
+        (est.redacted ? '' : (est.total_display != null ? ` — about <strong>${est.symbol}${Number(est.total_display).toFixed(2)} ${est.currency}</strong>` : ' — cost unknown (missing pricing rows)')) + '</div>');
+      (d.warnings || []).forEach(w => lines.push(`<div class="text-warning mt-1"><i class="bi bi-exclamation-triangle"></i> ${w}</div>`));
+      lines.push('<div class="text-muted mt-1">Runs one call at a time in the background; each call is charged when it starts.</div>');
+      q('#ncEstimateBody').innerHTML = lines.join('');
+      q('#ncEstimate').classList.remove('d-none');
+      return;
+    }
+    if (action === 'start') {
+      showErr(''); btn.disabled = true;
+      const d = await post('/improvement-lab/nc/sweeps', Object.assign({ cost_ack: true }, selection()));
+      if (!d.ok) { showErr(d.error); btn.disabled = false; return; }
+      q('#ncEstimate').classList.add('d-none');
+      pointStatusAt(d.sweep_id);
+      if (!d.started) showErr(d.message);
+      return;
+    }
+    if (action === 'open') { pointStatusAt(btn.dataset.sweep); q('#ncStatusPanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    const panel = btn.closest('[data-sweep-id]');
+    const sid = panel ? panel.dataset.sweepId : currentSweep;
+    if (!sid) return;
+    if (action === 'resume') {
+      const retry = btn.dataset.retry === '1';
+      if (retry && !confirm('Re-running failed calls will charge them again. Continue?')) return;
+      const d = await post(`/improvement-lab/nc/sweeps/${sid}/resume`, { retry_failed: retry });
+      if (!d.ok) { showErr(d.error); return; }
+      pointStatusAt(sid); return;
+    }
+    if (action === 'abort') {
+      const d = await post(`/improvement-lab/nc/sweeps/${sid}/abort`, {});
+      if (!d.ok) showErr(d.error || d.message); return;
+    }
+    if (action === 'delete') {
+      if (!confirm('Delete this sweep and its saved audio?')) return;
+      const d = await post(`/improvement-lab/nc/sweeps/${sid}`, undefined, 'DELETE');
+      if (!d.ok) { showErr(d.error); return; }
+      q('#ncStatusPanel').innerHTML = '<p class="text-muted small mb-0">Sweep deleted.</p>';
+      q('#ncStatusPanel').removeAttribute('hx-trigger');
+      htmx.trigger(document.body, 'ncHistoryRefresh'); return;
+    }
+    if (action === 'apply') {
+      if (!confirm(`Apply "${btn.dataset.label}" to this agent's noise-cancellation setting?`)) return;
+      const d = await post(`/improvement-lab/nc/sweeps/${sid}/apply`, { arm_id: btn.dataset.arm });
+      if (!d.ok) { showErr(d.error); return; }
+      pointStatusAt(sid); return;
+    }
+  });
+})();
+const STT_CATALOG = {"assemblyai": {"direct": true, "label": "AssemblyAI", "models": [{"id": "universal-3-5-pro", "label": "Universal 3.5 Realtime Pro"}, {"id": "universal-streaming-english", "label": "Universal Streaming (English)"}], "stack": true}, "deepgram": {"direct": true, "label": "Deepgram", "models": [{"id": "nova-3-general", "label": "Nova 3 (General)"}, {"direct": false, "id": "flux-general-en", "label": "Flux (English)"}, {"id": "nova-2-general", "label": "Nova 2 (General)"}, {"id": "nova-2-phonecall", "label": "Nova 2 (Phone Call)"}], "stack": true}, "groq": {"direct": true, "label": "Groq", "models": [{"id": "whisper-large-v3", "label": "Whisper Large v3"}, {"id": "whisper-large-v3-turbo", "label": "Whisper Large v3 Turbo"}], "stack": false}, "openai": {"direct": true, "label": "OpenAI", "models": [{"id": "whisper-1", "label": "Whisper"}, {"id": "gpt-4o-transcribe", "label": "GPT-4o Transcribe"}], "stack": false}, "speechmatics": {"direct": false, "label": "Speechmatics", "models": [{"id": "enhanced", "label": "Enhanced"}, {"id": "standard", "label": "Standard"}], "stack": true}};
+const NC_OPTIONS = [{"default_strength": null, "id": "none", "label": "No noise cancellation"}, {"default_strength": 0.3, "id": "webrtc_apm", "label": "WebRTC APM"}, {"default_strength": 0.3, "id": "dtln", "label": "DTLN"}, {"default_strength": 0.5, "id": "ai_coustics", "label": "ai.coustics QUAIL"}];
+const INSTALLED = {"anthropic": false, "assemblyai": false, "aws_polly": false, "aws_realtime": false, "aws_transcribe": false, "azure_openai": false, "azure_realtime": false, "azure_speech": false, "bedrock": false, "boto3": true, "cartesia": false, "deepgram": false, "elevenlabs": false, "google": false, "google_cloud": false, "google_gemini": false, "groq": false, "hume": false, "mem0ai": true, "minimax": false, "openai": false, "openrouter": false, "sarvam": false, "scx": false, "slaute": false, "slng": false, "speechmatics": false, "telnyx_ai": false, "xai": false, "xai_realtime": false};
+const PICKER_ROWS = [];
+let selectedCall = null;
+let rowSeq = 0;
+
+// review sec#5: operator-typed variant labels + error strings are echoed into
+// innerHTML — escape them (defense-in-depth against same-user self-XSS).
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+function selectCall(callId, tr) {
+  selectedCall = PICKER_ROWS.find(r => r.id === callId) || null;
+  document.querySelectorAll('tr[data-call-id]').forEach(r => r.classList.remove('lab-call-selected'));
+  if (tr) tr.classList.add('lab-call-selected');
+  document.getElementById('selectedCallLabel').textContent =
+      selectedCall ? `${selectedCall.agent_name || 'call'} · ${selectedCall.started_at_display || ''}` : 'no call selected';
+  refreshEstimateBtn();
+}
+
+function refreshEstimateBtn() {
+  document.getElementById('estimateBtn').disabled =
+      !selectedCall || document.querySelectorAll('#variantRows tr').length === 0;
+}
+
+function variantFromRow(tr) {
+  const g = cls => tr.querySelector(cls).value;
+  return {
+    id: tr.dataset.vid,
+    label: g('.v-label'),
+    mode: g('.v-mode'),
+    // no language key — the start-run route fills it from the agent's config
+    stt: { provider: g('.v-provider'), model: g('.v-model') },
+    nc: { provider: g('.v-nc'),
+          strength: parseFloat(g('.v-strength') || '0.5'),
+          model: 'quail_l' },
+  };
+}
+
+function collectVariants() {
+  return Array.from(document.querySelectorAll('#variantRows tr')).map(variantFromRow);
+}
+
+function modelOptionsHtml(provider) {
+  return (STT_CATALOG[provider]?.models || [])
+      .map(m => `<option value="${m.id}">${m.label}</option>`).join('');
+}
+
+function modelSupportsDirect(provider, modelId) {
+  const info = STT_CATALOG[provider] || {};
+  if (!info.direct) return false;
+  const m = (info.models || []).find(x => x.id === modelId);
+  // per-model direct:false (e.g. Deepgram Flux — streaming-only) overrides
+  // the provider flag; unknown models inherit it
+  return m ? m.direct !== false : true;
+}
+
+function modeOptionsHtml(provider, modelId) {
+  const info = STT_CATALOG[provider] || {};
+  let html = '';
+  if (info.stack) html += '<option value="stack">What the agent actually heard</option>';
+  if (modelSupportsDirect(provider, modelId)) {
+    html += '<option value="direct">Best possible transcription</option>';
+  } else if (info.direct) {
+    html += '<option value="" disabled>Best possible — not available for this model (streaming-only)</option>';
+  }
+  return html;
+}
+
+function addVariantRow(preset) {
+  const tbody = document.getElementById('variantRows');
+  const tr = document.createElement('tr');
+  tr.dataset.vid = preset?.id || `custom-${++rowSeq}`;
+  const providers = Object.entries(STT_CATALOG).map(([id, info]) => {
+    const off = INSTALLED[id] === false ? ' disabled' : '';
+    return `<option value="${id}"${off}>${info.label}${off ? ' (not configured)' : ''}</option>`;
+  }).join('');
+  tr.innerHTML = `
+    <td><input class="form-control form-control-sm v-label" value="${preset?.label || 'Custom'}"></td>
+    <td><select class="form-select form-select-sm v-provider" onchange="providerChanged(this)">${providers}</select></td>
+    <td><select class="form-select form-select-sm v-model" onchange="modelChanged(this)"></select></td>
+    <td><select class="form-select form-select-sm v-nc">${NC_OPTIONS.map(o =>
+        `<option value="${o.id}">${o.label}</option>`).join('')}</select>
+        <input type="number" class="form-control form-control-sm mt-1 v-strength" min="0.1" max="1" step="0.1" value="0.3" title="Strength"></td>
+    <td><select class="form-select form-select-sm v-mode"></select></td>
+    <td><button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); refreshEstimateBtn();"><i class="bi bi-x"></i></button></td>`;
+  tbody.appendChild(tr);
+  const providerSel = tr.querySelector('.v-provider');
+  if (preset?.stt?.provider) providerSel.value = preset.stt.provider;
+  providerChanged(providerSel);
+  if (preset?.stt?.model) {
+    tr.querySelector('.v-model').value = preset.stt.model;
+    modelChanged(tr.querySelector('.v-model'));   // mode options follow the model
+  }
+  if (preset?.nc?.provider) tr.querySelector('.v-nc').value = preset.nc.provider;
+  if (preset?.nc?.strength != null) tr.querySelector('.v-strength').value = preset.nc.strength;
+  if (preset?.mode) {
+    const modeSel = tr.querySelector('.v-mode');
+    modeSel.value = preset.mode;
+    if (!modeSel.value) modeSel.selectedIndex = 0;  // preset mode unavailable for this model
+  }
+  refreshEstimateBtn();
+}
+
+function providerChanged(sel) {
+  const tr = sel.closest('tr');
+  const modelSel = tr.querySelector('.v-model');
+  modelSel.innerHTML = modelOptionsHtml(sel.value);
+  tr.querySelector('.v-mode').innerHTML = modeOptionsHtml(sel.value, modelSel.value);
+}
+
+function modelChanged(sel) {
+  // Mode capability is per-MODEL (Deepgram Flux is streaming-only): rebuild
+  // the mode options, keeping the current choice when it's still allowed.
+  const tr = sel.closest('tr');
+  const modeSel = tr.querySelector('.v-mode');
+  const prev = modeSel.value;
+  modeSel.innerHTML = modeOptionsHtml(tr.querySelector('.v-provider').value, sel.value);
+  modeSel.value = prev;
+  if (!modeSel.value) modeSel.selectedIndex = 0;
+}
+
+function applyPreset(name) {
+  if (!selectedCall) { showWarnings(['Pick a call first.']); return; }
+  if (name === 'live_vs_raw' && !selectedCall.live_config_known) {
+    showWarnings(["This call predates provider logging — its live config is unknown. Build the matrix manually instead."]);
+    return;
+  }
+  document.getElementById('variantRows').innerHTML = '';
+  // preset rows are assembled client-side from the stored fields the picker
+  // row carries — the SERVER re-validates everything at run time
+  const presets = buildPresetRows(name);
+  showWarnings(presets.warnings);
+  presets.variants.forEach(v => addVariantRow(v));
+}
+
+function buildPresetRows(name) {
+  if (name === 'live_vs_raw') {
+    const live = {
+      id: 'live', label: 'Live config', mode: 'stack',
+      stt: {provider: selectedCall.stt_provider, model: selectedCall.stt_model},
+      nc: {provider: selectedCall.nc_provider || 'none',
+           strength: selectedCall.nc_strength ?? 0.5},
+    };
+    const raw = {id: 'raw', label: 'Same engine, no noise cancellation',
+                 mode: 'stack', stt: {...live.stt}, nc: {provider: 'none'}};
+    return {variants: [live, raw], warnings: []};
+  }
+  if (name === 'engine_shootout') {
+    const variants = Object.entries(STT_CATALOG)
+      .filter(([id, info]) => info.direct && INSTALLED[id] !== false)
+      .map(([id, info]) => ({
+        id: `shootout-${id}`, label: `${info.label} — best possible`,
+        mode: 'direct', stt: {provider: id, model: info.models[0].id},
+        nc: {provider: 'none'},
+      }));
+    return {variants,
+            warnings: variants.length ? [] : ['No batch-capable speech providers are configured.']};
+  }
+  return {variants: [], warnings: []};
+}
+
+function showWarnings(list) {
+  document.getElementById('presetWarnings').innerHTML = (list || [])
+    .map(w => `<div class="alert alert-warning alert-permanent py-1 px-2 small">${esc(w)}</div>`).join('');
+}
+
+async function showEstimate() {
+  const resp = await fetch('/improvement-lab/api/estimate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN},
+    body: JSON.stringify({call_id: selectedCall.id, variants: collectVariants()}),
+  });
+  const data = await resp.json();
+  const est = data.estimate;
+  let html = '';
+  (data.warnings || []).forEach(w => html += `<div class="alert alert-warning alert-permanent">${esc(w)}</div>`);
+  if (!est.known_duration) {
+    html += `<p>This call's length isn't recorded, so the cost can't be estimated up front — it will be checked when the run starts (30-minute hard limit either way).</p>`;
+  } else {
+    html += `<table class="table table-sm">` + est.items.map(i =>
+      `<tr><td>${esc(i.label)}</td><td class="text-end">${i.display != null ? est.symbol + i.display.toFixed(4) : 'rate not configured'}</td></tr>`).join('') +
+      `<tr class="fw-bold"><td>Total (approximate)</td><td class="text-end">${est.total_display != null ? est.symbol + est.total_display.toFixed(4) : '—'}</td></tr></table>`;
+    if (est.has_unknown_rates)
+      html += `<div class="alert alert-warning alert-permanent small">Some rows have no pricing configured — they will still bill at the provider's real rate. Add their rates in Settings → Pricing for accurate estimates.</div>`;
+    if (est.time_estimate_s != null)
+      html += `<p class="text-muted small">Estimated time: about ${Math.ceil(est.time_estimate_s / 60)} minute(s) — streamed rows replay in real time.</p>`;
+  }
+  document.getElementById('estimateBody').innerHTML = html;
+  resetScheduleSection();
+  new bootstrap.Modal(document.getElementById('estimateModal')).show();
+}
+
+async function confirmRun() {
+  bootstrap.Modal.getInstance(document.getElementById('estimateModal'))?.hide();
+  const resp = await fetch('/improvement-lab/api/runs', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN},
+    body: JSON.stringify({
+      call_id: selectedCall.id,
+      agent_id: selectedCall.agent_id,
+      cost_ack: true,                    // the estimate modal was just shown
+      variants: collectVariants(),
+    }),
+  });
+  const data = await resp.json();
+  if (!data.ok) { showWarnings([data.error]); return; }
+  pointRunPanelAt(data.run_id);
+}
+
+// ---- schedule-for-later (estimate modal) ----
+function resetScheduleSection() {
+  document.getElementById('scheduleSection').classList.add('d-none');
+  document.getElementById('confirmRunBtn').classList.remove('d-none');
+  document.getElementById('confirmScheduleBtn').classList.add('d-none');
+  document.getElementById('scheduleToggleBtn').textContent = 'Schedule for later…';
+  // default date: today (server rejects past instants; user picks the time)
+  const d = new Date();
+  document.getElementById('schedDate').value =
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  schedModeChanged();
+}
+function toggleScheduleSection() {
+  const section = document.getElementById('scheduleSection');
+  const showing = section.classList.toggle('d-none');   // true = now hidden
+  document.getElementById('confirmRunBtn').classList.toggle('d-none', !showing);
+  document.getElementById('confirmScheduleBtn').classList.toggle('d-none', showing);
+  document.getElementById('scheduleToggleBtn').textContent =
+      showing ? 'Schedule for later…' : 'Run now instead';
+}
+function schedModeChanged() {
+  const mode = document.getElementById('schedMode').value;
+  document.getElementById('schedDateWrap').classList.toggle('d-none', mode !== 'once');
+  document.getElementById('schedDayWrap').classList.toggle('d-none', mode !== 'weekly');
+  document.getElementById('schedMaxWrap').classList.toggle('d-none', mode === 'once');
+}
+async function confirmSchedule() {
+  const mode = document.getElementById('schedMode').value;
+  const schedule = {
+    mode: mode,
+    time: document.getElementById('schedTime').value,
+    day: document.getElementById('schedDay').value,
+    once_date: document.getElementById('schedDate').value,
+    max_runs: document.getElementById('schedMaxRuns').value || null,
+  };
+  const resp = await fetch('/improvement-lab/api/schedules', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN},
+    body: JSON.stringify({
+      call_id: selectedCall.id,
+      agent_id: selectedCall.agent_id,
+      cost_ack: true,                    // the estimate modal was just shown
+      variants: collectVariants(),
+      schedule: schedule,
+    }),
+  });
+  const data = await resp.json();
+  if (!data.ok) { showWarnings([data.error]); return; }
+  bootstrap.Modal.getInstance(document.getElementById('estimateModal'))?.hide();
+  if (data.warning) showWarnings([data.warning]);
+  htmx.trigger(document.body, 'labSchedulesRefresh');
+}
+function cancelSchedule(scheduleId) {
+  if (!confirm('Cancel this scheduled run?')) return;
+  fetch(`/improvement-lab/api/schedules/${scheduleId}`, {
+    method: 'DELETE',
+    headers: {'X-CSRFToken': CSRF_TOKEN},
+  }).then(r => r.json()).then(data => {
+    if (data && data.ok) htmx.trigger(document.body, 'labSchedulesRefresh');
+    else showWarnings([(data && data.error) || 'Could not cancel the schedule.']);
+  }).catch(() => showWarnings(['Could not cancel the schedule.']));
+}
+
+// ---- history / compare helpers (used by the HTMX partials — defined ONCE
+// here; partial-scoped definitions would race on load order) ----
+
+// Spinner shown while a run's status/results load (house pattern from the
+// settings pricing tab). Set via plain innerHTML ONCE per repoint — the 3s
+// poll then swaps content→content with no flashing.
+const LAB_RUN_SPINNER =
+  '<div class="card"><div class="card-body text-muted">' +
+  '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+  'Loading run…</div></div>';
+let labRun404Streak = 0;   // consecutive 404s — transient blips must not kill the poll
+
+function pointRunPanelAt(runId) {
+  const panel = document.getElementById('labRunPanel');
+  // One-time abort of any in-flight request for the PREVIOUS run so its
+  // late response can't swap over the new spinner. Deliberately NOT
+  // hx-sync="this:replace": that would also abort every poll slower than
+  // 3s — and error/interrupted runs shell journalctl for up to 10s, so
+  // blanket sync would starve them forever.
+  try { htmx.trigger(panel, 'htmx:abort'); } catch (e) {}
+  labRun404Streak = 0;
+  panel.innerHTML = LAB_RUN_SPINNER;
+  panel.setAttribute('hx-get', `/improvement-lab/runs/${runId}/status`);
+  panel.setAttribute('hx-trigger', 'load, every 3s');
+  htmx.process(panel); htmx.trigger(panel, 'load');
+}
+
+function viewRun(runId) {
+  pointRunPanelAt(runId);
+  document.getElementById('labRunPanel').scrollIntoView({behavior: 'smooth'});
+}
+
+// Error handling for the run panel ONLY (an unscoped listener would let a
+// failed history refresh wipe the panel).
+document.body.addEventListener('htmx:responseError', function (evt) {
+  if (!evt.detail || !evt.detail.elt || evt.detail.elt.id !== 'labRunPanel') return;
+  const panel = evt.detail.elt;
+  const status = evt.detail.xhr ? evt.detail.xhr.status : 0;
+  if (status === 0) return;  // our own abort from pointRunPanelAt — not an error
+  if (status === 404) {
+    // Transient 404s are real (Redis blip; S3 call-history hiccup on the
+    // ACL path) — only stop after 3 consecutive misses.
+    labRun404Streak += 1;
+    if (labRun404Streak >= 3) {
+      panel.removeAttribute('hx-trigger');
+      htmx.process(panel);
+      panel.innerHTML = '<div class="card"><div class="card-body text-muted">' +
+        'Run not found — it may have been removed by retention. ' +
+        '<a href="improvement-lab.html">Reload the Lab</a></div></div>';
+    }
+    return;
+  }
+  labRun404Streak = 0;
+  // 5xx / other: replace the spinner with a retry note, but NEVER overwrite
+  // already-rendered results (a live view surviving a blip beats an error card).
+  if (panel.querySelector('.spinner-border')) {
+    panel.innerHTML = '<div class="card"><div class="card-body text-muted">' +
+      'Failed to load the run. <a href="improvement-lab.html#" onclick="htmx.trigger(document.getElementById(\'labRunPanel\'), \'load\'); return false;">Retry</a></div></div>';
+  }
+});
+document.body.addEventListener('htmx:afterSwap', function (evt) {
+  if (evt.detail && evt.detail.elt && evt.detail.elt.id === 'labRunPanel') labRun404Streak = 0;
+});
+document.body.addEventListener('htmx:sendError', function (evt) {
+  if (!evt.detail || !evt.detail.elt || evt.detail.elt.id !== 'labRunPanel') return;
+  const panel = evt.detail.elt;
+  if (panel.querySelector('.spinner-border')) {
+    panel.innerHTML = '<div class="card"><div class="card-body text-muted">' +
+      'Network error loading the run. <a href="improvement-lab.html#" onclick="htmx.trigger(document.getElementById(\'labRunPanel\'), \'load\'); return false;">Retry</a></div></div>';
+  }
+});
+function compareChanged() {
+  const picked = document.querySelectorAll('.compare-check:checked');
+  document.getElementById('compareBtn').classList.toggle('d-none', picked.length !== 2);
+}
+function openCompare() {
+  const picked = [...document.querySelectorAll('.compare-check:checked')].map(c => c.value);
+  if (picked.length === 2) window.location = `/improvement-lab/compare?a=${picked[0]}&b=${picked[1]}`;
+}
+// delegated listener: vocab buttons arrive inside HTMX partials and carry
+// transcript-derived words — data-* attributes, never inline onclick args
+document.addEventListener('click', async (ev) => {
+  const btn = ev.target.closest('.vocab-add-btn');
+  if (!btn) return;
+  btn.disabled = true;
+  const resp = await fetch('/improvement-lab/api/vocab', {
+    method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN},
+    body: JSON.stringify({agent_id: btn.dataset.agentId,
+                          words: [btn.dataset.word],
+                          run_id: btn.dataset.runId}),
+  });
+  const data = await resp.json();
+  btn.textContent = data.ok ? '✓ added' : (data.error || 'failed');
+});
+
+// Copy-results buttons inside HTMX-polled partials: text rides in data-copy
+// (server-rendered, auto-escaped), inline onclick calls this page-level
+// helper — bound listeners wouldn't survive the 3s partial re-render.
+function labCopyResult(btn) {
+  const text = btn.dataset.copy || '';
+  if (!text) return;
+  copyToClipboard(text);
+  const original = btn.innerHTML;
+  btn.innerHTML = '<i class="bi bi-clipboard-check"></i> Copied';
+  setTimeout(() => { btn.innerHTML = original; }, 2000);
+}
+
+
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IkVVUkdPZXpobWRITTR1UGJ4UDQ1TDFKWXp2eVZRaWp1SjZGbkZJZ0ppQlEi.aqgYNA.-L85i1CuNdZ0LAce_AE7dWtl67o">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Improvement Lab
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Find out WHY calls fail and stop the same problem coming back. Replay recorded calls through different speech engines, score real calls against an AI-drafted success checklist, and turn confirmed failures into permanent regression tests.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> STT Lab Tab
+                        </h6>
+                        
+                        <p class="text-muted">Replay a recorded call through different speech-recognition engines and noise-cancellation settings, side-by-side with a &#39;best possible transcription&#39; reference, to SEE what the agent misheard and which setup hears your callers best. Results compare setups against each other. Adding a misheard word to the agent&#39;s vocabulary is one click, and the change goes through the normal versioned agent save.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> The Two Modes
+                        </h6>
+                        
+                        <p class="text-muted">&#39;What the agent actually heard&#39; streams the audio in real time through the same live pipeline your agent uses (streaming model, noise cancellation, time pressure to finalise words) — it shows what the agent WOULD have heard with that setup. &#39;Best possible transcription&#39; sends the whole recording to the provider&#39;s offline service with no time pressure — that provider&#39;s accuracy CEILING on your audio. The gap between them is the diagnosis: great ceiling but poor live result means your live settings are costing you (fixable); a poor ceiling means the audio itself is the problem. Streaming-only models (e.g. Deepgram Flux) can only run as &#39;What the agent actually heard&#39;. &#39;Caller words missed&#39; is the fair comparison column (lower is better); &#39;Whole call&#39; mixes both speakers — only compare rows with it; a &#39;—&#39; means the Lab wasn&#39;t confident which speaker was which and withholds the number.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Scheduled Runs
+                        </h6>
+                        
+                        <p class="text-muted">In the estimate popup, &#39;Schedule for later…&#39; runs the replay after hours instead of now: once (pick a date), daily, or weekly, at a time in the dashboard&#39;s configured timezone, with an optional &#39;stop after N runs&#39; spending cap. If the server is busy at the scheduled time (live call, another run, low memory) it retries for up to 4 hours, then reports why it couldn&#39;t run. Each run charges the estimated cost whether or not it succeeds; repeating schedules auto-pause after 3 failed runs in a row, and stop for re-confirmation if the run&#39;s cost changes. The Scheduled Runs card shows next fire time, cost per run, run count, status, and how the last run ended, with a Cancel button.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Noise Cancellation Tab
+                        </h6>
+                        
+                        <p class="text-muted">Find the noise-cancellation setting that hears your callers best. Pick an agent, tick several of its recorded calls (the newest 5 are pre-ticked, up to 10) and the settings to try — No noise cancellation, WebRTC APM, DTLN, ai.coustics (with its model and a strength each). The Lab replays every call through every setting with the agent&#39;s current speech engine held fixed, one call at a time in the background, and fills a grid: one row per call, one column per setting, each box showing how many of the caller&#39;s words came out wrong. Above the grid it names the winner on the calls EVERY setting completed (a paired comparison — the same audio under each treatment), needs at least 3 such calls and a 1-point lead, otherwise says &#39;too close to call&#39;. &#39;Apply to agent&#39; writes the winning setting to the agent in one click. Every box has a play button so you can hear exactly what the speech engine heard under that setting, next to the untreated audio (&#39;Raw&#39;). &#39;Voice kept&#39;, &#39;Noise kept&#39;, &#39;Dropouts&#39; and &#39;ms/frame&#39; are diagnostics only — they never decide the ranking. If the server is busy the sweep pauses with a Resume button; re-running a failed call charges it again. ai.coustics minutes are billed by ai.coustics and are not in the estimate.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Scoring Tab
+                        </h6>
+                        
+                        <p class="text-muted">The AI drafts a success checklist for each agent from its own prompt and tools — you review and approve it, then score batches of real calls to get a success rate. Failures land in a triage queue with the likely cause and the evidence shown inline; confirming a cause records it on the call and feeds the Improve tab. Verdicts are honest three-state (pass / fail / unknown) — ambiguous calls abstain instead of poisoning the rate.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Improve Tab
+                        </h6>
+                        
+                        <p class="text-muted">Turn confirmed failures into permanent regression tests: conversation failures become text simulation tests (you review the AI&#39;s draft first), and mishearing failures become audio regression tests (the call&#39;s audio is pinned and re-checked against a fixed reference after any speech-config change). &#39;Expand with AI&#39; writes extra variations of a test for you to review and keep. &#39;Run all ready&#39; runs every audio test one after another with a single upfront cost confirmation.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Costs
+                        </h6>
+                        
+                        <p class="text-muted">Nothing runs or spends money unless you click it, and every run shows an itemized estimate first. What the Lab spends is added to the original call&#39;s cost breakdown as an &#39;Improvement Lab&#39; line — the same way AI Summary costs appear — so it shows up in your normal cost reports. Replay charges are recorded per attempt from the estimate (a run that fails still spent money); scoring, diagnosis, and AI-generation charges are actuals.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Good to Know
+                        </h6>
+                        
+                        <p class="text-muted">Audio replays run one at a time and pause while a real call is active. Backups keep your tests, checklists, and results — but not the pinned audio copies: a restored audio test on a new server will ask you to re-create it from a call, which is only possible if the original recording still exists there. Sub-user access is controlled by the Improvement Lab permission in User Management.</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

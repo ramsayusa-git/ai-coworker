@@ -1,0 +1,384 @@
+/* n8n Failsafe Workflow Wizard (Reports page).
+ *
+ * Mirrors /static/js/n8n-webhook-wizard.js (Tools page): same step mechanics,
+ * same localStorage key for the n8n base URL (so operators don't retype it
+ * across the two wizards), download via a plain same-origin <a href> (the
+ * server's Content-Disposition does the rest — no popup-blocker exposure).
+ *
+ * Server contract: POST /api/reports/n8n-failsafe-wizard
+ *                  GET  /api/reports/{id}/n8n-workflow (the <a href>)
+ *                  POST /api/reports/{id}/execute      (Send test event)
+ */
+(function () {
+    "use strict";
+
+    var state = { template: null, created: null, downloadDone: false };
+
+    function modal() { return document.getElementById("failsafeWizardModal"); }
+    function el(id) { return document.getElementById(id); }
+
+    function csrfToken() {
+        var m = modal();
+        if (m && m.dataset.csrfToken) return m.dataset.csrfToken;
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.content : "";
+    }
+
+    function requireHttps() { return !!(modal() && modal().dataset.requireHttps); }
+
+    // Same key family as the Tools wizard — shared on purpose.
+    function lsKey() {
+        var t = modal() ? modal().dataset.tenant : "";
+        return "n8nWizardBaseUrl" + (t ? ":" + t : "");
+    }
+
+    function showError(msg) {
+        var box = el("fsWizError");
+        box.textContent = msg;
+        box.classList.remove("d-none");
+        box.scrollIntoView({ block: "nearest" });
+    }
+    function clearError() { el("fsWizError").classList.add("d-none"); }
+
+    function isToolCheck() { return state.template === "failsafe_tool_check"; }
+
+    // ------------------------------------------------------------------
+    // Step navigation
+    // ------------------------------------------------------------------
+    var currentStep = 1;
+
+    function showStep(step) {
+        currentStep = step;
+        clearError();
+        modal().querySelectorAll(".wizard-pane").forEach(function (p) {
+            var mine = p.dataset.pane === String(step) || (step === "success" && p.dataset.pane === "success");
+            p.classList.toggle("d-none", !mine);
+        });
+        var stepNum = step === "success" ? 4 : step;
+        modal().querySelectorAll(".wizard-step").forEach(function (s) {
+            var n = parseInt(s.dataset.step, 10);
+            s.classList.toggle("active", n === stepNum);
+            s.classList.toggle("complete", n < stepNum || step === "success");
+        });
+        el("fsWizBackBtn").disabled = step === 1 || step === "success";
+        el("fsWizNextBtn").classList.toggle("d-none", step === 3 || step === "success");
+        el("fsWizCreateBtn").classList.toggle("d-none", step !== 3);
+        el("fsWizDoneBtn").classList.toggle("d-none", step !== "success");
+        el("fsWizCancelBtn").classList.toggle("d-none", step === "success");
+        updateNextEnabled();
+    }
+
+    function updateNextEnabled() {
+        var ok = true;
+        if (currentStep === 1) ok = !!state.template;
+        el("fsWizNextBtn").disabled = !ok;
+    }
+
+    // ------------------------------------------------------------------
+    // Step 2: details
+    // ------------------------------------------------------------------
+    function selectedAgents() {
+        return Array.prototype.slice.call(modal().querySelectorAll(".fs-wiz-agent:checked"));
+    }
+
+    function selectedAgentIds() {
+        return selectedAgents().map(function (c) { return c.value; });
+    }
+
+    function rebuildToolPicker() {
+        // Union of the selected agents' tools; explicit ticks survive the
+        // recompute (an unticked agent must not silently drop a tool the
+        // operator chose that another selected agent still has... and even
+        // one no agent has — better to keep the intent visible).
+        var keep = {};
+        modal().querySelectorAll(".fs-wiz-tool:checked").forEach(function (c) { keep[c.value] = true; });
+        var union = {};
+        selectedAgents().forEach(function (c) {
+            var tools = [];
+            try { tools = JSON.parse(c.dataset.tools || "[]"); } catch (e) { /* ignore */ }
+            tools.forEach(function (t) { union[t] = true; });
+        });
+        Object.keys(keep).forEach(function (t) { union[t] = true; });
+        var names = Object.keys(union).sort();
+        var picker = el("fsWizToolPicker");
+        picker.innerHTML = "";
+        if (!names.length) {
+            var empty = document.createElement("div");
+            empty.className = "text-muted small";
+            empty.textContent = selectedAgents().length
+                ? "No tools found on the selected agents — type the tool name your booking webhook uses below."
+                : "Select an agent above to list its tools.";
+            picker.appendChild(empty);
+            return;
+        }
+        names.forEach(function (t, i) {
+            var wrap = document.createElement("div");
+            wrap.className = "form-check";
+            var input = document.createElement("input");
+            input.type = "checkbox";
+            input.className = "form-check-input fs-wiz-tool";
+            input.id = "fsWizTool-" + i;
+            input.value = t;
+            input.checked = !!keep[t];
+            var label = document.createElement("label");
+            label.className = "form-check-label font-monospace small";
+            label.htmlFor = input.id;
+            label.textContent = t;
+            wrap.appendChild(input);
+            wrap.appendChild(label);
+            picker.appendChild(wrap);
+        });
+    }
+
+    function prepareDetailsPane() {
+        el("fsWizToolsSection").classList.toggle("d-none", !isToolCheck());
+        el("fsWizAiExtractWrap").classList.toggle("d-none", !isToolCheck());
+        try {
+            var saved = localStorage.getItem(lsKey());
+            if (saved && !el("fsWizBaseUrl").value) el("fsWizBaseUrl").value = saved;
+        } catch (e) { /* private mode etc. */ }
+        rebuildToolPicker();
+        checkUrlWarning();
+        updateErrorEmailVisibility();
+    }
+
+    function aiOn() {
+        return !isToolCheck() || el("fsWizAiExtract").checked;
+    }
+
+    function updateErrorEmailVisibility() {
+        // Error email is required whenever the generated workflow has AI
+        // nodes; without AI it's still shown (email failures route there) but
+        // the server treats it as optional.
+        var label = el("fsWizErrorEmailWrap").querySelector("label");
+        label.textContent = aiOn() ? "Error alerts to (required)" : "Error alerts to (optional)";
+    }
+
+    function checkUrlWarning() {
+        var warnBox = el("fsWizUrlWarning");
+        var v = (el("fsWizBaseUrl").value || "").trim();
+        var msg = "";
+        if (v && requireHttps() && v.indexOf("https://") !== 0 && v.indexOf("://") !== -1) {
+            msg = "This deployment requires an https:// n8n address.";
+        } else if (v && (v.indexOf("localhost") !== -1 || v.indexOf("127.0.0.1") !== -1)) {
+            msg = "That looks like a local address — the dashboard server must be able to reach it.";
+        }
+        warnBox.textContent = msg;
+        warnBox.classList.toggle("d-none", !msg);
+    }
+
+    var EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+    function validateDetails() {
+        if (!(el("fsWizName").value || "").trim()) return "Please enter a report name.";
+        var url = (el("fsWizBaseUrl").value || "").trim();
+        if (!url) return "Please enter your n8n address.";
+        if (requireHttps() && url.indexOf("http://") === 0) return "The n8n address must use https:// on this deployment.";
+        if (!selectedAgentIds().length) return "Select at least one voice agent to watch.";
+        if (isToolCheck()) {
+            var anyTool = modal().querySelectorAll(".fs-wiz-tool:checked").length > 0
+                || (el("fsWizExtraTools").value || "").trim().length > 0;
+            if (!anyTool) return "Pick at least one 'handled' tool (or type its name in the box).";
+        }
+        if (!EMAIL_RE.test((el("fsWizFailsafeEmail").value || "").trim())) return "Please enter a valid alert email address.";
+        if (!EMAIL_RE.test((el("fsWizFromEmail").value || "").trim())) return "Please enter a valid from address.";
+        var errEmail = (el("fsWizErrorEmail").value || "").trim();
+        if (aiOn() && !EMAIL_RE.test(errEmail)) return "Please enter a valid error-alert email address.";
+        if (errEmail && !EMAIL_RE.test(errEmail)) return "The error-alert email address doesn't look valid.";
+        return null;
+    }
+
+    // ------------------------------------------------------------------
+    // Step 3: review
+    // ------------------------------------------------------------------
+    function escapeHtml(s) {
+        var d = document.createElement("div");
+        d.textContent = String(s);
+        return d.innerHTML;
+    }
+
+    function buildSummary() {
+        var tools = Array.prototype.slice.call(modal().querySelectorAll(".fs-wiz-tool:checked"))
+            .map(function (c) { return c.value; });
+        var extras = (el("fsWizExtraTools").value || "").trim();
+        var agentNames = selectedAgents().map(function (c) {
+            var label = modal().querySelector('label[for="' + c.id + '"]');
+            return label ? label.textContent : c.value;
+        });
+        var rows = [
+            ["Type", isToolCheck() ? "Failsafe (tool check)" : "Failsafe (AI classify)"],
+            ["Report name", el("fsWizName").value],
+            ["n8n address", el("fsWizBaseUrl").value],
+            ["Agents", agentNames.join(", ")],
+        ];
+        if (isToolCheck()) {
+            rows.push(["Handled tools", tools.join(", ") + (extras ? (tools.length ? ", " : "") + extras : "")]);
+            rows.push(["AI extraction", aiOn() ? "On" : "Off"]);
+        }
+        var kw = (el("fsWizKeywords").value || "").trim();
+        rows.push(["Keywords", kw || "(none — all enquiries alert)"]);
+        rows.push(["Alerts to", el("fsWizFailsafeEmail").value]);
+        rows.push(["Thresholds", el("fsWizMinTurns").value + " turns / " + el("fsWizMinDuration").value + "s"]);
+        rows.push(["Handoffs count as handled", el("fsWizHandoffHandled").checked ? "Yes" : "No"]);
+        el("fsWizSummary").innerHTML = '<table class="table table-sm mb-0"><tbody>' +
+            rows.map(function (r) {
+                return "<tr><th class=\"text-nowrap pe-3\">" + escapeHtml(r[0]) + "</th><td>" + escapeHtml(r[1]) + "</td></tr>";
+            }).join("") + "</tbody></table>";
+
+        var covered = selectedAgents().some(function (c) { return c.dataset.covered === "1"; });
+        var dup = el("fsWizDupWarning");
+        dup.classList.toggle("d-none", !covered);
+        if (covered) {
+            dup.textContent = "Heads up: another failsafe report already watches one of these agents. " +
+                "Two active failsafes send two alert emails per missed call — consider deleting the old report first.";
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Submit / finish
+    // ------------------------------------------------------------------
+    function submit() {
+        var payload = {
+            template: state.template,
+            name: (el("fsWizName").value || "").trim(),
+            n8n_base_url: (el("fsWizBaseUrl").value || "").trim(),
+            agent_ids: selectedAgentIds(),
+            handled_tools: Array.prototype.slice.call(modal().querySelectorAll(".fs-wiz-tool:checked"))
+                .map(function (c) { return c.value; }),
+            extra_tools: el("fsWizExtraTools").value || "",
+            intent_keywords: el("fsWizKeywords").value || "",
+            failsafe_email: (el("fsWizFailsafeEmail").value || "").trim(),
+            from_email: (el("fsWizFromEmail").value || "").trim(),
+            error_email: (el("fsWizErrorEmail").value || "").trim(),
+            min_turns: parseInt(el("fsWizMinTurns").value, 10),
+            min_duration_seconds: parseInt(el("fsWizMinDuration").value, 10),
+            ai_extract: aiOn(),
+            handoff_counts_as_handled: el("fsWizHandoffHandled").checked,
+        };
+        var btn = el("fsWizCreateBtn");
+        btn.disabled = true;
+        fetch("/api/reports/n8n-failsafe-wizard", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken() },
+            body: JSON.stringify(payload),
+        }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) {
+            btn.disabled = false;
+            if (!res.ok || !res.j.success) {
+                showError(res.j && res.j.error ? res.j.error : "Something went wrong — please try again.");
+                return;
+            }
+            state.created = res.j;
+            try { localStorage.setItem(lsKey(), payload.n8n_base_url); } catch (e) { /* ignore */ }
+            el("fsWizDownloadBtn").href = res.j.download_url;
+            el("fsWizProdUrl").value = res.j.production_url;
+            el("fsWizSecret").value = res.j.secret;
+            el("fsWizAiChecklistItem").classList.toggle("d-none", !aiOn());
+            showStep("success");
+        }).catch(function () {
+            btn.disabled = false;
+            showError("Could not reach the dashboard — please try again.");
+        });
+    }
+
+    function runTest() {
+        if (!state.created) return;
+        var out = el("fsWizTestResult");
+        out.textContent = "Sending…";
+        out.className = "small text-muted";
+        fetch("/api/reports/" + encodeURIComponent(state.created.report_id) + "/execute", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "X-CSRF-Token": csrfToken() },
+        }).then(function (r) { return r.json().catch(function () { return {}; }); })
+          .then(function (j) {
+            if (j && j.success) {
+                out.textContent = "Test sent — check n8n → Executions (may take a few seconds).";
+                out.className = "small text-success";
+            } else {
+                out.textContent = (j && (j.error || j.message)) ||
+                    "Test failed — expected until the workflow is imported and activated in n8n.";
+                out.className = "small text-warning";
+            }
+        }).catch(function () {
+            out.textContent = "Could not reach the dashboard.";
+            out.className = "small text-danger";
+        });
+    }
+
+    function copyField(inputId, btnId) {
+        var input = el(inputId);
+        input.select();
+        try { navigator.clipboard.writeText(input.value); } catch (e) { document.execCommand("copy"); }
+        var icon = el(btnId).querySelector("i");
+        if (icon) {
+            icon.className = "bi bi-clipboard-check";
+            setTimeout(function () { icon.className = "bi bi-clipboard"; }, 1200);
+        }
+    }
+
+    function resetWizard() {
+        state.template = null;
+        state.created = null;
+        state.downloadDone = false;
+        modal().querySelectorAll(".wizard-provider-tile").forEach(function (t) { t.classList.remove("selected"); });
+        el("fsWizTestResult").textContent = "";
+        showStep(1);
+    }
+
+    window.openFailsafeWizard = function () {
+        if (!modal()) return;
+        resetWizard();
+        new bootstrap.Modal(modal()).show();
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var m = modal();
+        if (!m) return;
+
+        m.querySelectorAll(".wizard-provider-tile").forEach(function (tile) {
+            tile.addEventListener("click", function () {
+                m.querySelectorAll(".wizard-provider-tile").forEach(function (t) { t.classList.remove("selected"); });
+                tile.classList.add("selected");
+                state.template = tile.dataset.template;
+                updateNextEnabled();
+            });
+        });
+
+        el("fsWizNextBtn").addEventListener("click", function () {
+            if (currentStep === 1) {
+                prepareDetailsPane();
+                showStep(2);
+            } else if (currentStep === 2) {
+                var err = validateDetails();
+                if (err) { showError(err); return; }
+                buildSummary();
+                showStep(3);
+            }
+        });
+        el("fsWizBackBtn").addEventListener("click", function () {
+            if (currentStep === 3) showStep(2);
+            else if (currentStep === 2) showStep(1);
+        });
+        el("fsWizCreateBtn").addEventListener("click", submit);
+
+        m.addEventListener("change", function (e) {
+            if (e.target.classList && e.target.classList.contains("fs-wiz-agent")) rebuildToolPicker();
+            if (e.target.id === "fsWizAiExtract") updateErrorEmailVisibility();
+        });
+        el("fsWizBaseUrl").addEventListener("input", checkUrlWarning);
+        el("fsWizTestBtn").addEventListener("click", runTest);
+        el("fsWizCopyUrl").addEventListener("click", function () { copyField("fsWizProdUrl", "fsWizCopyUrl"); });
+        el("fsWizCopySecret").addEventListener("click", function () { copyField("fsWizSecret", "fsWizCopySecret"); });
+        el("fsWizDownloadBtn").addEventListener("click", function () { state.downloadDone = true; });
+
+        m.addEventListener("hide.bs.modal", function (e) {
+            if (state.created && !state.downloadDone) {
+                if (!confirm("You haven't downloaded the n8n workflow file yet — without it the report will post to a webhook that doesn't exist. Close anyway? (You can re-download from the report's row.)")) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+})();

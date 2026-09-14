@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Agent Tester - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=265509">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=8376.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IkRkVEdIR0xqZzF4cFhUd1Ewa1h3U2RJWk9FX2NZeWdUNkdJMnRuaHVZaUki.aqgYMg.mwPYOiS9rJnCl2y8wCqMkzFs7Ww">
+    
+    
+<style>
+    .agent-tester-container {
+        height: calc(100vh - 180px);
+        min-height: 500px;
+    }
+
+    .agent-tester-container > div {
+        height: 100%;
+    }
+
+    .connection-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-height: 100%;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .chat-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-messages {
+        flex: 1 1 0;
+        overflow-y: scroll;
+        padding: 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-height: 0;
+        max-height: 100%;
+    }
+
+    /* Always show scrollbar */
+    .chat-messages::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+        border-radius: 4px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+    }
+
+    .message {
+        max-width: 75%;
+        padding: 0.6rem 0.9rem;
+        border-radius: 16px;
+        word-wrap: break-word;
+        line-height: 1.4;
+        font-size: 0.95rem;
+    }
+
+    .message.user {
+        align-self: flex-end;
+        background: var(--bs-primary);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .message.agent {
+        align-self: flex-start;
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-bottom-left-radius: 4px;
+    }
+
+    .message.system {
+        align-self: center;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-style: italic;
+        padding: 0.25rem 0;
+    }
+
+    /* Voice transcription messages */
+    .message.transcription {
+        position: relative;
+    }
+
+    .message.transcription::before {
+        content: '\F2CE'; /* bi-mic icon */
+        font-family: 'bootstrap-icons';
+        font-size: 0.7rem;
+        margin-right: 0.4rem;
+        opacity: 0.7;
+    }
+
+    .message.transcription.interim {
+        opacity: 0.7;
+        font-style: italic;
+    }
+
+    .message.transcription.user::before {
+        content: '\F2CE'; /* bi-mic */
+    }
+
+    .message.transcription.agent::before {
+        content: '\F4B7'; /* bi-soundwave */
+    }
+
+    /* Audio visualizer */
+    .audio-visualizer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        height: 40px;
+        padding: 0.5rem 0;
+        margin-top: 0.75rem;
+        background: var(--bg-secondary);
+        border-radius: 6px;
+    }
+
+    .audio-visualizer .bar {
+        width: 4px;
+        min-height: 4px;
+        max-height: 32px;
+        background: var(--bs-success);
+        border-radius: 2px;
+        transition: height 0.05s ease-out;
+    }
+
+    .audio-visualizer.muted .bar {
+        background: var(--bs-secondary);
+        height: 4px !important;
+    }
+
+    .audio-visualizer-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-top: 0.25rem;
+    }
+
+    .chat-input-area {
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .debug-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        height: 100%;
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .debug-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .debug-content {
+        flex: 1 1 0;
+        overflow-y: scroll;
+        padding: 0.5rem;
+        font-family: monospace;
+        font-size: 0.8rem;
+        min-height: 0;
+        max-height: 100%;
+    }
+
+    /* Always show scrollbar */
+    .debug-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .debug-content::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+        border-radius: 4px;
+    }
+
+    .debug-content::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+    .debug-content::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+    }
+
+    .debug-entry {
+        padding: 0.25rem 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .debug-entry.event {
+        color: var(--bs-info);
+    }
+
+    .debug-entry.error {
+        color: var(--bs-danger);
+    }
+
+    .debug-entry.connected {
+        color: var(--bs-success);
+    }
+
+    .debug-entry .timestamp {
+        color: var(--text-secondary);
+        margin-right: 0.5rem;
+    }
+
+    .mode-toggle {
+        display: flex;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        padding: 0.25rem;
+    }
+
+    .mode-toggle .btn {
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+    }
+
+    .mode-toggle .btn.active {
+        background: var(--bs-primary);
+        color: white;
+    }
+
+    .voice-controls {
+        display: none;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .voice-controls.active {
+        display: flex;
+    }
+
+    .voice-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .voice-indicator .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--bs-secondary);
+    }
+
+    .voice-indicator .dot.mic-enabled {
+        background: var(--bs-success);
+    }
+
+    .voice-indicator .dot.speaking {
+        background: var(--bs-success);
+        animation: pulse 1s infinite;
+    }
+
+    .device-selection {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+    }
+
+    .connection-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .connection-status .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--bs-secondary);
+    }
+
+    .connection-status.connected .dot {
+        background: var(--bs-success);
+    }
+
+    .connection-status.connecting .dot {
+        background: var(--bs-warning);
+        animation: blink 1s infinite;
+    }
+
+    .connection-status.reconnecting .dot {
+        background: var(--bs-warning);
+        animation: blink 0.5s infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    /* Connection quality indicator */
+    .connection-quality {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .quality-bars {
+        display: flex;
+        gap: 2px;
+        align-items: flex-end;
+    }
+
+    .quality-bars .bar {
+        width: 4px;
+        background: var(--bs-success);
+        border-radius: 1px;
+        transition: all 0.3s ease;
+    }
+
+    .quality-bars .bar:nth-child(1) { height: 4px; }
+    .quality-bars .bar:nth-child(2) { height: 8px; }
+    .quality-bars .bar:nth-child(3) { height: 12px; }
+    .quality-bars .bar:nth-child(4) { height: 16px; }
+
+    .connection-quality.excellent .bar { background: var(--bs-success); }
+    .connection-quality.good .bar { background: var(--bs-success); }
+    .connection-quality.good .bar:nth-child(4) { opacity: 0.3; }
+
+    .connection-quality.poor .bar { background: var(--bs-warning); }
+    .connection-quality.poor .bar:nth-child(3),
+    .connection-quality.poor .bar:nth-child(4) { opacity: 0.3; }
+
+    .connection-quality.lost .bar { background: var(--bs-danger); }
+    .connection-quality.lost .bar:nth-child(2),
+    .connection-quality.lost .bar:nth-child(3),
+    .connection-quality.lost .bar:nth-child(4) { opacity: 0.3; }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-secondary);
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link active">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Agent Tester</h1>
+                
+<p class="page-subtitle">Test agents via text or voice conversation</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#agent-tester" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="agent-tester.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<div class="container-fluid">
+    <!-- Info Box (dismissible) -->
+    <div class="alert alert-info alert-permanent mb-4 position-relative" id="agentTesterInfoBox" style="border-left: 4px solid var(--bs-info);">
+        <button type="button" class="btn-close position-absolute" style="top: 0.75rem; right: 0.75rem;" aria-label="Dismiss" onclick="dismissInfoBox()"></button>
+        <h5 class="alert-heading mb-2"><i class="bi bi-info-circle"></i> How to Use</h5>
+        <p class="mb-2">
+            This tool lets you <strong>test your voice agents and chatbot agents</strong> directly from the dashboard via text chat or voice call.
+        </p>
+        <hr class="my-2">
+        <ul class="mb-0 small">
+            <li><strong>Text Mode</strong> - Send text messages to the agent and receive text responses (all agents). Tests the LLM, tools and knowledge base only &mdash; the agent never listens or speaks, so speech-to-text, voice, VAD, turn detection and noise cancellation are <strong>not</strong> exercised.</li>
+            <li><strong>Voice Mode</strong> - Have a voice conversation using your microphone (voice agents and full-voice chatbots). This is the only mode that tests your speech-to-text and voice settings.</li>
+            <li><strong>Debug Panel</strong> - View connection events, transcriptions, and agent activity</li>
+        </ul>
+        <p class="mt-2 mb-0 small text-muted">
+            <i class="bi bi-exclamation-triangle"></i> Note: Voice agents must be running (chatbots: enabled) to respond. Test conversations don't appear in your Call or Chat History, but the agent's tools run for real.
+        </p>
+    </div>
+
+    <div class="row agent-tester-container">
+        <!-- Left: Connection Panel -->
+        <div class="col-md-3 mb-3 mb-md-0">
+            <div class="connection-panel h-100">
+                <h5 class="mb-3"><i class="bi bi-plug"></i> Connection</h5>
+
+                <!-- Agent Selector -->
+                <div class="mb-3">
+                    <label for="agentSelect" class="form-label">Select Agent</label>
+                    <select class="form-select" id="agentSelect" disabled>
+                        
+                        <option value="">No agents available</option>
+                        
+                    </select>
+                </div>
+
+                <!-- Stopped-agent notice: appears the moment a not-running
+                     agent is selected, so the tester clearly explains why a
+                     test won't connect (mirrors the backend status gate).
+                     alert-permanent keeps main.js from auto-dismissing it. -->
+                
+                <div class="alert alert-warning alert-permanent d-none py-2 px-3 mb-3" id="agentNotStartedWarning" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong id="agentNotStartedName"></strong>
+                    <span id="agentNotStartedMsg">is stopped. Start it on the
+                    <a href="agents.html" class="alert-link">Voice Agents</a> page before testing.</span>
+                </div>
+
+                <!-- Mode Toggle -->
+                <div class="mb-3">
+                    <label class="form-label">Mode</label>
+                    <div class="mode-toggle w-100">
+                        <button type="button" class="btn btn-sm flex-fill active" id="textModeBtn" onclick="setMode('text')">
+                            <i class="bi bi-chat-text"></i> Text
+                        </button>
+                        <button type="button" class="btn btn-sm flex-fill" id="voiceModeBtn" onclick="setMode('voice')">
+                            <i class="bi bi-mic"></i> Voice
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Connection Button -->
+                <div class="mb-3">
+                    
+                    <button type="button" class="btn btn-primary w-100" id="connectBtn" onclick="toggleConnection()" disabled>
+                        <i class="bi bi-play-circle"></i> Connect
+                    </button>
+                    
+                </div>
+
+                <!-- Connection Status -->
+                <div class="connection-status" id="connectionStatus">
+                    <span class="dot"></span>
+                    <span class="status-text">Disconnected</span>
+                </div>
+
+                <!-- Connection Quality (shown in voice mode when connected) -->
+                <div class="connection-quality" id="connectionQuality" style="display: none;">
+                    <span class="quality-bars">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </span>
+                    <span class="quality-text">Excellent</span>
+                </div>
+
+                <hr class="my-3">
+
+                <!-- Voice Controls (shown in voice mode when connected) -->
+                <div class="voice-controls" id="voiceControls">
+                    <div class="voice-indicator">
+                        <span class="dot" id="micIndicator"></span>
+                        <span>Microphone</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-success" id="muteBtn" onclick="toggleMute()" title="Click to mute">
+                        <i class="bi bi-mic"></i>
+                    </button>
+                </div>
+
+                <!-- Text Chat Settings (shown in text mode) -->
+                <div class="device-selection" id="textChatSettings">
+                    <h6 class="text-muted mb-2"><i class="bi bi-chat-text"></i> Text Chat Settings</h6>
+                    
+                    <div class="mb-2">
+                        <label for="textLlmProvider" class="form-label small">LLM Provider</label>
+                        <select class="form-select form-select-sm" id="textLlmProvider">
+                            
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="textLlmModel" class="form-label small">LLM Model</label>
+                        <select class="form-select form-select-sm" id="textLlmModel">
+                            
+                        </select>
+                        <small class="text-muted d-block mt-1">
+                            LLM used for text chat responses. List mirrors voice agent. Google Cloud / Azure require their respective integrations to be configured in Settings; Azure also requires the selected agent to have an Azure deployment name in its config.
+                        </small>
+                    </div>
+                    <script>
+                        // Catalog data injected from app/services/llm_catalog.py via Jinja.
+                        // Shape: { provider_id: { label: str, models: [{value, label}, ...] }, ... }
+                        const llmCatalogData = {};
+
+                        function populateTextLlmModelDropdown(providerId, preferredModelValue) {
+                            const modelSelect = document.getElementById('textLlmModel');
+                            if (!modelSelect) return;
+                            // Clear previous options without using innerHTML.
+                            while (modelSelect.firstChild) modelSelect.removeChild(modelSelect.firstChild);
+                            const info = llmCatalogData[providerId];
+                            if (!info) return;
+                            info.models.forEach(m => {
+                                const opt = document.createElement('option');
+                                opt.value = m.value;
+                                opt.textContent = m.label;
+                                if (preferredModelValue && m.value === preferredModelValue) opt.selected = true;
+                                modelSelect.appendChild(opt);
+                            });
+                            // Default to first model if no preference matched
+                            if (preferredModelValue && !modelSelect.value) {
+                                modelSelect.selectedIndex = 0;
+                            }
+                        }
+
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const providerSelect = document.getElementById('textLlmProvider');
+                            if (!providerSelect) return;
+                            // Initial population: default OpenAI -> gpt-4o-mini for parity with the prior single-select default.
+                            populateTextLlmModelDropdown(providerSelect.value, 'gpt-4o-mini');
+                            providerSelect.addEventListener('change', e => {
+                                populateTextLlmModelDropdown(e.target.value);
+                            });
+                        });
+                    </script>
+                </div>
+
+                <!-- Chatbot LLM note: shown INSTEAD of the override panel above
+                     when a chatbot is selected in text mode — chatbots always
+                     use their own configured model (+ fallbacks). -->
+                <div class="device-selection" id="chatLlmNote" style="display: none;">
+                    <h6 class="text-muted mb-2"><i class="bi bi-chat-text"></i> Text Chat Settings</h6>
+                    <small class="text-white d-block">
+                        Chatbots use the model configured in their editor:
+                        <span class="font-monospace text-success" id="chatLlmNoteModel"></span>
+                    </small>
+                </div>
+
+                <!-- Voice Settings (shown in voice mode) -->
+                <div class="device-selection" id="deviceSelection" style="display: none;">
+                    <h6 class="text-muted mb-2"><i class="bi bi-sliders"></i> Voice Settings</h6>
+                    <div class="mb-2">
+                        <label class="form-label small">Microphone</label>
+                        <select class="form-select form-select-sm" id="micSelect" onchange="saveMicPreference(this.value)">
+                            <option value="">Default</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Speaker</label>
+                        <select class="form-select form-select-sm" id="speakerSelect" onchange="saveSpeakerPreference(this.value)">
+                            <option value="">Default</option>
+                        </select>
+                    </div>
+
+                    <!-- Audio Visualizer -->
+                    <div class="audio-visualizer" id="audioVisualizer">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                    <div class="audio-visualizer-label" id="visualizerLabel">Microphone level</div>
+                </div>
+
+                <!-- Agent Info -->
+                <div class="mt-3" id="agentInfo" style="display: none;">
+                    <small class="text-muted">Connected to:</small>
+                    <div class="fw-bold" id="connectedAgentName">-</div>
+                    <small class="text-muted">Room:</small>
+                    <div class="font-monospace small" id="roomName">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Chat Interface -->
+        <div class="col-md-6 mb-3 mb-md-0">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div>
+                        <strong id="chatTitle">Agent Chat</strong>
+                        <span class="badge bg-secondary ms-2" id="modeIndicator">Text Mode</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearChat()">
+                        <i class="bi bi-trash"></i> Clear
+                    </button>
+                </div>
+
+                
+                <div class="alert alert-warning border-0 rounded-0 mb-0 py-2 px-3 small d-none"
+                     id="textModeAudioNotice" role="status">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i><span id="textModeAudioNoticeText"></span>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="empty-state" id="emptyState">
+                        <i class="bi bi-chat-dots"></i>
+                        <p>Select an agent and click Connect to start testing</p>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="messageInput"
+                               placeholder="Type a message..." disabled
+                               onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button class="btn btn-primary" type="button" id="sendBtn" onclick="sendMessage()" disabled>
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted mt-1 d-block" id="inputHint">Connect to an agent to start chatting</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Debug Panel -->
+        <div class="col-md-3 mb-3 mb-md-0">
+            <div class="debug-panel h-100">
+                <div class="debug-header">
+                    <strong><i class="bi bi-bug"></i> Debug</strong>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearDebug()">
+                        <i class="bi bi-trash"></i> Clear
+                    </button>
+                </div>
+                <div class="debug-content" id="debugContent">
+                    <div class="debug-entry">
+                        <span class="timestamp">[--:--:--]</span>
+                        Ready to connect...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden audio elements for voice mode -->
+<audio id="remoteAudio" autoplay></audio>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2.18.9/dist/livekit-client.umd.min.js"
+        integrity="sha384-tRRE3Te60fx5A7E2pYOOzTQ8IkCJUvzrnWvg3eA6Ok8EtTK0JUVtlIlt19w/xkoN"
+        crossorigin="anonymous"></script>
+<script>
+// Check if LiveKit client loaded
+const Livekit = window.LivekitClient || window.Livekit || window.livekit;
+if (!Livekit) {
+    console.error('LiveKit client library failed to load');
+}
+
+// Configuration
+const LIVEKIT_URL = "https://lk.aetosiot.com";
+const CSRF_TOKEN = "IkRkVEdIR0xqZzF4cFhUd1Ewa1h3U2RJWk9FX2NZeWdUNkdJMnRuaHVZaUki.aqgYMg.mwPYOiS9rJnCl2y8wCqMkzFs7Ww";
+
+// State
+let currentMode = 'text';
+let isConnected = false;
+let isConnecting = false;
+let room = null;
+let localParticipant = null;
+let isMuted = false;
+let connectedAgentName = 'Agent';  // Human-readable agent name
+
+// Reconnection state
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 16000]; // Exponential backoff
+
+// Connection timeout
+const CONNECTION_TIMEOUT = 15000; // 15 seconds
+
+// ICE configuration (fetched from server)
+let iceConfig = null;
+
+// Transcription state - track segments by ID to update interim transcriptions
+const transcriptionSegments = new Map(); // segmentId -> {element, text, isFinal, isLocal}
+
+// Audio visualizer state
+let audioAnalyser = null;
+let audioContext = null;
+let visualizerAnimationId = null;
+let visualizerStream = null; // Separate stream for visualization
+
+// Check if info box was dismissed
+document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('agentTesterInfoBoxDismissed') === 'true') {
+        const infoBox = document.getElementById('agentTesterInfoBox');
+        if (infoBox) infoBox.style.display = 'none';
+    }
+
+    // Enable connect button when agent is selected
+    document.getElementById('agentSelect').addEventListener('change', function() {
+        document.getElementById('connectBtn').disabled = !this.value;
+        updateAgentNotStartedWarning();
+        updateVoiceModeAvailability();
+        updateTextSettingsVisibility();
+        updateTextModeWarning();
+    });
+
+    // Reflect the initial selection (e.g. a browser-restored value) on load.
+    // updateTextModeWarning() MUST be called here too, not just from setMode() and
+    // the change handler above: setMode() never runs at load time, so a browser-
+    // restored agent selection would otherwise sit in default text mode with no
+    // notice — exactly the "opened it, touched nothing, got confused" case.
+    updateAgentNotStartedWarning();
+    updateVoiceModeAvailability();
+    updateTextSettingsVisibility();
+    updateTextModeWarning();
+
+    // Load device preferences and populate dropdowns
+    loadDevicePreferences();
+    populateDevices();
+});
+
+// Selected-agent helpers. Voice options carry data-agent-type="voice",
+// chatbot options data-agent-type="chat"; a missing attribute (or no
+// selection) defaults to "voice" — backwards safe.
+function selectedAgentOption() {
+    const sel = document.getElementById('agentSelect');
+    if (!sel || !sel.value) return null;
+    return sel.options[sel.selectedIndex] || null;
+}
+
+function selectedAgentType() {
+    const opt = selectedAgentOption();
+    return opt ? (opt.getAttribute('data-agent-type') || 'voice') : 'voice';
+}
+
+// Fixed message constants for the not-started banner — the msg span may only
+// ever receive one of these (no user data; the agent name is textContent-only).
+const AGENT_STOPPED_MSG_VOICE = 'is stopped. Start it on the <a href="agents.html" class="alert-link">Voice Agents</a> page before testing.';
+const AGENT_STOPPED_MSG_CHAT = 'is disabled. Enable it on the <a href="web-chat.html" class="alert-link">Chatbot Agents</a> page before testing.';
+
+// Show a clear, persistent notice when the selected agent isn't running, so
+// testers understand they must start it first (the backend token endpoint
+// rejects not-running agents). Advisory only — it never disables Connect, so a
+// status changed in another tab still lets the backend stay authoritative.
+// The agent name is set via textContent (never innerHTML) so a maliciously
+// named agent cannot inject markup; the message body swaps between the two
+// fixed constants above per agent type (chatbots gate on `enabled`, rendered
+// as data-status running/stopped).
+function updateAgentNotStartedWarning() {
+    const sel = document.getElementById('agentSelect');
+    const warning = document.getElementById('agentNotStartedWarning');
+    if (!sel || !warning) return;
+    const opt = sel.options[sel.selectedIndex];
+    const status = opt ? (opt.getAttribute('data-status') || '') : '';
+    const name = opt ? (opt.getAttribute('data-name') || '') : '';
+    if (sel.value && status !== 'running') {
+        const nameEl = document.getElementById('agentNotStartedName');
+        if (nameEl) nameEl.textContent = name || 'This agent';
+        const msgEl = document.getElementById('agentNotStartedMsg');
+        if (msgEl) msgEl.innerHTML = selectedAgentType() === 'chat' ? AGENT_STOPPED_MSG_CHAT : AGENT_STOPPED_MSG_VOICE;
+        warning.classList.remove('d-none');
+    } else {
+        warning.classList.add('d-none');
+    }
+}
+
+// Voice-mode availability: chatbots can only be voice-tested when their mode
+// is full_voice (avatar chatbots don't let the visitor publish a mic; text
+// chatbots have no audio pipeline). Mirrors the backend gate in the token
+// route — this is UX, the backend stays authoritative.
+function updateVoiceModeAvailability() {
+    const btn = document.getElementById('voiceModeBtn');
+    if (!btn) return;
+    const opt = selectedAgentOption();
+    const isChat = selectedAgentType() === 'chat';
+    const chatMode = opt ? (opt.getAttribute('data-chat-mode') || '') : '';
+    const voiceAllowed = !isChat || chatMode === 'full_voice';
+    btn.disabled = !voiceAllowed;
+    btn.title = voiceAllowed ? '' :
+        (chatMode === 'voice_with_avatar'
+            ? 'Avatar chatbots can only be tested in text mode'
+            : 'This chatbot is text-only');
+    if (!voiceAllowed && currentMode === 'voice') {
+        setMode('text');
+    }
+}
+
+// Fixed notice strings. Static constants only — nothing here interpolates agent
+// or provider data, so the span is set with textContent and there is no injection
+// surface. (If we ever name the operator's actual providers here, keep textContent
+// and strip the catalog's trailing star ratings first.)
+const TEXT_MODE_NOTICE_CAN_SWITCH =
+    'Text mode tests the LLM, tools and knowledge base only — the agent never listens or ' +
+    'speaks. Speech-to-text, voice, VAD, turn detection and noise cancellation are not used. ' +
+    'Switch to Voice mode to test them.';
+const TEXT_MODE_NOTICE_TEXT_ONLY_TEST =
+    'Text mode tests the LLM, tools and knowledge base only — the agent never listens or ' +
+    'speaks, and the avatar is not rendered. This agent can only be tested in text mode, so ' +
+    'its speech settings cannot be checked from here.';
+
+// Show the audio-pipeline notice whenever the tester is in text mode.
+//
+// Applies to EVERY agent and provider by design — the skipped components are a
+// property of text mode itself, not of any particular STT/TTS choice, so this can
+// never go stale when a new provider is added to the catalog.
+//
+// Two agents are treated differently, both deliberately:
+//   * voice_with_avatar chatbots — the Voice button is disabled for them
+//     (updateVoiceModeAvailability), so "switch to Voice mode" would be advice they
+//     cannot follow. They get the second message instead.
+//   * text-only chatbots — they have no audio pipeline configured at all, so nothing
+//     is being skipped and the notice would be noise. Hidden.
+function updateTextModeWarning() {
+    const box = document.getElementById('textModeAudioNotice');
+    const msg = document.getElementById('textModeAudioNoticeText');
+    if (!box || !msg) return;
+
+    const opt = selectedAgentOption();
+    const isChat = selectedAgentType() === 'chat';
+    const chatMode = opt ? (opt.getAttribute('data-chat-mode') || '') : '';
+
+    // Nothing selected yet, or not in text mode → nothing to say.
+    // A text-only chatbot has no speech config, so the notice would be meaningless.
+    const textOnlyChatbot = isChat && chatMode !== 'full_voice' && chatMode !== 'voice_with_avatar';
+    if (!opt || currentMode !== 'text' || textOnlyChatbot) {
+        box.classList.add('d-none');
+        return;
+    }
+
+    const canSwitchToVoice = !isChat || chatMode === 'full_voice';
+    msg.textContent = canSwitchToVoice
+        ? TEXT_MODE_NOTICE_CAN_SWITCH
+        : TEXT_MODE_NOTICE_TEXT_ONLY_TEST;
+    box.classList.remove('d-none');
+}
+
+// Text-settings visibility: the LLM-override panel applies only to VOICE
+// agents in text mode — chatbots always use their own configured model, so
+// they get the informational note instead. Centralized because BOTH setMode()
+// and the agent-dropdown change handler must apply the same rule (setMode
+// previously re-showed the panel unconditionally in text mode).
+function updateTextSettingsVisibility() {
+    const panel = document.getElementById('textChatSettings');
+    if (!panel) return;
+    const isChat = selectedAgentType() === 'chat';
+    panel.style.display = (currentMode === 'text' && !isChat) ? 'block' : 'none';
+    const note = document.getElementById('chatLlmNote');
+    if (note) {
+        const opt = selectedAgentOption();
+        if (currentMode === 'text' && isChat && opt) {
+            const modelEl = document.getElementById('chatLlmNoteModel');
+            if (modelEl) modelEl.textContent = opt.getAttribute('data-llm') || '';
+            note.style.display = 'block';
+        } else {
+            note.style.display = 'none';
+        }
+    }
+}
+
+function dismissInfoBox() {
+    const infoBox = document.getElementById('agentTesterInfoBox');
+    if (infoBox) {
+        infoBox.style.display = 'none';
+        localStorage.setItem('agentTesterInfoBoxDismissed', 'true');
+    }
+}
+
+function setMode(mode) {
+    currentMode = mode;
+
+    // Update UI
+    document.getElementById('textModeBtn').classList.toggle('active', mode === 'text');
+    document.getElementById('voiceModeBtn').classList.toggle('active', mode === 'voice');
+    document.getElementById('modeIndicator').textContent = mode === 'text' ? 'Text Mode' : 'Voice Mode';
+    updateTextModeWarning();
+
+    // Update input hint
+    const inputHint = document.getElementById('inputHint');
+    if (isConnected) {
+        if (mode === 'voice') {
+            inputHint.textContent = 'Voice mode active - speak into your microphone';
+        } else {
+            inputHint.textContent = 'Type a message and press Enter or click Send';
+        }
+    }
+
+    // Show/hide voice controls (device selection is always visible)
+    document.getElementById('voiceControls').classList.toggle('active', mode === 'voice' && isConnected);
+
+    // Toggle text chat settings vs voice settings visibility (the text panel
+    // is agent-type-aware — chatbots show the configured-model note instead)
+    updateTextSettingsVisibility();
+    document.getElementById('deviceSelection').style.display = mode === 'voice' ? 'block' : 'none';
+
+    logDebug('Mode changed to: ' + mode, 'event');
+}
+
+async function toggleConnection() {
+    if (isConnected || isConnecting) {
+        await disconnect();
+    } else {
+        await connect();
+    }
+}
+
+async function connect() {
+    const agentSelect = document.getElementById('agentSelect');
+    const agentId = agentSelect.value;
+
+    if (!agentId) {
+        alert('Please select an agent');
+        return;
+    }
+
+    isConnecting = true;
+    reconnectAttempts = 0;
+    updateConnectionStatus('connecting');
+    document.getElementById('connectBtn').disabled = true;
+    document.getElementById('connectBtn').innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Connecting...';
+
+    logDebug('Requesting token...', 'event');
+
+    try {
+        // Fetch ICE servers for NAT traversal (voice mode benefits most)
+        if (!iceConfig) {
+            logDebug('Fetching ICE servers...', 'event');
+            try {
+                const iceResponse = await fetch('/api/agent-tester/ice-servers');
+                if (iceResponse.ok) {
+                    iceConfig = await iceResponse.json();
+                    logDebug('ICE servers loaded (TURN: ' + (iceConfig.has_turn ? 'yes' : 'no') + ')', 'event');
+                }
+            } catch (iceError) {
+                logDebug('Could not fetch ICE servers, using defaults', 'error');
+            }
+        }
+
+        // Get selected LLM for text chat mode (combine the two cascading dropdowns).
+        const textLlmProvider = document.getElementById('textLlmProvider');
+        const textLlmModel = document.getElementById('textLlmModel');
+        const selectedLlm = (textLlmProvider && textLlmModel && textLlmModel.value)
+            ? `${textLlmProvider.value}:${textLlmModel.value}`
+            : 'openai:gpt-4o-mini';
+
+        // Chatbots have no LLM override — they always use their configured
+        // model, so text_llm is null for them (the worker derives it anyway).
+        const agentType = selectedAgentType();
+
+        // Get token from server
+        const response = await fetch('/api/agent-tester/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                agent_id: agentId,
+                agent_type: agentType,
+                mode: currentMode,
+                text_llm: (currentMode === 'text' && agentType !== 'chat') ? selectedLlm : null,
+                csrf_token: CSRF_TOKEN
+            })
+        });
+
+        // Parse defensively. FastAPI returns JSON for its own errors, so the
+        // usual failures (agent not running, no permission, low balance) arrive
+        // as {"error": "..."} and are surfaced verbatim below. But nginx sits in
+        // front of the dashboard, and a 502/504 from it is an HTML page — the
+        // previous `await response.json()` ran BEFORE the response.ok check, so
+        // that threw a SyntaxError and the operator was shown a JSON parse
+        // error instead of "the backend is down". Parse failure must degrade to
+        // the HTTP status, which is the honest signal in that case.
+        let data = null;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            data = null;
+        }
+
+        if (!response.ok) {
+            let message = data && (data.error || data.detail);
+            if (!message) {
+                const status = `${response.status}${response.statusText ? ' ' + response.statusText : ''}`;
+                message = (response.status === 502 || response.status === 503 || response.status === 504)
+                    ? `The dashboard server is not responding (${status}). It may be restarting — wait a moment and try again.`
+                    : `Failed to get token (server returned ${status}).`;
+            }
+            throw new Error(message);
+        }
+
+        if (!data) {
+            throw new Error('The server returned an unreadable response. Check the dashboard logs.');
+        }
+
+        logDebug('Token received, connecting to room: ' + data.room_name, 'event');
+
+        // Store the human-readable agent name for use in messages
+        connectedAgentName = data.agent_name;
+
+        // Build room options with ICE configuration for better NAT traversal
+        const roomOptions = {
+            adaptiveStream: true,
+            dynacast: true,
+        };
+
+        // Add RTC configuration if ICE servers are available
+        if (iceConfig && iceConfig.ice_servers) {
+            roomOptions.rtcConfig = {
+                iceServers: iceConfig.ice_servers,
+                iceTransportPolicy: iceConfig.ice_transport_policy || 'all',
+                iceCandidatePoolSize: 10,
+            };
+            logDebug('Using custom ICE config with ' + iceConfig.ice_servers.length + ' servers', 'event');
+        }
+
+        // Create LiveKit room
+        room = new Livekit.Room(roomOptions);
+
+        // Set up event handlers
+        setupRoomEventHandlers(room);
+
+        // Connect to room with timeout
+        let connectionTimeout;
+        const timeoutPromise = new Promise((_, reject) => {
+            connectionTimeout = setTimeout(() => {
+                reject(new Error('Connection timeout - check your network or firewall'));
+            }, CONNECTION_TIMEOUT);
+        });
+
+        try {
+            await Promise.race([
+                room.connect(LIVEKIT_URL, data.token),
+                timeoutPromise
+            ]);
+            clearTimeout(connectionTimeout);
+        } catch (connectError) {
+            clearTimeout(connectionTimeout);
+            throw connectError;
+        }
+
+        isConnected = true;
+        isConnecting = false;
+        localParticipant = room.localParticipant;
+
+        // Update UI
+        document.getElementById('connectedAgentName').textContent = data.agent_name;
+        document.getElementById('roomName').textContent = data.room_name;
+        document.getElementById('agentInfo').style.display = 'block';
+        document.getElementById('chatTitle').textContent = 'Chat with ' + data.agent_name;
+
+        updateConnectionStatus('connected');
+        document.getElementById('connectBtn').innerHTML = '<i class="bi bi-stop-circle"></i> Disconnect';
+        document.getElementById('connectBtn').disabled = false;
+        document.getElementById('connectBtn').classList.replace('btn-primary', 'btn-danger');
+
+        // Enable input
+        document.getElementById('messageInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        document.getElementById('emptyState').style.display = 'none';
+
+        // Show connected message FIRST (before welcome message arrives)
+        addSystemMessage('Connected to ' + data.agent_name);
+
+        // Update input hint
+        if (currentMode === 'voice') {
+            document.getElementById('inputHint').textContent = 'Voice mode active - speak into your microphone';
+            document.getElementById('voiceControls').classList.add('active');
+            // Enable microphone for voice mode
+            await enableMicrophone();
+            // Apply saved device preferences
+            await applySavedDevicePreferences();
+        } else {
+            document.getElementById('inputHint').textContent = 'Type a message and press Enter or click Send';
+        }
+
+        logDebug('Connected successfully!', 'connected');
+
+    } catch (error) {
+        console.error('Connection error:', error);
+        const friendlyMessage = getConnectionErrorMessage(error);
+        logDebug('Connection failed: ' + error.message, 'error');
+        // The empty-state placeholder is full-height and would hide the message
+        // appended below it; clear it so the failure is actually visible.
+        const failEmptyState = document.getElementById('emptyState');
+        if (failEmptyState) failEmptyState.style.display = 'none';
+        addSystemMessage('Connection failed: ' + friendlyMessage);
+
+        isConnecting = false;
+        updateConnectionStatus('disconnected');
+        document.getElementById('connectBtn').innerHTML = '<i class="bi bi-play-circle"></i> Connect';
+        document.getElementById('connectBtn').disabled = false;
+    }
+}
+
+async function disconnect(isClientInitiated = true) {
+    if (room) {
+        logDebug('Disconnecting...', 'event');
+        await room.disconnect();
+        room = null;
+    }
+
+    isConnected = false;
+    isConnecting = false;
+    localParticipant = null;
+    isMuted = false;
+    reconnectAttempts = 0;
+
+    // Clear transcription tracking
+    transcriptionSegments.clear();
+
+    // Stop audio visualizer
+    stopAudioVisualizer();
+
+    // Update UI
+    updateConnectionStatus('disconnected');
+    document.getElementById('connectBtn').innerHTML = '<i class="bi bi-play-circle"></i> Connect';
+    document.getElementById('connectBtn').classList.replace('btn-danger', 'btn-primary');
+    document.getElementById('connectBtn').disabled = false;
+
+    // Hide connection quality indicator
+    document.getElementById('connectionQuality').style.display = 'none';
+
+    // Reset mute button to default state
+    const muteBtn = document.getElementById('muteBtn');
+    muteBtn.innerHTML = '<i class="bi bi-mic"></i>';
+    muteBtn.className = 'btn btn-sm btn-outline-success';
+    muteBtn.title = 'Click to mute';
+    document.getElementById('agentInfo').style.display = 'none';
+    document.getElementById('chatTitle').textContent = 'Agent Chat';
+    document.getElementById('voiceControls').classList.remove('active');
+
+    // Disable input
+    document.getElementById('messageInput').disabled = true;
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('inputHint').textContent = 'Connect to an agent to start chatting';
+
+    if (isClientInitiated) {
+        addSystemMessage('Disconnected');
+    }
+    logDebug('Disconnected', 'event');
+}
+
+// Attempt to reconnect after connection loss
+async function attemptReconnect() {
+    const agentSelect = document.getElementById('agentSelect');
+    const agentId = agentSelect.value;
+
+    if (!agentId) {
+        logDebug('Cannot reconnect - no agent selected', 'error');
+        disconnect(false);
+        return;
+    }
+
+    logDebug('Attempting reconnection...', 'event');
+    updateConnectionStatus('reconnecting');
+
+    try {
+        // Re-establish connection
+        await connect();
+        logDebug('Reconnection successful!', 'connected');
+    } catch (error) {
+        logDebug('Reconnection failed: ' + error.message, 'error');
+
+        // Check if we should retry
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            const delay = RECONNECT_DELAYS[reconnectAttempts] || 16000;
+            reconnectAttempts++;
+            logDebug(`Will retry in ${delay/1000}s (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`, 'event');
+            setTimeout(() => attemptReconnect(), delay);
+        } else {
+            logDebug('Max reconnection attempts reached', 'error');
+            addSystemMessage('Connection lost. Please reconnect manually.');
+            disconnect(false);
+        }
+    }
+}
+
+function setupRoomEventHandlers(room) {
+    room.on(Livekit.RoomEvent.Connected, () => {
+        logDebug('Room connected', 'connected');
+    });
+
+    // Handle reconnection events
+    room.on(Livekit.RoomEvent.Reconnecting, () => {
+        logDebug('Connection lost, attempting to reconnect...', 'event');
+        updateConnectionStatus('reconnecting');
+        addSystemMessage('Connection interrupted, reconnecting...');
+    });
+
+    room.on(Livekit.RoomEvent.Reconnected, () => {
+        logDebug('Reconnected successfully!', 'connected');
+        updateConnectionStatus('connected');
+        reconnectAttempts = 0;
+        addSystemMessage('Reconnected');
+
+        // Re-enable microphone if in voice mode and wasn't muted
+        if (currentMode === 'voice' && !isMuted && localParticipant) {
+            enableMicrophone();
+        }
+    });
+
+    room.on(Livekit.RoomEvent.Disconnected, (reason) => {
+        logDebug('Room disconnected: ' + (reason || 'unknown'), 'event');
+
+        // Check if this was a client-initiated disconnect
+        const isClientInitiated = reason === Livekit.DisconnectReason.CLIENT_INITIATED;
+
+        if (isClientInitiated) {
+            disconnect(true);
+            return;
+        }
+
+        // For unexpected disconnects, try to reconnect
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            const delay = RECONNECT_DELAYS[reconnectAttempts] || 16000;
+            reconnectAttempts++;
+            logDebug(`Reconnect attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} in ${delay/1000}s...`, 'event');
+            updateConnectionStatus('reconnecting');
+
+            setTimeout(() => attemptReconnect(), delay);
+        } else {
+            logDebug('Max reconnection attempts reached', 'error');
+            addSystemMessage('Connection lost. Please reconnect manually.');
+            disconnect(false);
+        }
+    });
+
+    // Signal connection established (before media)
+    room.on(Livekit.RoomEvent.SignalConnected, () => {
+        logDebug('Signal connected, establishing media...', 'event');
+    });
+
+    // Media device errors
+    room.on(Livekit.RoomEvent.MediaDevicesError, (error) => {
+        logDebug('Media device error: ' + error.message, 'error');
+        addSystemMessage('Microphone access denied or unavailable');
+    });
+
+    room.on(Livekit.RoomEvent.ParticipantConnected, (participant) => {
+        logDebug('Participant joined: ' + participant.identity, 'event');
+        // Don't show system message - already shown in connect() before this event
+    });
+
+    room.on(Livekit.RoomEvent.ParticipantDisconnected, (participant) => {
+        logDebug('Participant left: ' + participant.identity, 'event');
+        addSystemMessage(connectedAgentName + ' disconnected');
+    });
+
+    // Track when our local microphone is published/unpublished
+    room.on(Livekit.RoomEvent.LocalTrackPublished, (publication) => {
+        logDebug('Local track published: ' + publication.kind, 'connected');
+        if (publication.kind === 'audio') {
+            document.getElementById('micIndicator').classList.add('mic-enabled');
+            logDebug('Microphone track published successfully', 'connected');
+            // Start audio visualizer
+            setTimeout(() => startAudioVisualizer(), 100);
+        }
+    });
+
+    room.on(Livekit.RoomEvent.LocalTrackUnpublished, (publication) => {
+        logDebug('Local track unpublished: ' + publication.kind, 'event');
+        if (publication.kind === 'audio') {
+            document.getElementById('micIndicator').classList.remove('mic-enabled', 'speaking');
+            logDebug('Microphone track unpublished', 'event');
+            // Stop audio visualizer
+            stopAudioVisualizer();
+        }
+    });
+
+    room.on(Livekit.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        logDebug('Track subscribed: ' + track.kind + ' from ' + participant.identity, 'event');
+
+        if (track.kind === 'audio') {
+            // Attach audio to audio element
+            const audioElement = document.getElementById('remoteAudio');
+            track.attach(audioElement);
+            logDebug('Audio track attached', 'connected');
+        }
+    });
+
+    room.on(Livekit.RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+        logDebug('Track unsubscribed: ' + track.kind, 'event');
+        track.detach();
+    });
+
+    room.on(Livekit.RoomEvent.DataReceived, (payload, participant, kind) => {
+        try {
+            const decoder = new TextDecoder();
+            const message = decoder.decode(payload);
+            logDebug('Data received: ' + message.substring(0, 100), 'event');
+
+            // Try to parse as JSON (agent messages are usually JSON)
+            try {
+                const data = JSON.parse(message);
+                if (data.text || data.message || data.content) {
+                    // Use the stored human-readable agent name
+                    addAgentMessage(data.text || data.message || data.content, connectedAgentName);
+                } else if (data.type === 'transcription') {
+                    logDebug('Transcription: ' + data.text, 'event');
+                } else {
+                    // Log other data types to debug
+                    logDebug('Data: ' + JSON.stringify(data).substring(0, 200), 'event');
+                }
+            } catch {
+                // Plain text message - use stored agent name
+                addAgentMessage(message, connectedAgentName);
+            }
+        } catch (error) {
+            logDebug('Error processing data: ' + error.message, 'error');
+        }
+    });
+
+    room.on(Livekit.RoomEvent.ActiveSpeakersChanged, (speakers) => {
+        // Update speaking indicators
+        const isSpeaking = speakers.some(s => s === localParticipant);
+        document.getElementById('micIndicator').classList.toggle('speaking', isSpeaking);
+    });
+
+    room.on(Livekit.RoomEvent.ConnectionQualityChanged, (quality, participant) => {
+        if (participant === localParticipant) {
+            logDebug('Connection quality: ' + quality, 'event');
+            updateConnectionQualityIndicator(quality);
+
+            if (quality === Livekit.ConnectionQuality.Poor) {
+                logDebug('Poor connection quality detected', 'error');
+            } else if (quality === Livekit.ConnectionQuality.Lost) {
+                logDebug('Connection quality lost', 'error');
+            }
+        }
+    });
+
+    // Handle transcriptions from voice mode
+    // This receives both user speech transcriptions (from agent's STT) and agent speech transcriptions
+    room.on(Livekit.RoomEvent.TranscriptionReceived, (segments, participant, publication) => {
+        if (!segments || segments.length === 0) return;
+
+        for (const segment of segments) {
+            const isLocal = participant?.identity === localParticipant?.identity;
+            const segmentKey = `${participant?.identity || 'unknown'}-${segment.id}`;
+
+            // Check if we already have this segment (interim update)
+            if (transcriptionSegments.has(segmentKey)) {
+                const existing = transcriptionSegments.get(segmentKey);
+                // Update existing message element
+                existing.element.textContent = segment.text;
+                existing.text = segment.text;
+
+                // If now final, remove interim styling
+                if (segment.final && !existing.isFinal) {
+                    existing.element.classList.remove('interim');
+                    existing.isFinal = true;
+                }
+            } else {
+                // Create new transcription message
+                const element = addTranscriptionMessage(segment.text, isLocal, !segment.final);
+                transcriptionSegments.set(segmentKey, {
+                    element: element,
+                    text: segment.text,
+                    isFinal: segment.final,
+                    isLocal: isLocal
+                });
+            }
+        }
+    });
+}
+
+async function enableMicrophone(retryCount = 0) {
+    const MAX_MIC_RETRIES = 3;
+
+    if (!room || !localParticipant) return;
+
+    try {
+        logDebug('Enabling microphone...', 'event');
+        await localParticipant.setMicrophoneEnabled(true);
+        logDebug('Microphone enabled', 'connected');
+        // The LocalTrackPublished event will update the indicator when the track is actually published
+    } catch (error) {
+        logDebug('Failed to enable microphone: ' + error.message, 'error');
+        console.error('Microphone error:', error);
+
+        // Retry logic for transient failures
+        if (retryCount < MAX_MIC_RETRIES) {
+            logDebug(`Retrying microphone (${retryCount + 1}/${MAX_MIC_RETRIES})...`, 'event');
+            await new Promise(r => setTimeout(r, 1000));
+            return enableMicrophone(retryCount + 1);
+        }
+
+        const friendlyMessage = getConnectionErrorMessage(error);
+        addSystemMessage('Failed to enable microphone: ' + friendlyMessage);
+    }
+}
+
+async function toggleMute() {
+    if (!localParticipant) return;
+
+    isMuted = !isMuted;
+    await localParticipant.setMicrophoneEnabled(!isMuted);
+
+    const muteBtn = document.getElementById('muteBtn');
+    const visualizer = document.getElementById('audioVisualizer');
+
+    if (isMuted) {
+        // Mic is now muted - show muted icon in red
+        muteBtn.innerHTML = '<i class="bi bi-mic-mute"></i>';
+        muteBtn.classList.replace('btn-outline-success', 'btn-outline-danger');
+        muteBtn.title = 'Click to unmute';
+        visualizer.classList.add('muted');
+        logDebug('Microphone muted', 'event');
+    } else {
+        // Mic is now on - show mic icon in green
+        muteBtn.innerHTML = '<i class="bi bi-mic"></i>';
+        muteBtn.classList.replace('btn-outline-danger', 'btn-outline-success');
+        muteBtn.title = 'Click to mute';
+        visualizer.classList.remove('muted');
+        logDebug('Microphone unmuted', 'event');
+    }
+}
+
+// Start audio visualizer using a separate microphone stream
+async function startAudioVisualizer() {
+    if (audioAnalyser) return; // Already running
+
+    try {
+        // Get the selected microphone device ID
+        const micSelect = document.getElementById('micSelect');
+        const deviceId = micSelect?.value || undefined;
+
+        // Request a separate audio stream for visualization
+        const constraints = {
+            audio: deviceId ? { deviceId: { exact: deviceId } } : true
+        };
+
+        visualizerStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        // Create AudioContext and analyser using Web Audio API
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Resume AudioContext if suspended
+        if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+        }
+
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 256;
+        audioAnalyser.smoothingTimeConstant = 0.5;
+        audioAnalyser.minDecibels = -90;
+        audioAnalyser.maxDecibels = -10;
+
+        // Connect the stream to the analyser
+        const source = audioContext.createMediaStreamSource(visualizerStream);
+        source.connect(audioAnalyser);
+
+        const bars = document.querySelectorAll('#audioVisualizer .bar');
+        const numBars = bars.length;
+
+        // Animation loop
+        function updateVisualizer() {
+            if (!audioAnalyser) {
+                return;
+            }
+
+            if (isMuted) {
+                // Set all bars to minimum height when muted
+                bars.forEach(bar => bar.style.height = '4px');
+                visualizerAnimationId = requestAnimationFrame(updateVisualizer);
+                return;
+            }
+
+            // Get frequency data
+            const dataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+            audioAnalyser.getByteFrequencyData(dataArray);
+
+            // Use lower frequency bins (more relevant for voice)
+            const usableBins = Math.min(dataArray.length, 64);
+            const binSize = Math.max(1, Math.floor(usableBins / numBars));
+
+            for (let i = 0; i < numBars; i++) {
+                // Average the frequency bins for this bar
+                let sum = 0;
+                for (let j = 0; j < binSize; j++) {
+                    const idx = i * binSize + j;
+                    if (idx < usableBins) {
+                        sum += dataArray[idx];
+                    }
+                }
+                const avg = sum / binSize;
+
+                // Scale to bar height (4px min, 32px max)
+                const height = Math.max(4, (avg / 255) * 32);
+                bars[i].style.height = height + 'px';
+            }
+
+            visualizerAnimationId = requestAnimationFrame(updateVisualizer);
+        }
+
+        updateVisualizer();
+        logDebug('Audio visualizer started', 'event');
+    } catch (error) {
+        logDebug('Failed to start audio visualizer: ' + error.message, 'error');
+        console.error('Visualizer error:', error);
+    }
+}
+
+// Stop audio visualizer and cleanup resources
+function stopAudioVisualizer() {
+    if (visualizerAnimationId) {
+        cancelAnimationFrame(visualizerAnimationId);
+        visualizerAnimationId = null;
+    }
+
+    // Stop the visualization stream tracks
+    if (visualizerStream) {
+        visualizerStream.getTracks().forEach(track => track.stop());
+        visualizerStream = null;
+    }
+
+    if (audioContext) {
+        audioContext.close().catch(() => {});
+        audioContext = null;
+    }
+    audioAnalyser = null;
+
+    // Reset bars to minimum height
+    const bars = document.querySelectorAll('#audioVisualizer .bar');
+    bars.forEach(bar => bar.style.height = '4px');
+}
+
+// Saved device preferences
+let savedMicDeviceId = '';
+let savedSpeakerDeviceId = '';
+
+// Load device preferences from server
+async function loadDevicePreferences() {
+    try {
+        const response = await fetch('/api/agent-tester/device-prefs');
+        if (response.ok) {
+            const data = await response.json();
+            savedMicDeviceId = data.mic_device_id || '';
+            savedSpeakerDeviceId = data.speaker_device_id || '';
+            logDebug('Loaded device preferences', 'event');
+        }
+    } catch (error) {
+        logDebug('Failed to load device preferences: ' + error.message, 'error');
+    }
+}
+
+// Save mic preference to server and apply if connected
+async function saveMicPreference(deviceId) {
+    savedMicDeviceId = deviceId;
+    try {
+        await fetch('/api/agent-tester/device-prefs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mic_device_id: deviceId, csrf_token: CSRF_TOKEN })
+        });
+        logDebug('Saved microphone preference', 'event');
+
+        // Apply immediately if connected
+        if (room && deviceId) {
+            await room.switchActiveDevice('audioinput', deviceId);
+            logDebug('Switched microphone', 'connected');
+        }
+
+        // Restart visualizer with new mic
+        stopAudioVisualizer();
+        startAudioVisualizer();
+    } catch (error) {
+        logDebug('Failed to save mic preference: ' + error.message, 'error');
+    }
+}
+
+// Save speaker preference to server and apply if connected
+async function saveSpeakerPreference(deviceId) {
+    savedSpeakerDeviceId = deviceId;
+    try {
+        await fetch('/api/agent-tester/device-prefs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ speaker_device_id: deviceId, csrf_token: CSRF_TOKEN })
+        });
+        logDebug('Saved speaker preference', 'event');
+
+        // Apply immediately if connected
+        if (room && deviceId) {
+            await room.switchActiveDevice('audiooutput', deviceId);
+            logDebug('Switched speaker', 'connected');
+        }
+    } catch (error) {
+        logDebug('Failed to save speaker preference: ' + error.message, 'error');
+    }
+}
+
+// Check if a device ID exists on the current machine
+async function deviceExists(kind, deviceId) {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        return devices.some(d => d.kind === kind && d.deviceId === deviceId);
+    } catch (e) {
+        return false;
+    }
+}
+
+// Apply saved device preferences when connecting
+async function applySavedDevicePreferences() {
+    try {
+        if (savedMicDeviceId && room) {
+            if (await deviceExists('audioinput', savedMicDeviceId)) {
+                await room.switchActiveDevice('audioinput', savedMicDeviceId);
+                logDebug('Applied saved microphone: ' + savedMicDeviceId.substring(0, 8) + '...', 'connected');
+            } else {
+                logDebug('Saved microphone not found on this device, using default', 'event');
+                savedMicDeviceId = '';
+            }
+        }
+        if (savedSpeakerDeviceId && room) {
+            if (await deviceExists('audiooutput', savedSpeakerDeviceId)) {
+                await room.switchActiveDevice('audiooutput', savedSpeakerDeviceId);
+                logDebug('Applied saved speaker: ' + savedSpeakerDeviceId.substring(0, 8) + '...', 'connected');
+            } else {
+                logDebug('Saved speaker not found on this device, using default', 'event');
+                savedSpeakerDeviceId = '';
+            }
+        }
+    } catch (error) {
+        logDebug('Failed to apply device preferences: ' + error.message, 'error');
+    }
+}
+
+// Populate device dropdowns
+async function populateDevices() {
+    try {
+        logDebug('Enumerating devices...', 'event');
+
+        // Try using navigator.mediaDevices directly as fallback
+        let mics = [];
+        let speakers = [];
+
+        if (Livekit.Room && typeof Livekit.Room.getLocalDevices === 'function') {
+            // Pass true to request permissions - needed to get device labels
+            mics = await Livekit.Room.getLocalDevices('audioinput', true);
+            speakers = await Livekit.Room.getLocalDevices('audiooutput', true);
+        } else {
+            // Fallback to native API
+            logDebug('Using native mediaDevices API', 'event');
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            mics = devices.filter(d => d.kind === 'audioinput');
+            speakers = devices.filter(d => d.kind === 'audiooutput');
+        }
+
+        const micSelect = document.getElementById('micSelect');
+        const speakerSelect = document.getElementById('speakerSelect');
+
+        // Clear existing options (keep default)
+        micSelect.innerHTML = '<option value="">Default</option>';
+        speakerSelect.innerHTML = '<option value="">Default</option>';
+
+        // Add microphones
+        mics.forEach(device => {
+            // Skip default device (already added)
+            if (device.deviceId === 'default') return;
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.textContent = device.label || 'Microphone ' + (micSelect.options.length);
+            micSelect.appendChild(option);
+        });
+
+        // Add speakers (if supported)
+        speakers.forEach(device => {
+            // Skip default device (already added)
+            if (device.deviceId === 'default') return;
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.textContent = device.label || 'Speaker ' + (speakerSelect.options.length);
+            speakerSelect.appendChild(option);
+        });
+
+        // Restore saved selections (only if the device exists on this machine)
+        if (savedMicDeviceId) {
+            micSelect.value = savedMicDeviceId;
+            if (micSelect.value !== savedMicDeviceId) {
+                // Device not found in dropdown - doesn't exist on this machine
+                logDebug('Saved microphone not available on this device', 'event');
+                savedMicDeviceId = '';
+                micSelect.value = '';
+            }
+        }
+        if (savedSpeakerDeviceId) {
+            speakerSelect.value = savedSpeakerDeviceId;
+            if (speakerSelect.value !== savedSpeakerDeviceId) {
+                logDebug('Saved speaker not available on this device', 'event');
+                savedSpeakerDeviceId = '';
+                speakerSelect.value = '';
+            }
+        }
+
+        logDebug('Found ' + mics.length + ' microphones, ' + speakers.length + ' speakers', 'event');
+
+        // Start visualizer so user can test their mic before connecting
+        startAudioVisualizer();
+    } catch (error) {
+        logDebug('Failed to enumerate devices: ' + error.message, 'error');
+        console.error('Device enumeration error:', error);
+    }
+}
+
+async function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+
+    if (!message || !isConnected) return;
+
+    // Add to chat
+    addUserMessage(message);
+    input.value = '';
+
+    // Send via data channel
+    try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(JSON.stringify({
+            type: 'chat',
+            text: message
+        }));
+
+        await localParticipant.publishData(data, Livekit.DataPacket_Kind.RELIABLE);
+        logDebug('Message sent: ' + message.substring(0, 50), 'event');
+    } catch (error) {
+        logDebug('Failed to send message: ' + error.message, 'error');
+        addSystemMessage('Failed to send message: ' + error.message);
+    }
+}
+
+function addUserMessage(text) {
+    const messagesDiv = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message user';
+    messageDiv.textContent = text;
+    messagesDiv.appendChild(messageDiv);
+    setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 10);
+}
+
+function addAgentMessage(text, sender = 'Agent') {
+    const messagesDiv = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message agent';
+    messageDiv.textContent = text;
+    messagesDiv.appendChild(messageDiv);
+    setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 10);
+}
+
+function addSystemMessage(text) {
+    const messagesDiv = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message system';
+    messageDiv.textContent = text;
+    messagesDiv.appendChild(messageDiv);
+    setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 10);
+}
+
+// Add a transcription message (from voice mode)
+// Returns the element so it can be updated for interim transcriptions
+function addTranscriptionMessage(text, isLocal, isInterim = false) {
+    const messagesDiv = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+
+    // Build class list
+    let className = 'message transcription';
+    className += isLocal ? ' user' : ' agent';
+    if (isInterim) className += ' interim';
+
+    messageDiv.className = className;
+    messageDiv.textContent = text;
+    messagesDiv.appendChild(messageDiv);
+    setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 10);
+
+    return messageDiv;
+}
+
+function clearChat() {
+    document.getElementById('chatMessages').innerHTML = '';
+    // Clear transcription tracking when chat is cleared
+    transcriptionSegments.clear();
+
+    if (!isConnected) {
+        document.getElementById('chatMessages').innerHTML = `
+            <div class="empty-state" id="emptyState">
+                <i class="bi bi-chat-dots"></i>
+                <p>Select an agent and click Connect to start testing</p>
+            </div>
+        `;
+    }
+}
+
+function updateConnectionStatus(status) {
+    const statusDiv = document.getElementById('connectionStatus');
+    const statusText = statusDiv.querySelector('.status-text');
+    const qualityDiv = document.getElementById('connectionQuality');
+
+    statusDiv.className = 'connection-status ' + status;
+
+    switch (status) {
+        case 'connected':
+            statusText.textContent = 'Connected';
+            // Show quality indicator in voice mode
+            qualityDiv.style.display = currentMode === 'voice' ? 'flex' : 'none';
+            break;
+        case 'connecting':
+            statusText.textContent = 'Connecting...';
+            qualityDiv.style.display = 'none';
+            break;
+        case 'reconnecting':
+            statusText.textContent = 'Reconnecting...';
+            // Keep quality indicator visible during reconnection
+            break;
+        default:
+            statusText.textContent = 'Disconnected';
+            qualityDiv.style.display = 'none';
+    }
+}
+
+// Update connection quality indicator UI
+function updateConnectionQualityIndicator(quality) {
+    const qualityDiv = document.getElementById('connectionQuality');
+    const qualityText = qualityDiv.querySelector('.quality-text');
+
+    // Only show in voice mode when connected
+    if (currentMode !== 'voice' || !isConnected) {
+        qualityDiv.style.display = 'none';
+        return;
+    }
+
+    qualityDiv.style.display = 'flex';
+
+    // Map LiveKit quality to our CSS classes
+    switch (quality) {
+        case Livekit.ConnectionQuality.Excellent:
+            qualityDiv.className = 'connection-quality excellent';
+            qualityText.textContent = 'Excellent';
+            break;
+        case Livekit.ConnectionQuality.Good:
+            qualityDiv.className = 'connection-quality good';
+            qualityText.textContent = 'Good';
+            break;
+        case Livekit.ConnectionQuality.Poor:
+            qualityDiv.className = 'connection-quality poor';
+            qualityText.textContent = 'Poor';
+            break;
+        case Livekit.ConnectionQuality.Lost:
+            qualityDiv.className = 'connection-quality lost';
+            qualityText.textContent = 'Lost';
+            break;
+        default:
+            qualityDiv.className = 'connection-quality';
+            qualityText.textContent = 'Unknown';
+    }
+}
+
+// Get user-friendly error message based on error type
+function getConnectionErrorMessage(error) {
+    const msg = (error.message || '').toLowerCase();
+
+    if (msg.includes('permission') || msg.includes('denied') || msg.includes('notallowed')) {
+        return 'Microphone permission denied. Please allow microphone access and try again.';
+    }
+    if (msg.includes('timeout')) {
+        return 'Connection timed out. This may be a firewall or network issue. Try using a different network.';
+    }
+    if (msg.includes('ice') || msg.includes('candidate') || msg.includes('dtls')) {
+        return 'Unable to establish media connection. Your network may be blocking WebRTC. Try disabling VPN or firewall.';
+    }
+    if (msg.includes('not found') || msg.includes('notfound') || msg.includes('device')) {
+        return 'No microphone found. Please connect a microphone and refresh the page.';
+    }
+    if (msg.includes('notreadable') || msg.includes('not readable')) {
+        return 'Microphone is in use by another application. Please close other apps using the microphone.';
+    }
+    if (msg.includes('overconstrained')) {
+        return 'Selected microphone is not available. Please select a different device.';
+    }
+    if (msg.includes('network') || msg.includes('failed to fetch')) {
+        return 'Network error. Please check your internet connection.';
+    }
+
+    return error.message || 'An unexpected error occurred.';
+}
+
+function logDebug(message, type = '') {
+    const debugContent = document.getElementById('debugContent');
+    const timestamp = formatDashboardEpoch(Date.now() / 1000, {seconds: true}).slice(11);  // HH:MM:SS in dashboard tz
+
+    const entry = document.createElement('div');
+    entry.className = 'debug-entry ' + type;
+    entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${escapeHtml(message)}`;
+
+    debugContent.appendChild(entry);
+    setTimeout(() => { debugContent.scrollTop = debugContent.scrollHeight; }, 10);
+
+    // Keep only last 100 entries
+    while (debugContent.children.length > 100) {
+        debugContent.removeChild(debugContent.firstChild);
+    }
+}
+
+function clearDebug() {
+    document.getElementById('debugContent').innerHTML = `
+        <div class="debug-entry">
+            <span class="timestamp">[--:--:--]</span>
+            Debug log cleared
+        </div>
+    `;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (room) {
+        room.disconnect();
+    }
+});
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IkRkVEdIR0xqZzF4cFhUd1Ewa1h3U2RJWk9FX2NZeWdUNkdJMnRuaHVZaUki.aqgYMg.mwPYOiS9rJnCl2y8wCqMkzFs7Ww">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Agent Tester
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Test your voice agents AND chatbot agents via text chat or voice conversation directly from the dashboard. Useful for debugging agent behavior, testing prompts and tools, and verifying agent responses.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Getting Started
+                        </h6>
+                        
+                        <p class="text-muted">1. Select an agent from the dropdown — voice agents and chatbot agents appear in separate groups. 2. Choose Text or Voice mode. 3. Click Connect to create a test session. 4. Start chatting or speaking to test the agent.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Text Mode
+                        </h6>
+                        
+                        <p class="text-muted">Send text messages to the agent and receive text responses. For VOICE agents you can pick which LLM provider/model processes your messages via the Text Chat Settings panel. CHATBOT agents always use the model configured in their own editor (including fallbacks) — the tester shows which model that is instead of an override. Messages are sent via LiveKit data channels with full tool support.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Voice Mode
+                        </h6>
+                        
+                        <p class="text-muted">Have a voice conversation with the agent using your microphone. Requires microphone permission in your browser. The agent will respond with synthesized speech. Available for voice agents and full-voice chatbots; text-only and avatar chatbots can only be tested in Text mode.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Testing Chatbot Agents
+                        </h6>
+                        
+                        <p class="text-muted">Chatbot test sessions run the same pipeline as the website widget — same prompt, tools, knowledge base, memory, and welcome message — but in a throwaway test room: nothing is saved to Chat History (the editor&#39;s &#39;Preview Widget&#39; button, by contrast, opens the real widget and DOES record history). The chatbot&#39;s webhook and other tools run for real during a test, exactly as they would for a website visitor. A chatbot must be Enabled to respond; disabled chatbots show a warning when selected.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Connection Panel
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Select Agent</strong></td>
+                                        <td>Choose which agent to test. Voice agents must be running; chatbot agents must be enabled</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Mode Toggle</strong></td>
+                                        <td>Switch between Text and Voice modes (Voice is greyed out for text-only/avatar chatbots)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Connect/Disconnect</strong></td>
+                                        <td>Start or end the test session</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Connection Status</strong></td>
+                                        <td>Shows current connection state</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Debug Panel
+                        </h6>
+                        
+                        <p class="text-muted">The Debug panel on the right shows real-time events: connection status, participant joins/leaves, track subscriptions, data messages, and transcriptions. Useful for troubleshooting agent issues.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Requirements
+                        </h6>
+                        
+                        <p class="text-muted">Voice agents must be in &#39;Running&#39; status on the Agents page; chatbot agents must be Enabled on the Chatbot Agents page. The agent&#39;s code must handle the room connection and respond to participants. If no response is received, check the agent logs.</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

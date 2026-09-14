@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chatbot Agents - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=611761">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=2300.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link ">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link active">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Chatbot Agents</h1>
+                
+<p class="page-subtitle">Configure AI Chat Agents for Website Deployment</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#chatbot-agents" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="web-chat.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-chat-dots"></i> Total Chat Agents
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-check-circle"></i> Enabled
+        </div>
+        <div class="stat-value success">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-x-circle"></i> Disabled
+        </div>
+        <div class="stat-value">
+            0
+        </div>
+    </div>
+    
+</div>
+
+<!-- Info Alert -->
+<div class="alert alert-info alert-permanent" role="alert">
+    <i class="bi bi-info-circle"></i>
+    <strong>Chatbot Agents:</strong> Create chat agents that can be embedded on external websites via a JavaScript snippet.
+    Visitors interact with your AI agent through a chat widget powered by LiveKit.
+</div>
+
+<!-- Flash Messages -->
+
+
+<!-- Agents List -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">
+            <i class="bi bi-chat-dots"></i> Chat Agents
+        </h5>
+        <div class="d-flex gap-2">
+            
+            
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#importChatAgentModal" title="Import">
+                <i class="bi bi-upload"></i> Import
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#chatTemplateSelectorModal">
+                <i class="bi bi-layout-text-sidebar-reverse"></i> Templates
+            </button>
+            
+            
+            
+            
+            <a href="web-chat/create.html" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Create Chat Agent
+                <span class="badge bg-light text-dark ms-1">0/2</span>
+                
+            </a>
+            
+            
+        </div>
+    </div>
+    <div class="card-body">
+        
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-chat-dots"></i>
+            </div>
+            <div class="empty-state-title">No chat agents configured</div>
+            <div class="empty-state-description">
+                
+                Create a chatbot agent to deploy an AI chat widget on your website.
+                
+            </div>
+            
+            
+            <a href="web-chat/create.html" class="btn btn-primary mt-3">
+                <i class="bi bi-plus-circle"></i> Create Your First Chat Agent
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteAgentModal" tabindex="-1" aria-labelledby="deleteAgentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAgentModalLabel">Confirm Delete Chat Agent</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="deleteAgentForm">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <p>Are you sure you want to delete chat agent <strong id="delete_agent_name"></strong>?</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> This action cannot be undone. Any websites using this agent's embed code will stop working.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Chat Agent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Import Chat Agent Modal -->
+<div class="modal fade" id="importChatAgentModal" tabindex="-1" aria-labelledby="importChatAgentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importChatAgentModalLabel">Import Chat Agents</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="https://vaai.aetosiot.com/web-chat/import" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <p>Upload a previously exported chat agent JSON file to import agents.</p>
+                    <div class="mb-3">
+                        <label for="import_file" class="form-label">Select JSON File</label>
+                        <input type="file" class="form-control" id="import_file" name="import_file" accept=".json" required>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Imported agents will be created with new IDs. If a name already exists, a number suffix will be added.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Chatbot Template Selector Modal (cards shared with the voice agents surface) -->
+<div class="modal fade" id="chatTemplateSelectorModal" tabindex="-1" aria-labelledby="chatTemplateSelectorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatTemplateSelectorModalLabel">
+                    <i class="bi bi-layout-text-sidebar-reverse"></i> Chatbot Templates
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                
+
+
+
+<p class="text-muted mb-2">Choose a pre-configured template to get started quickly. You'll be taken to the editor to review and customise the agent before activating it.</p>
+
+<style>
+/* Template cards only: the default --border-color (#2a2a2a) is near-invisible
+   on the dark card background — lift it a touch so the card edges read. */
+.template-card-grid { --tmpl-border: #4a4a4a; }
+.template-card-grid .card.h-100 { border-color: var(--tmpl-border); }
+</style>
+<div class="row g-3 template-card-grid">
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(16,185,129,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-heart-pulse fs-5" style="color: #10b981;"></i>
+                        <strong>Healthcare Clinic Assistant</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Website assistant for a medical clinic — answers questions about hours, services, and appointment preparation, and explains how to reschedule. Never gives medical advice.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-primary">GPT-4o Mini</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs an OpenAI API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="healthcare">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(245,158,11,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-bag-check fs-5" style="color: #f59e0b;"></i>
+                        <strong>E-Commerce Support Chatbot</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Website support chatbot for an online store — answers order, returns, shipping, and product questions from store policy.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-warning text-dark">Gemini 3.5 Flash</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs a Google AI API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="ecommerce">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(34,197,94,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-house-door fs-5" style="color: #22c55e;"></i>
+                        <strong>Real Estate Website Assistant</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Website assistant for a real estate agency — answers service questions and gathers buyer/seller details so an agent can follow up.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-danger">Claude Haiku 4.5</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs an Anthropic API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="realestate">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(139,92,246,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-stars fs-5" style="color: #8b5cf6;"></i>
+                        <strong>Hotel Concierge Chatbot</strong>
+                    </div>
+                    
+                    <span class="badge bg-warning text-dark">Realtime</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Website concierge for a hotel — answers questions about rooms, dining, the spa, and local attractions, and takes requests to pass to the concierge desk.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-primary">GPT-4o Mini</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs an OpenAI API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="hotel">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(239,68,68,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-cup-hot fs-5" style="color: #ef4444;"></i>
+                        <strong>Restaurant Reservations Chatbot</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Website assistant for a restaurant — answers menu and hours questions and collects reservation requests for the team to confirm.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-warning text-dark">Gemini 3.5 Flash</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs a Google AI API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="restaurant">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(59,130,246,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-headset fs-5" style="color: #3b82f6;"></i>
+                        <strong>IT Helpdesk Chatbot</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">IT support widget — guides visitors through common fixes and collects ticket details for a technician to follow up.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-primary">GPT-4o Mini</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs an OpenAI API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="it_helpdesk">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(249,115,22,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-tools fs-5" style="color: #f97316;"></i>
+                        <strong>Trades Booking Chatbot</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Website assistant for a trades business — answers service and pricing questions and collects job request details for the office to schedule.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-danger">Claude Haiku 4.5</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs an Anthropic API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="trades_booking">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(99,102,241,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-clipboard-check fs-5" style="color: #6366f1;"></i>
+                        <strong>Feedback Survey Chatbot</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Outbound</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Post-service feedback widget — asks four short feedback questions and captures each answer as a structured extraction field automatically.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-warning text-dark">Gemini 3.5 Flash Lite</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs a Google AI API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="survey">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: rgba(20,184,166,0.15); border-bottom: 1px solid var(--tmpl-border);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-clipboard2-pulse fs-5" style="color: #14b8a6;"></i>
+                        <strong>Clinic Front Desk Assistant</strong>
+                    </div>
+                    
+                    <span class="badge bg-secondary">Standard</span>
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Website front desk for a medical practice — answers practice questions, collects booking requests and messages for the team to action, and directs emergencies to 000.</p>
+                <div class="d-flex flex-wrap gap-1">
+                    
+                    <span class="badge bg-danger">Claude Haiku 4.5</span>
+                    
+                </div>
+                
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-key"></i> Needs an Anthropic API key (Settings → Integrations)</p>
+                
+            </div>
+            <div class="card-footer" style="background: transparent; border-top: 1px solid var(--tmpl-border);">
+                
+                <form method="post" action="https://vaai.aetosiot.com/web-chat/create-from-template" data-template-create>
+                    <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                    <input type="hidden" name="template_id" value="clinic_frontdesk">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-right-circle"></i> Use This Template
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<p class="small text-white mt-3 mb-0"><i class="bi bi-info-circle"></i> Chatbot templates are created <strong>enabled</strong> — they'll answer as soon as the widget is embedded, so make sure the listed API key is configured first.</p>
+
+<script>
+(function () {
+    if (window._templateCreateGuard) return;
+    window._templateCreateGuard = true;
+    // Disable the submit button on first click so a double-click can't
+    // create two agents (creation takes a moment before the redirect).
+    document.addEventListener('submit', function (e) {
+        var form = e.target && e.target.closest ? e.target.closest('form[data-template-create]') : null;
+        if (!form) return;
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn && !btn.disabled) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating…';
+        }
+    }, true);
+})();
+</script>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="copyAgentModal" tabindex="-1" aria-labelledby="copyAgentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="copyAgentModalLabel"><i class="bi bi-arrow-left-right me-2"></i><span id="copyAgentTitle">Copy agent</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3" id="copyAgentIntro"></p>
+        <div class="row g-3 mb-3">
+          <div class="col-md-7">
+            <label class="form-label" for="copyAgentName">Name of the copy</label>
+            <input type="text" class="form-control" id="copyAgentName" maxlength="120" autocomplete="off">
+            <div class="form-text">If the name is already used on the other channel, a number is added.</div>
+          </div>
+          <div class="col-md-5" id="copyAgentModeWrap">
+            <label class="form-label" for="copyAgentMode">Chat mode for the chatbot</label>
+            <select class="form-select" id="copyAgentMode">
+              <option value="full_voice">Full voice (talk and type)</option>
+              <option value="voice_with_avatar">Voice with avatar (type, hear replies)</option>
+              <option value="text">Text only</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="copyAgentPreviewLoading" class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Working out what carries over…</div>
+        <div id="copyAgentPreviewError" class="alert alert-danger alert-permanent d-none" role="alert"></div>
+
+        <div id="copyAgentPreview" class="d-none">
+          <div id="copyAgentWarnings" class="alert alert-warning alert-permanent d-none" role="alert">
+            <div class="fw-semibold mb-1"><i class="bi bi-exclamation-triangle me-1"></i>Please check before you copy</div>
+            <ul class="mb-0 small" id="copyAgentWarningsList"></ul>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="fw-semibold text-success mb-1"><i class="bi bi-check-circle me-1"></i>Copied</div>
+              <ul class="small ps-3 mb-0" id="copyAgentCopied"></ul>
+            </div>
+            <div class="col-md-4">
+              <div class="fw-semibold text-primary mb-1"><i class="bi bi-sliders me-1"></i>Adapted</div>
+              <ul class="small ps-3 mb-0" id="copyAgentAdapted"></ul>
+            </div>
+            <div class="col-md-4">
+              <div class="fw-semibold text-secondary mb-1"><i class="bi bi-dash-circle me-1"></i>Not carried over</div>
+              <ul class="small ps-3 mb-0" id="copyAgentDropped"></ul>
+            </div>
+          </div>
+          <div class="form-check mt-3 d-none" id="copyAgentAckWrap">
+            <input class="form-check-input" type="checkbox" id="copyAgentAck">
+            <label class="form-check-label small" for="copyAgentAck">I will pick a speech recogniser and a voice on the copy before enabling it.</label>
+          </div>
+          <p class="text-muted small mt-3 mb-0">This is a one-time snapshot. Changing one agent later does not change the other. The copy is created switched off so you can review it first.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="copyAgentSubmit" disabled><i class="bi bi-arrow-left-right me-1"></i>Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const S = { direction: null, agentId: null, agentName: null, previewTimer: null, previewSeq: 0, realtime: false };
+  const $ = (id) => document.getElementById(id);
+
+  function csrf() {
+    const m = document.querySelector('meta[name="csrf-token"]');
+    return m ? m.getAttribute('content') : '';
+  }
+  function endpoint() {
+    return S.direction === 'voice_to_chat'
+      ? `/agents/${encodeURIComponent(S.agentId)}/copy-to-chatbot`
+      : `/web-chat/${encodeURIComponent(S.agentId)}/copy-to-voice`;
+  }
+  function payload(dryRun) {
+    const body = { name: $('copyAgentName').value.trim(), dry_run: !!dryRun };
+    if (S.direction === 'voice_to_chat') body.chat_mode = $('copyAgentMode').value;
+    return body;
+  }
+  function post(body) {
+    return fetch(endpoint(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+      body: JSON.stringify(body),
+    }).then(r => {
+      if (r.status === 401) { window.location.href = '/login'; return null; }
+      return r.json().catch(() => ({ success: false, error: `HTTP ${r.status}` }));
+    });
+  }
+  function fill(listId, items) {
+    const ul = $(listId);
+    ul.innerHTML = '';
+    if (!items || !items.length) {
+      const li = document.createElement('li'); li.className = 'text-muted'; li.textContent = 'Nothing'; ul.appendChild(li); return;
+    }
+    items.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+  }
+  function updateSubmit() {
+    const ackNeeded = !$('copyAgentAckWrap').classList.contains('d-none');
+    const ok = !$('copyAgentPreview').classList.contains('d-none') && (!ackNeeded || $('copyAgentAck').checked);
+    $('copyAgentSubmit').disabled = !ok;
+  }
+  function preview() {
+    const seq = ++S.previewSeq;
+    $('copyAgentPreviewLoading').classList.remove('d-none');
+    $('copyAgentPreview').classList.add('d-none');
+    $('copyAgentPreviewError').classList.add('d-none');
+    $('copyAgentSubmit').disabled = true;
+    post(payload(true)).then(data => {
+      if (!data || seq !== S.previewSeq) return;
+      $('copyAgentPreviewLoading').classList.add('d-none');
+      if (!data.success) {
+        $('copyAgentPreviewError').textContent = data.error || 'Preview failed';
+        $('copyAgentPreviewError').classList.remove('d-none');
+        return;
+      }
+      const rep = data.report || {};
+      fill('copyAgentCopied', rep.copied);
+      fill('copyAgentAdapted', rep.adapted);
+      fill('copyAgentDropped', rep.dropped);
+      const warns = rep.warnings || [];
+      $('copyAgentWarnings').classList.toggle('d-none', !warns.length);
+      fill('copyAgentWarningsList', warns);
+      // Voice setup acknowledgement: a realtime source (voice->chat) or a chatbot
+      // without a recogniser/voice (chat->voice) lands without usable speech.
+      S.realtime = !!rep.needs_voice_setup;
+      $('copyAgentAckWrap').classList.toggle('d-none', !S.realtime);
+      $('copyAgentAck').checked = false;
+      $('copyAgentPreview').classList.remove('d-none');
+      updateSubmit();
+    }).catch(err => {
+      if (seq !== S.previewSeq) return;
+      $('copyAgentPreviewLoading').classList.add('d-none');
+      $('copyAgentPreviewError').textContent = 'Preview failed: ' + err;
+      $('copyAgentPreviewError').classList.remove('d-none');
+    });
+  }
+  function schedulePreview() {
+    clearTimeout(S.previewTimer);
+    $('copyAgentSubmit').disabled = true;  // the shown preview no longer matches the typed name
+    S.previewTimer = setTimeout(preview, 350);
+  }
+
+  window.openCopyAgentModal = function (direction, agentId, agentName) {
+    S.direction = direction; S.agentId = agentId; S.agentName = agentName || 'Agent';
+    const toChat = direction === 'voice_to_chat';
+    $('copyAgentTitle').textContent = toChat ? 'Copy to Chatbot Agent' : 'Copy to Voice Agent';
+    $('copyAgentIntro').textContent = toChat
+      ? `Make a website chatbot from "${S.agentName}". The prompt, knowledge, tools, memory settings, language model and speech settings carry over; phone-only settings do not.`
+      : `Make a phone agent from "${S.agentName}". The prompt, knowledge, tools, memory settings, language model and speech settings carry over; website-only settings do not.`;
+    $('copyAgentName').value = `${S.agentName} (${toChat ? 'Chatbot' : 'Voice'} copy)`;
+    $('copyAgentModeWrap').classList.toggle('d-none', !toChat);
+    $('copyAgentMode').value = 'full_voice';
+    $('copyAgentAckWrap').classList.add('d-none');
+    $('copyAgentAck').checked = false;
+    $('copyAgentPreview').classList.add('d-none');
+    $('copyAgentPreviewError').classList.add('d-none');
+    bootstrap.Modal.getOrCreateInstance($('copyAgentModal')).show();
+    preview();
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    $('copyAgentName').addEventListener('input', schedulePreview);
+    $('copyAgentMode').addEventListener('change', preview);
+    $('copyAgentAck').addEventListener('change', updateSubmit);
+    $('copyAgentSubmit').addEventListener('click', function () {
+      const btn = $('copyAgentSubmit');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Copying…';
+      post(payload(false)).then(data => {
+        btn.innerHTML = '<i class="bi bi-arrow-left-right me-1"></i>Copy';
+        if (!data) return;
+        if (!data.success) {
+          $('copyAgentPreviewError').textContent = data.error || 'Copy failed';
+          $('copyAgentPreviewError').classList.remove('d-none');
+          btn.disabled = false;
+          return;
+        }
+        const kind = S.direction === 'voice_to_chat' ? 'Chatbot' : 'Voice agent';
+        // Warnings raised DURING the write (e.g. assignment or versioning hiccups)
+        // only exist in this response — show them before moving on.
+        const lateWarns = ((data.report || {}).warnings || []);
+        const shown = Array.from($('copyAgentWarningsList').querySelectorAll('li')).map(li => li.textContent);
+        const fresh = lateWarns.filter(w => !shown.includes(w));
+        const extra = fresh.length ? `\n\nPlease note:\n- ${fresh.join('\n- ')}` : '';
+        const go = confirm(`${kind} "${data.name}" created switched off.${extra}\n\nOpen it now to review?`);
+        if (go && data.edit_url) { window.location.href = data.edit_url; return; }
+        location.reload();
+      }).catch(err => {
+        btn.innerHTML = '<i class="bi bi-arrow-left-right me-1"></i>Copy';
+        btn.disabled = false;
+        $('copyAgentPreviewError').textContent = 'Copy failed: ' + err;
+        $('copyAgentPreviewError').classList.remove('d-none');
+      });
+    });
+  });
+})();
+</script>
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<script>
+let currentChatLogsAgentId = null;
+
+function viewChatAgentLogs(agentId) {
+    currentChatLogsAgentId = agentId;
+    refreshChatLogs();
+    const modal = new bootstrap.Modal(document.getElementById('chatLogsViewerModal'));
+    modal.show();
+}
+
+function refreshChatLogs() {
+    if (!currentChatLogsAgentId) return;
+    const logsContent = document.getElementById('chat-agent-logs-content');
+    const lines = document.getElementById('chatLogLinesSelect').value;
+    logsContent.textContent = 'Loading logs...';
+    fetch(`/web-chat/${currentChatLogsAgentId}/logs?lines=${lines}`, {
+        headers: { 'Accept': 'application/json' },
+    })
+    .then(response => {
+        if (response.status === 401) {
+            alert('Session expired. Redirecting to login...');
+            window.location.href = '/login';
+            return;
+        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        if (!data) return;
+        logsContent.textContent = data.logs || data.error || 'No logs available';
+    })
+    .catch(() => { logsContent.textContent = 'Failed to load logs'; });
+}
+
+function copyChatAgentLogs() {
+    const logsContent = document.getElementById('chat-agent-logs-content');
+    const logText = logsContent.textContent;
+    if (!logText || logText === 'Loading logs...') { alert('No logs to copy.'); return; }
+    navigator.clipboard.writeText(logText).then(() => {
+        const btn = document.getElementById('copyChatLogsBtn');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+    }).catch(() => alert('Failed to copy logs'));
+}
+
+function confirmDeleteAgent(agentId, agentName) {
+    document.getElementById('delete_agent_name').textContent = agentName;
+    document.getElementById('deleteAgentForm').action = '/web-chat/delete/' + agentId;
+    const modal = new bootstrap.Modal(document.getElementById('deleteAgentModal'));
+    modal.show();
+}
+
+function duplicateChatAgent(agentId) {
+    if (!confirm('Duplicate this chat agent?')) return;
+
+    fetch('/web-chat/' + agentId + '/duplicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then(response => {
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data) return;
+        if (data.success) {
+            alert('Chat agent duplicated: ' + data.agent_name);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to duplicate chat agent');
+    });
+}
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IlVZZlhMTnhHTnVudUhQbzlSWnR2aUw0VmowcVBIbTRGalk0YjNVZjREdGsi.aqgYLw.OHwY9FCNrRYhFBBKuzchzR-xMps">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Chatbot Agents
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Create and manage AI-powered chat agents that can be embedded on any website. Each chat agent has its own personality, LLM configuration, and widget appearance.</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Agent List
+                        </h6>
+                        
+                        <p class="text-muted">Your own software can also drive a chatbot without the widget through the REST API (Settings → Integrations → REST API → Chatbot API card) — see the User Guide, Chatbot Agents → REST API. View all configured chat agents with status (enabled/disabled). Click an agent to edit, or use the Create Agent button. Agents can be toggled on/off, duplicated, exported individually, or deleted. The arrows button (Copy to Voice Agent) makes a phone agent from a chatbot: a preview shows what carries over (prompt, knowledge, tools, memory, language model, speech settings) and what does not (widget look, avatar, SMS, allowed websites, session limits, recording), then the voice agent is created stopped for you to review. It is a one-time copy, not a link. Duplicate now also copies the chatbot&#39;s tools and knowledge-base links. Use the Export button to download all agents as JSON, or Import to restore from a previously exported file.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Templates
+                        </h6>
+                        
+                        <p class="text-muted">The Templates button opens eight ready-made text chatbots — the same scenarios as the voice agent templates (healthcare clinic, e-commerce support, real estate, hotel concierge, restaurant reservations, IT helpdesk, trades bookings, feedback survey), each adapted for website chat with a complete prompt, reference information, and widget styling. Template chatbots are created ENABLED and answer as soon as the widget is embedded, so the API key shown on the card must be configured first. Templates are text-only; voice can be enabled later in the editor. The Feedback Survey template enables automatic summaries for itself so its answers are captured as extraction fields.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Basic Settings
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Name</strong></td>
+                                        <td>Display name for the agent (shown in dashboard)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Description</strong></td>
+                                        <td>Internal notes about this agent (not shown to visitors)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Enabled</strong></td>
+                                        <td>Toggle to enable/disable the agent. Disabled agents reject new connections.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> LLM &amp; Prompt
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Provider</strong></td>
+                                        <td>AI provider: OpenAI, Anthropic, Google, AWS Bedrock, or xAI</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Model</strong></td>
+                                        <td>Specific model to use for chat responses</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Temperature</strong></td>
+                                        <td>Creativity level 0-2. Lower for consistent, higher for creative responses.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>System Prompt</strong></td>
+                                        <td>Instructions that define the agent&#39;s personality and behavior</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Reference Information</strong></td>
+                                        <td>Always included in every reply. Best for short, must-know facts (return policy, hours, contact email). For larger document sets, use RAG Knowledge Base Collections below — the LLM searches those on demand instead of stuffing them into every prompt.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>RAG Knowledge Base Collections</strong></td>
+                                        <td>Attach one or more Knowledge Base collections (created at Knowledge Base in the main menu). When collections are assigned, the search_knowledge_base tool is auto-enabled and the LLM decides when to search the docs (e.g. it fires on &#39;what&#39;s our return policy?&#39; but not on &#39;hi there&#39;). Works across all channels — widget text, widget voice, and SMS. Falls back gracefully if Qdrant is down (the agent answers without doc lookup, no crash).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Tool Instructions</strong></td>
+                                        <td>Instructions for when and how to use assigned tools</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Voice tab
+                        </h6>
+                        
+                        <p class="text-muted">Chat Mode (Text / Voice with avatar / Full voice) plus four sub-tabs laid out like the voice-agent editor: Speech Recognition (recogniser, model, language, turn detector, stall recovery, advanced), Voice (provider, model, voice, output volume, markdown filter, advanced), Conversation Dynamics and Recording. The sub-tab you had open is remembered; a save blocked by an invalid value on another sub-tab switches to it. Owns the Chat Mode choice (Text / Voice with avatar / Full voice) and every setting that only matters with sound. Every field shows the value the chatbot already runs with, so opening the tab and saving changes nothing until you edit a field.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Chat Mode</strong></td>
+                                        <td>Text (type only), Voice with avatar (agent speaks, visitor types, no mic prompt), Full voice (two-way voice; the browser asks for the microphone). Voice-only widget display modes and avatars need the matching mode.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Speech Recognition</strong></td>
+                                        <td>Provider, model and language, plus responsiveness, custom vocabulary, smart formatting, filler removal and language auto-detect. Chatbots offer the same recognisers as voice agents (incl. xAI Grok, Telnyx, SLNG.ai, Speechmatics and Azure OpenAI), each greyed until its key is set. Some providers (AssemblyAI, Sarvam, Speechmatics) add their own panel that appears only while selected. Speechmatics decides end-of-turn itself: a long mid-sentence pause can end the turn early — raise its end-of-utterance silence if visitors pause a lot</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>STT Stall Recovery</strong></td>
+                                        <td>Retries a recogniser that stops responding, then apologises with the Goodbye Message. Turning it on reveals the backup recognition provider used when retries are spent.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Voice</strong></td>
+                                        <td>Provider, model, voice and language, speaking speed, output volume, and per-provider extras (ElevenLabs stability/similarity, Deepgram Flux expressivity, Hume description/instant mode) shown only for the selected provider. Chatbot voices match voice agents (incl. xAI, Speechmatics preview, SLNG.ai, Telnyx Kokoro, MiniMax and Azure OpenAI).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Voice activity detection</strong></td>
+                                        <td>Whether and how sensitively the agent notices the visitor speaking; min silence is the pause that ends a turn.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Turn detection &amp; endpointing</strong></td>
+                                        <td>Turn detector threshold, audio-detector patience (blank = automatic), fixed/dynamic endpointing, response delay, and the Deepgram Flux end-of-turn controls when Flux is the recogniser.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Interruptions</strong></td>
+                                        <td>Words needed to cut the agent off, how long the visitor must speak, and false-interruption handling.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Noise cancellation</strong></td>
+                                        <td>Full voice only. Server-side cleaning of the visitor&#39;s microphone audio (Off / WebRTC APM / DTLN / ai-coustics), echo-canceller warm-up and microphone input rate. Browsers already suppress noise — start with Off. Always off in Voice with avatar (no microphone).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Silence re-engage</strong></td>
+                                        <td>Full voice only. When the visitor goes quiet the agent nudges them (ask if still there / repeat / let the AI improvise / custom text) up to a maximum number of times, then says goodbye. Already active on Full voice chatbots; these controls tune it. Always off in Voice with avatar (no microphone, so a reading visitor is never cut off). Inactivity auto-close (Session tab) still ends idle sessions in every mode.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Generation</strong></td>
+                                        <td>Pre-emptive generation and speech (faster replies, slightly more usage) and prompt caching for supporting LLM providers.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Record full-voice sessions</strong></td>
+                                        <td>Full voice only, off by default. Text and avatar sessions are never recorded. Recordings appear on the chat&#39;s page in Chat History (player, download, consent receipt) and on the Recording/Egress page behind &#39;Include chat sessions&#39;. The transcript is kept either way.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Recording consent</strong></td>
+                                        <td>Four settings. Ask first and keep chatting unrecorded if they decline (recommended). Ask first and offer text chat instead. Don&#39;t ask and show your notice as a permanent line, recording regardless. Don&#39;t ask and show nothing. In the two &#39;ask&#39; modes nothing is minted and no microphone is requested until the visitor answers. In the two &#39;don&#39;t ask&#39; modes the server decides from this setting and ignores what the browser claims, the consent receipt records that the visitor was never asked rather than pretending they agreed, and the chat layouts show a &#39;Recording&#39; marker in the header while audio is captured. The Voice Orb and Voice Button display modes render no header, so on &#39;Don&#39;t ask - show nothing&#39; those two show the visitor nothing at all. Recording without consent is unlawful in much of Australia and many other places — that call is the operator&#39;s.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Widget Appearance
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Brand Color</strong></td>
+                                        <td>Primary color for the chat widget button and header</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Position</strong></td>
+                                        <td>Bottom-right or bottom-left placement of the chat icon</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Theme</strong></td>
+                                        <td>Light, dark, or auto — auto follows each visitor&#39;s own system dark-mode preference</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Widget Title</strong></td>
+                                        <td>Title shown at the top of the chat window</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Display Mode</strong></td>
+                                        <td>Popup (floating bubble), Embedded (inline in a container div), Sidebar (slide-in panel from the screen edge), Fullscreen overlay (large centred window with dimmed backdrop), Voice Button (click-to-talk pill with live waveform), or Voice Orb (animated audio-reactive orb). The two voice modes need Chat Mode = Full voice</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Widget Size</strong></td>
+                                        <td>Compact (380px) or full (440px) width for the chat window</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Corner Style</strong></td>
+                                        <td>Rounded (default), square, or extra-rounded corners for the chat window and message bubbles</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Launcher Size</strong></td>
+                                        <td>Small, medium, or large floating chat bubble</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Open From Your Own Button</strong></td>
+                                        <td>Optional CSS selector (e.g. #chat-with-us) of a button or link already on your website — clicking it opens the widget. Applies to popup, sidebar, and fullscreen modes</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Widget Elements</strong></td>
+                                        <td>Show or hide the message transcript, microphone button, and text input box. The text input can only be hidden in Full voice mode with the mic shown, so visitors always have a way to talk to the agent</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Orb Style</strong></td>
+                                        <td>Look of the voice orb, drawn in your brand colour. Classic is the original crescent. Circle is a solid dot that breathes with the caller&#39;s voice and glows while the agent speaks. Bars is a five-bar meter. Circle and Bars drive BOTH the big orb in Voice Orb display mode AND the small in-chat indicator, so they replace the Voice Visualizer setting. New chatbots default to Circle; chatbots created before this setting existed stay on Classic until changed</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Voice Visualizer</strong></td>
+                                        <td>Ignored when Orb Style is Circle or Bars. Style of the in-chat indicator during voice sessions: Bars (classic equaliser) or Dot grid — a 5x5 dot matrix that animates with the agent&#39;s state (ring sweep while connecting, centre pulse while listening, line sweep while thinking, volume columns while speaking)</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Welcome Message</strong></td>
+                                        <td>Greeting shown when visitors open the chat</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Branding Text</strong></td>
+                                        <td>Text shown at the bottom of the chat widget (e.g. &#39;Powered by LiveKit&#39;)</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Voice Mode
+                        </h6>
+                        
+                        <p class="text-muted">Optionally enable voice input so visitors can speak to the agent via microphone. Requires STT and TTS provider configuration. In any voiced mode the agent is automatically given spoken-reply rules on top of your prompt (short replies, no lists or symbols read aloud, natural numbers and dates, one question at a time, typed and spoken messages treated the same) — the transcript still shows every reply as text while it&#39;s spoken, and text-only sessions are unaffected.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Turn Detector</strong></td>
+                                        <td>How the agent decides the visitor has finished speaking (voice sessions only). &#34;Audio (v1-mini)&#34; is recommended and the default for new chatbots — it listens to the speech itself, runs on the server at no extra memory cost. &#34;Text model&#34; is the older approach: it needs roughly 1 GB of extra memory for the AI Agent Service, and on smaller servers it is skipped automatically (turn-taking then falls back to simple silence detection). &#34;Off&#34; uses silence detection only.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>STT Stall Recovery</strong></td>
+                                        <td>If the speech-to-text provider stops responding mid-conversation, the agent recovers missed words, asks the visitor to repeat if needed, reconnects a dead transcription stream, and as a last resort says a goodbye and ends the session. Off by default. Voice sessions only — typed chats are never interrupted by it. You can set how long to wait before recovery starts, and your own goodbye message.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Virtual Avatar
+                        </h6>
+                        
+                        <p class="text-muted">Render a lip-synced talking-head video of the agent in the chat widget. The avatar provider receives the agent&#39;s voice (TTS) and republishes synced audio + video into the room. Voice Mode must be enabled for the avatar to lip-sync to. Seven providers are supported: D-ID (highest quality, slow ~5–15s warm-up, requires a v4 expressive avatar), Tavus (hyper-realistic, requires a Replica + Persona configured for LiveKit transport), Beyond Presence (fastest setup — works with a stock avatar by default), LiveAvatar by HeyGen (dynamic real-time avatars, choose a public avatar or create your own), Anam (lifelike low-latency avatars — pick a stock avatar from the gallery or build a custom one in Anam Lab), Simli (very low-latency real-time faces — pick a Face ID from the default library, optional emotion), and Avatario (720p realtime avatars with an optional custom background image). Spatius is not supported: it renders in the browser with its own SDK, which the chat widget does not load. API keys are configured once on the Settings &gt; Integrations page; per-chatbot avatar selection is on the Avatar tab in each agent&#39;s editor.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Cost</strong></td>
+                                        <td>Avatar minutes are priced per minute on Settings &gt; Pricing &gt; Avatar Providers (one row per provider, seeded at each provider&#39;s entry-tier rate — lower it if you are on a bigger plan; Simli and Avatario rows are marked unverified, set them from your provider dashboard). Metered from the moment the avatar video appears until hang-up or drop, and shown as an &#39;Avatar&#39; line in the call&#39;s cost breakdown, Chat History and reports. Use a row&#39;s Disable toggle (not Delete) to stop billing a provider — deleted default rows are re-created at the next restart.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Avatar never appears (no picture AND no voice)</strong></td>
+                                        <td>The provider&#39;s cloud could not reach your LiveKit server: check LIVEKIT_PUBLIC_URL is a public wss:// address and that inbound connections are allowed by your firewall. The agent log records &#39;Avatar never joined the room within 20 s&#39; and the agent recovers voice-only after 20 seconds. The Integrations Test button proves the API KEY only — not that the avatar can reach your server.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>First-reply latency</strong></td>
+                                        <td>First message may be delayed 5–15 seconds while the avatar warms up. Subsequent replies are real-time.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Public-URL requirement</strong></td>
+                                        <td>Avatar providers run in the cloud and connect inbound to your LiveKit server, so LIVEKIT_PUBLIC_URL must be reachable from the public internet (a private IP or localhost will fail). Tronic-managed dashboards already meet this.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Failure handling</strong></td>
+                                        <td>If anything goes wrong (missing key, missing IDs, provider outage, plugin not installed), the agent gracefully continues voice-only — visitors still hear the agent, just without the face.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Tavus persona setup</strong></td>
+                                        <td>Tavus personas must be configured with pipeline_mode=&#34;echo&#34; and transport_type=&#34;livekit&#34;. Leave Persona ID blank to let the plugin auto-create one with these settings.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>D-ID signup</strong></td>
+                                        <td>https://www.d-id.com/ — create account, generate API key, then build a v4 expressive avatar in D-ID Studio.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Tavus signup</strong></td>
+                                        <td>https://tavus.io/ — create account, create a Replica (digital human), then create a LiveKit-compatible Persona.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Beyond Presence signup</strong></td>
+                                        <td>https://app.bey.dev/ — create account, generate an API key. The plugin uses a working stock avatar by default.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>LiveAvatar (HeyGen) signup</strong></td>
+                                        <td>https://app.liveavatar.com/ — create account, generate an API key at app.liveavatar.com/developers (NOT HeyGen&#39;s main site — they are separate dashboards even though LiveAvatar is by HeyGen). Then choose a public avatar or create your own. Avatar ID is required (no default).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>LiveAvatar session concurrency limit</strong></td>
+                                        <td>Free-tier LiveAvatar accounts allow only one concurrent active session. If a previous session wasn&#39;t cleaned up (agent crashed mid-call), new sessions get rejected with &#39;Session concurrency limit reached&#39; (HTTP 403). Active sessions auto-expire after 20 minutes. To check or kill stuck sessions, sign in to app.liveavatar.com — or upgrade to a tier that allows higher concurrency.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Anam signup</strong></td>
+                                        <td>https://lab.anam.ai/ — create account, generate an API key at lab.anam.ai/api-keys. Copy an Avatar ID from the stock Avatar Gallery (docs.anam.ai/resources/avatar-gallery) or create a custom avatar in Anam Lab. Avatar ID is required; the display name is optional (defaults to the chatbot&#39;s name).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Simli signup</strong></td>
+                                        <td>https://app.simli.com/ — create account, generate an API key at app.simli.com/apikey. Pick a Face ID from the default library (app.simli.com/create/from-existing) or upload your own face. Face ID is required; Emotion is optional (default Happy). Free tier: 50 minutes/month. The avatar drops after the chatbot&#39;s Inactivity Timeout + 1 minute of avatar silence and the video ends at the chatbot&#39;s Max Session length (or 60 minutes when unlimited).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Avatario signup</strong></td>
+                                        <td>https://avatario.ai/signup — create account, generate an API key in the Avatario dashboard and copy a stock Avatar ID from the same dashboard. Avatar ID is required; Background image URL is optional (video is up to 1280x720). There is no Test button for Avatario because its only API call starts a billable session — verify by starting a chatbot session.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Human Handoff tab
+                        </h6>
+                        
+                        <p class="text-muted">Hand a chat to a person. When the visitor asks for a human (or presses the widget&#39;s &#39;Talk to a person&#39; button), the chatbot says the wait message, stops answering, and sends the conversation to your Webhook URL — usually an n8n workflow that posts to Slack, your CRM or a help desk. Every later visitor message is sent there too. Your team member replies through the reply link the webhook receives (the downloadable n8n workflow includes a reply form) and the reply appears in the visitor&#39;s chat, SMS or WhatsApp with their name. When they finish, or go quiet for the set time, the chatbot takes back over and already knows what was said. There is no inbox in the dashboard.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Enable Human Handoff</strong></td>
+                                        <td>Switches the feature and the handoff_to_human tool on for this chatbot. A Webhook URL is required.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Webhook URL</strong></td>
+                                        <td>Where conversations are sent. Must be reachable from this server, and this server&#39;s address (Settings → Server) must be reachable from there for replies.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Signing secret</strong></td>
+                                        <td>Every event is signed with it (X-Handoff-Signature over timestamp.body). Generated on first save. Regenerating it means updating your n8n workflow or software.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Name shown when the person gives none</strong></td>
+                                        <td>Label on their replies if they don&#39;t send a name.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>While a person is being brought in / When the assistant takes back over</strong></td>
+                                        <td>What the visitor is told at each step. Full-voice chats read them aloud.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Talk to a person button</strong></td>
+                                        <td>Adds a header button to the widget so the visitor can ask directly; hidden while a handoff is active.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>If the button can&#39;t be honoured</strong></td>
+                                        <td>Shown when the daily limit is reached or the chat can&#39;t be handed over right now.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Wait for a person / Then / Never wait longer than</strong></td>
+                                        <td>Nobody picks up in time: either the assistant carries on (with its message) or the chat keeps waiting, but never past the hard limit.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Person silent for</strong></td>
+                                        <td>The person stops replying for this long → the assistant takes back over.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Email me when a handoff starts</strong></td>
+                                        <td>One email per handoff using Settings → Email.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Handoffs per day / Visitor messages per handoff / Forwarded messages per day</strong></td>
+                                        <td>Abuse limits. Exceeding a message cap hands the chat back to the assistant.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Send test event</strong></td>
+                                        <td>Posts a sample conversation to your webhook, then waits a minute for your side to reply to it — proves both directions.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Build n8n workflow (Slack)</strong></td>
+                                        <td>Downloads a ready-made workflow (Slack post + reply form) to import into n8n.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> SMS / WhatsApp Delivery Channel
+                        </h6>
+                        
+                        <p class="text-muted">Let visitors text (or WhatsApp-message) a phone number and get replies from this same chatbot — same LLM, same system prompt, same knowledge base, same memory. Five providers: Twilio (global), Telnyx (global), Tronic Cloud (Tronic&#39;s own gateway at text.tronic.com.au), Sent.dm (one number for BOTH SMS and WhatsApp — replies go back on whichever channel the visitor used), and Custom (n8n) for any other SMS carrier via your own n8n instance. Preset setup is one-time: paste API keys on Settings &gt; Integrations, enable SMS on the chatbot&#39;s SMS / WhatsApp tab, pick a provider, type the FROM number (not needed for Sent.dm), and copy the generated webhook URL into your provider&#39;s console.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>How it works</strong></td>
+                                        <td>An inbound text reaches your dashboard&#39;s webhook URL → the chatbot&#39;s LLM generates a reply → the provider sends it back as SMS. The visitor doesn&#39;t need an app or website — just their phone. Webhook responses go out within ~100ms (the LLM call runs on a background task), so providers don&#39;t retry or stall.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Memory per phone number</strong></td>
+                                        <td>Each phone number is treated as its own visitor. Mem0 (if enabled) remembers the conversation across SMS sessions for that phone, scoped to this agent. Website widget visitors are kept separate.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Daily reply cap</strong></td>
+                                        <td>Per-(agent, phone) cap (default 50/day) prevents Denial-of-Wallet abuse. 0 = unlimited. Drops silently after the limit — the inbound is accepted but no reply is sent (logged in the operator&#39;s logs).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Twilio setup</strong></td>
+                                        <td>Console &gt; Phone Numbers &gt; your number &gt; Messaging Configuration. Set &#39;A MESSAGE COMES IN&#39; to Webhook + HTTP POST + paste the URL from this tab. Twilio signs every webhook with HMAC-SHA1; the dashboard verifies it automatically.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Telnyx setup</strong></td>
+                                        <td>Mission Control &gt; Messaging &gt; Messaging Profiles &gt; your profile &gt; Inbound Settings. Set Webhook URL to the URL from this tab (HTTP POST), API Version V2 (Ed25519). Paste the Webhook Public Key into Settings &gt; Integrations so the dashboard can verify signatures.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Tronic Cloud setup</strong></td>
+                                        <td>Sign in at text.tronic.com.au, open your number&#39;s inbound webhook setting, paste the URL from this tab. Two-way SMS requires an AU 10-digit number in international format (e.g. 61400123456) — alpha senders like &#39;MyShop&#39; are send-only.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Sent.dm setup (SMS + WhatsApp)</strong></td>
+                                        <td>Sign in at app.sent.dm, provision your business number, and copy your API key into Settings &gt; Integrations &gt; Sent.dm. In the Sent.dm dashboard create a webhook endpoint pointed at the URL from this tab, subscribe it to message.received, and paste that endpoint&#39;s signing secret (whsec_…) into the tab. There is no From number — the sender is the business number on your Sent.dm account, and one Sent.dm number belongs to ONE chatbot (configure exactly one inbound endpoint per account). For WhatsApp, connect your Meta Business account inside Sent.dm (Meta login + payment method on the Meta side). Replies automatically go back on whichever channel the visitor used. Business-initiated sends (test button, voice-agent tool) use a passthrough template the dashboard auto-creates on save. The WhatsApp channel is code-complete but not yet verified end-to-end; SMS is fully tested.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Custom (n8n) setup</strong></td>
+                                        <td>Bring any SMS carrier by wiring it through your own n8n instance. Select Custom (n8n), save the chatbot (this generates a shared secret), then download the two ready-made workflows from the SMS tab — they arrive pre-filled with this chatbot&#39;s webhook address and secret. Import both into n8n, drop your carrier&#39;s node into the Send workflow, activate both, paste the Send workflow&#39;s Production URL into the dashboard, and point your carrier&#39;s inbound webhook at the Inbound workflow. A Test panel on the tab verifies the setup and can send a real test SMS.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>n8n security</strong></td>
+                                        <td>Custom (n8n) messages carry an X-SMS-Secret header in both directions, generated by the dashboard (16+ characters, compared in constant time). The secret is baked into the downloaded workflows — if you regenerate it, re-download and re-import BOTH workflows or they stop authenticating.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Webhook security</strong></td>
+                                        <td>Twilio + Telnyx use cryptographic webhook signatures (HMAC-SHA1 / Ed25519). Sent.dm signs webhooks HMAC-SHA256 (Svix-style) with a per-endpoint secret you paste into the tab; replayed deliveries are also suppressed. Custom (n8n) uses the shared-secret header. Tronic Cloud has no signature; it relies on your webhook URL staying secret. The agent ID in the URL is opaque, so don&#39;t share the URL publicly.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Failure handling</strong></td>
+                                        <td>If a key is missing, the provider&#39;s API is down, or the LLM call fails, the visitor gets no reply that turn — but nothing crashes. Errors are visible in the operator logs (sms.send.failed / sms.reply.llm_failed).</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Session Management
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Auto-close Inactive</strong></td>
+                                        <td>Automatically close sessions after inactivity period</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Inactivity Timeout</strong></td>
+                                        <td>Minutes of inactivity before session closes</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Inactivity Message</strong></td>
+                                        <td>Message shown when session is auto-closed</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Max Messages</strong></td>
+                                        <td>Maximum messages per session before it closes</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Max session length</strong></td>
+                                        <td>Ends a single chat session after this many minutes with a polite message asking the visitor to start a new chat. 0 = no limit (the default, matching how chatbots have always behaved). Protects against a session being held open indefinitely and running up AI costs.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Reconnect Grace Period</strong></td>
+                                        <td>How long (seconds) the conversation room stays open after the visitor closes or leaves the page, so a quick reload rejoins the same conversation. 0 = default (~20 seconds); maximum 600. Longer windows keep sessions alive (and any per-minute costs running) after the visitor has gone.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Error Handling</strong></td>
+                                        <td>What the visitor sees if the AI hits an internal error: the standard apology (default), your own custom message, or nothing at all (silent — the typing dots clear automatically). Applies to both website chat and SMS.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Domains (CORS)
+                        </h6>
+                        
+                        <p class="text-muted">Configure which website origins are allowed to use this chat agent. Only listed origins can request tokens. Always use https:// in production.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Embed Code
+                        </h6>
+                        
+                        <p class="text-muted">Copy the generated script tag and paste it before the closing &lt;/body&gt; tag on your website. The widget will automatically appear as a floating chat icon. Use the Preview button to open a live preview showing exactly how the widget will look and behave on your site.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Per-Session Dynamic Variables
+                        </h6>
+                        
+                        <p class="text-muted">Your website can hand the chatbot per-visitor context by adding a data-variables attribute to the embed snippet, e.g. data-variables=&#39;{&#34;name&#34;: &#34;Priya&#34;, &#34;account_number&#34;: &#34;1253566&#34;}&#39;. Each key becomes a {{placeholder}} usable in the system prompt and welcome message — &#34;Hello {{name}}, your account {{account_number}} premium is due soon.&#34; Rules: variable names are lowercase letters/digits/underscores (max 32 chars), up to 10 variables, values up to 200 characters, ~2KB total. Unsupplied placeholders are removed from the welcome message automatically. IMPORTANT — personalization only, never identity: the token endpoint is public, so any caller can claim any value. The agent must never treat a variable like {{account_number}} as verified identity or feed it to tools as an authenticated lookup key without its own verification step.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Prompt Versioning
+                        </h6>
+                        
+                        <p class="text-muted">Every time you save changes to an agent&#39;s system prompt, the previous version is automatically saved. You can view version history, compare differences between versions, and restore any previous version.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Version History</strong></td>
+                                        <td>Click the green Versions button to see all saved prompt versions with timestamps and source labels (manual, enrich, or autoresearch).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Diff View</strong></td>
+                                        <td>Click &#39;Diff&#39; on any version to see a color-coded comparison showing exactly what changed (green = added, red = removed).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Restore</strong></td>
+                                        <td>Click &#39;Restore&#39; to load a previous version into the editor. You must click Update Agent to save the restored version.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Max Versions</strong></td>
+                                        <td>Configure how many versions to keep per agent (5-50, default 20). Oldest versions are automatically pruned.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> AutoResearch
+                        </h6>
+                        
+                        <p class="text-muted">AI-powered prompt optimization that analyzes your agent&#39;s actual chat session transcripts to suggest specific improvements. Lives on its own AutoResearch page in the sidebar (Testing section) — the editor&#39;s purple AutoResearch button takes you there with the agent pre-selected. Can be run manually or scheduled to run overnight.</p>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Run Analysis</strong></td>
+                                        <td>Select analysis steps, choose an LLM provider/model, set the number of chat sessions to analyze (5-50), and click Run Now. Progress is shown step-by-step.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Call Selection</strong></td>
+                                        <td>Choose &#39;Most recent calls&#39; or &#39;Prioritise problem calls&#39; — the latter hunts for sessions that were abandoned, didn&#39;t achieve their goal, had negative sentiment, or where the visitor barely engaged, mixing in normal sessions for contrast.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Suggestions</strong></td>
+                                        <td>Each suggestion shows what would change, which issues it addresses, and a confidence score. Amber warnings flag suggestions that dropped placeholders, shrank suspiciously, or grew too much — review those carefully. Click &#39;Apply to Live Prompt&#39; to review a side-by-side comparison (editable) and apply — the outgoing prompt is saved to Versions automatically, so applying is always reversible.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Schedule</strong></td>
+                                        <td>Set AutoResearch to run automatically (daily or weekly) at a specific time, including the call-selection mode. Suggestions are never auto-applied — review in Results History.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Reference Sessions</strong></td>
+                                        <td>Curate your best chat sessions as benchmarks. AutoResearch uses these to score suggestions and ensure they don&#39;t make good interactions worse.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Methodology</strong></td>
+                                        <td>Advanced: customize the analysis, suggestion, and scoring prompts that drive AutoResearch.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> MCP / API Access
+                        </h6>
+                        
+                        <p class="text-muted">External tools (Claude Code, Cursor, scripts) can manage chatbot agents through the built-in MCP server at /mcp: list_chatbot_agents, get_chatbot_agent, create_chatbot_agent, update_chatbot_agent, delete_chatbot_agent. Every field on this page is editable over MCP — including the widget appearance, avatar provider, memory settings, and the SMS / WhatsApp channel (stored secrets are preserved when a field is left empty, exactly like this editor). Ask your MCP client to call get_agent_config_reference() and read the chatbot_agents section for the full schema.</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

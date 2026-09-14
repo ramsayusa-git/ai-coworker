@@ -1,0 +1,2569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Knowledge Base - Powered By Aetos Techlabs LLP</title>
+    
+    <link rel="icon" type="image/png" href="static/images/custom_favicon.png@v=204899">
+    
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Dashboard display timezone (Settings → Server → Time & Date) + shared
+         client-side time formatters. Loaded in <head> so page-inline scripts
+         can call formatDashboard*() regardless of block ordering. -->
+    <script>window.DASHBOARD_TZ = "Australia/Sydney";</script>
+    <script src="static/js/time-display.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css@v=2433.css">
+    
+
+    <!-- HTMX CSRF Token Configuration -->
+    <meta name="csrf-token" content="IllYWi1kRFBtX3BvaDcxazQ4N29xTFNVeWhveWZTZWtCUkplNE5JV0JfOFEi.aqgYLQ.IwVVtlTfFaPd9vcXIGXWq0yWN1U">
+    
+    
+</head>
+<body data-bs-theme="dark" style="zoom: 0.9;">
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 10, 10, 0.7); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+    ">
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 50px;">
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.1s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.3s;"></span>
+            <span style="display: inline-block; width: 8px; height: 10px; background: var(--brand-primary); border-radius: 3px; animation: loaderBars 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    </div>
+    <style>
+        @keyframes loaderBars {
+            0%, 100% { height: 10px; }
+            50% { height: 50px; }
+        }
+    </style>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            
+            <img src="static/images/custom_logo.png" alt="Logo" style="max-height: 48px; max-width: 180px;">
+            
+        </a>
+
+        
+        
+        
+        
+        
+        
+        <div class="community-edition-badge">
+            
+            <a href="settings.html#licensing" title="Community Edition — click for licensing info">
+                <span class="badge bg-warning text-dark">Community Edition</span>
+            </a>
+            
+        </div>
+        
+
+        <nav class="sidebar-nav">
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Core</div>
+                
+                <a href="index.html" class="nav-link ">
+                    <i class="bi bi-speedometer2"></i>
+                    Analytics
+                </a>
+                
+                
+                <a href="reports.html" class="nav-link ">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Reports
+                </a>
+                
+                
+                <a href="rooms.html" class="nav-link ">
+                    <i class="bi bi-door-open"></i>
+                    Rooms
+                </a>
+                
+                
+                <a href="call-history.html" class="nav-link ">
+                    <i class="bi bi-clock-history"></i>
+                    Call History
+                </a>
+                
+                
+                <a href="chat-history.html" class="nav-link ">
+                    <i class="bi bi-chat-left-text"></i>
+                    Chat History
+                </a>
+                
+                
+                <a href="egress.html" class="nav-link ">
+                    <i class="bi bi-record-circle"></i>
+                    Recording/Egress
+                </a>
+                
+                
+                <a href="tools.html" class="nav-link ">
+                    <i class="bi bi-tools"></i>
+                    Tools
+                </a>
+                
+                
+                <a href="knowledge-base.html" class="nav-link active">
+                    <i class="bi bi-book"></i>
+                    Knowledge Base / Memory
+                </a>
+                
+                
+                <a href="agents.html" class="nav-link ">
+                    <i class="bi bi-robot"></i>
+                    Voice Agents
+                </a>
+                
+                
+                <a href="web-chat.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Chatbot Agents
+                </a>
+                
+            </div>
+            
+
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Telephony</div>
+                
+                <a href="telephony/inbound.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    SIP Trunks
+                </a>
+                
+                
+                <a href="telephony/rules.html" class="nav-link ">
+                    <i class="bi bi-diagram-3"></i>
+                    Dispatch Rules
+                </a>
+                
+                
+                <a href="telephony/numbers.html" class="nav-link ">
+                    <i class="bi bi-telephone"></i>
+                    Phone Numbers
+                </a>
+                
+                
+                <a href="telephony/campaigns.html" class="nav-link ">
+                    <i class="bi bi-megaphone"></i>
+                    Campaigns
+                </a>
+                
+            </div>
+            
+
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                
+                <a href="agent-tester.html" class="nav-link ">
+                    <i class="bi bi-chat-dots"></i>
+                    Agent Tester
+                </a>
+                
+                
+                <a href="simulation.html" class="nav-link ">
+                    <i class="bi bi-cpu"></i>
+                    Simulation
+                </a>
+                
+                
+                <a href="autoresearch.html" class="nav-link ">
+                    <i class="bi bi-search-heart"></i>
+                    AutoResearch
+                </a>
+                
+                
+                <a href="improvement-lab.html" class="nav-link ">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Improvement Lab
+                </a>
+                
+                
+            </div>
+            
+
+            
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="settings.html" class="nav-link ">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+                
+                
+                <a href="settings.html#general" class="update-badge-popup" id="updateBadgePopup"
+                   style="display: none;" title="Dashboard update available">
+                    <span class="update-badge-dot"></span>
+                    <span class="update-badge-text">Update Available</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                
+            </div>
+            
+
+            
+            
+            
+        </nav>
+
+        
+        
+        
+        
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="top-bar-sticky-group">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            
+            <div>
+                <h1 class="page-title">Knowledge Base</h1>
+                
+<p class="page-subtitle">Manage knowledge base collections and RAG capabilities for your agents</p>
+
+            </div>
+            
+            <div class="top-bar-actions">
+                
+                
+                
+                
+                
+                <a href="userguide.html#knowledge-base" target="_blank" rel="noopener"
+                   class="btn btn-sm btn-warning user-guide-btn me-2" title="User Guide — opens at this page's chapter">
+                    <i class="bi bi-book"></i> User Guide
+                </a>
+                
+                
+                <!-- Help Button -->
+                
+                <button class="btn btn-outline-info btn-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#helpModal" title="Page Help" style="border-width: 2px;">
+                    <i class="bi bi-question-circle-fill"></i> Help
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                        Administrator
+                        
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li class="dropdown-item-text text-muted small">
+                            <i class="bi bi-person"></i> Administrator
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="knowledge-base.html#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="bi bi-key"></i> Change Password
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://vaai.aetosiot.com/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        
+        
+        <div class="license-banner" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            
+            
+            <strong>Community Edition Active.</strong>
+            Free for non-commercial use, limited to 2 voice agents and 2 chatbot agents.
+            Upgrade your licence in the
+            <a href="https://www.skool.com/livekit-dashboard-ai-voice-3995/about" target="_blank" rel="noopener">Skool community</a>
+            or contact <a href="mailto:voiceai@tronic.com.au">voiceai@tronic.com.au</a>.
+            
+        </div>
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        </div><!-- /top-bar-sticky-group -->
+
+        <!-- Flash Messages -->
+        
+        
+        
+
+        <!-- Multi-Tenancy Licence Banner (multi-tenant deploys only — returns None on single) -->
+        
+        
+
+        
+        
+        
+
+        <!-- Page Content -->
+        <main>
+            
+
+
+
+
+
+<!-- Stats Grid: KB + Memory on a single row, with an invisible card-width spacer between them.
+     Uses 7 fixed 1fr columns so cards stretch to fill the full row width.
+     For tenant sessions in multi-tenant mode the Memory cards + spacer
+     are hidden, so the grid collapses to the 3 KB cards. -->
+<div class="stats-grid" style="grid-template-columns: repeat(7, minmax(0, 1fr));">
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-database"></i> KB Status
+        </div>
+        <div class="stat-value" id="qdrantStatusBadge">
+            
+                <span class="badge bg-secondary">Not Configured</span>
+            
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-collection"></i> KB Collections
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-file-earmark-text"></i> KB Documents
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    
+    <!-- invisible spacer: occupies one card-width slot to separate KB from Memory -->
+    <div class="stat-card" style="visibility: hidden; border: none; background: transparent;" aria-hidden="true"></div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-toggle-on"></i> Memory Status
+        </div>
+        <div class="stat-value">
+            
+                <span class="badge bg-secondary">Disabled</span>
+            
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-people"></i> Memory Agents
+        </div>
+        <div class="stat-value info">
+            0
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <i class="bi bi-journal-text"></i> Memory Records
+        </div>
+        <div class="stat-value info">
+            
+                <span class="text-muted small">—</span>
+            
+        </div>
+    </div>
+    
+</div>
+
+
+
+<!-- KB / Memory Tab Bar -->
+<ul class="nav nav-tabs mb-4" id="kbMemoryTabs" role="tablist"
+    data-hash-nav
+    data-hash-aliases='{"kb-pane":"kb","memory-pane":"memory"}'>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="kb-tab" data-bs-toggle="tab"
+                data-bs-target="#kb-pane" type="button" role="tab"
+                aria-controls="kb-pane" aria-selected="true">
+            <i class="bi bi-book"></i> Knowledge Base
+        </button>
+    </li>
+    
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="memory-tab" data-bs-toggle="tab"
+                data-bs-target="#memory-pane" type="button" role="tab"
+                aria-controls="memory-pane" aria-selected="false">
+            <i class="bi bi-brain"></i> Memory
+        </button>
+    </li>
+    
+</ul>
+
+<div class="tab-content" id="kbMemoryTabContent">
+<div class="tab-pane fade show active" id="kb-pane" role="tabpanel" aria-labelledby="kb-tab">
+
+
+<!-- Setup Wizard -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-rocket-takeoff"></i> Get Started
+        </h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-4">Set up a vector database to enable knowledge base search for your agents.</p>
+
+        <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#setup-docker" type="button">
+                    <i class="bi bi-box-seam"></i> Docker (Recommended)
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#setup-cloud" type="button">
+                    <i class="bi bi-cloud"></i> Qdrant Cloud
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Docker Setup -->
+            <div class="tab-pane fade show active" id="setup-docker">
+                
+                <div class="alert alert-info alert-permanent">
+                    <i class="bi bi-info-circle me-2"></i>
+                    This will pull and start a Qdrant Docker container (~80MB). It runs locally and uses about 30-50MB of RAM.
+                </div>
+                
+                <button class="btn btn-primary" onclick="setupQdrant('docker')" id="btnSetupDocker">
+                    <i class="bi bi-play-circle"></i> Start Qdrant
+                </button>
+                
+                
+            </div>
+
+            <!-- Cloud Setup -->
+            <div class="tab-pane fade" id="setup-cloud">
+                <div class="alert alert-info alert-permanent">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Connect to a Qdrant Cloud instance. Get a free cluster at cloud.qdrant.io.
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Qdrant Cloud URL</label>
+                        <input type="url" class="form-control" id="cloudUrl" placeholder="https://your-cluster.qdrant.io">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">API Key</label>
+                        <input type="password" class="form-control" id="cloudApiKey" placeholder="Your API key">
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" onclick="setupQdrant('cloud')">
+                            <i class="bi bi-link-45deg"></i> Connect
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="setupProgress" class="mt-3" style="display:none;">
+            <div class="progress" style="height: 6px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 100%"></div>
+            </div>
+            <small class="text-muted mt-1 d-block" id="setupStatusText">Setting up Qdrant...</small>
+        </div>
+    </div>
+</div>
+
+
+
+
+</div>
+
+
+<div class="tab-pane fade" id="memory-pane" role="tabpanel" aria-labelledby="memory-tab">
+
+<div class="alert alert-warning mb-3">
+    <i class="bi bi-exclamation-triangle"></i>
+    <strong>Qdrant is not configured yet.</strong> Memory requires Qdrant + the <code>mem0ai</code> package.
+    Switch to the <a href="knowledge-base.html#kb-pane" data-bs-toggle="tab" data-bs-target="#kb-pane">Knowledge Base tab</a>
+    and complete the Get Started wizard first.
+</div>
+
+
+
+<!-- Memory Configuration (admin-only) -->
+<div class="card mb-4">
+    <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#memoryConfigSection">
+        <h5 class="card-title mb-0 d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-brain"></i> Memory Configuration</span>
+            <i class="bi bi-chevron-down"></i>
+        </h5>
+    </div>
+    <div class="collapse" id="memoryConfigSection">
+        <div class="card-body">
+            
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i>
+                Agent memory requires the <code>mem0ai</code> package. Install it from <a href="settings.html#dependencies">Settings &gt; Dependencies</a>.
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<!-- Agent Memories Section -->
+<div class="card mb-4" id="memoriesSection">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-brain"></i> Agent Memories
+        </h5>
+    </div>
+    <div class="card-body">
+        
+        <div class="text-center py-4">
+            <i class="bi bi-brain display-4 text-muted"></i>
+            <p class="text-muted mt-2">
+                Agent memory requires the <code>mem0ai</code> package.
+                Install it from <a href="settings.html#dependencies">Settings &gt; Dependencies</a>.
+            </p>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Memory Detail Panel -->
+<div id="memoryDetail" style="display: none;">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-brain"></i> Memories: <span id="memoryAgentName"></span>
+            </h5>
+            <div>
+                <select class="form-select form-select-sm d-inline-block" style="width: auto;" id="memoryUserFilter" onchange="filterMemoriesByUser()">
+                    <option value="">All Users</option>
+                </select>
+                <button type="button" class="btn btn-outline-danger btn-sm ms-2" id="btnForgetUser" style="display:none;" onclick="forgetUser()">
+                    <i class="bi bi-person-x"></i> Forget User
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="closeMemoryDetail()">
+                    <i class="bi bi-x-lg"></i> Close
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            
+            <!-- Bulk import card -->
+            <div class="card mb-3 border-info">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-cloud-upload"></i> Bulk import memories</span>
+                    <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="collapse" data-bs-target="#bulkImportBody" aria-expanded="false">
+                        <i class="bi bi-chevron-down"></i> <span id="bulkImportToggleLabel">Show</span>
+                    </button>
+                </div>
+                <div id="bulkImportBody" class="collapse">
+                    <div class="card-body">
+                        <p class="form-text mb-2">Pre-load caller facts in bulk. The agent already looks up memories by phone number at the start of every call &mdash; uploaded rows will be injected automatically.</p>
+
+                        <div class="mb-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="bulkSource" id="bulkSourceFile" value="file" checked>
+                                <label class="form-check-label" for="bulkSourceFile">CSV file</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="bulkSource" id="bulkSourceUrl" value="url">
+                                <label class="form-check-label" for="bulkSourceUrl">Google Sheet URL</label>
+                            </div>
+                        </div>
+
+                        <div id="bulkSourceFilePane" class="mb-2">
+                            <input type="file" class="form-control form-control-sm" id="bulkFileInput" accept=".csv">
+                            <div class="form-text">
+                                <a href="api/kb/memories/bulk-template.csv">Download template</a>
+                                &middot; CSV only, max 10MB, 2,000 facts per upload.
+                            </div>
+                        </div>
+
+                        <div id="bulkSourceUrlPane" class="mb-2" style="display:none;">
+                            <input type="url" class="form-control form-control-sm" id="bulkUrlInput" placeholder="https://docs.google.com/spreadsheets/d/...">
+                            <div class="form-text">
+                                Public Google Sheets only. In Google Sheets click <strong>Share</strong> (top right) &rarr; <strong>Change to anyone with the link</strong> &rarr; Viewer &rarr; Copy link, then paste it here. Imports run once &mdash; paste the URL again to re-import after edits.
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="bulkPersistent" checked>
+                            <label class="form-check-label" for="bulkPersistent">
+                                Pin all uploaded memories
+                            </label>
+                            <div class="form-text">Pinned memories survive end-of-call extraction and FIFO pruning. The agent cannot overwrite or delete them.</div>
+                        </div>
+
+                        <details class="mb-2">
+                            <summary class="text-muted small">CSV format example</summary>
+                            <pre class="small bg-body-tertiary text-body p-2 mt-2 mb-1">phone_number,Client ID,Plan Tier,Account Balance
++61412345678,CRM-12345,Premium,2500
++61398765432,CRM-67890,Standard,150</pre>
+                            <div class="form-text mb-1">First column must be <code>phone_number</code>. Every other column becomes one memory per row in the form <code>Header: value</code>. For the example above, the agent will see facts like <code>Client ID: CRM-12345</code> and <code>Plan Tier: Premium</code>. Use natural column names &mdash; they appear directly in the agent's prompt.</div>
+                            <div class="form-text text-muted">Uploaded data is stored in your configured Qdrant instance and the text of each fact is sent to your configured embedding provider. Each row &times; column generates one embedding API call.</div>
+                        </details>
+
+                        <button type="button" class="btn btn-primary btn-sm" id="bulkUploadBtn" onclick="bulkUploadMemories()">
+                            <i class="bi bi-upload"></i> Import memories
+                        </button>
+
+                        <div id="bulkUploadResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+
+            <div id="memoryList">
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <span class="ms-2">Loading memories...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+</div>
+
+<!-- Create Collection Modal -->
+<div class="modal fade" id="createCollectionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Create Collection</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createCollectionForm" onsubmit="createCollection(event)">
+                <input type="hidden" name="csrf_token" value="IllYWi1kRFBtX3BvaDcxazQ4N29xTFNVeWhveWZTZWtCUkplNE5JV0JfOFEi.aqgYLQ.IwVVtlTfFaPd9vcXIGXWq0yWN1U">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Collection Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" required placeholder="e.g. Product FAQ, Company Policies">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="2" placeholder="Optional description of what this collection contains"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> Create
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+        </main>
+
+        <!-- Footer -->
+        
+        <footer>
+            <small>
+                
+                    <span style="color: var(--text-secondary);">Powered by Aetos Techlabs © 2026</span>
+                
+            </small>
+            
+        </footer>
+    </div>
+
+    <!-- Page loader: hide on ready, show on navigate away -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.style.display = 'none'; }, 300);
+            }
+
+            // Back/forward-cache restores skip DOMContentLoaded — without this
+            // a page revisited via the Back button can reappear with the
+            // loader still up from the click that navigated away.
+            window.addEventListener('pageshow', function () {
+                var l = document.getElementById('pageLoader');
+                if (l) {
+                    l.style.opacity = '0';
+                    setTimeout(function () { l.style.display = 'none'; }, 300);
+                }
+            });
+
+            // Show loader when navigating to a new page (full page loads only)
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                // Skip: external links, new tabs, anchors, HTMX links, javascript:, #
+                var href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                if (link.target === '_blank' || link.hasAttribute('hx-get') || link.hasAttribute('hx-post') || link.hasAttribute('hx-swap')) return;
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                // Skip: file-download links (the browser triggers a download instead of
+                // navigating, so DOMContentLoaded never fires again to dismiss the loader).
+                // Without this skip the loader stays visible forever until the operator
+                // refreshes — e.g. clicking guides on Settings → Notes/Guides.
+                if (link.hasAttribute('download')) return;
+                // Skip: server-decided downloads (Content-Disposition: attachment) that
+                // carry no download attribute — export/download routes and direct file
+                // links. Same stuck-forever failure mode as above.
+                if (/\/(export|download)(\/|\?|$)/i.test(href) ||
+                    /\.(json|csv|zip|txt|wav|mp3|ogg|pdf|xml)(\?|$)/i.test(href)) return;
+                // Skip: same-page links whose target differs only by hash — the
+                // browser performs same-document navigation (no reload), so
+                // DOMContentLoaded never re-fires to dismiss the loader. E.g.
+                // the Community Edition badge (/settings#licensing) clicked
+                // while already on the Settings page.
+                try {
+                    var dest = new URL(link.href, window.location.href);
+                    if (dest.hash && dest.pathname === window.location.pathname
+                        && dest.search === window.location.search) return;
+                } catch (err) { /* ignore malformed hrefs */ }
+                // Internal navigation — show loader
+                var loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    // Force reflow before setting opacity
+                    loader.offsetHeight;
+                    loader.style.opacity = '1';
+                    // FAILSAFE: any download this heuristic missed (or a
+                    // navigation the browser cancelled) leaves the page alive
+                    // with the loader up forever. If we're still here after
+                    // 8s, assume no navigation happened and dismiss. A real
+                    // (slow) navigation still replaces the page regardless.
+                    setTimeout(function () {
+                        loader.style.opacity = '0';
+                        setTimeout(function () { loader.style.display = 'none'; }, 300);
+                    }, 8000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- HTMX CSRF Configuration -->
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            evt.detail.parameters['csrf_token'] = csrfToken;
+        });
+    </script>
+    
+    
+<script>
+// Embedding provider models data
+const embeddingProviders = {"default_model": null, "default_provider": null, "providers": [{"configured": false, "id": "openai", "models": [], "name": "OpenAI"}, {"configured": false, "id": "google", "models": [], "name": "Google AI Studio"}, {"configured": false, "id": "google_cloud", "models": [], "name": "Google Cloud Vertex AI"}, {"configured": false, "id": "fastembed", "models": [], "name": "Local (Free, no API key)"}]};
+const currentModel = '';
+const synthesisLLMs = {"default_model": null, "default_provider": null, "providers": [{"configured": false, "id": "openai", "models": [], "name": "OpenAI"}, {"configured": false, "id": "google", "models": [], "name": "Google AI Studio"}, {"configured": false, "id": "google_cloud", "models": [], "name": "Google Cloud Vertex AI"}, {"configured": false, "id": "bedrock", "models": [], "name": "AWS Bedrock"}, {"configured": false, "id": "anthropic", "models": [], "name": "Anthropic"}, {"configured": false, "id": "xai", "models": [], "name": "xAI / Grok"}, {"configured": false, "id": "groq", "models": [], "name": "Groq"}, {"configured": false, "id": "azure_openai", "models": [], "name": "Azure"}, {"configured": false, "id": "openrouter", "models": [], "name": "OpenRouter"}, {"configured": false, "id": "scx", "models": [], "name": "SCX (Au)"}, {"configured": false, "id": "telnyx_ai", "models": [], "name": "Telnyx"}]};
+const currentSynthesisModel = '';
+const csrfToken = 'IllYWi1kRFBtX3BvaDcxazQ4N29xTFNVeWhveWZTZWtCUkplNE5JV0JfOFEi.aqgYLQ.IwVVtlTfFaPd9vcXIGXWq0yWN1U';
+let selectedCollectionId = null;
+
+// --- Embedding Config ---
+
+function updateModelDropdown() {
+    const providerSelect = document.getElementById('embeddingProvider');
+    const modelSelect = document.getElementById('embeddingModel');
+    if (!providerSelect || !modelSelect) return;
+
+    const providerId = providerSelect.value;
+    // Clear and add default option
+    while (modelSelect.options.length > 0) modelSelect.remove(0);
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = 'Select model...';
+    modelSelect.appendChild(defaultOpt);
+
+    if (!providerId || !embeddingProviders.providers) return;
+
+    const provider = embeddingProviders.providers.find(p => p.id === providerId);
+    if (!provider || !provider.models) return;
+
+    provider.models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.id + ' (' + m.dimensions + 'd)';
+        if (m.id === currentModel) opt.selected = true;
+        modelSelect.appendChild(opt);
+    });
+
+    // Auto-select first if no current match
+    if (!modelSelect.value && modelSelect.options.length > 1) {
+        modelSelect.selectedIndex = 1;
+    }
+}
+
+// Memory Configuration — separate from Collection Configuration
+const currentMemoryModel = 'text-embedding-3-small';
+const currentMemoryProvider = 'openai';
+
+function updateMemoryModelDropdown() {
+    const providerSelect = document.getElementById('memoryEmbeddingProvider');
+    const modelSelect = document.getElementById('memoryEmbeddingModel');
+    if (!providerSelect || !modelSelect) return;
+
+    const providerId = providerSelect.value;
+    modelSelect.innerHTML = '';
+
+    if (!providerId || !embeddingProviders || !embeddingProviders.providers) return;
+
+    const provider = embeddingProviders.providers.find(function(p) { return p.id === providerId; });
+    if (!provider || !provider.models) return;
+
+    provider.models.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.id + ' (' + m.dimensions + 'd)';
+        if (m.id === currentMemoryModel) opt.selected = true;
+        modelSelect.appendChild(opt);
+    });
+}
+
+function initMemoryConfig() {
+    var providerSelect = document.getElementById('memoryEmbeddingProvider');
+    if (!providerSelect || !embeddingProviders || !embeddingProviders.providers) return;
+
+    providerSelect.innerHTML = '<option value="">Select provider...</option>';
+    embeddingProviders.providers.forEach(function(p) {
+        if (p.id === 'fastembed') return;  // No local embeddings for memory
+        var opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.name;
+        if (!p.configured) {
+            opt.textContent += ' (not configured)';
+            opt.disabled = true;
+            opt.style.color = '#6c757d';
+        }
+        if (p.id === currentMemoryProvider) opt.selected = true;
+        providerSelect.appendChild(opt);
+    });
+    updateMemoryModelDropdown();
+}
+
+async function saveMemoryConfig(event) {
+    event.preventDefault();
+    var form = document.getElementById('memoryConfigForm');
+    var formData = new FormData(form);
+
+    // Check if dimensions will change (provider or model changed)
+    var newProvider = formData.get('embedding_provider');
+    var newModel = formData.get('embedding_model');
+
+    // If provider or model changed from current, warn about dimension change
+    if ((newProvider !== currentMemoryProvider || newModel !== currentMemoryModel) && currentMemoryModel) {
+        if (!confirm('Changing the embedding model may delete all existing agent memories if vector dimensions differ. This cannot be undone.\n\nContinue?')) {
+            return;
+        }
+        document.getElementById('memoryConfirmReset').value = 'true';
+    }
+
+    try {
+        var resp = await fetch('/api/kb/memory-config', {
+            method: 'POST',
+            body: formData,
+        });
+        var data = await resp.json();
+        if (data.success) {
+            var msg = 'Memory configuration saved.';
+            if (data.dimensions_changed) msg += ' Existing memories were cleared (incompatible dimensions). Agent service restarted.';
+            else msg += ' Agent service restarted.';
+            alert(msg);
+            window.location.reload();
+        } else {
+            alert('Failed to save: ' + (data.error || 'Unknown error'));
+        }
+    } catch(e) {
+        alert('Failed to save memory configuration');
+    }
+}
+
+// Initialize model dropdown on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateModelDropdown();
+    updateSynthesisModels();
+    initMemoryConfig();
+});
+
+// --- Configuration ---
+
+async function saveConfig(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+
+    try {
+        const resp = await fetch('/api/kb/config', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Configuration saved', 'success');
+        } else {
+            showToast(result.error || 'Failed to save', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error', 'danger');
+    }
+}
+
+// --- Qdrant Setup ---
+
+async function setupQdrant(mode) {
+    const progress = document.getElementById('setupProgress');
+    const statusText = document.getElementById('setupStatusText');
+    progress.style.display = 'block';
+
+    const data = new FormData();
+    data.append('csrf_token', csrfToken);
+    data.append('mode', mode);
+
+    if (mode === 'cloud') {
+        data.append('cloud_url', document.getElementById('cloudUrl').value);
+        data.append('cloud_api_key', document.getElementById('cloudApiKey').value);
+        statusText.textContent = 'Connecting to Qdrant Cloud...';
+    } else {
+        statusText.textContent = 'Pulling Qdrant Docker image... this may take a few minutes.';
+        const btn = document.getElementById('btnSetupDocker');
+        if (btn) { btn.disabled = true; btn.textContent = 'Setting up...'; }
+    }
+
+    try {
+        const resp = await fetch('/api/kb/qdrant/setup', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast(result.message || 'Qdrant set up successfully!', 'success');
+            setTimeout(function() { location.reload(); }, 1500);
+        } else {
+            showToast(result.error || 'Setup failed', 'danger');
+            progress.style.display = 'none';
+            const btn = document.getElementById('btnSetupDocker');
+            if (btn) { btn.disabled = false; btn.textContent = 'Start Qdrant'; }
+        }
+    } catch (err) {
+        showToast('Network error during setup', 'danger');
+        progress.style.display = 'none';
+    }
+}
+
+function toggleSynthesisPrompt() {
+    const enabled = document.getElementById('synthesisEnabled').checked;
+    document.getElementById('synthesisPromptContainer').style.display = enabled ? 'block' : 'none';
+    const testToggle = document.getElementById('testSynthesisToggle');
+    if (testToggle) {
+        testToggle.style.display = enabled ? 'block' : 'none';
+        if (!enabled) document.getElementById('testSynthesis').checked = false;
+    }
+}
+
+function updateSynthesisModels() {
+    const provider = document.getElementById('synthesisProvider').value;
+    const modelSelect = document.getElementById('synthesisModel');
+    while (modelSelect.options.length > 0) modelSelect.remove(0);
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = 'Default';
+    modelSelect.appendChild(defaultOpt);
+
+    if (!provider || !synthesisLLMs.providers) return;
+
+    const providerData = synthesisLLMs.providers.find(p => p.id === provider);
+    if (providerData && providerData.models) {
+        providerData.models.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.name;
+            if (m.id === currentSynthesisModel) opt.selected = true;
+            modelSelect.appendChild(opt);
+        });
+    }
+}
+
+async function qdrantAction(action) {
+    try {
+        const data = new FormData();
+        data.append('csrf_token', csrfToken);
+        const resp = await fetch('/api/kb/qdrant/' + action, { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast(result.message || 'Qdrant ' + action + ' successful', 'success');
+            setTimeout(function() { location.reload(); }, 1500);
+        } else {
+            showToast(result.error || 'Qdrant ' + action + ' failed', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error', 'danger');
+    }
+}
+
+// --- Collections ---
+
+function showCreateCollectionModal() {
+    const modal = new bootstrap.Modal(document.getElementById('createCollectionModal'));
+    document.getElementById('createCollectionForm').reset();
+    modal.show();
+}
+
+async function createCollection(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+
+    try {
+        const resp = await fetch('/api/kb/collections/create', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Collection created', 'success');
+            const modalEl = document.getElementById('createCollectionModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            setTimeout(function() { location.reload(); }, 1000);
+        } else {
+            showToast(result.error || 'Failed to create collection', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error', 'danger');
+    }
+}
+
+async function deleteCollection(id, name) {
+    if (!confirm('Delete collection "' + name + '"? This will remove all documents and vectors. This cannot be undone.')) return;
+
+    try {
+        const resp = await fetch('/api/kb/collections/' + id, { method: 'DELETE' });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Collection deleted', 'success');
+            setTimeout(function() { location.reload(); }, 1000);
+        } else {
+            showToast(result.error || 'Failed to delete', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error', 'danger');
+    }
+}
+
+// --- Collection Detail ---
+
+async function selectCollection(id) {
+    selectedCollectionId = id;
+
+    // Clear previous search results
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('searchEmpty').style.display = 'block';
+    var sl = document.getElementById('searchResultsList');
+    while (sl.firstChild) sl.removeChild(sl.firstChild);
+    document.getElementById('searchQuery').value = '';
+    document.getElementById('testSynthesis').checked = false;
+    document.getElementById('searchTiming').textContent = '';
+
+    // Highlight selected row
+    document.querySelectorAll('.collection-row').forEach(function(r) { r.classList.remove('table-active'); });
+    const row = document.querySelector('[data-collection-id="' + id + '"]');
+    if (row) row.classList.add('table-active');
+
+    // Show detail panel
+    document.getElementById('collectionDetail').style.display = 'block';
+
+    // Load collection detail
+    try {
+        const resp = await fetch('/api/kb/collections/' + id);
+        const result = await resp.json();
+        if (result.success) {
+            document.getElementById('detailName').textContent = result.collection.name;
+            renderDocumentList(result.documents || []);
+        }
+    } catch (err) {
+        showToast('Failed to load collection details', 'danger');
+    }
+
+    // Scroll to detail panel
+    document.getElementById('collectionDetail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeCollectionDetail() {
+    document.getElementById('collectionDetail').style.display = 'none';
+    selectedCollectionId = null;
+    document.querySelectorAll('.collection-row').forEach(function(r) { r.classList.remove('table-active'); });
+
+    // Clear search results
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('searchEmpty').style.display = 'block';
+    var sl = document.getElementById('searchResultsList');
+    while (sl.firstChild) sl.removeChild(sl.firstChild);
+    document.getElementById('searchQuery').value = '';
+    document.getElementById('testSynthesis').checked = false;
+    document.getElementById('searchTiming').textContent = '';
+}
+
+function renderDocumentList(docs) {
+    const tbody = document.getElementById('documentTableBody');
+    // Clear existing rows
+    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+    if (!docs.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.className = 'text-center text-muted py-3';
+        td.textContent = 'No documents uploaded yet';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    docs.forEach(function(doc) {
+        const tr = document.createElement('tr');
+        const isUrl = doc.source_type === 'url';
+
+        // Name
+        const tdName = document.createElement('td');
+        const icon = document.createElement('i');
+        icon.className = isUrl ? 'bi bi-globe text-primary me-1' : 'bi bi-file-earmark-text text-muted me-1';
+        tdName.appendChild(icon);
+        if (isUrl && doc.source_url) {
+            tdName.appendChild(document.createTextNode(' ' + (doc.filename || 'URL')));
+            tdName.title = doc.source_url;
+        } else {
+            tdName.appendChild(document.createTextNode(' ' + doc.filename));
+        }
+        tr.appendChild(tdName);
+
+        // Size
+        const tdSize = document.createElement('td');
+        tdSize.textContent = formatBytes(doc.size_bytes || 0);
+        tr.appendChild(tdSize);
+
+        // Chunks
+        const tdChunks = document.createElement('td');
+        tdChunks.textContent = doc.chunks_count || 0;
+        tr.appendChild(tdChunks);
+
+        // Uploaded
+        const tdUploaded = document.createElement('td');
+        tdUploaded.textContent = doc.uploaded_at ? formatDashboardDate(doc.uploaded_at) : '-';
+        tr.appendChild(tdUploaded);
+
+        // Status
+        const tdStatus = document.createElement('td');
+        if (isUrl) {
+            if (doc.last_refresh_error) {
+                const errBadge = document.createElement('span');
+                errBadge.className = 'badge bg-danger';
+                errBadge.title = doc.last_refresh_error;
+                const errIcon = document.createElement('i');
+                errIcon.className = 'bi bi-exclamation-triangle';
+                errBadge.appendChild(errIcon);
+                errBadge.appendChild(document.createTextNode(' Error'));
+                tdStatus.appendChild(errBadge);
+            } else if (doc.last_refreshed_at) {
+                const timeBadge = document.createElement('span');
+                timeBadge.className = 'badge bg-secondary';
+                var refreshDate = formatDashboardDateTime(doc.last_refreshed_at);
+                var refreshIcon = document.createElement('i');
+                refreshIcon.className = 'bi bi-arrow-repeat';
+                timeBadge.appendChild(refreshIcon);
+                timeBadge.appendChild(document.createTextNode(' ' + refreshDate));
+                timeBadge.title = 'Last refreshed: ' + refreshDate + ' (every ' + (doc.refresh_interval_hours || 24) + 'h)';
+                tdStatus.appendChild(timeBadge);
+            }
+        } else {
+            var dash = document.createElement('span');
+            dash.className = 'text-muted';
+            dash.textContent = '\u2014';
+            tdStatus.appendChild(dash);
+        }
+        tr.appendChild(tdStatus);
+
+        // Actions
+        const tdActions = document.createElement('td');
+        tdActions.className = 'd-flex gap-1 flex-nowrap';
+
+        if (isUrl) {
+            // Refresh button
+            const refreshBtn = document.createElement('button');
+            refreshBtn.className = 'btn btn-outline-primary btn-sm';
+            refreshBtn.title = 'Refresh now';
+            refreshBtn.onclick = function() { refreshUrlDocument(doc.id); };
+            var rIcon = document.createElement('i');
+            rIcon.className = 'bi bi-arrow-clockwise';
+            refreshBtn.appendChild(rIcon);
+            tdActions.appendChild(refreshBtn);
+
+            // Interval dropdown
+            const intervalSelect = document.createElement('select');
+            intervalSelect.className = 'form-select form-select-sm';
+            intervalSelect.style.width = '72px';
+            intervalSelect.style.fontSize = '0.75rem';
+            intervalSelect.title = 'Refresh interval';
+            var intervals = [{v: 12, t: '12h'}, {v: 24, t: '24h'}, {v: 48, t: '48h'}, {v: 168, t: '7d'}];
+            intervals.forEach(function(opt) {
+                var o = document.createElement('option');
+                o.value = opt.v;
+                o.textContent = opt.t;
+                if (parseInt(doc.refresh_interval_hours || 24) === opt.v) o.selected = true;
+                intervalSelect.appendChild(o);
+            });
+            intervalSelect.onchange = function() { updateRefreshInterval(doc.id, this); };
+            tdActions.appendChild(intervalSelect);
+        }
+
+        // Re-index button
+        const reindexBtn = document.createElement('button');
+        reindexBtn.className = 'btn btn-outline-secondary btn-sm';
+        reindexBtn.title = 'Re-index with current settings';
+        reindexBtn.onclick = function() { reindexDocument(doc.id); };
+        var riIcon = document.createElement('i');
+        riIcon.className = 'bi bi-arrow-repeat';
+        reindexBtn.appendChild(riIcon);
+        tdActions.appendChild(reindexBtn);
+
+        // Download button
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'btn btn-outline-secondary btn-sm';
+        dlBtn.title = 'Download document text';
+        dlBtn.onclick = function() { downloadDocument(doc.id); };
+        var dlIcon = document.createElement('i');
+        dlIcon.className = 'bi bi-download';
+        dlBtn.appendChild(dlIcon);
+        tdActions.appendChild(dlBtn);
+
+        // Delete button
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-outline-danger btn-sm';
+        delBtn.onclick = function() { deleteDocument(doc.id, doc.filename); };
+        var dIcon = document.createElement('i');
+        dIcon.className = 'bi bi-trash';
+        delBtn.appendChild(dIcon);
+        tdActions.appendChild(delBtn);
+
+        tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+    });
+}
+
+// --- Documents ---
+
+async function uploadDocument(e) {
+    e.preventDefault();
+    if (!selectedCollectionId) { showToast('No collection selected', 'warning'); return; }
+
+    const fileInput = document.getElementById('fileInput');
+    if (!fileInput.files.length) { showToast('Please select a file', 'warning'); return; }
+
+    const progress = document.getElementById('uploadProgress');
+    const btn = document.getElementById('btnUpload');
+    progress.style.display = 'block';
+    btn.disabled = true;
+
+    const data = new FormData();
+    data.append('csrf_token', csrfToken);
+    data.append('file', fileInput.files[0]);
+
+    try {
+        const resp = await fetch('/api/kb/collections/' + selectedCollectionId + '/upload', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Uploaded "' + result.filename + '" (' + result.chunks_count + ' chunks)', 'success');
+            fileInput.value = '';
+            selectCollection(selectedCollectionId); // Refresh
+            // Also refresh the main page after a delay to update counts
+            setTimeout(function() { location.reload(); }, 2000);
+        } else {
+            showToast(result.error || 'Upload failed', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error during upload', 'danger');
+    } finally {
+        progress.style.display = 'none';
+        btn.disabled = false;
+    }
+}
+
+async function addUrlDocument(e) {
+    e.preventDefault();
+    if (!selectedCollectionId) { showToast('No collection selected', 'warning'); return; }
+
+    const urlInput = document.getElementById('urlInput');
+    const url = urlInput.value.trim();
+    if (!url) { showToast('Please enter a URL', 'warning'); return; }
+
+    const progress = document.getElementById('uploadProgress');
+    const btn = document.getElementById('btnAddUrl');
+    progress.style.display = 'block';
+    btn.disabled = true;
+
+    const data = new FormData();
+    data.append('csrf_token', csrfToken);
+    data.append('url', url);
+    data.append('refresh_interval_hours', document.getElementById('urlRefreshInterval').value);
+
+    try {
+        const resp = await fetch('/api/kb/collections/' + selectedCollectionId + '/add-url', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Added URL source (' + result.chunks_count + ' chunks)', 'success');
+            urlInput.value = '';
+            selectCollection(selectedCollectionId);
+            setTimeout(function() { location.reload(); }, 2000);
+        } else {
+            showToast(result.error || 'Failed to add URL', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error adding URL', 'danger');
+    } finally {
+        progress.style.display = 'none';
+        btn.disabled = false;
+    }
+}
+
+async function refreshUrlDocument(docId) {
+    if (!selectedCollectionId) return;
+
+    showToast('Refreshing URL source...', 'info');
+    const data = new FormData();
+    data.append('csrf_token', csrfToken);
+
+    try {
+        const resp = await fetch('/api/kb/documents/' + selectedCollectionId + '/' + docId + '/refresh', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('URL source refreshed (' + (result.chunks_count || 0) + ' chunks)', 'success');
+            selectCollection(selectedCollectionId);
+        } else {
+            showToast(result.error || 'Refresh failed', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error during refresh', 'danger');
+    }
+}
+
+async function updateRefreshInterval(docId, selectEl) {
+    if (!selectedCollectionId) return;
+
+    const data = new FormData();
+    data.append('csrf_token', csrfToken);
+    data.append('refresh_interval_hours', selectEl.value);
+
+    try {
+        const resp = await fetch('/api/kb/documents/' + selectedCollectionId + '/' + docId + '/update-interval', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Refresh interval updated', 'success');
+        } else {
+            showToast(result.error || 'Failed to update interval', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error', 'danger');
+    }
+}
+
+async function deleteDocument(docId, filename) {
+    if (!confirm('Delete "' + filename + '"? This will remove the document and its vectors.')) return;
+    if (!selectedCollectionId) return;
+
+    try {
+        const resp = await fetch('/api/kb/documents/' + selectedCollectionId + '/' + docId, { method: 'DELETE' });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Document deleted', 'success');
+            selectCollection(selectedCollectionId); // Refresh
+        } else {
+            showToast(result.error || 'Failed to delete', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error', 'danger');
+    }
+}
+
+// --- Re-index & Download ---
+
+async function reindexDocument(docId) {
+    if (!selectedCollectionId) return;
+    if (!confirm('Re-index this document with current chunking settings? This will re-chunk and re-embed the document.')) return;
+
+    showToast('Re-indexing document...', 'info');
+    const data = new FormData();
+    data.append('csrf_token', csrfToken);
+
+    try {
+        const resp = await fetch('/api/kb/documents/' + selectedCollectionId + '/' + docId + '/reindex', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Re-indexed: ' + (result.filename || '') + ' (' + (result.chunks_count || 0) + ' chunks)', 'success');
+            selectCollection(selectedCollectionId);
+        } else {
+            showToast(result.error || 'Re-index failed', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error during re-index', 'danger');
+    }
+}
+
+async function reindexAllDocuments() {
+    if (!selectedCollectionId) return;
+    if (!confirm('Re-index ALL documents in this collection with current chunking settings? This may take a while for large collections.')) return;
+
+    const btn = document.getElementById('btnReindexAll');
+    if (btn) {
+        btn.disabled = true;
+        while (btn.firstChild) btn.removeChild(btn.firstChild);
+        var spinIcon = document.createElement('i');
+        spinIcon.className = 'bi bi-hourglass-split';
+        btn.appendChild(spinIcon);
+        btn.appendChild(document.createTextNode(' Re-indexing...'));
+    }
+
+    showToast('Re-indexing all documents...', 'info');
+    const data = new FormData();
+    data.append('csrf_token', csrfToken);
+
+    try {
+        const resp = await fetch('/api/kb/collections/' + selectedCollectionId + '/reindex-all', { method: 'POST', body: data });
+        const result = await resp.json();
+        if (result.success) {
+            var msg = 'Re-indexed ' + result.reindexed + ' document(s)';
+            if (result.failed > 0) msg += ', ' + result.failed + ' failed';
+            showToast(msg, result.failed > 0 ? 'warning' : 'success');
+            selectCollection(selectedCollectionId);
+            setTimeout(function() { location.reload(); }, 2000);
+        } else {
+            showToast(result.error || 'Re-index all failed', 'danger');
+        }
+    } catch (err) {
+        showToast('Network error during re-index', 'danger');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            while (btn.firstChild) btn.removeChild(btn.firstChild);
+            var rIcon = document.createElement('i');
+            rIcon.className = 'bi bi-arrow-repeat';
+            btn.appendChild(rIcon);
+            btn.appendChild(document.createTextNode(' Re-index All'));
+        }
+    }
+}
+
+function downloadDocument(docId) {
+    if (!selectedCollectionId) return;
+    window.open('/api/kb/documents/' + selectedCollectionId + '/' + docId + '/download', '_blank');
+}
+
+// --- Search ---
+
+async function testSearch() {
+    const query = document.getElementById('searchQuery').value.trim();
+    if (!query) { showToast('Enter a search query', 'warning'); return; }
+    if (!selectedCollectionId) { showToast('No collection selected', 'warning'); return; }
+
+    document.getElementById('searchEmpty').style.display = 'none';
+    document.getElementById('searchResults').style.display = 'block';
+
+    const resultsList = document.getElementById('searchResultsList');
+    while (resultsList.firstChild) resultsList.removeChild(resultsList.firstChild);
+    const spinner = document.createElement('div');
+    spinner.className = 'text-center py-2';
+    spinner.textContent = 'Searching...';
+    resultsList.appendChild(spinner);
+
+    const data = new FormData();
+    data.append('query', query);
+    data.append('collection_ids', selectedCollectionId);
+    const synthCheckbox = document.getElementById('testSynthesis');
+    if (synthCheckbox && synthCheckbox.checked) {
+        data.append('synthesize', '1');
+    }
+
+    const t0 = performance.now();
+    try {
+        const resp = await fetch('/api/kb/search', { method: 'POST', body: data });
+        const result = await resp.json();
+        const elapsed = Math.round(performance.now() - t0);
+        document.getElementById('searchTiming').textContent = 'Completed in ' + elapsed + 'ms';
+
+        while (resultsList.firstChild) resultsList.removeChild(resultsList.firstChild);
+
+        // Show synthesized answer above raw chunks if available
+        if (result.synthesized_answer) {
+            const synthCard = document.createElement('div');
+            synthCard.className = 'mb-3';
+            synthCard.style.cssText = 'background-color: #000; border: 1px solid var(--border-color); border-radius: 0.25rem; padding: 1rem;';
+
+            const synthHeader = document.createElement('div');
+            synthHeader.className = 'd-flex align-items-center mb-2';
+            const synthIcon = document.createElement('i');
+            synthIcon.className = 'bi bi-stars me-1';
+            synthIcon.style.color = '#0f0';
+            synthHeader.appendChild(synthIcon);
+            const synthLabel = document.createElement('strong');
+            synthLabel.className = 'small';
+            synthLabel.style.color = '#ccc';
+            synthLabel.textContent = 'AI Synthesized Answer';
+            synthHeader.appendChild(synthLabel);
+            synthCard.appendChild(synthHeader);
+
+            const synthPre = document.createElement('pre');
+            synthPre.style.cssText = 'margin: 0;';
+            const synthCode = document.createElement('code');
+            synthCode.style.cssText = 'background-color: #000; color: #0f0; font-family: \'Courier New\', monospace; font-size: 0.875rem; white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto; display: block;';
+            synthCode.textContent = result.synthesized_answer;
+            synthPre.appendChild(synthCode);
+            synthCard.appendChild(synthPre);
+
+            resultsList.appendChild(synthCard);
+
+            // Add separator before raw chunks
+            if (result.results && result.results.length) {
+                const sep = document.createElement('div');
+                sep.className = 'small mb-2';
+                sep.style.color = '#adb5bd';
+                const sepIcon = document.createElement('i');
+                sepIcon.className = 'bi bi-collection me-1';
+                sep.appendChild(sepIcon);
+                sep.appendChild(document.createTextNode('Raw search results:'));
+                resultsList.appendChild(sep);
+            }
+        }
+
+        if (result.success && result.results && result.results.length) {
+            result.results.forEach(function(r) {
+                const card = document.createElement('div');
+                card.className = 'mb-2 p-2';
+                card.style.cssText = 'border: 1px solid var(--border-color); border-radius: 0.375rem; font-size: 0.85rem;';
+
+                const header = document.createElement('div');
+                header.className = 'd-flex justify-content-between align-items-center mb-1';
+
+                const fileLabel = document.createElement('small');
+                fileLabel.className = 'text-muted';
+                fileLabel.textContent = r.filename;
+                header.appendChild(fileLabel);
+
+                const scoreBadge = document.createElement('span');
+                scoreBadge.className = 'badge ' + (r.score >= 0.7 ? 'bg-success' : r.score >= 0.4 ? 'bg-warning text-dark' : 'bg-secondary');
+                scoreBadge.textContent = Math.round(r.score * 100) + '%';
+                header.appendChild(scoreBadge);
+
+                card.appendChild(header);
+
+                const textDiv = document.createElement('div');
+                textDiv.style.cssText = 'white-space: pre-wrap; word-break: break-word;';
+                textDiv.textContent = r.text.length > 800 ? r.text.substring(0, 800) + '...' : r.text;
+                card.appendChild(textDiv);
+
+                resultsList.appendChild(card);
+            });
+        } else if (result.success) {
+            const msg = document.createElement('div');
+            msg.className = 'text-center text-muted py-3';
+            msg.textContent = 'No results found';
+            resultsList.appendChild(msg);
+        } else {
+            const msg = document.createElement('div');
+            msg.className = 'text-center text-danger py-3';
+            msg.textContent = result.error || 'Search failed';
+            resultsList.appendChild(msg);
+        }
+    } catch (err) {
+        while (resultsList.firstChild) resultsList.removeChild(resultsList.firstChild);
+        const msg = document.createElement('div');
+        msg.className = 'text-center text-danger py-3';
+        msg.textContent = 'Network error';
+        resultsList.appendChild(msg);
+    }
+}
+
+// Handle Enter key in search input
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchQuery');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') testSearch();
+        });
+    }
+});
+
+// --- Utilities ---
+
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function showToast(message, type) {
+    type = type || 'info';
+    // Use existing toast system if available
+    if (typeof window.showToastNotification === 'function') {
+        window.showToastNotification(message, type);
+        return;
+    }
+
+    // Create a simple toast
+    var container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '1090';
+        document.body.appendChild(container);
+    }
+
+    var toast = document.createElement('div');
+    toast.className = 'toast align-items-center text-bg-' + type + ' border-0';
+    toast.setAttribute('role', 'alert');
+
+    var d = document.createElement('div');
+    d.className = 'd-flex';
+
+    var body = document.createElement('div');
+    body.className = 'toast-body';
+    body.textContent = message;
+    d.appendChild(body);
+
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'btn-close btn-close-white me-2 m-auto';
+    closeBtn.setAttribute('data-bs-dismiss', 'toast');
+    d.appendChild(closeBtn);
+
+    toast.appendChild(d);
+    container.appendChild(toast);
+
+    var bsToast = new bootstrap.Toast(toast, { delay: 4000 });
+    bsToast.show();
+    toast.addEventListener('hidden.bs.toast', function() { toast.remove(); });
+}
+
+// --- Memory management ---
+var currentMemoryAgentId = '';
+
+function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function viewMemories(agentId, agentName) {
+    currentMemoryAgentId = agentId;
+    document.getElementById('memoryAgentName').textContent = agentName;
+    document.getElementById('memoryDetail').style.display = '';
+    loadMemoryUsers(agentId);
+    loadMemories(agentId);
+}
+
+function closeMemoryDetail() {
+    document.getElementById('memoryDetail').style.display = 'none';
+    currentMemoryAgentId = '';
+}
+
+async function loadMemoryUsers(agentId) {
+    try {
+        const resp = await fetch('/api/kb/memories/' + agentId + '/users');
+        const data = await resp.json();
+        const select = document.getElementById('memoryUserFilter');
+        // Reset to default option
+        while (select.options.length > 0) select.remove(0);
+        var defOpt = document.createElement('option');
+        defOpt.value = '';
+        defOpt.textContent = 'All Users';
+        select.appendChild(defOpt);
+        if (data.success && data.users) {
+            data.users.forEach(function(uid) {
+                var opt = document.createElement('option');
+                opt.value = uid;
+                opt.textContent = uid;
+                select.appendChild(opt);
+            });
+        }
+    } catch(e) { console.error('Failed to load memory users:', e); }
+}
+
+async function loadMemories(agentId, userId) {
+    var url = '/api/kb/memories/' + agentId;
+    if (userId) url += '?user_id=' + encodeURIComponent(userId);
+    var memoryList = document.getElementById('memoryList');
+    // Show loading spinner
+    while (memoryList.firstChild) memoryList.removeChild(memoryList.firstChild);
+    var loadingDiv = document.createElement('div');
+    loadingDiv.className = 'text-center py-3';
+    var spinner = document.createElement('div');
+    spinner.className = 'spinner-border spinner-border-sm text-primary';
+    loadingDiv.appendChild(spinner);
+    loadingDiv.appendChild(document.createTextNode(' Loading...'));
+    memoryList.appendChild(loadingDiv);
+
+    try {
+        const resp = await fetch(url);
+        const data = await resp.json();
+        while (memoryList.firstChild) memoryList.removeChild(memoryList.firstChild);
+
+        if (data.success && data.memories && data.memories.length > 0) {
+            var tableWrap = document.createElement('div');
+            tableWrap.className = 'table-container';
+            var table = document.createElement('table');
+            var thead = document.createElement('thead');
+            var headRow = document.createElement('tr');
+            ['Memory', 'User', 'Created', 'Actions'].forEach(function(h) {
+                var th = document.createElement('th');
+                th.textContent = h;
+                headRow.appendChild(th);
+            });
+            thead.appendChild(headRow);
+            table.appendChild(thead);
+            var tbody = document.createElement('tbody');
+
+            data.memories.forEach(function(mem) {
+                var tr = document.createElement('tr');
+                var tdMem = document.createElement('td');
+
+                // Pin badge inline at start of memory cell when persistent
+                if (mem.persistent) {
+                    var pinBadge = document.createElement('span');
+                    pinBadge.className = 'badge bg-warning text-dark me-2';
+                    var pinBadgeIcon = document.createElement('i');
+                    pinBadgeIcon.className = 'bi bi-pin-angle-fill';
+                    pinBadge.appendChild(pinBadgeIcon);
+                    pinBadge.appendChild(document.createTextNode(' Pinned'));
+                    tdMem.appendChild(pinBadge);
+                }
+
+                tdMem.appendChild(document.createTextNode(mem.memory || mem.data || ''));
+                tr.appendChild(tdMem);
+
+                var tdUser = document.createElement('td');
+                var code = document.createElement('code');
+                code.className = 'small';
+                // Strip #pinned suffix for readability — the badge shows pin state
+                code.textContent = (mem.user_id || '').replace(/#pinned$/, '');
+                tdUser.appendChild(code);
+                tr.appendChild(tdUser);
+
+                var tdCreated = document.createElement('td');
+                tdCreated.textContent = mem.created_at ? formatDashboardDate(mem.created_at) : '';
+                tr.appendChild(tdCreated);
+
+                var tdActions = document.createElement('td');
+                
+                var pinBtn = document.createElement('button');
+                pinBtn.className = 'btn btn-outline-warning btn-sm me-1';
+                pinBtn.setAttribute('data-agent-id', agentId);
+                pinBtn.setAttribute('data-memory-id', mem.id);
+                pinBtn.setAttribute('data-pinned', mem.persistent ? '1' : '0');
+                if (mem.persistent) {
+                    pinBtn.title = 'Unpin this memory — it becomes editable by the agent';
+                    pinBtn.setAttribute('aria-label', 'Unpin memory');
+                } else {
+                    pinBtn.title = 'Pin this memory — protect it from automatic updates';
+                    pinBtn.setAttribute('aria-label', 'Pin memory');
+                }
+                var pinIcon = document.createElement('i');
+                pinIcon.className = mem.persistent ? 'bi bi-pin-angle-fill' : 'bi bi-pin';
+                pinBtn.appendChild(pinIcon);
+                pinBtn.onclick = function() {
+                    togglePinned(
+                        this.getAttribute('data-agent-id'),
+                        this.getAttribute('data-memory-id'),
+                        this.getAttribute('data-pinned') === '1'
+                    );
+                };
+                tdActions.appendChild(pinBtn);
+
+                var delBtn = document.createElement('button');
+                delBtn.className = 'btn btn-outline-danger btn-sm';
+                delBtn.setAttribute('data-agent-id', agentId);
+                delBtn.setAttribute('data-memory-id', mem.id);
+                delBtn.onclick = function() { deleteSingleMemory(this.getAttribute('data-agent-id'), this.getAttribute('data-memory-id')); };
+                var delIcon = document.createElement('i');
+                delIcon.className = 'bi bi-trash';
+                delBtn.appendChild(delIcon);
+                tdActions.appendChild(delBtn);
+                
+                tr.appendChild(tdActions);
+
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            tableWrap.appendChild(table);
+            memoryList.appendChild(tableWrap);
+        } else {
+            var emptyDiv = document.createElement('div');
+            emptyDiv.className = 'text-center py-4 text-muted';
+            var emptyIcon = document.createElement('i');
+            emptyIcon.className = 'bi bi-cloud-upload';
+            emptyIcon.style.fontSize = '2.5rem';
+            emptyIcon.style.opacity = '0.5';
+            emptyDiv.appendChild(emptyIcon);
+            var emptyTitle = document.createElement('div');
+            emptyTitle.className = 'mt-2';
+            emptyTitle.textContent = 'No memories yet';
+            emptyDiv.appendChild(emptyTitle);
+            
+            var emptyHint = document.createElement('div');
+            emptyHint.className = 'small text-muted';
+            emptyHint.textContent = 'Use the Bulk import card above to pre-load caller facts from a CSV.';
+            emptyDiv.appendChild(emptyHint);
+            
+            memoryList.appendChild(emptyDiv);
+        }
+    } catch(e) {
+        while (memoryList.firstChild) memoryList.removeChild(memoryList.firstChild);
+        var errDiv = document.createElement('div');
+        errDiv.className = 'text-center py-3 text-danger';
+        errDiv.textContent = 'Failed to load memories.';
+        memoryList.appendChild(errDiv);
+    }
+}
+
+function filterMemoriesByUser() {
+    var userId = document.getElementById('memoryUserFilter').value;
+    var forgetBtn = document.getElementById('btnForgetUser');
+    forgetBtn.style.display = userId ? '' : 'none';
+    loadMemories(currentMemoryAgentId, userId);
+}
+
+async function deleteSingleMemory(agentId, memoryId) {
+    if (!confirm('Delete this memory?')) return;
+    try {
+        const resp = await fetch('/api/kb/memories/' + agentId + '/' + memoryId, {
+            method: 'DELETE',
+            headers: {'X-CSRFToken': csrfToken},
+        });
+        const data = await resp.json();
+        if (data.success) {
+            var userId = document.getElementById('memoryUserFilter').value;
+            loadMemories(agentId, userId);
+        } else {
+            alert('Failed to delete memory: ' + (data.error || 'Unknown error'));
+        }
+    } catch(e) { alert('Failed to delete memory'); }
+}
+
+async function clearAllMemories(agentId, agentName) {
+    if (!confirm('Delete ALL memories for agent "' + agentName + '"? This cannot be undone.')) return;
+    try {
+        const resp = await fetch('/api/kb/memories/' + agentId, {
+            method: 'DELETE',
+            headers: {'X-CSRFToken': csrfToken},
+        });
+        const data = await resp.json();
+        if (data.success) {
+            alert('All memories cleared for ' + agentName);
+            if (currentMemoryAgentId === agentId) closeMemoryDetail();
+        } else {
+            alert('Failed: ' + (data.error || 'Unknown error'));
+        }
+    } catch(e) { alert('Failed to clear memories'); }
+}
+
+async function forgetUser() {
+    var userId = document.getElementById('memoryUserFilter').value;
+    if (!userId) return;
+    if (!confirm('Delete ALL memories for user "' + userId + '" across ALL agents? This is a privacy/GDPR action and cannot be undone.')) return;
+    try {
+        const resp = await fetch('/api/kb/memories/user/' + encodeURIComponent(userId), {
+            method: 'DELETE',
+            headers: {'X-CSRFToken': csrfToken},
+        });
+        const data = await resp.json();
+        if (data.success) {
+            alert('All memories for ' + userId + ' have been deleted.');
+            document.getElementById('memoryUserFilter').value = '';
+            await loadMemoryUsers(currentMemoryAgentId);
+            filterMemoriesByUser();
+        } else {
+            alert('Failed: ' + (data.error || 'Unknown error'));
+        }
+    } catch(e) { alert('Failed to forget user'); }
+}
+
+// --- Bulk Memory Upload ---
+
+document.addEventListener('DOMContentLoaded', function() {
+    var fileRadio = document.getElementById('bulkSourceFile');
+    var urlRadio = document.getElementById('bulkSourceUrl');
+    if (!fileRadio || !urlRadio) return;
+    function refreshBulkPanes() {
+        var useFile = fileRadio.checked;
+        var filePane = document.getElementById('bulkSourceFilePane');
+        var urlPane = document.getElementById('bulkSourceUrlPane');
+        if (filePane) filePane.style.display = useFile ? '' : 'none';
+        if (urlPane) urlPane.style.display = useFile ? 'none' : '';
+    }
+    fileRadio.addEventListener('change', refreshBulkPanes);
+    urlRadio.addEventListener('change', refreshBulkPanes);
+    var collapseEl = document.getElementById('bulkImportBody');
+    if (collapseEl) {
+        collapseEl.addEventListener('shown.bs.collapse', function() {
+            var lbl = document.getElementById('bulkImportToggleLabel');
+            if (lbl) lbl.textContent = 'Hide';
+        });
+        collapseEl.addEventListener('hidden.bs.collapse', function() {
+            var lbl = document.getElementById('bulkImportToggleLabel');
+            if (lbl) lbl.textContent = 'Show';
+        });
+    }
+});
+
+async function bulkUploadMemories() {
+    if (!currentMemoryAgentId) {
+        alert('Open a memory detail panel first.');
+        return;
+    }
+    var btn = document.getElementById('bulkUploadBtn');
+    var resultDiv = document.getElementById('bulkUploadResult');
+    var fileMode = document.getElementById('bulkSourceFile').checked;
+    var persistent = document.getElementById('bulkPersistent').checked;
+
+    var formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('persistent', persistent ? 'true' : 'false');
+
+    var endpoint;
+    if (fileMode) {
+        var fileInput = document.getElementById('bulkFileInput');
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert('Choose a CSV file first.');
+            return;
+        }
+        formData.append('file', fileInput.files[0]);
+        endpoint = '/api/kb/memories/' + encodeURIComponent(currentMemoryAgentId) + '/bulk-upload';
+    } else {
+        var urlVal = (document.getElementById('bulkUrlInput').value || '').trim();
+        if (!urlVal) {
+            alert('Paste a Google Sheet URL first.');
+            return;
+        }
+        formData.append('url', urlVal);
+        endpoint = '/api/kb/memories/' + encodeURIComponent(currentMemoryAgentId) + '/bulk-upload-url';
+    }
+
+    btn.disabled = true;
+    var originalLabel = btn.textContent;
+    btn.textContent = 'Uploading…';
+    while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+
+    try {
+        var resp = await fetch(endpoint, {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': csrfToken},
+        });
+        var data = await resp.json();
+        renderBulkUploadResult(data, resultDiv);
+        if (data.success) {
+            await loadMemoryUsers(currentMemoryAgentId);
+            await loadMemories(currentMemoryAgentId, document.getElementById('memoryUserFilter').value);
+        }
+    } catch(e) {
+        var errBox = document.createElement('div');
+        errBox.className = 'alert alert-danger';
+        errBox.textContent = 'Upload failed: ' + e;
+        resultDiv.appendChild(errBox);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '';
+        var icon = document.createElement('i');
+        icon.className = 'bi bi-upload me-1';
+        btn.appendChild(icon);
+        btn.appendChild(document.createTextNode(' Import memories'));
+    }
+}
+
+function renderBulkUploadResult(data, container) {
+    while (container.firstChild) container.removeChild(container.firstChild);
+    if (!data.success) {
+        var errBox = document.createElement('div');
+        errBox.className = 'alert alert-danger';
+        errBox.textContent = data.error || 'Upload failed.';
+        container.appendChild(errBox);
+        return;
+    }
+
+    var added = data.added || 0;
+    var failed = data.failed || 0;
+    var phones = data.phones || 0;
+    var skipped = data.skipped || 0;
+    var errors = data.errors || [];
+    var batchId = data.batch_id || '';
+
+    var summary = document.createElement('div');
+    summary.className = 'alert alert-success d-flex justify-content-between align-items-center';
+    summary.appendChild(document.createTextNode(
+        'Added ' + added + ' memories across ' + phones + ' phone numbers.'
+    ));
+    if (batchId) {
+        var rollbackBtn = document.createElement('button');
+        rollbackBtn.className = 'btn btn-outline-secondary btn-sm';
+        rollbackBtn.setAttribute('data-batch-id', batchId);
+        rollbackBtn.textContent = 'Roll back this import';
+        rollbackBtn.onclick = function() {
+            rollbackBatch(this.getAttribute('data-batch-id'));
+        };
+        summary.appendChild(rollbackBtn);
+    }
+    container.appendChild(summary);
+
+    if (errors.length || skipped || failed) {
+        var details = document.createElement('details');
+        details.className = 'alert alert-warning';
+        var summ = document.createElement('summary');
+        summ.textContent = (errors.length + skipped + failed) +
+            ' rows skipped or failed — tap to review.';
+        details.appendChild(summ);
+
+        if (errors.length) {
+            var table = document.createElement('table');
+            table.className = 'table table-sm mt-2 mb-0';
+            var thead = document.createElement('thead');
+            var hr = document.createElement('tr');
+            ['Row', 'Phone', 'Reason'].forEach(function(h) {
+                var th = document.createElement('th');
+                th.textContent = h;
+                hr.appendChild(th);
+            });
+            thead.appendChild(hr);
+            table.appendChild(thead);
+            var tbody = document.createElement('tbody');
+            errors.forEach(function(err) {
+                var tr = document.createElement('tr');
+                var tdRow = document.createElement('td');
+                tdRow.textContent = err.row || '';
+                tr.appendChild(tdRow);
+                var tdPhone = document.createElement('td');
+                tdPhone.textContent = err.phone || '';
+                tr.appendChild(tdPhone);
+                var tdReason = document.createElement('td');
+                tdReason.textContent = err.reason || '';
+                tr.appendChild(tdReason);
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            details.appendChild(table);
+        }
+        container.appendChild(details);
+    }
+}
+
+async function rollbackBatch(batchId) {
+    if (!batchId) return;
+    if (!confirm('Roll back this import? It will permanently delete every memory uploaded in this batch.')) return;
+    try {
+        var resp = await fetch(
+            '/api/kb/memories/' + encodeURIComponent(currentMemoryAgentId) +
+            '/batch/' + encodeURIComponent(batchId),
+            {method: 'DELETE', headers: {'X-CSRFToken': csrfToken}}
+        );
+        var data = await resp.json();
+        if (data.success) {
+            alert('Rolled back ' + (data.deleted || 0) + ' memories.');
+            var resultDiv = document.getElementById('bulkUploadResult');
+            while (resultDiv && resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+            await loadMemoryUsers(currentMemoryAgentId);
+            await loadMemories(currentMemoryAgentId, document.getElementById('memoryUserFilter').value);
+        } else {
+            alert('Rollback failed: ' + (data.error || 'Unknown error'));
+        }
+    } catch(e) { alert('Rollback failed.'); }
+}
+
+async function togglePinned(agentId, memoryId, currentlyPinned) {
+    if (currentlyPinned) {
+        if (!confirm('Unpin this memory? It will no longer be protected from automatic updates or pruning.')) return;
+    }
+    try {
+        var formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('pinned', currentlyPinned ? 'false' : 'true');
+        var resp = await fetch(
+            '/api/kb/memories/' + encodeURIComponent(agentId) + '/' +
+            encodeURIComponent(memoryId) + '/toggle-pinned',
+            {method: 'POST', body: formData, headers: {'X-CSRFToken': csrfToken}}
+        );
+        var data = await resp.json();
+        if (!data.success) {
+            alert('Pin toggle failed: ' + (data.error || 'Unknown error'));
+            return;
+        }
+        if (data.warning === 'old_record_lingering') {
+            showToast(
+                'Pin updated, but the old record could not be deleted — a duplicate may need to be removed manually.',
+                'warning'
+            );
+        }
+        await loadMemories(currentMemoryAgentId, document.getElementById('memoryUserFilter').value);
+    } catch(e) {
+        alert('Pin toggle failed: ' + e);
+    }
+}
+</script>
+
+    
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key"></i> Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <form method="POST" action="https://vaai.aetosiot.com/change-password" autocomplete="off">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="IllYWi1kRFBtX3BvaDcxazQ4N29xTFNVeWhveWZTZWtCUkplNE5JV0JfOFEi.aqgYLQ.IwVVtlTfFaPd9vcXIGXWq0yWN1U">
+                        <div class="mb-3">
+                            <label for="cpm_new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_new_password"
+                                       name="new_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_new_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Minimum 8 characters, must include uppercase, lowercase, and a number.</small>
+                            
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="cpm_strength_bar" class="progress-bar"
+                                     role="progressbar"
+                                     style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="cpm_strength_label" class="form-text text-muted">Strength: —</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpm_confirm_password" class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="cpm_confirm_password"
+                                       name="confirm_password"
+                                       autocomplete="new-password"
+                                       required minlength="8">
+                                <button class="btn btn-secondary" type="button"
+                                        onclick="cpmTogglePassword('cpm_confirm_password', this)"
+                                        tabindex="-1" aria-label="Show or hide password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        function cpmTogglePassword(inputId, button) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var icon = button.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'bi bi-eye';
+            }
+        }
+
+        (function() {
+            var input = document.getElementById('cpm_new_password');
+            var bar = document.getElementById('cpm_strength_bar');
+            var label = document.getElementById('cpm_strength_label');
+            if (!input || !bar || !label) return;
+
+            function scorePassword(pw) {
+                // Simple heuristic — informational only. Counts character-class
+                // diversity + length tier. Does NOT block submit; the server's
+                // own validate_password() is the real gate.
+                if (!pw) return { score: 0, label: 'Strength: —', cls: 'bg-secondary' };
+                var len = pw.length;
+                var classes = 0;
+                if (/[a-z]/.test(pw)) classes++;
+                if (/[A-Z]/.test(pw)) classes++;
+                if (/[0-9]/.test(pw)) classes++;
+                if (/[^A-Za-z0-9]/.test(pw)) classes++;
+
+                var score = 0;
+                if (len >= 8) score += 25;
+                if (len >= 12) score += 20;
+                if (len >= 16) score += 10;
+                score += classes * 11;
+                if (score > 100) score = 100;
+
+                if (score < 35) return { score: score, label: 'Strength: weak', cls: 'bg-danger' };
+                if (score < 65) return { score: score, label: 'Strength: fair', cls: 'bg-warning' };
+                return { score: score, label: 'Strength: strong', cls: 'bg-success' };
+            }
+
+            function update() {
+                var r = scorePassword(input.value);
+                bar.style.width = r.score + '%';
+                bar.setAttribute('aria-valuenow', String(r.score));
+                bar.className = 'progress-bar ' + r.cls;
+                label.textContent = r.label;
+            }
+
+            input.addEventListener('input', update);
+            // Reset on modal hide so re-opening doesn't show a stale meter.
+            var modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    input.value = '';
+                    var confirmInput = document.getElementById('cpm_confirm_password');
+                    if (confirmInput) confirmInput.value = '';
+                    update();
+                });
+            }
+        })();
+    </script>
+
+    <!-- Contextual Help Modal -->
+    
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-primary"></i>
+                        Knowledge Base
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p class="lead mb-4">Create and manage knowledge base collections that give your agents access to searchable information using RAG (Retrieval-Augmented Generation).</p>
+
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Overview
+                        </h6>
+                        
+                        <p class="text-muted">The Knowledge Base lets you upload documents and text that agents can search during conversations. When a caller asks a question, the agent automatically searches relevant collections and uses the results to provide accurate answers.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Getting Started
+                        </h6>
+                        
+                        <p class="text-muted">1. Set up Qdrant (Docker or Cloud) using the setup wizard.
+2. Configure an embedding provider and model.
+3. Create a collection and add documents.
+4. Assign the collection to an agent in the agent editor.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Configuration
+                        </h6>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0" style="background-color: var(--bg-secondary);">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <tr>
+                                        <td><strong>Embedding Provider</strong></td>
+                                        <td>The AI provider used to convert text into vectors for search. Must be configured in Settings &gt; Integrations first.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Embedding Model</strong></td>
+                                        <td>The specific model used for embeddings. Different models produce different quality results.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Results per Search</strong></td>
+                                        <td>How many matching text chunks to return per search query (default: 5).</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Chunk Size</strong></td>
+                                        <td>Size of text chunks in characters. Smaller chunks are more precise, larger chunks provide more context.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Chunk Overlap</strong></td>
+                                        <td>How much adjacent chunks overlap, to avoid splitting important information across chunk boundaries.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Context Chunks</strong></td>
+                                        <td>Number of adjacent chunks to include around each search result for additional context. 0 returns only the matched chunk.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Score Threshold</strong></td>
+                                        <td>Minimum similarity score (0-1) for search results. Results below this threshold are discarded. Lower values return more results, higher values return only the most relevant.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>AI Answer Synthesis</strong></td>
+                                        <td>When enabled, search results are passed through an LLM to synthesize a concise answer before returning to the agent. This produces more natural responses but adds latency and LLM cost.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Synthesis Provider</strong></td>
+                                        <td>The LLM provider used for answer synthesis. Leave as &#39;Use AI Summary default&#39; to use the provider configured in Settings &gt; Integrations.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Synthesis Model</strong></td>
+                                        <td>The specific model used for answer synthesis. Leave as &#39;Default&#39; to use the model configured in Settings &gt; Integrations.</td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><strong>Synthesis Prompt</strong></td>
+                                        <td>The system prompt used when synthesizing answers from search results. Customize this to control how the LLM formats and filters knowledge base results.</td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Collections
+                        </h6>
+                        
+                        <p class="text-muted">Collections group related documents together. Create separate collections for different topics (e.g., &#39;Product Info&#39;, &#39;Company Policies&#39;). Each collection uses the same embedding model configured above.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Documents
+                        </h6>
+                        
+                        <p class="text-muted">Add documents to a collection by pasting text or uploading files. Supported file formats: TXT, MD, CSV, and PDF (max 10MB). PDF files are automatically processed with text extraction. Documents are split into chunks and embedded for vector search. You can view, download, add, or delete documents within each collection.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> URL Sources
+                        </h6>
+                        
+                        <p class="text-muted">Add web page URLs, Google Docs, or Google Sheets as knowledge sources. Content is automatically fetched, extracted, and indexed into the collection. Configure auto-refresh intervals (1 hour, 6 hours, 12 hours, 24 hours, 7 days, or 30 days) to keep content up to date — the system will automatically re-fetch and re-index the URL content on the configured schedule.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Assigning to Agents
+                        </h6>
+                        
+                        <p class="text-muted">In the agent editor (Identity tab), select which collections an agent can search. An agent can access multiple collections. The agent will automatically search assigned collections when it needs information to answer questions.</p>
+                        
+                        
+                    </div>
+                    
+                    <div class="help-section mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-chevron-right"></i> Agent Memories (mem0)
+                        </h6>
+                        
+                        <p class="text-muted">The Agent Memories section at the bottom of this page lets you browse and manage per-agent conversational memory powered by mem0. When memory is enabled on an agent (via the Memory tab in the agent editor), the agent remembers facts from past conversations and recalls them automatically when the same person calls back or chats again.
+
+Voice calls are indexed by the caller&#39;s phone number. Web chats are indexed by a persistent browser ID. You can view all memories per agent, filter by user (phone number or visitor ID), delete individual memories, clear all memories for an agent, or use the &#39;Forget User&#39; button to delete all memories for a specific phone number across all agents (GDPR/privacy compliance).
+
+Requirements: mem0ai package (install from Settings &gt; Dependencies) and Qdrant running.</p>
+                        
+                        
+                    </div>
+                    
+                    
+
+                    <hr class="my-4">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        Need more help? Check the
+                        <a href="https://docs.livekit.io/" target="_blank">LiveKit Documentation</a>
+                        or
+                        <a href="https://docs.livekit.io/agents/" target="_blank">Agents Documentation</a>.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Dashboard Update Notification System -->
+    <script>
+    (function() {
+        const STORAGE_KEYS = {
+            updateAvailable: 'dashboardUpdateAvailable',
+            latestVersion: 'dashboardLatestVersion',
+            lastCheck: 'dashboardUpdateLastCheck',
+            currentVersion: 'dashboardCurrentVersion',
+            isBeta: 'dashboardUpdateIsBeta'
+        };
+        const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const CURRENT_VERSION = 'v1.39.0';
+
+        function updateBadgeVisibility() {
+            const badge = document.getElementById('updateBadgePopup');
+            if (!badge) return;
+
+            const updateAvailable = localStorage.getItem(STORAGE_KEYS.updateAvailable) === 'true';
+            const storedCurrentVersion = localStorage.getItem(STORAGE_KEYS.currentVersion);
+
+            // Clear if version changed (user installed update)
+            if (storedCurrentVersion && storedCurrentVersion !== CURRENT_VERSION) {
+                clearUpdateNotification();
+                return;
+            }
+
+            badge.style.display = updateAvailable ? 'flex' : 'none';
+
+            // Set badge text based on beta flag
+            if (updateAvailable) {
+                const isBeta = localStorage.getItem(STORAGE_KEYS.isBeta) === 'true';
+                const textEl = badge.querySelector('.update-badge-text');
+                if (textEl) textEl.textContent = isBeta ? 'Beta Update' : 'Update Available';
+            }
+        }
+
+        function clearUpdateNotification() {
+            localStorage.removeItem(STORAGE_KEYS.updateAvailable);
+            localStorage.removeItem(STORAGE_KEYS.latestVersion);
+            localStorage.removeItem(STORAGE_KEYS.currentVersion);
+            localStorage.removeItem(STORAGE_KEYS.isBeta);
+            const badge = document.getElementById('updateBadgePopup');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function silentUpdateCheck() {
+            fetch('/api/system/update-check')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.error) return;
+
+                localStorage.setItem(STORAGE_KEYS.lastCheck, Date.now().toString());
+
+                if (data.update_available) {
+                    localStorage.setItem(STORAGE_KEYS.updateAvailable, 'true');
+                    localStorage.setItem(STORAGE_KEYS.latestVersion, data.latest_version);
+                    localStorage.setItem(STORAGE_KEYS.currentVersion, CURRENT_VERSION);
+                    if (data.latest_version && data.latest_version.endsWith('-beta')) {
+                        localStorage.setItem(STORAGE_KEYS.isBeta, 'true');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEYS.isBeta);
+                    }
+                } else {
+                    clearUpdateNotification();
+                }
+                updateBadgeVisibility();
+            })
+            .catch(() => {}); // Silent fail
+        }
+
+        function shouldCheckForUpdates() {
+            const lastCheck = localStorage.getItem(STORAGE_KEYS.lastCheck);
+            if (!lastCheck) return true;
+            return Date.now() - parseInt(lastCheck, 10) > CHECK_INTERVAL_MS;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadgeVisibility();
+            if (shouldCheckForUpdates()) {
+                setTimeout(silentUpdateCheck, 2000); // Delay to not block page load
+            }
+        });
+
+        window.clearUpdateNotification = clearUpdateNotification;
+    })();
+    </script>
+    
+</body>
+</html>

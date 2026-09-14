@@ -1,0 +1,245 @@
+# Setup SIP Trunks with Vonage
+
+A step-by-step guide for configuring Vonage SIP Trunking to work with your LiveKit Voice AI Dashboard.
+
+---
+
+## Prerequisites
+
+- A Vonage / Nexmo account
+- A purchased phone number in Vonage
+- Access to your LiveKit Dashboard
+- Your LiveKit Server's Public IP Address
+
+---
+
+## Part 1: Vonage Portal Configuration
+
+### Step 1: Log In to the Vonage Dashboard
+
+1. Log in to [dashboard.nexmo.com](https://dashboard.nexmo.com)
+2. Navigate to **Numbers** → **SIP Trunking**
+3. Click **Create SIP Trunk**
+
+### Step 2: General Trunk Settings
+
+Configure the basic trunk details:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `LiveKit Trunk` |
+| **Region** | Select the region closest to your LiveKit server (AMER, EMEA, or APAC) |
+
+> **Important:** Vonage outbound termination is regional. The hostname you use in LiveKit depends on which region your numbers and traffic live in. See Step 5 below.
+
+### Step 3: Configure Inbound (IP Whitelist)
+
+Vonage SIP trunking uses **IP whitelist authentication only** — there is no digest username/password for inbound calls.
+
+1. In your trunk's **Inbound Settings**, locate the SIP origination URI field
+2. Enter your LiveKit server's public address:
+
+| Field | Value |
+|-------|-------|
+| **Origination SIP URI** | `sip:your-livekit-server.com:5060` (your LiveKit server FQDN or IP) |
+| **Transport** | `UDP` |
+
+3. Save the inbound configuration
+
+### Step 4: Configure Outbound Authentication
+
+Vonage authenticates outbound calls (calls leaving Vonage to your LiveKit server) by IP whitelist.
+
+1. In your trunk's **Outbound Settings**, locate **Authorized IP Addresses**
+2. Add your **LiveKit Server's Public IP Address**
+3. Save
+
+> **Note:** No SIP digest credentials are issued — Vonage will only accept SIP traffic from the IPs you list here.
+
+### Step 5: Pick Your Outbound Termination Hostname
+
+Vonage termination hostnames are regional:
+
+| Region | Outbound Termination Host |
+|--------|---------------------------|
+| **Americas** (US, Canada, LATAM) | `sip-us.vonage.com` |
+| **EMEA** (Europe, Middle East, Africa) | `sip-eu.vonage.com` |
+| **APAC** (Asia Pacific, including Australia) | `sip-ap.vonage.com` |
+
+Pick the region that matches the country code of the numbers you've purchased and the location of your LiveKit server. Using the wrong region adds 100-300ms of one-way audio latency.
+
+### Step 6: Assign Numbers to the Trunk
+
+1. Navigate to **Numbers** → **Your Numbers**
+2. Locate the number you want to use
+3. Click **Manage** → **Forwarding** → **SIP Trunking**
+4. Select the trunk you created in Step 1
+
+> **Important - Number Format:** Vonage stores phone numbers **without a leading `+`** (e.g., `14155551234`). However, the LiveKit Dashboard normalises everything to E.164 with `+` (e.g., `+14155551234`). Don't worry about this — when entering the number into the dashboard's Inbound/Outbound trunk forms, just paste the digits Vonage shows you and the dashboard will handle the conversion.
+
+### Step 7: Look Up Vonage's Egress IPs
+
+Vonage's signaling subnets change over time. Always pull the **current** list from Vonage's KB article before you start:
+
+```
+https://api.support.vonage.com/hc/en-us/articles/360035471331
+```
+
+Copy the full set of CIDR ranges — you'll paste them into LiveKit's **Allowed Addresses** field in Step 8.
+
+---
+
+## Part 2: LiveKit Dashboard Configuration
+
+### Step 8: Create Inbound SIP Trunk
+
+1. Log into your LiveKit Dashboard
+2. Navigate to **Telephony** → **Inbound Trunks**
+3. Click **+ Create Trunk**
+4. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Vonage Inbound` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Numbers** | Your Vonage number (with or without +; the dashboard normalises) |
+| **Allowed Addresses** | Paste Vonage's egress CIDR ranges (from Step 7) |
+| **Username** | Leave empty |
+| **Password** | Leave empty |
+
+5. Click **Create**
+
+> **Important - Firewall Configuration:**
+> You must also allow Vonage's egress IP ranges in your cloud provider's firewall (AWS Security Groups, GCP Firewall Rules, etc.) for **both TCP and UDP on port 5060**. If your firewall blocks Vonage's IPs, calls will not reach your LiveKit server even if the LiveKit trunk configuration is correct.
+
+### Step 9: Create Dispatch Rule
+
+1. Navigate to **Telephony** → **Dispatch Rules**
+2. Click **+ Create Rule**
+3. Configure the rule:
+
+| Field | Value |
+|-------|-------|
+| **Trunk IDs** | Select `Vonage Inbound` |
+| **Dispatch Rule Type** | Choose based on your needs (Direct/Individual/Multi-Line) |
+| **Room Name** | `support-room` (or your target room) |
+| **Agent Name** | Select your AI Agent |
+
+4. Click **Create**
+
+### Step 10: Create Outbound SIP Trunk
+
+1. Navigate to **Telephony** → **Outbound Trunks**
+2. Click **Create new trunk**
+3. Fill in the form:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Vonage Outbound` |
+| **Address** | `sip-us.vonage.com`, `sip-eu.vonage.com`, or `sip-ap.vonage.com` (choose your region from Step 5) |
+| **Transport** | `UDP` |
+| **Number Format** | `+E.164 (WITH +)` |
+| **Username** | Leave Empty (Using IP Auth) |
+| **Password** | Leave Empty (Using IP Auth) |
+| **Numbers** | Your Vonage number (with or without +; dashboard normalises) |
+
+4. Click **Create**
+
+> **Important - Choosing the Right Region:**
+> - Choose the Vonage region closest to your LiveKit server location for lowest latency
+> - For example: If your server is in AWS Sydney, use `sip-ap.vonage.com`. If in US East, use `sip-us.vonage.com`. If in Frankfurt, use `sip-eu.vonage.com`
+> - The wrong region still works but adds noticeable one-way audio delay
+
+### Step 11: Set Audio Codecs (LiveKit side)
+
+Vonage supports **G.711 μ-law (PCMU)**, **G.711 A-law (PCMA)**, and **Opus**. LiveKit negotiates codecs automatically — no extra config needed unless you've manually restricted codecs in your `livekit-sip` config. If you have, ensure at least one of G.711μ, G.711A, or Opus is allowed.
+
+---
+
+## Part 3: Verification
+
+### Step 12: Test Inbound
+
+1. Call your Vonage number from a mobile phone or external line
+2. Check the **Rooms** page in the dashboard
+3. You should see a new room created when the call connects
+
+**If it fails:**
+- Verify **Allowed Addresses** match Vonage's current egress CIDR list
+- Check that your number is forwarded to the SIP trunk (Step 6)
+- Ensure the inbound Origination SIP URI points to your LiveKit server (Step 3)
+
+### Step 13: Test Outbound
+
+1. Go to **Telephony** → **Outbound Trunks**
+2. Click **Create Outbound Call** (or use the Sandbox)
+3. Enter a destination number in E.164 format and call
+4. Verify caller ID displays correctly and audio works both ways
+
+---
+
+## Troubleshooting Checklist
+
+| Issue | Check |
+|-------|-------|
+| Calls not arriving | Verify Origination SIP URI in Vonage points to your LiveKit server on port 5060 |
+| "Trunk not found" / 404 | Ensure **Allowed Addresses** in LiveKit includes Vonage's full egress CIDR list |
+| 403 Forbidden on outbound | Verify your LiveKit server's public IP is in Vonage's Authorized IP Addresses list |
+| One-way audio | Confirm UDP/RTP ports are open in your cloud firewall and `use_external_ip: true` is set in `livekit-sip` config if your server is behind NAT |
+| No room created | Check dispatch rule is linked to the correct trunk ID |
+| High latency / lag | Verify you're using the regional hostname closest to your LiveKit server (Step 5) |
+| Number routing incorrectly | Confirm the number is forwarded to the SIP trunk in **Numbers** → **Your Numbers** |
+| Number format mismatch | The dashboard accepts both `+14155551234` and `14155551234` — paste whichever Vonage shows you |
+| Codec negotiation failure | Confirm at least G.711μ-law, G.711 A-law, or Opus is enabled on both sides |
+
+---
+
+## Quick Reference: Configuration Summary
+
+**Vonage Side:**
+```
+SIP Trunk: LiveKit Trunk
+Region: AMER / EMEA / APAC
+
+Inbound (Origination):
+  → SIP URI: sip:your-livekit-server.com:5060
+  → Transport: UDP
+
+Outbound Auth:
+  → Authorized IPs: Your LiveKit Server Public IP
+
+Outbound Termination Host:
+  → AMER: sip-us.vonage.com
+  → EMEA: sip-eu.vonage.com
+  → APAC: sip-ap.vonage.com
+
+Numbers:
+  → Forwarded from Numbers → Your Numbers → SIP Trunking
+```
+
+**LiveKit Side:**
+```
+Inbound Trunk:
+  → Name: Vonage Inbound
+  → Number Format: +E.164 (WITH +)
+  → Numbers: Your Vonage number
+  → Allowed Addresses: Vonage egress CIDR list (from KB article)
+  → Auth: None (IP whitelist only)
+
+Dispatch Rule:
+  → Linked to: Vonage Inbound trunk
+  → Type: Direct/Individual/Multi-Line (your choice)
+  → Agent: Your AI agent
+
+Outbound Trunk:
+  → Name: Vonage Outbound
+  → Address: sip-us.vonage.com / sip-eu.vonage.com / sip-ap.vonage.com
+  → Transport: UDP
+  → Number Format: +E.164 (WITH +)
+  → Numbers: Your Vonage number
+  → Auth: None (IP whitelist only)
+```
+
+---
+
+This guide covers the complete end-to-end setup for both inbound and outbound calls via Vonage SIP Trunking with your LiveKit Voice AI Dashboard.

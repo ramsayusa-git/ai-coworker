@@ -1,0 +1,207 @@
+# Setup SIP Trunks with Tronic Cloud
+
+A step-by-step guide for configuring Tronic Cloud SIP Trunking to work with your LiveKit Voice AI Dashboard.
+
+> **This is the recommended provider for LiveKit Dashboard installs.** Tronic Cloud is the same infrastructure that powers the dashboard itself, so the setup wizard pre-fills the IP allowlist and outbound host automatically. You only need to enter the username, password, and your DID(s) — most other providers require 10+ steps of carrier-portal configuration.
+
+---
+
+## Prerequisites
+
+- A Tronic Cloud account (contact **accounts@tronic.com.au** to set up)
+- Your Tronic Cloud SIP **username** and **password** (issued by Tronic Cloud at signup)
+- One or more phone numbers (DIDs) provisioned by Tronic Cloud
+- Access to your LiveKit Dashboard
+
+> **Need credentials or a number?** Email **accounts@tronic.com.au** or **support@tronic.com.au** — the team will provision your trunk credentials and any DID(s) you need.
+
+---
+
+## Part 1: Tronic Cloud Account Setup
+
+### Step 1: Request Credentials
+
+1. Email **accounts@tronic.com.au** or **support@tronic.com.au** with:
+   - Your business name
+   - Country of operation
+   - The phone number(s) (DIDs) you'd like provisioned, or a request to be issued new numbers
+2. Tronic Cloud will reply with:
+   - Your **SIP username** (e.g., `tc_yourcompany`)
+   - Your **SIP password**
+   - The **DID(s)** assigned to your account in E.164 format (e.g., `+61285008007`)
+
+That's all you need from the provider side. There is no carrier portal to configure — Tronic Cloud handles routing, codecs, and number assignment server-side.
+
+### Step 2: (Optional) Log In to the Tronic Cloud Portal
+
+If you'd like to view your account, billing, or call history:
+
+1. Visit [https://tronic.com.au](https://tronic.com.au)
+2. Sign in with the credentials provided in your welcome email
+
+The portal is read-only for trunk configuration — all SIP setup happens in the LiveKit Dashboard.
+
+---
+
+## Part 2: LiveKit Dashboard Configuration
+
+### Step 3: Create Inbound SIP Trunk
+
+1. Log into your LiveKit Dashboard
+2. Navigate to **Telephony** → **Inbound Trunks**
+3. Click **+ Create Trunk**
+4. **Select "Tronic Cloud" as the provider** — the wizard will auto-fill the Allowed Addresses with Tronic's egress IPs.
+5. Fill in the remaining fields:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Tronic Cloud Inbound` |
+| **Number Format** | `no_plus` (E.164 without leading `+`) |
+| **Trunk Type** | `pstn` |
+| **Numbers** | Your Tronic Cloud DID(s), e.g., `61285008007` (no `+`) |
+| **Allowed Addresses** | **Auto-filled by the wizard** (see list below) |
+| **Username** | Leave empty (Tronic Cloud authenticates inbound by IP) |
+| **Password** | Leave empty |
+
+**The 7 Tronic Cloud egress IPs (auto-filled by the wizard):**
+
+```
+168.138.106.10
+168.138.106.85
+168.138.109.106
+152.67.119.40
+34.117.4.72
+130.162.194.63
+158.179.16.254
+```
+
+> **Tip:** Tronic Cloud also publishes the live egress IP list via DNS. Run `nslookup acl.tronic.com.au` from any terminal to fetch the current set — handy if you need to verify the list independently or if Tronic Cloud ever adds new egress nodes.
+
+6. Click **Create**
+
+> **Firewall note:** If you've installed the LiveKit Dashboard on your own cloud server, ensure the 7 IPs above are allowed inbound on **TCP and UDP port 5060** in your cloud provider's firewall. Most Tronic-managed installs already have this configured — if your dashboard was provisioned by Tronic, skip this step.
+
+### Step 4: Create Dispatch Rule
+
+1. Navigate to **Telephony** → **Dispatch Rules**
+2. Click **+ Create Rule**
+3. Configure the rule:
+
+| Field | Value |
+|-------|-------|
+| **Trunk IDs** | Select `Tronic Cloud Inbound` |
+| **Dispatch Rule Type** | `Individual` (per-call room — recommended default) |
+| **Room Prefix** | `caller-` (or your preferred prefix) |
+| **Agent Name** | Select your AI Agent |
+
+4. Click **Create**
+
+> **Why Individual?** The recommended Tronic Cloud config uses individual dispatch (a unique room per call). This keeps each caller isolated and is the cleanest setup for AI voice agents. Use Direct or Multi-Line only if you have a specific reason.
+
+### Step 5: Create Outbound SIP Trunk
+
+1. Navigate to **Telephony** → **Outbound Trunks**
+2. Click **Create new trunk**
+3. **Select "Tronic Cloud" as the provider** — the wizard will auto-fill the Address field.
+4. Fill in the remaining fields:
+
+| Field | Value |
+|-------|-------|
+| **Trunk Name** | `Tronic Cloud Outbound` |
+| **Address** | **Auto-filled:** `voice.tronic.com.au` |
+| **Transport** | `UDP` |
+| **Number Format** | `no_plus` (E.164 without leading `+`) |
+| **Trunk Type** | `pstn` |
+| **Username** | Your Tronic Cloud SIP username (from Step 1) |
+| **Password** | Your Tronic Cloud SIP password (from Step 1) |
+| **Numbers** | Your Tronic Cloud DID(s), e.g., `61285008007` (no `+`) |
+
+5. Click **Create**
+
+> **Single global region:** Tronic Cloud uses a single global termination host (`voice.tronic.com.au`). There are no regional variants to choose — the routing is handled internally.
+
+---
+
+## Part 3: Verification
+
+### Step 6: Test Inbound
+
+1. Call your Tronic Cloud DID from a mobile phone or external line
+2. Check the **Rooms** page in the dashboard
+3. You should see a new room created (with the prefix you set in Step 4) when the call connects
+
+**If it fails:**
+- Verify the DID was paste in **without** the `+` prefix (e.g., `61285008007`, not `+61285008007`)
+- Confirm the dispatch rule is linked to the `Tronic Cloud Inbound` trunk
+- Email **support@tronic.com.au** if calls aren't reaching the dashboard — they can check Tronic Cloud's call routing logs
+
+### Step 7: Test Outbound
+
+1. Go to **Telephony** → **Outbound Trunks**
+2. Click **Create Outbound Call** (or use the Sandbox)
+3. Enter a destination number in E.164 format (e.g., `+61400123456`) and call
+4. Verify caller ID displays correctly and audio works both ways
+
+---
+
+## Troubleshooting Checklist
+
+| Issue | Check |
+|-------|-------|
+| Calls not arriving | Verify the DID was entered **without `+`** (e.g., `61285008007`) and the dispatch rule is linked to the Tronic inbound trunk |
+| 401 / 407 on outbound | Verify Username and Password match exactly what Tronic Cloud emailed you — copy and paste, don't retype |
+| Wrong number format error | Confirm **Number Format** is set to `no_plus` (not `+E.164`) on both inbound and outbound trunks |
+| One-way audio | Ensure your dashboard server's firewall allows UDP/RTP ports for the 7 Tronic egress IPs and `use_external_ip: true` is set in `livekit-sip` config if behind NAT |
+| No room created | Check dispatch rule is linked to the correct trunk ID |
+| Outbound caller ID wrong | Verify the **Numbers** field on the outbound trunk matches your Tronic DID(s) |
+| Need a new DID, billing question, account issue | Email **accounts@tronic.com.au** or **support@tronic.com.au** |
+
+---
+
+## Quick Reference: Configuration Summary
+
+**Tronic Cloud Side:**
+```
+Setup: email accounts@tronic.com.au
+
+Issued by Tronic Cloud:
+  → SIP Username
+  → SIP Password
+  → DID(s) in E.164 format
+
+Authentication:
+  → Inbound: IP whitelist (7 fixed Tronic egress IPs)
+  → Outbound: digest (username + password)
+
+Region: single global (voice.tronic.com.au)
+```
+
+**LiveKit Side:**
+```
+Inbound Trunk:
+  → Name: Tronic Cloud Inbound
+  → Number Format: no_plus
+  → Trunk Type: pstn
+  → Numbers: Your Tronic DID (no +)
+  → Allowed Addresses: 7 Tronic egress IPs (auto-filled)
+  → Auth: None (IP whitelist)
+
+Dispatch Rule:
+  → Linked to: Tronic Cloud Inbound trunk
+  → Type: Individual (recommended)
+  → Room Prefix: caller-
+  → Agent: Your AI agent
+
+Outbound Trunk:
+  → Name: Tronic Cloud Outbound
+  → Address: voice.tronic.com.au (auto-filled)
+  → Transport: UDP
+  → Number Format: no_plus
+  → Trunk Type: pstn
+  → Auth: Tronic SIP username + password
+  → Numbers: Your Tronic DID (no +)
+```
+
+---
+
+This guide covers the complete end-to-end setup for both inbound and outbound calls via Tronic Cloud — the recommended SIP trunk provider for the LiveKit Dashboard.
