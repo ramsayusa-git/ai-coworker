@@ -1,19 +1,24 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import type { ContactFull } from "@/lib/types";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, getToken, getCachedMe } from "@/lib/api";
 import { HelpLink } from "@/components/help-link";
 
+type Row = ContactFull & { companyName?: string | null };
+
 type ApiContact = {
-  id: string; name: string; phoneE164: string; email: string | null;
+  id: string; name: string; phoneE164: string; email: string | null; companyName?: string | null;
   tags: string[]; stage: ContactFull["stage"]; optIn: boolean;
   createdAt: string; lastContactedAt: string;
 };
 
-function fromApi(c: ApiContact): ContactFull {
-  return { id: c.id, name: c.name, phone: c.phoneE164, email: c.email ?? undefined,
+function fromApi(c: ApiContact): Row {
+  return { id: c.id, name: c.name, phone: c.phoneE164, email: c.email ?? undefined, companyName: c.companyName,
     tags: c.tags ?? [], stage: c.stage, optIn: c.optIn, createdAt: c.createdAt, lastContactedAt: c.lastContactedAt };
 }
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 const stageColor: Record<ContactFull["stage"], string> = {
   lead: "bg-amber-100 text-amber-700",
@@ -30,12 +35,14 @@ function timeAgo(iso: string) {
 }
 
 export function ContactsView() {
-  const [contacts, setContacts] = useState<ContactFull[]>([]);
+  const [contacts, setContacts] = useState<Row[]>([]);
   const [query, setQuery] = useState("");
   const [stage, setStage] = useState<ContactFull["stage"] | "all">("all");
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [saving, setSaving] = useState(false);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     const rows: ApiContact[] = await apiFetch("/contacts");
@@ -70,18 +77,100 @@ export function ContactsView() {
     await apiFetch(`/contacts/${id}`, { method: "DELETE" });
   }
 
+  async function exportCsv() {
+    const token = getToken();
+    const orgId = getCachedMe()?.orgId;
+    const res = await fetch(`${API_BASE}/v1/orgs/${orgId}/contacts/export.csv`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "contacts.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // Minimal CSV parser: handles quoted fields with embedded commas — good enough for a
+  // contacts export/import round-trip and typical spreadsheet exports (Excel/Sheets/CRM).
+  function parseCsv(text: string): string[][] {
+    const rows: string[][] = [];
+    let row: string[] = [], field = "", inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (inQuotes) {
+        if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (ch === '"') inQuotes = false;
+        else field += ch;
+      } else if (ch === '"') inQuotes = true;
+      else if (ch === ",") { row.push(field); field = ""; }
+      else if (ch === "\n" || ch === "\r") {
+        if (ch === "\r" && text[i + 1] === "\n") i++;
+        row.push(field); field = "";
+        if (row.some((f) => f !== "")) rows.push(row);
+        row = [];
+      } else field += ch;
+    }
+    if (field || row.length) { row.push(field); if (row.some((f) => f !== "")) rows.push(row); }
+    return rows;
+  }
+
+  async function importCsvFile(file: File) {
+    setImportMsg("Importing…");
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+      if (rows.length < 2) { setImportMsg("No data rows found in that file."); return; }
+      const header = rows[0].map((h) => h.trim().toLowerCase());
+      const idx = (name: string) => header.findIndex((h) => h === name);
+      const nameIdx = idx("name"), phoneIdx = idx("phone") >= 0 ? idx("phone") : idx("phonee164");
+      if (nameIdx < 0 || phoneIdx < 0) { setImportMsg("CSV needs at least Name and Phone columns."); return; }
+      const emailIdx = idx("email"), companyIdx = idx("company"), tagsIdx = idx("tags"), stageIdx = idx("stage"), sourceIdx = idx("source");
+      const payload = rows.slice(1).map((r) => ({
+        name: r[nameIdx], phoneE164: r[phoneIdx],
+        email: emailIdx >= 0 ? r[emailIdx] : undefined,
+        companyName: companyIdx >= 0 ? r[companyIdx] : undefined,
+        tags: tagsIdx >= 0 && r[tagsIdx] ? r[tagsIdx].split(";").map((t) => t.trim()).filter(Boolean) : undefined,
+        stage: stageIdx >= 0 ? r[stageIdx] : undefined,
+        source: sourceIdx >= 0 ? r[sourceIdx] : undefined,
+      }));
+      const result = await apiFetch("/contacts/import", { method: "POST", body: JSON.stringify({ rows: payload }) });
+      setImportMsg(`Imported: ${result.created} new, ${result.updated} updated, ${result.skipped} skipped.`);
+      await load();
+    } catch (e) {
+      setImportMsg(e instanceof Error ? e.message : "Import failed");
+    }
+  }
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Contacts</h1>
         <div className="flex items-center gap-2">
           <HelpLink anchor="contacts" />
+          <input ref={fileInputRef} type="file" accept=".csv" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) importCsvFile(f); e.target.value = ""; }} />
+          <button onClick={() => fileInputRef.current?.click()}
+            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50">
+            Import CSV
+          </button>
+          <button onClick={exportCsv}
+            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50">
+            Export CSV
+          </button>
           <button onClick={() => setShowAdd((s) => !s)}
             className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
             + Add contact
           </button>
         </div>
       </div>
+
+      {importMsg && (
+        <div className="mb-3 flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+          {importMsg}
+          <button onClick={() => setImportMsg(null)} className="text-emerald-500 hover:text-emerald-700">✕</button>
+        </div>
+      )}
 
       {showAdd && (
         <div className="mb-4 flex flex-wrap items-end gap-2 rounded-lg border border-zinc-200 bg-white p-4">
@@ -127,6 +216,7 @@ export function ContactsView() {
           <thead className="border-b border-zinc-200 bg-zinc-50 text-left text-xs text-zinc-500">
             <tr>
               <th className="px-4 py-2 font-medium">Name</th>
+              <th className="px-4 py-2 font-medium">Company</th>
               <th className="px-4 py-2 font-medium">Phone</th>
               <th className="px-4 py-2 font-medium">Stage</th>
               <th className="px-4 py-2 font-medium">Tags</th>
@@ -138,7 +228,10 @@ export function ContactsView() {
           <tbody>
             {filtered.map((c) => (
               <tr key={c.id} className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50">
-                <td className="px-4 py-2 font-medium">{c.name}</td>
+                <td className="px-4 py-2 font-medium">
+                  <Link href={`/contacts/${c.id}`} className="text-emerald-700 hover:underline">{c.name}</Link>
+                </td>
+                <td className="px-4 py-2 text-zinc-600">{c.companyName || "—"}</td>
                 <td className="px-4 py-2 text-zinc-600">{c.phone}</td>
                 <td className="px-4 py-2">
                   <span className={`rounded px-1.5 py-0.5 text-xs capitalize ${stageColor[c.stage]}`}>{c.stage}</span>
@@ -158,7 +251,7 @@ export function ContactsView() {
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-zinc-400">No contacts match.</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-zinc-400">No contacts match.</td></tr>
             )}
           </tbody>
         </table>

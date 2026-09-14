@@ -18,6 +18,8 @@ import { automationsRoutes } from "./modules/automations.js";
 import { adsRoutes, processScheduledAds } from "./modules/ads.js";
 import { socialPostsRoutes, processScheduledSocialPosts } from "./modules/social-posts.js";
 import { dealsRoutes } from "./modules/deals.js";
+import { companiesRoutes } from "./modules/companies.js";
+import { tasksRoutes } from "./modules/tasks.js";
 
 const app = Fastify({
   logger: { transport: { target: "pino-pretty", options: { translateTime: "HH:MM:ss", ignore: "pid,hostname" } } },
@@ -62,6 +64,8 @@ await app.register(async (scoped) => {
   await scoped.register(adsRoutes);
   await scoped.register(socialPostsRoutes);
   await scoped.register(dealsRoutes);
+  await scoped.register(companiesRoutes);
+  await scoped.register(tasksRoutes);
 }, { prefix: "/v1" });
 
 const port = Number(process.env.PORT ?? 4000);

@@ -24,3 +24,76 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ---------------------------------------------------------------------------
+   White-label brand re-skin.
+   The app's UI is built with static Tailwind `emerald-*` utility classes
+   (buttons, links, borders, focus rings — ~200 occurrences across ~30
+   files). Rather than parameterize every className, these overrides
+   redirect the compiled emerald-* utilities to CSS custom properties that
+   BrandProvider (components/brand-provider.tsx) sets from the signed-in
+   org's partner brand (or the public /public/branding lookup pre-login).
+   Values default to the platform's own emerald-600 (#059669) scale, so
+   nothing changes for orgs with no partner brand. !important is required
+   because Tailwind's own utility classes would otherwise win by source order.
+--------------------------------------------------------------------------- */
+:root {
+  --brand-50: #ecfdf5;
+  --brand-100: #d1fae5;
+  --brand-200: #a7f3d0;
+  --brand-300: #6ee7b7;
+  --brand-400: #34d399;
+  --brand-500: #10b981;
+  --brand-600: #059669;
+  --brand-700: #047857;
+  --brand-800: #065f46;
+  --brand-900: #064e3b;
+}
+
+.bg-emerald-50 { background-color: var(--brand-50) !important; }
+.bg-emerald-100 { background-color: var(--brand-100) !important; }
+.bg-emerald-200 { background-color: var(--brand-200) !important; }
+.bg-emerald-300 { background-color: var(--brand-300) !important; }
+.bg-emerald-400 { background-color: var(--brand-400) !important; }
+.bg-emerald-500 { background-color: var(--brand-500) !important; }
+.bg-emerald-600 { background-color: var(--brand-600) !important; }
+.bg-emerald-700 { background-color: var(--brand-700) !important; }
+.bg-emerald-800 { background-color: var(--brand-800) !important; }
+.bg-emerald-900 { background-color: var(--brand-900) !important; }
+
+.text-emerald-50 { color: var(--brand-50) !important; }
+.text-emerald-100 { color: var(--brand-100) !important; }
+.text-emerald-200 { color: var(--brand-200) !important; }
+.text-emerald-300 { color: var(--brand-300) !important; }
+.text-emerald-400 { color: var(--brand-400) !important; }
+.text-emerald-500 { color: var(--brand-500) !important; }
+.text-emerald-600 { color: var(--brand-600) !important; }
+.text-emerald-700 { color: var(--brand-700) !important; }
+.text-emerald-800 { color: var(--brand-800) !important; }
+.text-emerald-900 { color: var(--brand-900) !important; }
+
+.border-emerald-100 { border-color: var(--brand-100) !important; }
+.border-emerald-200 { border-color: var(--brand-200) !important; }
+.border-emerald-300 { border-color: var(--brand-300) !important; }
+.border-emerald-400 { border-color: var(--brand-400) !important; }
+.border-emerald-500 { border-color: var(--brand-500) !important; }
+.border-emerald-600 { border-color: var(--brand-600) !important; }
+.border-emerald-700 { border-color: var(--brand-700) !important; }
+
+.ring-emerald-500 { --tw-ring-color: var(--brand-500) !important; }
+.ring-emerald-600 { --tw-ring-color: var(--brand-600) !important; }
+
+.hover\:bg-emerald-50:hover { background-color: var(--brand-50) !important; }
+.hover\:bg-emerald-100:hover { background-color: var(--brand-100) !important; }
+.hover\:bg-emerald-600:hover { background-color: var(--brand-600) !important; }
+.hover\:bg-emerald-700:hover { background-color: var(--brand-700) !important; }
+
+.hover\:text-emerald-600:hover { color: var(--brand-600) !important; }
+.hover\:text-emerald-700:hover { color: var(--brand-700) !important; }
+
+.hover\:border-emerald-300:hover { border-color: var(--brand-300) !important; }
+.hover\:border-emerald-400:hover { border-color: var(--brand-400) !important; }
+.hover\:border-emerald-600:hover { border-color: var(--brand-600) !important; }
+
+.focus\:border-emerald-500:focus { border-color: var(--brand-500) !important; }
+.focus\:border-emerald-600:focus { border-color: var(--brand-600) !important; }

@@ -302,3 +302,63 @@ export interface DealsAnalytics {
   won90d: number;
   lost90d: number;
 }
+
+export interface Company {
+  id: string;
+  name: string;
+  domain: string | null;
+  industry: string | null;
+  phone: string | null;
+  address: string | null;
+  notes: string | null;
+  ownerId: string | null;
+  createdAt: string;
+  contactCount: number;
+  openDealCount: number;
+}
+
+export type TaskType = "call" | "whatsapp" | "meeting" | "follow_up" | "other";
+export type TaskStatus = "open" | "done";
+
+export interface CrmTask {
+  id: string;
+  title: string;
+  description: string | null;
+  type: TaskType;
+  status: TaskStatus;
+  dueAt: string | null;
+  contactId: string | null;
+  dealId: string | null;
+  assigneeId: string | null;
+  createdBy: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  contactName?: string | null;
+  dealTitle?: string | null;
+  assigneeName?: string | null;
+}
+
+export interface ContactRecord {
+  id: string;
+  waId: string | null;
+  phoneE164: string;
+  name: string;
+  email: string | null;
+  jobTitle: string | null;
+  companyId: string | null;
+  companyName?: string | null;
+  ownerId: string | null;
+  source: string | null;
+  tags: string[];
+  stage: string;
+  optIn: boolean;
+  createdAt: string;
+  lastContactedAt: string;
+}
+
+export interface ContactDetail {
+  contact: ContactRecord & { attributes: Record<string, unknown> };
+  deals: Deal[];
+  tasks: CrmTask[];
+  conversations: Conversation[];
+}

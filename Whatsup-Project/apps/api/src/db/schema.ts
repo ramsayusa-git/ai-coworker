@@ -142,6 +142,22 @@ export const channels = pgTable("channels", {
   connectedAt: timestamp("connected_at").defaultNow(),
 });
 
+// CRM company/account — the B2B entity a contact (person) belongs to. Optional: plenty of
+// orgs are B2C and never set this, but any org selling to businesses needs a place to roll
+// up multiple contacts + deals under one account, same as wacrm/any real CRM's Companies tab.
+export const companies = pgTable("companies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  domain: text("domain"),
+  industry: text("industry"),
+  phone: text("phone"),
+  address: text("address"),
+  notes: text("notes"),
+  ownerId: uuid("owner_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const contacts = pgTable("contacts", {
   id: uuid("id").primaryKey().defaultRandom(),
   orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
@@ -149,6 +165,10 @@ export const contacts = pgTable("contacts", {
   phoneE164: text("phone_e164").notNull(),
   name: text("name").notNull(),
   email: text("email"),
+  jobTitle: text("job_title"),
+  companyId: uuid("company_id").references(() => companies.id, { onDelete: "set null" }),
+  ownerId: uuid("owner_id").references(() => users.id),
+  source: text("source"), // where this lead/contact came from — "website", "referral", "ad", etc; free text, no fixed list
   attributes: jsonb("attributes").$type<Record<string, unknown>>().default({}),
   tags: text("tags").array().default([]),
   stage: text("stage").default("lead"),
@@ -156,6 +176,30 @@ export const contacts = pgTable("contacts", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastContactedAt: timestamp("last_contacted_at").defaultNow(),
 }, (t) => [unique().on(t.orgId, t.phoneE164)]);
+
+// CRM follow-ups/reminders/activities — a task tied to a contact and/or a deal, assignable,
+// with a due date. This is what turns "I'll follow up with this lead next week" into
+// something the CRM actually tracks and surfaces, rather than living only in someone's head
+// or a WhatsApp thread. Deliberately simple (no recurrence, no calendar sync) — matches what
+// wacrm/most WhatsApp-CRM competitors ship as their "Tasks"/"Activities" module.
+export const taskTypeEnum = pgEnum("task_type", ["call", "whatsapp", "meeting", "follow_up", "other"]);
+export const taskStatusEnum = pgEnum("task_status", ["open", "done"]);
+
+export const tasks = pgTable("tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: taskTypeEnum("type").default("follow_up"),
+  status: taskStatusEnum("status").default("open"),
+  dueAt: timestamp("due_at"),
+  contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "cascade" }),
+  dealId: uuid("deal_id").references(() => deals.id, { onDelete: "cascade" }),
+  assigneeId: uuid("assignee_id").references(() => users.id),
+  createdBy: uuid("created_by").references(() => users.id),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
 export const conversations = pgTable("conversations", {
   id: uuid("id").primaryKey().defaultRandom(),
