@@ -285,7 +285,7 @@ export async function partnersRoutes(app: FastifyInstance) {
     const host = ((req.query as { host?: string })?.host || (req.headers.host as string) || "")
       .split(":")[0].trim().toLowerCase();
     type Brand = { brandName: string; logoUrl: string | null; faviconUrl: string | null; footerText: string | null; primaryColor: string };
-    const DEFAULT_BRAND: Brand = { brandName: "Aetos One Chat", logoUrl: null, faviconUrl: null, footerText: null, primaryColor: "#059669" };
+    const DEFAULT_BRAND: Brand = { brandName: "Loqio", logoUrl: null, faviconUrl: null, footerText: null, primaryColor: "#059669" };
     if (!host) return DEFAULT_BRAND;
     const [partner] = await db.select().from(partners).where(eq(partners.customDomain, host));
     if (!partner || partner.customDomainStatus !== "verified" || !partner.customDomainActive) return DEFAULT_BRAND;

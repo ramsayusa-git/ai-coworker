@@ -5,6 +5,7 @@ import { eq, and, isNull } from "drizzle-orm";
 import { db, withOrgDb } from "../db/client.js";
 import { users, orgMembers, orgs, partners, invites } from "../db/schema.js";
 import { ACCESS_TOKEN_TTL, issueRefreshFamily, rotateRefreshToken, revokeRefreshToken } from "../auth-tokens.js";
+import { seedDefaultPipeline } from "./deals.js";
 
 function signSession(app: FastifyInstance, userId: string, orgId: string, role: string, email: string, functionalRoles: string[] = []) {
   return app.jwt.sign({ userId, orgId, role, email, functionalRoles }, { expiresIn: ACCESS_TOKEN_TTL });
@@ -83,6 +84,9 @@ export async function authRoutes(app: FastifyInstance) {
 
     const [org] = await db.insert(orgs).values({ partnerId: directPartner.id, name: orgName.trim() }).returning();
     await db.insert(orgMembers).values({ orgId: org.id, userId: user.id, role: "org_owner", status: "active" });
+    // Every new org gets a starter Sales Pipeline (New Lead -> ... -> Won) so Deals isn't
+    // an empty screen on day one. Best-effort: a failure here shouldn't block signup.
+    await seedDefaultPipeline(org.id).catch((err) => app.log.error({ err }, "seedDefaultPipeline failed"));
 
     const token = signSession(app, user.id, org.id, "org_owner", user.email);
     const refreshToken = await issueRefreshFamily(user.id);

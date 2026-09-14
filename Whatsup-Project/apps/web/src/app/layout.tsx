@@ -5,7 +5,7 @@ import { BrandProvider } from "@/components/brand-provider";
 import { LanguageProvider } from "@/components/marketing/language-context";
 
 export const metadata: Metadata = {
-  title: "Aetos One Chat",
+  title: "Loqio",
   description: "WhatsApp Business messaging platform",
 };
 

@@ -17,12 +17,17 @@ import { analyticsRoutes } from "./modules/analytics.js";
 import { automationsRoutes } from "./modules/automations.js";
 import { adsRoutes, processScheduledAds } from "./modules/ads.js";
 import { socialPostsRoutes, processScheduledSocialPosts } from "./modules/social-posts.js";
+import { dealsRoutes } from "./modules/deals.js";
 
 const app = Fastify({
   logger: { transport: { target: "pino-pretty", options: { translateTime: "HH:MM:ss", ignore: "pid,hostname" } } },
 });
 
-await app.register(cors, { origin: true });
+// @fastify/cors v11's own default `methods` is just "GET,HEAD,POST" (not the full REST verb
+// set docs imply) — every PATCH/PUT/DELETE route in this app was silently unreachable from
+// the browser (blocked at the preflight, never even logged server-side) until this was made
+// explicit. Found while wiring up Deals' PATCH routes; applies to every existing module too.
+await app.register(cors, { origin: true, methods: ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE"] });
 await app.register(authPlugin);
 
 app.get("/health", async () => ({ ok: true, ts: new Date().toISOString() }));
@@ -56,6 +61,7 @@ await app.register(async (scoped) => {
   await scoped.register(automationsRoutes);
   await scoped.register(adsRoutes);
   await scoped.register(socialPostsRoutes);
+  await scoped.register(dealsRoutes);
 }, { prefix: "/v1" });
 
 const port = Number(process.env.PORT ?? 4000);

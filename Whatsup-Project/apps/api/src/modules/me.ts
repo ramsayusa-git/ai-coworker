@@ -4,7 +4,7 @@ import { db } from "../db/client.js";
 import { orgs, users, partners } from "../db/schema.js";
 
 type Brand = { brandName: string; logoUrl: string | null; faviconUrl: string | null; footerText: string | null; primaryColor: string };
-const DEFAULT_BRAND: Brand = { brandName: "Aetos One Chat", logoUrl: null, faviconUrl: null, footerText: null, primaryColor: "#059669" };
+const DEFAULT_BRAND: Brand = { brandName: "Loqio", logoUrl: null, faviconUrl: null, footerText: null, primaryColor: "#059669" };
 
 export async function meRoutes(app: FastifyInstance) {
   app.get("/me", { preHandler: app.authenticate }, async (req, reply) => {

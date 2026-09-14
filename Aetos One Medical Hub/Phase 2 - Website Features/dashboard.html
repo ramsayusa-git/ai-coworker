@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos One Medical Hub - Feature Dashboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #003d82;
+            --primary-dark: #001f47;
+            --primary-light: #0066cc;
+            --secondary: #00897b;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --bg-light: #f8f9fb;
+            --bg-white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-light: #666666;
+            --border: #e0e0e0;
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-light: #1a1a1a;
+                --bg-white: #2d2d2d;
+                --text-dark: #f5f5f5;
+                --text-light: #b0b0b0;
+                --border: #404040;
+            }
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 60px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--text-light);
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--success);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge.secondary {
+            background: var(--primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .btn.secondary {
+            background: var(--secondary);
+        }
+
+        .btn.secondary:hover {
+            background: #00695c;
+        }
+
+        .highlight-box {
+            background: linear-gradient(120deg, var(--accent), var(--primary-light));
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+
+        .highlight-box h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            background: var(--bg-white);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Aetos One Medical Hub</h1>
+            <p>Feature Dashboard - Phase 2 Complete</p>
+        </header>
+
+        <div class="highlight-box">
+            <h2>✨ Live Device Vitals Inside Consultations</h2>
+            <p>The only platform in India combining real-time ECG, BP, and glucose readings with video consultations, integrated with ABDM, FHIR, and national health standards.</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number">8</div>
+                <div class="stat-label">Phase 2 Features Complete</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">400+</div>
+                <div class="stat-label">Lab Tests Supported</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">20+</div>
+                <div class="stat-label">Pharmacy Partners</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">6</div>
+                <div class="stat-label">Export Formats</div>
+            </div>
+        </div>
+
+        <!-- LANDING PAGES -->
+        <section class="section">
+            <h2 class="section-title">🌐 Landing Pages</h2>
+            <div class="grid">
+                <a href="index.html" class="card">
+                    <div class="card-icon">📱</div>
+                    <h3>Main Website</h3>
+                    <p>Professional landing page with feature overview, pricing, testimonials, and trust metrics.</p>
+                    <div class="card-footer">
+                        <span class="badge">Production Ready</span>
+                    </div>
+                </a>
+
+                <a href="index-enhanced.html" class="card">
+                    <div class="card-icon">🗺️</div>
+                    <h3>Enhanced Design</h3>
+                    <p>Sophisticated version with interactive Indian map, dark mode, and eSanjeevani-inspired UI.</p>
+                    <div class="card-footer">
+                        <span class="badge">Premium</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- PHASE 2 FEATURES -->
+        <section class="section">
+            <h2 class="section-title">✅ Phase 2 Features (Complete)</h2>
+            <div class="grid">
+                <a href="aetos-phase2-ocr-document-scanning.html" class="card">
+                    <div class="card-icon">📸</div>
+                    <h3>OCR Document Scanning</h3>
+                    <p>Capture medical documents with phone camera, AI extracts data, user corrects and saves to health records.</p>
+                    <div class="card-footer">
+                        <span class="badge">Complete</span>
+                    </div>
+                </a>
+
+                <a href="aetos-phase2-pharmacy-directory-v2.html" class="card">
+                    <div class="card-icon">💊</div>
+                    <h3>Pharmacy Directory</h3>
+                    <p>Browse 20+ pharmacy partners, check medicine availability, place orders with 2-4 hour delivery.</p>
+                    <div class="card-footer">
+                        <span class="badge">Complete</span>
+                    </div>
+                </a>
+
+                <a href="aetos-phase2-lab-test-pricing.html" class="card">
+                    <div class="card-icon">🔬</div>
+                    <h3>Lab Test Pricing</h3>
+                    <p>Compare 400+ diagnostic tests across categories, book home collection, track results in real-time.</p>
+                    <div class="card-footer">
+                        <span class="badge">Complete</span>
+                    </div>
+                </a>
+
+                <a href="aetos-phase2-delivery-tracking.html" class="card">
+                    <div class="card-icon">📍</div>
+                    <h3>Delivery Tracking</h3>
+                    <p>Real-time GPS tracking, 5-step timeline (confirmed → picked → transit → near → delivered), geofence alerts.</p>
+                    <div class="card-footer">
+                        <span class="badge">Complete</span>
+                    </div>
+                </a>
+
+                <a href="aetos-phase2-medical-history-timeline.html" class="card">
+                    <div class="card-icon">📋</div>
+                    <h3>Medical History Timeline</h3>
+                    <p>10-type timeline (consults, prescriptions, labs, imaging, surgeries, allergies, family history). Filter, search, export.</p>
+                    <div class="card-footer">
+                        <span class="badge">Complete</span>
+                    </div>
+                </a>
+
+                <a href="aetos-phase2-prescription-refill-automation.html" class="card">
+                    <div class="card-icon">💉</div>
+                    <h3>Prescription Refill</h3>
+                    <p>Auto-refill reminders based on medication schedule, one-click refill, dosage verification, refill history.</p>
+                    <div class="card-footer">
+                        <span class="badge">Complete</span>
+                    </div>
+                </a>
+
+                <a href="aetos-phase2-consultation-history-export.html" class="card">
+                    <div class="card-icon">📥</div>
+                    <h3>Export Consultations</h3>
+                    <p>Export in 6 formats: PDF, CSV, JSON, FHIR R4, HL7 v2.5, Summary. Shareable via email with expiring links.</p>
+                    <div class="card-footer">
+                        <span class="badge">Complete</span>
+                    </div>
+                </a>
+
+                <a href="aetos-phase2-family-account-linking.html" class="card">
+                    <div class="card-icon">👨‍👩‍👧‍👦</div>
+                    <h3>Family Accounts</h3>
+                    <p>Link family members with RBAC controls (view-only, manage), parental controls for minors, emergency access.</p>
+                    <div class="card-footer">
+                        <span class="badge">Complete</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- DOCUMENTATION -->
+        <section class="section">
+            <h2 class="section-title">📚 Documentation</h2>
+            <div class="grid">
+                <a href="aetos-products-comprehensive-guide.html" class="card">
+                    <div class="card-icon">📖</div>
+                    <h3>Product Guide</h3>
+                    <p>Complete documentation with architecture diagrams, workflows, data flows, integrations, and compliance framework.</p>
+                    <div class="card-footer">
+                        <span class="badge secondary">Reference</span>
+                    </div>
+                </a>
+
+                <a href="aetos-care-competitor-analysis.html" class="card">
+                    <div class="card-icon">📊</div>
+                    <h3>Competitor Analysis</h3>
+                    <p>Analysis of India's top 20 healthcare platforms with feature comparison, gap analysis, and positioning recommendations.</p>
+                    <div class="card-footer">
+                        <span class="badge secondary">Research</span>
+                    </div>
+                </a>
+
+                <a href="aetos-competitor-comparison.html" class="card">
+                    <div class="card-icon">⚖️</div>
+                    <h3>Feature Comparison</h3>
+                    <p>Detailed feature matrix comparing Aetos One Care against top 5 competitors across 30+ dimensions.</p>
+                    <div class="card-footer">
+                        <span class="badge secondary">Research</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- QUICK LINKS -->
+        <section class="section">
+            <h2 class="section-title">🔗 Quick Links</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <a href="#" onclick="openFile('index.html')" class="btn">Main Website</a>
+                <a href="#" onclick="openFile('index-enhanced.html')" class="btn">Enhanced Design</a>
+                <a href="SETUP-INSTRUCTIONS.md" class="btn secondary">Setup Guide</a>
+                <a href="#" onclick="alert('Run: python3 -m http.server 8000')" class="btn secondary">Dev Server</a>
+            </div>
+        </section>
+
+        <footer>
+            <h3>🏥 Aetos One Medical Hub</h3>
+            <p>Telemedicine Platform | Live Device Vitals | ABDM Integrated</p>
+            <p style="margin-top: 10px; opacity: 0.9;">Phase 2 Complete | September 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        function openFile(filename) {
+            window.location.href = filename;
+        }
+    </script>
+</body>
+</html>

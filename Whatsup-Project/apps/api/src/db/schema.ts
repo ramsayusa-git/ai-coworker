@@ -10,6 +10,10 @@ export const roleEnum = pgEnum("role", [
   "platform_admin", "partner_owner", "partner_admin", "partner_support",
   "org_owner", "org_admin", "supervisor", "agent", "viewer",
 ]);
+// Deal terminal state, separate from which pipeline stage/column it currently sits in
+// (see deals.stageId below) — a deal can be marked "won" without having visited every
+// stage. Matches the stage-vs-status split competitors (e.g. wacrm) use.
+export const dealStatusEnum = pgEnum("deal_status", ["open", "won", "lost"]);
 
 export const partners = pgTable("partners", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -325,6 +329,7 @@ export const automationRules = pgTable("automation_rules", {
     | { type: "add_tag"; tag: string }
     | { type: "send_template"; templateId: string }
     | { type: "change_status"; status: string }
+    | { type: "create_deal"; pipelineId: string; stageId: string; title?: string; valuePaise?: number }
   >>().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -362,4 +367,47 @@ export const socialPosts = pgTable("social_posts", {
   status: text("status").default("draft"), // draft | scheduled | published | failed
   results: jsonb("results").$type<Record<string, { status: "published" | "failed"; externalId?: string; error?: string }>>().default({}),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+
+// Sales Pipelines — closes the one real gap found against wacrm (open-source WhatsApp
+// CRM competitor, see wacrm.tech/docs/pipelines): a Kanban deal board layered on top of
+// contacts/conversations. An org can run multiple pipelines (e.g. "New business" vs
+// "Renewals"); each has its own ordered set of stages.
+export const pipelines = pgTable("pipelines", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const pipelineStages = pgTable("pipeline_stages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  pipelineId: uuid("pipeline_id").notNull().references(() => pipelines.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  color: text("color").default("#71717a"),
+  position: integer("position").notNull().default(0),
+});
+
+// A deal/card on the board. Stage = where it sits on the board (moves on drag-and-drop);
+// status = its terminal state (open/won/lost) — a deal can be won without having visited
+// every stage. valuePaise follows the same money-in-paise convention as orgs.walletPaise.
+export const deals = pgTable("deals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  pipelineId: uuid("pipeline_id").notNull().references(() => pipelines.id, { onDelete: "cascade" }),
+  stageId: uuid("stage_id").notNull().references(() => pipelineStages.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  valuePaise: integer("value_paise").default(0),
+  contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
+  conversationId: uuid("conversation_id").references(() => conversations.id, { onDelete: "set null" }),
+  assigneeId: uuid("assignee_id").references(() => users.id),
+  expectedCloseDate: timestamp("expected_close_date"),
+  notes: text("notes"),
+  status: dealStatusEnum("status").default("open"),
+  position: integer("position").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

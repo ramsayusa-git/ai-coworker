@@ -43,7 +43,7 @@ const en = {
   pricing: { eyebrow: "Pricing", title: "Simple plans, 0% message markup",
     subtitle: "You always pay Meta directly for WhatsApp conversations — we only charge for the software. No per-agent inbox tax, ever.",
     footnote: "Prices shown are illustrative launch pricing and may change. GST is added where applicable." },
-  compare: { eyebrow: "Compare", title: "Aetos One Chat vs. the market",
+  compare: { eyebrow: "Compare", title: "Loqio vs. the market",
     subtitle: "Condensed from a module-by-module benchmark against 10 WhatsApp platforms worldwide — India SaaS (Wati, AiSensy, Interakt, Gallabox) and enterprise CPaaS (Twilio). ● full · ◐ partial / higher tier · ○ none." },
 };
 
@@ -79,7 +79,7 @@ const hi: Dict = {
   pricing: { eyebrow: "मूल्य", title: "सरल योजनाएं, 0% मैसेज मार्कअप",
     subtitle: "आप हमेशा व्हाट्सएप बातचीत के लिए सीधे Meta को भुगतान करते हैं — हम केवल सॉफ़्टवेयर के लिए शुल्क लेते हैं। कभी भी प्रति-एजेंट इनबॉक्स टैक्स नहीं।",
     footnote: "दिखाई गई कीमतें उदाहरण के तौर पर लॉन्च मूल्य हैं और बदल सकती हैं। जहां लागू हो वहां GST जोड़ा जाता है।" },
-  compare: { eyebrow: "तुलना करें", title: "Aetos One Chat बनाम बाज़ार",
+  compare: { eyebrow: "तुलना करें", title: "Loqio बनाम बाज़ार",
     subtitle: "दुनिया भर के 10 व्हाट्सएप प्लेटफ़ॉर्म के मुकाबले मॉड्यूल-दर-मॉड्यूल बेंचमार्क का सार — भारत SaaS (Wati, AiSensy, Interakt, Gallabox) और एंटरप्राइज़ CPaaS (Twilio)। ● पूर्ण · ◐ आंशिक / उच्च टियर · ○ कोई नहीं।" },
 };
 
@@ -115,7 +115,7 @@ const bn: Dict = {
   pricing: { eyebrow: "মূল্য", title: "সহজ পরিকল্পনা, 0% মেসেজ মার্কআপ",
     subtitle: "হোয়াটসঅ্যাপ কথোপকথনের জন্য আপনি সবসময় সরাসরি Meta-কে পেমেন্ট করেন — আমরা শুধু সফটওয়্যারের জন্য চার্জ করি। কখনও প্রতি-এজেন্ট ইনবক্স ট্যাক্স নেই।",
     footnote: "প্রদর্শিত মূল্য উদাহরণস্বরূপ লঞ্চ মূল্য এবং পরিবর্তিত হতে পারে। প্রযোজ্য ক্ষেত্রে GST যুক্ত হয়।" },
-  compare: { eyebrow: "তুলনা করুন", title: "Aetos One Chat বনাম বাজার",
+  compare: { eyebrow: "তুলনা করুন", title: "Loqio বনাম বাজার",
     subtitle: "বিশ্বব্যাপী ১০টি হোয়াটসঅ্যাপ প্ল্যাটফর্মের বিপরীতে মডিউল-বাই-মডিউল বেঞ্চমার্কের সারাংশ — ভারত SaaS (Wati, AiSensy, Interakt, Gallabox) এবং এন্টারপ্রাইজ CPaaS (Twilio)। ● সম্পূর্ণ · ◐ আংশিক / উচ্চতর টিয়ার · ○ কোনোটিই নয়।" },
 };
 
@@ -151,7 +151,7 @@ const mr: Dict = {
   pricing: { eyebrow: "किंमत", title: "सोप्या योजना, 0% मेसेज मार्कअप",
     subtitle: "व्हॉट्सअ‍ॅप संभाषणांसाठी तुम्ही नेहमी थेट Meta ला पैसे देता — आम्ही फक्त सॉफ्टवेअरसाठी शुल्क आकारतो. कधीही प्रति-एजंट इनबॉक्स टॅक्स नाही.",
     footnote: "दाखवलेल्या किमती उदाहरणादाखल लाँच किंमती आहेत आणि बदलू शकतात. लागू असेल तिथे GST जोडला जातो." },
-  compare: { eyebrow: "तुलना करा", title: "Aetos One Chat विरुद्ध बाजार",
+  compare: { eyebrow: "तुलना करा", title: "Loqio विरुद्ध बाजार",
     subtitle: "जगभरातील 10 व्हॉट्सअ‍ॅप प्लॅटफॉर्मच्या तुलनेत मॉड्यूल-दर-मॉड्यूल बेंचमार्कचा सारांश — भारत SaaS (Wati, AiSensy, Interakt, Gallabox) आणि एंटरप्राइझ CPaaS (Twilio). ● पूर्ण · ◐ अंशतः / उच्च टियर · ○ काहीही नाही." },
 };
 
@@ -187,7 +187,7 @@ const te: Dict = {
   pricing: { eyebrow: "ధర", title: "సరళమైన ప్లాన్లు, 0% మెసేజ్ మార్కప్",
     subtitle: "వాట్సాప్ సంభాషణల కోసం మీరు ఎల్లప్పుడూ నేరుగా Meta కు చెల్లిస్తారు — మేము సాఫ్ట్‌వేర్ కోసం మాత్రమే వసూలు చేస్తాము. ఎప్పుడూ ప్రతి-ఏజెంట్ ఇన్‌బాక్స్ టాక్స్ ఉండదు.",
     footnote: "చూపిన ధరలు ఉదాహరణ లాంచ్ ధరలు మరియు మారవచ్చు. వర్తించే చోట GST జోడించబడుతుంది." },
-  compare: { eyebrow: "పోల్చండి", title: "Aetos One Chat వర్సెస్ మార్కెట్",
+  compare: { eyebrow: "పోల్చండి", title: "Loqio వర్సెస్ మార్కెట్",
     subtitle: "ప్రపంచవ్యాప్తంగా 10 వాట్సాప్ ప్లాట్‌ఫారమ్‌లకు వ్యతిరేకంగా మాడ్యూల్-బై-మాడ్యూల్ బెంచ్‌మార్క్ నుండి సంక్షిప్తీకరించబడింది — భారత్ SaaS (Wati, AiSensy, Interakt, Gallabox) మరియు ఎంటర్‌ప్రైజ్ CPaaS (Twilio). ● పూర్తి · ◐ పాక్షికం / ఎక్కువ టైర్ · ○ ఏదీ లేదు." },
 };
 
@@ -223,7 +223,7 @@ const ta: Dict = {
   pricing: { eyebrow: "விலை", title: "எளிய திட்டங்கள், 0% செய்தி மார்க்அப்",
     subtitle: "வாட்ஸ்அப் உரையாடல்களுக்கு நீங்கள் எப்போதும் நேரடியாக Meta-க்கு பணம் செலுத்துகிறீர்கள் — நாங்கள் மென்பொருளுக்கு மட்டுமே கட்டணம் வசூலிக்கிறோம். ஒருபோதும் ஒரு-ஏஜென்ட் இன்பாக்ஸ் வரி இல்லை.",
     footnote: "காட்டப்படும் விலைகள் உதாரண தொடக்க விலைகள் மற்றும் மாறக்கூடும். பொருந்தும் இடத்தில் GST சேர்க்கப்படும்." },
-  compare: { eyebrow: "ஒப்பிடுக", title: "Aetos One Chat எதிராக சந்தை",
+  compare: { eyebrow: "ஒப்பிடுக", title: "Loqio எதிராக சந்தை",
     subtitle: "உலகளாவிய 10 வாட்ஸ்அப் தளங்களுக்கு எதிரான தொகுதி-வாரியான ஒப்பீட்டிலிருந்து சுருக்கப்பட்டது — இந்திய SaaS (Wati, AiSensy, Interakt, Gallabox) மற்றும் எண்டர்பிரைஸ் CPaaS (Twilio). ● முழுமையானது · ◐ பகுதி / உயர் நிலை · ○ எதுவுமில்லை." },
 };
 

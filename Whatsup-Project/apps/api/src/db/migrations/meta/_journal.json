@@ -29,6 +29,13 @@
       "when": 1789207919942,
       "tag": "0003_low_hercules",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789383596490,
+      "tag": "0004_overrated_microchip",
+      "breakpoints": true
     }
   ]
 }

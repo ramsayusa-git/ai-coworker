@@ -27,7 +27,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
               <img src={brand.logoUrl} alt={brand.brandName} className="h-7 max-w-[10rem] object-contain" />
             ) : (
               <>
-                <span className="grid h-7 w-7 place-items-center rounded-md bg-emerald-600 text-sm text-white">A</span>
+                <span className="grid h-7 w-7 place-items-center rounded-md bg-emerald-600 text-sm text-white">{brand.brandName.charAt(0)}</span>
                 <span>{brand.brandName}</span>
               </>
             )}

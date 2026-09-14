@@ -10,6 +10,7 @@ const nav = [
   { href: "/dashboard", label: "Dashboard", icon: "🏠" },
   { href: "/inbox", label: "Inbox", icon: "💬" },
   { href: "/contacts", label: "Contacts", icon: "👤" },
+  { href: "/deals", label: "Deals", icon: "💼" },
   { href: "/broadcasts", label: "Broadcasts", icon: "📣" },
   { href: "/templates", label: "Templates", icon: "📄" },
   { href: "/bots", label: "Bots", icon: "🤖" },

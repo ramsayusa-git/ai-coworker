@@ -34,7 +34,7 @@ export function ComparePageContent() {
               <tr>
                 <th className="px-4 py-3 font-semibold">Feature</th>
                 {compareCompetitors.map((c) => (
-                  <th key={c} className={`px-3 py-3 text-center font-semibold ${c === "Aetos" ? "text-emerald-700" : ""}`}>
+                  <th key={c} className={`px-3 py-3 text-center font-semibold ${c === "Loqio" ? "text-emerald-700" : ""}`}>
                     {c}
                   </th>
                 ))}

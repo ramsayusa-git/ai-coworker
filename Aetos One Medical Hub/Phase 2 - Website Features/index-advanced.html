@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos One Care — Revolutionary Healthcare Platform</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #003d82;
+            --primary-light: #e3f2fd;
+            --secondary: #00897b;
+            --accent: #ff6e40;
+            --success: #4caf50;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --bg-light: #fafafa;
+            --bg-white: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.16);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --text-primary: #f0f0f0;
+                --text-secondary: #b0b0b0;
+                --bg-light: #0f0f0f;
+                --bg-white: #1a1a1a;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-white);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 1rem 2rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 137, 123, 0.05) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 102, 204, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-30px) translateX(-20px); }
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gradient-text {
+            background: linear-gradient(120deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            line-height: 1.8;
+            animation: fadeInUp 0.8s ease-out 0.1s both;
+        }
+
+        .badges {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(0, 137, 123, 0.1) 100%);
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 102, 204, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge:hover {
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.2) 0%, rgba(0, 137, 123, 0.2) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Stats Section */
+        .stats {
+            max-width: 1400px;
+            margin: 4rem auto 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(0, 102, 204, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .stat-number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(120deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            counter-increment: stat-counter;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 4rem;
+            animation: fadeInUp 0.8s ease-out 0.1s both;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-white);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0s; }
+        .feature-card:nth-child(2) { animation-delay: 0.1s; }
+        .feature-card:nth-child(3) { animation-delay: 0.2s; }
+        .feature-card:nth-child(4) { animation-delay: 0.3s; }
+        .feature-card:nth-child(5) { animation-delay: 0.4s; }
+        .feature-card:nth-child(6) { animation-delay: 0.5s; }
+        .feature-card:nth-child(7) { animation-delay: 0.6s; }
+        .feature-card:nth-child(8) { animation-delay: 0.7s; }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .feature-card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 137, 123, 0.05) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .process-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .process-step {
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .process-step:nth-child(1) { animation-delay: 0.1s; }
+        .process-step:nth-child(2) { animation-delay: 0.2s; }
+        .process-step:nth-child(3) { animation-delay: 0.3s; }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            box-shadow: var(--shadow-md);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: var(--shadow-md), 0 0 0 0 rgba(0, 102, 204, 0.7); }
+            50% { box-shadow: var(--shadow-md), 0 0 0 10px rgba(0, 102, 204, 0); }
+        }
+
+        .process-step h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .process-step p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .price-card {
+            background: var(--bg-white);
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .price-card:nth-child(1) { animation-delay: 0.1s; }
+        .price-card:nth-child(2) {
+            animation-delay: 0.2s;
+            transform: scale(1.05);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+        .price-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .price-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .price-card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .price {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(120deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .price-features {
+            text-align: left;
+            margin: 2rem 0;
+            padding: 1.5rem 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .price-features li {
+            list-style: none;
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 137, 123, 0.05) 100%);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .faq-grid {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--bg-white);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .faq-item:nth-child(1) { animation-delay: 0.1s; }
+        .faq-item:nth-child(2) { animation-delay: 0.2s; }
+        .faq-item:nth-child(3) { animation-delay: 0.3s; }
+        .faq-item:nth-child(4) { animation-delay: 0.4s; }
+        .faq-item:nth-child(5) { animation-delay: 0.5s; }
+
+        .faq-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-white);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .faq-header:hover {
+            background: rgba(0, 102, 204, 0.05);
+            border-color: var(--primary);
+        }
+
+        .faq-header h4 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 1.5rem;
+            background: rgba(0, 102, 204, 0.02);
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-item.active .faq-content {
+            max-height: 200px;
+            padding: 1rem 1.5rem;
+        }
+
+        .faq-content p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Scroll Animation */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .scroll-animate.in-view {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        footer h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            opacity: 0.9;
+            margin: 0.5rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { padding: 0.8rem 1.5rem; }
+            .nav-links { display: none; }
+            .hero { padding: 4rem 1.5rem; margin-top: 60px; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .section-title { font-size: 2rem; }
+            .buttons { flex-direction: column; }
+            .btn { width: 100%; }
+            .price-card:nth-child(2) { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">🏥 Aetos One Care</div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Healthcare Reimagined for <span class="gradient-text">India</span></h1>
+            <p>Comprehensive telemedicine platform combining OCR scanning, pharmacy network, lab tests, prescription management, and family health records.</p>
+
+            <div class="badges">
+                <span class="badge">✓ DPDPA 2023 Compliant</span>
+                <span class="badge">✓ FHIR R4 Ready</span>
+                <span class="badge">✓ ABDM Integrated</span>
+                <span class="badge">✓ 24/7 Support</span>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-primary">Start Free Trial</button>
+                <button class="btn btn-secondary">Explore Features</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box scroll-animate">
+                    <div class="stat-number" data-target="50000">50K+</div>
+                    <div class="stat-label">Active Doctors</div>
+                </div>
+                <div class="stat-box scroll-animate">
+                    <div class="stat-number" data-target="2000000">2M+</div>
+                    <div class="stat-label">Consultations</div>
+                </div>
+                <div class="stat-box scroll-animate">
+                    <div class="stat-number" data-target="400">400+</div>
+                    <div class="stat-label">Lab Tests</div>
+                </div>
+                <div class="stat-box scroll-animate">
+                    <div class="stat-number" data-target="4.8">4.8★</div>
+                    <div class="stat-label">App Rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2 class="section-title">Powerful Features</h2>
+        <p class="section-subtitle">Everything you need for comprehensive healthcare management</p>
+
+        <div class="feature-grid">
+            <div class="feature-card scroll-animate">
+                <div class="feature-icon">📸</div>
+                <h3>OCR Document Scanning</h3>
+                <p>Capture medical documents instantly with AI-powered text extraction and verification.</p>
+            </div>
+            <div class="feature-card scroll-animate">
+                <div class="feature-icon">💊</div>
+                <h3>Pharmacy Network</h3>
+                <p>Access 20+ partner pharmacies with real-time inventory and same-day delivery.</p>
+            </div>
+            <div class="feature-card scroll-animate">
+                <div class="feature-icon">🔬</div>
+                <h3>Lab Test Booking</h3>
+                <p>Compare and book 400+ diagnostic tests with home collection and instant results.</p>
+            </div>
+            <div class="feature-card scroll-animate">
+                <div class="feature-icon">📍</div>
+                <h3>Real-Time Tracking</h3>
+                <p>Live GPS tracking of prescriptions and deliveries with geofence notifications.</p>
+            </div>
+            <div class="feature-card scroll-animate">
+                <div class="feature-icon">📋</div>
+                <h3>Medical History</h3>
+                <p>10-type comprehensive timeline with filters, search, and multi-format exports.</p>
+            </div>
+            <div class="feature-card scroll-animate">
+                <div class="feature-icon">💉</div>
+                <h3>Prescription Refill</h3>
+                <p>Smart reminders and one-click refills with dosage verification and history.</p>
+            </div>
+            <div class="feature-card scroll-animate">
+                <div class="feature-icon">📥</div>
+                <h3>Data Export</h3>
+                <p>Export consultations in PDF, CSV, JSON, FHIR R4, HL7 v2.5, or summary format.</p>
+            </div>
+            <div class="feature-card scroll-animate">
+                <div class="feature-icon">👨‍👩‍👧‍👦</div>
+                <h3>Family Management</h3>
+                <p>Link family members with role-based controls and parental supervision options.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Simple, seamless healthcare in 3 steps</p>
+
+        <div class="process-grid">
+            <div class="process-step scroll-animate">
+                <div class="step-number">1</div>
+                <h3>Sign Up</h3>
+                <p>Create your account with email or phone in under 2 minutes with DPDPA compliance.</p>
+            </div>
+            <div class="process-step scroll-animate">
+                <div class="step-number">2</div>
+                <h3>Build Records</h3>
+                <p>Upload documents, link family members, and sync existing health records instantly.</p>
+            </div>
+            <div class="process-step scroll-animate">
+                <div class="step-number">3</div>
+                <h3>Access Healthcare</h3>
+                <p>Consult doctors, order tests, refill prescriptions, and track deliveries in real-time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <h2 class="section-title">Simple Transparent Pricing</h2>
+        <p class="section-subtitle">Choose the plan that fits your needs</p>
+
+        <div class="pricing-grid">
+            <div class="price-card scroll-animate">
+                <h3>Free</h3>
+                <div class="price">₹0</div>
+                <p style="color: var(--text-secondary);">Perfect to start</p>
+                <ul class="price-features">
+                    <li>5 consultations/month</li>
+                    <li>Basic health records</li>
+                    <li>Email support</li>
+                    <li>Mobile app access</li>
+                </ul>
+                <button class="btn btn-secondary" style="width: 100%;">Get Started</button>
+            </div>
+            <div class="price-card scroll-animate">
+                <h3>Premium Plus</h3>
+                <div class="price">₹499</div>
+                <p style="color: var(--text-secondary);">Most popular</p>
+                <ul class="price-features">
+                    <li>Unlimited consultations</li>
+                    <li>Lab test discounts (30%)</li>
+                    <li>Pharmacy network access</li>
+                    <li>Priority support</li>
+                    <li>Family account (2 members)</li>
+                </ul>
+                <button class="btn btn-primary" style="width: 100%;">Choose Plan</button>
+            </div>
+            <div class="price-card scroll-animate">
+                <h3>Family Care</h3>
+                <div class="price">₹999</div>
+                <p style="color: var(--text-secondary);">For families</p>
+                <ul class="price-features">
+                    <li>Unlimited everything</li>
+                    <li>Lab test discounts (40%)</li>
+                    <li>Family accounts (5 members)</li>
+                    <li>24/7 phone support</li>
+                    <li>Annual health checkup</li>
+                </ul>
+                <button class="btn btn-secondary" style="width: 100%;">Choose Plan</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Everything you need to know</p>
+
+        <div class="faq-grid">
+            <div class="faq-item scroll-animate">
+                <div class="faq-header">
+                    <h4>Is my health data secure and private?</h4>
+                    <span class="faq-toggle">⌄</span>
+                </div>
+                <div class="faq-content">
+                    <p>Yes. We're fully DPDPA 2023 compliant, use AES-256 encryption, and integrate with ABDM for secure data handling. Your data is yours.</p>
+                </div>
+            </div>
+            <div class="faq-item scroll-animate">
+                <div class="faq-header">
+                    <h4>How do I export my medical records?</h4>
+                    <span class="faq-toggle">⌄</span>
+                </div>
+                <div class="faq-content">
+                    <p>Export in 6 formats: PDF (printable), CSV (spreadsheets), JSON (developers), FHIR R4 (healthcare systems), HL7 v2.5 (legacy EHR), or summary (email share).</p>
+                </div>
+            </div>
+            <div class="faq-item scroll-animate">
+                <div class="faq-header">
+                    <h4>Can I link family members?</h4>
+                    <span class="faq-toggle">⌄</span>
+                </div>
+                <div class="faq-content">
+                    <p>Yes. Add up to 5 family members (based on plan) with role-based access controls and parental supervision for minors.</p>
+                </div>
+            </div>
+            <div class="faq-item scroll-animate">
+                <div class="faq-header">
+                    <h4>How fast is delivery for medicines?</h4>
+                    <span class="faq-toggle">⌄</span>
+                </div>
+                <div class="faq-content">
+                    <p>Our pharmacy partners deliver within 2-4 hours in metro areas and 24 hours in regional areas. Track in real-time.</p>
+                </div>
+            </div>
+            <div class="faq-item scroll-animate">
+                <div class="faq-header">
+                    <h4>What payment methods do you accept?</h4>
+                    <span class="faq-toggle">⌄</span>
+                </div>
+                <div class="faq-content">
+                    <p>We accept all major cards, UPI, digital wallets, and net banking. EMI options available for annual plans.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <h3>🏥 Aetos One Care</h3>
+        <p>Healthcare for Every Indian</p>
+        <p>© 2026 Aetos Tech Labs. DPDPA | FHIR | ABDM Compliant.</p>
+    </footer>
+
+    <script>
+        // Scroll Animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-animate').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Animate Numbers
+        function animateCounter(element, target) {
+            const text = element.textContent;
+            const numericPart = parseInt(text.replace(/\D/g, ''));
+            const suffix = text.replace(/\d/g, '');
+            const duration = 2000;
+            const start = Date.now();
+
+            function update() {
+                const progress = Math.min((Date.now() - start) / duration, 1);
+                const current = Math.floor(numericPart * progress);
+                element.textContent = current + suffix;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            update();
+        }
+
+        // Start counter animation when in view
+        const counterObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target, parseInt(entry.target.dataset.target));
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-number').forEach(el => {
+            counterObserver.observe(el);
+        });
+
+        // FAQ Toggle
+        document.querySelectorAll('.faq-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const item = header.closest('.faq-item');
+                item.classList.toggle('active');
+            });
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

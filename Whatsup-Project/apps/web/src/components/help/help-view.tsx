@@ -123,7 +123,7 @@ export function HelpView() {
     <div className="mx-auto max-w-3xl">
       <h1 className="text-2xl font-semibold">Help &amp; Guide</h1>
       <p className="mb-6 mt-1 text-sm text-zinc-500">
-        How to use every feature in Aetos One Chat. Jump to a section below, or click the ❓ Help button on any page.
+        How to use every feature in Loqio. Jump to a section below, or click the ❓ Help button on any page.
       </p>
 
       <nav className="mb-8 flex flex-wrap gap-2">

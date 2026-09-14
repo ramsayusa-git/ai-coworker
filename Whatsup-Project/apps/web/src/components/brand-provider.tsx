@@ -6,7 +6,7 @@ import { DEFAULT_BRAND, getCachedMe, getPublicBranding, getToken, type Brand } f
 // org's partner brand from /me (cached at login); signed-out screens (login/register/
 // accept-invite) and the tab favicon resolve it from the public /public/branding lookup,
 // keyed off the custom domain the request came in on. Always falls back to the platform
-// default "Aetos One Chat" brand — nothing here can leave the UI unbranded or broken.
+// default "Loqio" brand — nothing here can leave the UI unbranded or broken.
 const BrandContext = createContext<Brand>(DEFAULT_BRAND);
 
 export function useBrand(): Brand {

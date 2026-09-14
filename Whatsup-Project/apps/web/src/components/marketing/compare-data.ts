@@ -1,4 +1,4 @@
-export const compareCompetitors = ["Aetos", "Wati", "AiSensy", "Interakt", "Gallabox", "Twilio"] as const;
+export const compareCompetitors = ["Loqio", "Wati", "AiSensy", "Interakt", "Gallabox", "Twilio"] as const;
 
 export type CompareRow = { feature: string; values: string[] }; // ● full · ◐ partial · ○ none
 

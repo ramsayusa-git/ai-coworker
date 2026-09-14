@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { and, eq, sql } from "drizzle-orm";
 import { db, withOrgDb } from "../db/client.js";
 import {
-  automationRules, conversations, contacts, channels, templates, messages,
+  automationRules, conversations, contacts, channels, templates, messages, deals,
 } from "../db/schema.js";
 import { getAdapter } from "../adapters/index.js";
 import { requireCapability } from "../rbac.js";
@@ -11,7 +11,8 @@ type Action =
   | { type: "assign_team"; teamId: string }
   | { type: "add_tag"; tag: string }
   | { type: "send_template"; templateId: string }
-  | { type: "change_status"; status: string };
+  | { type: "change_status"; status: string }
+  | { type: "create_deal"; pipelineId: string; stageId: string; title?: string; valuePaise?: number };
 type Filter = { field: "channel" | "tag"; op: "eq" | "contains"; value: string };
 
 export async function automationsRoutes(app: FastifyInstance) {
@@ -108,6 +109,14 @@ export async function runAutomations(
         await db.update(conversations).set({ assignedTeamId: action.teamId }).where(eq(conversations.id, ctx.conversationId));
       } else if (action.type === "change_status") {
         await db.update(conversations).set({ status: action.status as any }).where(eq(conversations.id, ctx.conversationId));
+      } else if (action.type === "create_deal") {
+        const existing = await db.select({ n: sql<number>`count(*)` }).from(deals)
+          .where(and(eq(deals.orgId, orgId), eq(deals.stageId, action.stageId)));
+        await db.insert(deals).values({
+          orgId, pipelineId: action.pipelineId, stageId: action.stageId,
+          title: action.title?.trim() || contact.name, valuePaise: action.valuePaise ?? 0,
+          contactId: contact.id, conversationId: ctx.conversationId, position: Number(existing[0]?.n ?? 0),
+        });
       } else if (action.type === "add_tag") {
         if (!(contact.tags ?? []).includes(action.tag)) {
           await db.update(contacts).set({ tags: sql`array_append(coalesce(${contacts.tags}, ARRAY[]::text[]), ${action.tag})` })

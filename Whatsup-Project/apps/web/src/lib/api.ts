@@ -11,7 +11,7 @@ export type Brand = {
   primaryColor: string;
 };
 export const DEFAULT_BRAND: Brand = {
-  brandName: "Aetos One Chat", logoUrl: null, faviconUrl: null, footerText: null, primaryColor: "#059669",
+  brandName: "Loqio", logoUrl: null, faviconUrl: null, footerText: null, primaryColor: "#059669",
 };
 
 export type Me = { userId: string; email: string; name: string; orgId: string; orgName: string; role: string; brand?: Brand };

@@ -257,3 +257,48 @@ export interface AnalyticsSummary {
   statusBreakdown: { open: number; pending: number; snoozed: number; resolved: number };
   agentLeaderboard: { name: string; assigned: number; resolved: number }[];
 }
+
+
+export type DealStatus = "open" | "won" | "lost";
+
+export interface PipelineStage {
+  id: string;
+  pipelineId: string;
+  name: string;
+  color: string;
+  position: number;
+}
+
+export interface Pipeline {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  createdAt: string;
+  stages: PipelineStage[];
+}
+
+export interface Deal {
+  id: string;
+  pipelineId: string;
+  stageId: string;
+  title: string;
+  valuePaise: number;
+  contactId: string | null;
+  conversationId: string | null;
+  assigneeId: string | null;
+  expectedCloseDate: string | null;
+  notes: string | null;
+  status: DealStatus;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DealsAnalytics {
+  totalOpenValuePaise: number;
+  openDealCount: number;
+  countByStage: Record<string, number>;
+  winRate90d: number | null;
+  won90d: number;
+  lost90d: number;
+}
