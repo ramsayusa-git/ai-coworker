@@ -97,3 +97,174 @@ body {
 
 .focus\:border-emerald-500:focus { border-color: var(--brand-500) !important; }
 .focus\:border-emerald-600:focus { border-color: var(--brand-600) !important; }
+
+/* ---------------------------------------------------------------------------
+   Theme system (light / dark) — same override strategy as the white-label
+   brand block above, and for the same reason: the app's ~30 view files use
+   static Tailwind zinc/white utilities. Rather than rewrite every className,
+   these map the handful of neutrals actually in use onto CSS variables, so a
+   single data-theme attribute on <html> re-skins the whole app. Light values
+   are byte-identical to Tailwind's own zinc palette, so light mode looks
+   exactly as it did before this block existed.
+--------------------------------------------------------------------------- */
+:root {
+  --surface-0: #fafafa;   /* page background      (zinc-50)  */
+  --surface-1: #ffffff;   /* cards, panels        (white)    */
+  --surface-2: #f4f4f5;   /* muted fills          (zinc-100) */
+  --surface-3: #e4e4e7;   /* stronger fills       (zinc-200) */
+  --surface-hover: #f4f4f5;
+  --chip-strong: #27272a;  /* dark pill on light UI (zinc-800) */
+  --chip-strong-text: #ffffff;
+  --text-1: #18181b;
+  --text-2: #52525b;
+  --text-3: #71717a;
+  --text-4: #a1a1aa;
+  --border-1: #f4f4f5;
+  --border-2: #e4e4e7;
+  --border-3: #d4d4d8;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --elev-1: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --elev-2: 0 4px 16px -4px rgba(16, 24, 40, 0.10);
+  --elev-3: 0 18px 40px -12px rgba(16, 24, 40, 0.20);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --dur-slow: 420ms;
+}
+
+[data-theme="dark"] {
+  --surface-0: #0b0d12;
+  --surface-1: #14171f;
+  --surface-2: #1b1f29;
+  --surface-3: #262b37;
+  --surface-hover: #1f2430;
+  --chip-strong: #e4e4e7;
+  --chip-strong-text: #0b0d12;
+  --text-1: #f4f4f5;
+  --text-2: #c3c8d2;
+  --text-3: #9aa1af;
+  --text-4: #6f7684;
+  --border-1: #1e2330;
+  --border-2: #262b37;
+  --border-3: #333a49;
+  --glass-bg: rgba(20, 23, 31, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --elev-2: 0 6px 20px -6px rgba(0, 0, 0, 0.6);
+  --elev-3: 0 22px 48px -16px rgba(0, 0, 0, 0.75);
+  color-scheme: dark;
+}
+
+body { background: var(--surface-0); color: var(--text-1); }
+
+/* Neutral utility remap. Scoped to [data-theme] so a page rendered before the
+   theme attribute is applied is never left half-styled. */
+[data-theme] .bg-white { background-color: var(--surface-1) !important; }
+[data-theme] .bg-zinc-50 { background-color: var(--surface-0) !important; }
+[data-theme] .bg-zinc-100 { background-color: var(--surface-2) !important; }
+[data-theme] .bg-zinc-200,
+[data-theme] .bg-zinc-300 { background-color: var(--surface-3) !important; }
+[data-theme] .bg-zinc-800,
+[data-theme] .bg-zinc-900,
+[data-theme] .bg-black { background-color: var(--chip-strong) !important; color: var(--chip-strong-text) !important; }
+[data-theme] .bg-zinc-800 *,
+[data-theme] .bg-zinc-900 * { color: inherit; }
+
+[data-theme] .text-zinc-900,
+[data-theme] .text-zinc-800,
+[data-theme] .text-zinc-700 { color: var(--text-1) !important; }
+[data-theme] .text-zinc-600 { color: var(--text-2) !important; }
+[data-theme] .text-zinc-500 { color: var(--text-3) !important; }
+[data-theme] .text-zinc-400,
+[data-theme] .text-zinc-300 { color: var(--text-4) !important; }
+
+[data-theme] .border-zinc-100 { border-color: var(--border-1) !important; }
+[data-theme] .border-zinc-200,
+[data-theme] .ring-zinc-200 { border-color: var(--border-2) !important; }
+[data-theme] .ring-zinc-200 { --tw-ring-color: var(--border-2) !important; }
+[data-theme] .border-zinc-300,
+[data-theme] .border-zinc-400,
+[data-theme] .border-zinc-600 { border-color: var(--border-3) !important; }
+
+[data-theme] .hover\:bg-zinc-50:hover,
+[data-theme] .hover\:bg-zinc-100:hover,
+[data-theme] .hover\:bg-zinc-200:hover { background-color: var(--surface-hover) !important; }
+[data-theme] .hover\:text-zinc-600:hover,
+[data-theme] .hover\:text-zinc-700:hover { color: var(--text-1) !important; }
+
+/* Form controls don't inherit the remap above, so they get it explicitly. */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: var(--surface-2);
+  color: var(--text-1);
+  border-color: var(--border-3);
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder { color: var(--text-4); }
+[data-theme="dark"] option { background-color: var(--surface-2); color: var(--text-1); }
+[data-theme="dark"] ::-webkit-scrollbar { width: 10px; height: 10px; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 999px; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------------------------------------------------------------------------
+   Surface treatments and motion used by the app shell and dashboard.
+--------------------------------------------------------------------------- */
+.lq-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--glass-border);
+}
+.lq-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-2);
+  border-radius: 14px;
+  box-shadow: var(--elev-1);
+  transition: box-shadow var(--dur) var(--ease-out), transform var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
+}
+.lq-card-hover:hover { box-shadow: var(--elev-2); transform: translateY(-2px); border-color: var(--border-3); }
+.lq-accent-wash {
+  background-image:
+    radial-gradient(60rem 22rem at 8% -10%, color-mix(in srgb, var(--brand-500) 22%, transparent), transparent 70%),
+    radial-gradient(44rem 20rem at 92% -20%, color-mix(in srgb, var(--brand-300) 20%, transparent), transparent 70%);
+}
+.lq-grid-lines {
+  background-image:
+    linear-gradient(to right, var(--border-1) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border-1) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.lq-ring-focus:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 4px var(--brand-500);
+}
+
+@keyframes lq-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes lq-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lq-shimmer { from { background-position: -140% 0; } to { background-position: 240% 0; } }
+@keyframes lq-pop { 0% { transform: scale(0.96); } 60% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+.lq-rise { animation: lq-rise var(--dur-slow) var(--ease-out) both; }
+.lq-fade { animation: lq-fade var(--dur) var(--ease-out) both; }
+.lq-pop { animation: lq-pop var(--dur) var(--ease-out) both; }
+.lq-skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%);
+  background-size: 300% 100%;
+  animation: lq-shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+.lq-dragging { opacity: 0.45; transform: scale(0.985) rotate(-0.4deg); cursor: grabbing; }
+.lq-drop-target { outline: 2px dashed var(--brand-500); outline-offset: 3px; }
+
+/* Every animation and transition above is opt-out for people who ask their OS
+   to reduce motion — the UI stays fully usable, it just stops moving. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

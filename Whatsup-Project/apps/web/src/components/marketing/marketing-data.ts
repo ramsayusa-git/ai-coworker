@@ -26,6 +26,7 @@ export const features: Feature[] = [
       "Assignment rules: round-robin, load-based, skills, teams",
       "SLA timers, snooze, priority, canned replies, private notes",
       "Collision detection and typing presence between agents",
+      "WhatsApp, Facebook Messenger and Instagram Direct in one inbox",
       "Chat-history import when connecting an existing number",
     ],
     flow: [
@@ -91,7 +92,7 @@ export const features: Feature[] = [
       "Guided template builder with variables and sample media",
       "Live Meta approval status and rejection reasons",
       "Category-aware cost preview before you submit",
-      "Carousel templates and WhatsApp Flows (forms)",
+      "Buttons, list menus, catalogue cards and WhatsApp Flows built in",
       "Versioning so a rejected edit never blocks the live template",
     ],
     flow: [
@@ -101,6 +102,53 @@ export const features: Feature[] = [
       { icon: "🚀", title: "Use everywhere", detail: "Broadcasts, drips, bots" },
     ],
     edge: "Shows the real Meta approval status and cost category in the same screen you build the template in.",
+  },
+  {
+    id: "interactive",
+    emoji: "🔘",
+    title: "Interactive Messages",
+    tag: "buttons · lists · catalogue",
+    tone: "sky",
+    summary:
+      "Quick-reply buttons, call-to-action buttons, list menus and catalogue cards — built visually and sent as real Meta interactive messages, not plain text with a link stuck on the end.",
+    bullets: [
+      "Up to 3 quick-reply buttons, 2 website buttons and a call button per message",
+      "List messages with sections and up to 10 selectable rows",
+      "Catalogue: single product card or a full Browse Catalogue message",
+      "Text, image, video or document header plus a footer line",
+      "Meta's own limits enforced as you build, so nothing is rejected at send time",
+      "Every tap comes back into the inbox and can trigger automations",
+    ],
+    flow: [
+      { icon: "🎛️", title: "Build visually", detail: "Buttons, list rows or products" },
+      { icon: "👀", title: "Live preview", detail: "Exactly what the customer sees" },
+      { icon: "📲", title: "Sent as interactive", detail: "Real Meta message type" },
+      { icon: "↩️", title: "Tap returns", detail: "Routed, tagged, automatable" },
+    ],
+    edge: "The preview is generated from the exact payload we send to Meta — what you see is what goes out, not a separate mock-up.",
+  },
+  {
+    id: "flows",
+    emoji: "🧾",
+    title: "WhatsApp Flows",
+    tag: "in-chat forms",
+    tone: "sky",
+    summary:
+      "Native in-chat forms — booking, lead capture, surveys, sign-ups — that a customer fills in without ever leaving the chat.",
+    bullets: [
+      "Multi-screen builder: text, date picker, dropdown, choice, opt-in fields",
+      "Live phone preview while you build",
+      "One-click publish straight to Meta, with real validation errors surfaced",
+      "Submissions land against the contact and conversation, not in a message blob",
+      "Attach a published flow to any template or campaign",
+    ],
+    flow: [
+      { icon: "🧱", title: "Build screens", detail: "Fields, order, CTA labels" },
+      { icon: "🚀", title: "Publish to Meta", detail: "Compiled to Flow JSON" },
+      { icon: "📝", title: "Customer fills in", detail: "Inside WhatsApp, no link-out" },
+      { icon: "📥", title: "Answers captured", detail: "On the contact + conversation" },
+    ],
+    edge: "Answers are stored as structured, queryable responses — most tools drop a flow submission into the chat as raw text.",
   },
   {
     id: "bots",
@@ -254,6 +302,29 @@ export const features: Feature[] = [
     edge: "Custom domain + full branding + wholesale billing + rev-share + client logins in one product — no other platform in this space bundles all five.",
   },
   {
+    id: "developer",
+    emoji: "🧑‍💻",
+    title: "Developer Platform",
+    tag: "rest api · webhooks",
+    tone: "amber",
+    summary:
+      "A documented REST API and signed outbound webhooks, so the platform fits into whatever you have already built.",
+    bullets: [
+      "Scoped API keys — only the hash is stored, the key is shown once",
+      "Template Send Message API: fire an approved template, buttons intact, to any number",
+      "Send free-form and interactive messages, read and write contacts and conversations",
+      "Outbound webhooks for messages, statuses, assignments, campaigns and flow responses",
+      "HMAC-SHA256 signed deliveries with timestamps, 5 retries and a delivery log",
+    ],
+    flow: [
+      { icon: "🔑", title: "Create a key", detail: "Scoped, revocable, hashed" },
+      { icon: "📮", title: "Call the API", detail: "Send templates or messages" },
+      { icon: "🪝", title: "Subscribe events", detail: "Pick exactly what you need" },
+      { icon: "✅", title: "Verify signature", detail: "Replay-safe HMAC + timestamp" },
+    ],
+    edge: "Signed, retried webhooks with a visible delivery log — not a single fire-and-forget callback URL you can never debug.",
+  },
+  {
     id: "settings",
     emoji: "⚙️",
     title: "Security & Enterprise",
@@ -264,7 +335,7 @@ export const features: Feature[] = [
       "Role-based access control and an append-only audit log",
       "Two-factor authentication for every user",
       "GST invoices, INR (Razorpay) and USD (Stripe) billing",
-      "Prepaid wallet with top-ups for pay-per-use metrics",
+      "Prepaid wallet metered per 24-hour conversation, exactly as Meta bills",
       "SSO/SAML and data-residency controls on the roadmap",
     ],
     flow: [

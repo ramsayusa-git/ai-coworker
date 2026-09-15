@@ -16,7 +16,9 @@ export function ProductHomeContent() {
   const { t } = useLanguage();
   const stats = [
     { value: "0%", label: t.home.stat1 },
-    { value: "12", label: t.home.stat2 },
+    // Derived from the module list itself so the headline number can never drift
+    // out of step with what the features page actually shows.
+    { value: String(features.length), label: t.home.stat2 },
     { value: "2 min", label: t.home.stat3 },
     { value: "10+", label: t.home.stat4 },
   ];

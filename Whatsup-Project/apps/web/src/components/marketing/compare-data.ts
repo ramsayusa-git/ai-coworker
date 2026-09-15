@@ -18,6 +18,18 @@ export const compareGroups: { group: string; rows: CompareRow[] }[] = [
       { feature: "Unlimited agents (no per-seat cost)", values: ["●", "○", "●", "○", "○", "○"] },
       { feature: "Assignment rules (round-robin/skills/team)", values: ["●", "◐", "◐", "◐", "◐", "◐"] },
       { feature: "Chat-history import from phone", values: ["●", "○", "○", "○", "○", "○"] },
+      { feature: "Messenger + Instagram in the same inbox", values: ["●", "◐", "○", "◐", "●", "◐"] },
+    ],
+  },
+  {
+    group: "Message types",
+    rows: [
+      { feature: "Quick-reply + call-to-action buttons", values: ["●", "●", "●", "●", "●", "◐"] },
+      { feature: "List messages (menu of up to 10 rows)", values: ["●", "●", "◐", "◐", "●", "◐"] },
+      { feature: "Catalogue / product messages", values: ["●", "◐", "◐", "●", "◐", "○"] },
+      { feature: "WhatsApp Flows (native in-chat forms)", values: ["●", "●", "◐", "◐", "◐", "○"] },
+      { feature: "Visual builder with true-to-payload preview", values: ["●", "◐", "◐", "◐", "◐", "○"] },
+      { feature: "Structured flow responses on the contact record", values: ["●", "◐", "○", "○", "○", "○"] },
     ],
   },
   {
@@ -49,6 +61,8 @@ export const compareGroups: { group: string; rows: CompareRow[] }[] = [
     rows: [
       { feature: "Full white-label + custom domain", values: ["●", "○", "○", "○", "○", "○"] },
       { feature: "Wholesale billing + rev-share ledger", values: ["●", "◐", "◐", "○", "○", "○"] },
+      { feature: "Template Send Message API", values: ["●", "●", "●", "●", "●", "●"] },
+      { feature: "Signed outbound webhooks with a delivery log", values: ["●", "◐", "◐", "◐", "◐", "●"] },
       { feature: "Best-in-class docs/SDKs", values: ["◐", "○", "○", "○", "○", "●"] },
       { feature: "SSO/SAML, ISO 27001", values: ["◐ roadmap", "○", "○", "○", "○", "●"] },
     ],

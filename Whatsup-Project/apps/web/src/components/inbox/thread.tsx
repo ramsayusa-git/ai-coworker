@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { CannedResponse, Conversation, ConversationNote, ConvStatus, Message, OrgMember, Team } from "@/lib/types";
+import type { CannedResponse, Conversation, ConversationNote, ConvStatus, Message, OrgMember, Team, Template } from "@/lib/types";
 import { apiFetch } from "@/lib/api";
 import { useResizableWidth } from "@/lib/use-resizable-width";
 import { useResizableHeight } from "@/lib/use-resizable-height";
@@ -19,7 +19,7 @@ function windowLabel(iso: string) {
 export function Thread({
   conversation, messages, onSend, sending, members, teams, notes, canned, onAssign, onAssignTeam, onStatusChange, onAddNote, onTagsChange, onTogglePin,
 }: {
-  conversation: Conversation; messages: Message[]; onSend: (body: string) => Promise<void>; sending: boolean;
+  conversation: Conversation; messages: Message[]; onSend: (body: string, templateId?: string) => Promise<void>; sending: boolean;
   members: OrgMember[]; teams?: Team[]; notes: ConversationNote[]; canned?: CannedResponse[];
   onAssign: (assigneeId: string | null) => void;
   onAssignTeam?: (assignedTeamId: string | null) => void;
@@ -109,6 +109,7 @@ export function Thread({
             <div key={m.id} className={`flex ${m.direction === "out" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[70%] rounded-2xl px-3 py-2 text-sm shadow-sm ${m.direction === "out" ? "bg-emerald-600 text-white" : "bg-white text-zinc-900"}`}>
                 <div>{m.body}</div>
+                <MessageInteractive m={m} />
                 <div className={`mt-1 text-right text-[10px] ${m.direction === "out" ? "text-emerald-100" : "text-zinc-400"}`}>
                   {new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   {m.direction === "out" && <span className={`ml-1 ${m.status === "read" ? "text-sky-200" : ""}`}>{statusIcon[m.status]}</span>}
@@ -120,6 +121,7 @@ export function Thread({
         </div>
         <div className="border-t border-zinc-200 bg-white p-3">
           <div className="mb-2 flex items-center gap-2">
+            <TemplatePicker onPick={(id) => onSend("", id)} disabled={sending} />
             <button onClick={suggestReply} disabled={drafting || !win.ok}
               className="rounded border border-indigo-200 bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-100 disabled:opacity-40">
               {drafting ? "Thinking…" : "✨ Suggest reply"}
@@ -230,6 +232,105 @@ export function Thread({
               </>
             )}
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Renders the interactive part of a message: the buttons/list/catalogue/flow control that
+// went out with an outbound message, or the button/row/flow answer that came back.
+function MessageInteractive({ m }: { m: Message }) {
+  const spec = m.interactive;
+  if (!spec) return null;
+  const out = m.direction === "out";
+  const chip = out
+    ? "bg-emerald-500/30 text-emerald-50"
+    : "bg-zinc-100 text-zinc-600";
+
+  if (m.msgType === "button_reply") {
+    return <div className={`mt-1 inline-block rounded px-1.5 py-0.5 text-[11px] ${chip}`}>tapped: {String(spec.buttonText ?? spec.buttonId)}</div>;
+  }
+  if (m.msgType === "list_reply") {
+    return <div className={`mt-1 inline-block rounded px-1.5 py-0.5 text-[11px] ${chip}`}>chose: {String(spec.rowTitle ?? spec.rowId)}</div>;
+  }
+  if (m.msgType === "flow_reply") {
+    const answers = (spec.answers ?? {}) as Record<string, unknown>;
+    return (
+      <div className={`mt-1 space-y-0.5 rounded px-1.5 py-1 text-[11px] ${chip}`}>
+        <div className="font-medium">Flow submitted</div>
+        {Object.entries(answers).filter(([k]) => k !== "flow_token").map(([k, v]) => (
+          <div key={k}>{k}: {String(v)}</div>
+        ))}
+      </div>
+    );
+  }
+  if (m.msgType === "product") {
+    const items = (spec.items ?? []) as Array<{ product_retailer_id?: string; quantity?: number }>;
+    return <div className={`mt-1 rounded px-1.5 py-0.5 text-[11px] ${chip}`}>Catalogue order: {items.length} item(s)</div>;
+  }
+
+  // Outbound interactive: show the controls the customer sees.
+  const buttons = (spec.buttons ?? []) as Array<{ kind: string; text: string }>;
+  const rows = ((spec.listSections ?? []) as Array<{ rows?: unknown[] }>).flatMap((s) => s.rows ?? []);
+  if (spec.type === "list") {
+    return <div className={`mt-1 rounded px-1.5 py-0.5 text-[11px] ${chip}`}>☰ {String(spec.listButtonText ?? "Select")} · {rows.length} option(s)</div>;
+  }
+  if (spec.type === "flow") {
+    return <div className={`mt-1 rounded px-1.5 py-0.5 text-[11px] ${chip}`}>🧾 {String(spec.flowCtaText ?? "Open")}</div>;
+  }
+  if (spec.type === "catalog") {
+    return <div className={`mt-1 rounded px-1.5 py-0.5 text-[11px] ${chip}`}>🛍 Catalogue message</div>;
+  }
+  if (buttons.length) {
+    return (
+      <div className="mt-1 flex flex-wrap gap-1">
+        {buttons.map((b, i) => (
+          <span key={i} className={`rounded px-1.5 py-0.5 text-[11px] ${chip}`}>
+            {b.kind === "url" ? "↗ " : b.kind === "phone" ? "📞 " : ""}{b.text}
+          </span>
+        ))}
+      </div>
+    );
+  }
+  return null;
+}
+
+// Sends an approved template straight from the composer, keeping its interactive
+// components. Outside the 24h service window this is the only thing WhatsApp allows,
+// which is why it is not gated on the window like free-form text is.
+function TemplatePicker({ onPick, disabled }: { onPick: (templateId: string) => void; disabled?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [templates, setTemplates] = useState<Template[]>([]);
+
+  useEffect(() => {
+    if (!open || templates.length) return;
+    apiFetch("/templates")
+      .then((rows: Template[]) => setTemplates(rows.filter((t) => t.status === "approved" && t.channel === "whatsapp")))
+      .catch(() => setTemplates([]));
+  }, [open, templates.length]);
+
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen((o) => !o)} disabled={disabled}
+        className="rounded border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-40">
+        📄 Template
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-0 z-10 mb-1 max-h-64 w-80 overflow-y-auto rounded-md border border-zinc-200 bg-white shadow-lg">
+          {templates.map((t) => (
+            <button key={t.id} onClick={() => { onPick(t.id); setOpen(false); }}
+              className="block w-full border-b border-zinc-100 px-3 py-2 text-left hover:bg-zinc-50">
+              <div className="flex items-center gap-1">
+                <span className="font-mono text-xs font-medium">{t.name}</span>
+                {t.interactiveType && t.interactiveType !== "none" && (
+                  <span className="rounded bg-amber-100 px-1 py-0.5 text-[10px] text-amber-700">{t.interactiveType}</span>
+                )}
+              </div>
+              <div className="truncate text-[11px] text-zinc-500">{t.body}</div>
+            </button>
+          ))}
+          {templates.length === 0 && <div className="px-3 py-4 text-center text-xs text-zinc-400">No approved WhatsApp templates.</div>}
         </div>
       )}
     </div>

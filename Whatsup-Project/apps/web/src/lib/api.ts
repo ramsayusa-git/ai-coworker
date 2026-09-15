@@ -193,6 +193,22 @@ export async function partnerFetch(path: string, init?: RequestInit) {
   return res.status === 204 ? null : res.json();
 }
 
+// Platform-level (not org-scoped) authenticated GET — /v1/plans, /v1/conversation-rates.
+export async function platformFetch(path: string, init?: RequestInit): Promise<any> {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/v1${path}`, {
+    ...init,
+    cache: "no-store",
+    headers: {
+      "content-type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers ?? {}),
+    },
+  });
+  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  return res.json();
+}
+
 export async function apiFetch(path: string, init?: RequestInit, _retried = false): Promise<any> {
   const token = getToken();
   const orgId = await getOrgId();

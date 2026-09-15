@@ -16,6 +16,10 @@ export interface Message {
   body: string;
   status: MsgStatus;
   createdAt: string;
+  // text | interactive | template | button_reply | list_reply | flow_reply | product
+  msgType?: string;
+  // Outbound: the interactive spec that was sent. Inbound: the structured reply payload.
+  interactive?: Record<string, any> | null;
 }
 
 export interface Conversation {
@@ -104,6 +108,79 @@ export interface Template {
   quality?: "green" | "yellow" | "red";
   rejectionReason?: string;
   updatedAt: string;
+  // Meta interactive components
+  headerType?: "none" | "text" | "image" | "video" | "document";
+  headerText?: string | null;
+  headerMediaUrl?: string | null;
+  footer?: string | null;
+  interactiveType?: InteractiveType;
+  buttons?: TemplateButton[];
+  listButtonText?: string | null;
+  listSections?: ListSection[];
+  catalogId?: string | null;
+  catalogSections?: CatalogSection[];
+  flowId?: string | null;
+  flowCtaText?: string | null;
+}
+
+export type InteractiveType = "none" | "buttons" | "list" | "catalog" | "flow";
+export type TemplateButton = { kind: "quick_reply" | "url" | "phone"; text: string; url?: string; phone?: string; payload?: string };
+export type ListSection = { title: string; rows: Array<{ id: string; title: string; description?: string }> };
+export type CatalogSection = { title: string; productRetailerIds: string[] };
+
+export type FlowField = { name: string; label: string; type: string; required?: boolean; options?: string[] };
+export type FlowScreen = { id: string; title: string; terminal?: boolean; ctaLabel?: string; fields: FlowField[] };
+export interface Flow {
+  id: string;
+  name: string;
+  status: "draft" | "published" | "deprecated";
+  categories: string[];
+  screens: FlowScreen[];
+  metaFlowId?: string | null;
+  channelId?: string | null;
+  publishError?: string | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+}
+export interface FlowResponseRow {
+  id: string; flowId: string | null; flowName?: string | null;
+  answers: Record<string, unknown>; createdAt: string;
+  contactName?: string | null; contactPhone?: string | null; conversationId?: string | null;
+}
+
+export interface Plan {
+  id: string; name: string; tagline?: string | null; position: number;
+  priceMonthlyPaise: number; priceQuarterlyPaise: number; priceAnnualPaise: number;
+  limits: Record<string, number>; features: Record<string, boolean>; highlights: string[];
+}
+export interface ConversationRate {
+  id: string; country: string; countryCode: string;
+  marketingMilliPaise: number; utilityMilliPaise: number;
+  authenticationMilliPaise: number; serviceMilliPaise: number; markupBps: number;
+}
+export interface BillingSummary {
+  plan: Plan | null;
+  planCycle: "monthly" | "quarterly" | "annual";
+  planStatus: string;
+  planRenewsAt: string | null;
+  billingCountryCode: string;
+  walletPaise: number;
+  rateCard: ConversationRate | null;
+  usageThisMonth: { byCategory: Array<{ category: string; conversations: number; milliPaise: number }>; spentPaise: number; since: string };
+}
+export interface WalletTransaction {
+  id: string; kind: string; amountPaise: number; balanceAfterPaise: number; reason: string; createdAt: string;
+}
+export interface WebhookEndpoint {
+  id: string; url: string; description?: string | null; events: string[]; active: boolean; createdAt: string; secretSet?: boolean;
+}
+export interface WebhookDelivery {
+  id: string; endpointId: string; event: string; status: string; attempts: number;
+  responseCode?: number | null; error?: string | null; createdAt: string; deliveredAt?: string | null;
+}
+export interface ApiKey {
+  id: string; name: string; prefix: string; scopes: string[];
+  lastUsedAt?: string | null; revokedAt?: string | null; createdAt: string;
 }
 
 export type BroadcastStatus = "draft" | "scheduled" | "sending" | "completed" | "paused";

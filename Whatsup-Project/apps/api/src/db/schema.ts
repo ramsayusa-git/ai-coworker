@@ -68,6 +68,12 @@ export const orgs = pgTable("orgs", {
   partnerAccess: text("partner_access").default("none"),
   name: text("name").notNull(),
   planId: text("plan_id").default("free"),
+  // monthly | quarterly | annual — the brochure prices the same tiers three ways
+  planCycle: text("plan_cycle").notNull().default("monthly"),
+  planStatus: text("plan_status").notNull().default("active"), // active | past_due | cancelled
+  planRenewsAt: timestamp("plan_renews_at"),
+  // Billing country decides which conversationRates row applies to this org's sends
+  billingCountryCode: text("billing_country_code").notNull().default("IN"),
   walletPaise: integer("wallet_paise").default(0),
   timezone: text("timezone").default("Asia/Kolkata"),
   locale: text("locale").default("en"),
@@ -275,6 +281,12 @@ export const messages = pgTable("messages", {
   channelId: uuid("channel_id").notNull().references(() => channels.id),
   direction: directionEnum("direction").notNull(),
   body: text("body").notNull(),
+  // text | interactive | template | button_reply | list_reply | flow_reply | product
+  // "text" is the default so every pre-existing row keeps its meaning.
+  msgType: text("msg_type").notNull().default("text"),
+  // The interactive spec that was sent (outbound) or the structured reply payload
+  // that came back (inbound button/list/flow replies) — rendered in the thread.
+  interactive: jsonb("interactive").$type<Record<string, unknown>>(),
   status: msgStatusEnum("status").default("sent"),
   templateId: uuid("template_id"),
   campaignId: uuid("campaign_id"),
@@ -293,6 +305,26 @@ export const templates = pgTable("templates", {
   status: text("status").default("pending"),
   body: text("body").notNull(),
   variables: text("variables").array().default([]),
+  // --- Meta interactive components (the brochure's quick-reply / CTA / list / catalogue) ---
+  // headerType: none | text | image | video | document
+  headerType: text("header_type").notNull().default("none"),
+  headerText: text("header_text"),
+  headerMediaUrl: text("header_media_url"),
+  footer: text("footer"),
+  // interactiveType: none | buttons | list | catalog | flow
+  // "none" keeps the plain-text behaviour every existing template already has.
+  interactiveType: text("interactive_type").notNull().default("none"),
+  // Quick-reply and call-to-action buttons. kind: quick_reply | url | phone
+  buttons: jsonb("buttons").$type<Array<{ kind: string; text: string; url?: string; phone?: string; payload?: string }>>().default([]),
+  // List message: a button label plus sections of selectable rows
+  listButtonText: text("list_button_text"),
+  listSections: jsonb("list_sections").$type<Array<{ title: string; rows: Array<{ id: string; title: string; description?: string }> }>>().default([]),
+  // Catalogue / product message (single product or multi-product sections)
+  catalogId: text("catalog_id"),
+  catalogSections: jsonb("catalog_sections").$type<Array<{ title: string; productRetailerIds: string[] }>>().default([]),
+  // Attached WhatsApp Flow (interactiveType = "flow")
+  flowId: uuid("flow_id"),
+  flowCtaText: text("flow_cta_text"),
   rejectionReason: text("rejection_reason"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [unique().on(t.orgId, t.name, t.language)]);
@@ -455,3 +487,153 @@ export const deals = pgTable("deals", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ---------------------------------------------------------------------------
+// WhatsApp Flows (Meta's native in-chat form/screen flows — the "Book a Service"
+// date/time/model form pattern). A flow is authored here as screen JSON, published
+// to Meta (which returns a flow id), then attached to an interactive message.
+// ---------------------------------------------------------------------------
+export const flows = pgTable("flows", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  // draft | published | deprecated — mirrors Meta's own flow lifecycle
+  status: text("status").notNull().default("draft"),
+  categories: text("categories").array().default([]), // SIGN_UP, APPOINTMENT_BOOKING, LEAD_GENERATION, ...
+  // Authoring model: an ordered list of screens, each with typed fields. compileFlowJson()
+  // in adapters/meta-flows.ts turns this into Meta's Flow JSON v5 on publish.
+  screens: jsonb("screens").$type<Array<{
+    id: string; title: string; terminal?: boolean;
+    fields: Array<{ name: string; label: string; type: string; required?: boolean; options?: string[] }>;
+    ctaLabel?: string;
+  }>>().default([]),
+  metaFlowId: text("meta_flow_id"),
+  channelId: uuid("channel_id").references(() => channels.id, { onDelete: "set null" }),
+  publishError: text("publish_error"),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// One customer's completed flow submission (Meta delivers it as an interactive
+// nfm_reply on the inbound webhook).
+export const flowResponses = pgTable("flow_responses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  flowId: uuid("flow_id").references(() => flows.id, { onDelete: "set null" }),
+  metaFlowToken: text("meta_flow_token"),
+  contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "cascade" }),
+  conversationId: uuid("conversation_id").references(() => conversations.id, { onDelete: "cascade" }),
+  answers: jsonb("answers").$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ---------------------------------------------------------------------------
+// Billing / Commercials. Money is in paise everywhere (same convention as
+// orgs.walletPaise and deals.valuePaise). Conversation rates are stored in
+// milli-paise because Meta's per-conversation rates go to 3-4 decimals of a
+// rupee (e.g. India utility = Rs 0.115 = 11.5 paise = 11500 milli-paise).
+// ---------------------------------------------------------------------------
+export const plans = pgTable("plans", {
+  id: text("id").primaryKey(), // free | starter | advanced
+  name: text("name").notNull(),
+  tagline: text("tagline"),
+  priceMonthlyPaise: integer("price_monthly_paise").notNull().default(0),
+  priceQuarterlyPaise: integer("price_quarterly_paise").notNull().default(0),
+  priceAnnualPaise: integer("price_annual_paise").notNull().default(0),
+  // Hard entitlement limits. null/-1 = unlimited.
+  limits: jsonb("limits").$type<Record<string, number>>().default({}),
+  // Feature flags gating whole modules (webhooks, api access, flows, drip, ...)
+  features: jsonb("features").$type<Record<string, boolean>>().default({}),
+  highlights: text("highlights").array().default([]),
+  position: integer("position").notNull().default(0),
+  active: boolean("active").default(true),
+});
+
+// Per-country conversation rate card, at Meta actuals — the brochure's "No Markup"
+// promise is implemented as markupBps (basis points) defaulting to 0 platform-wide.
+export const conversationRates = pgTable("conversation_rates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  country: text("country").notNull(),
+  countryCode: text("country_code").notNull(),
+  marketingMilliPaise: integer("marketing_milli_paise").notNull().default(0),
+  utilityMilliPaise: integer("utility_milli_paise").notNull().default(0),
+  authenticationMilliPaise: integer("authentication_milli_paise").notNull().default(0),
+  serviceMilliPaise: integer("service_milli_paise").notNull().default(0),
+  markupBps: integer("markup_bps").notNull().default(0), // 0 = no markup, brochure promise
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.countryCode)]);
+
+// Wallet ledger. Every credit (top-up, signup bonus) and debit (a charged
+// conversation) is a row — orgs.walletPaise is the running balance.
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  kind: text("kind").notNull(), // credit | debit | bonus | adjustment
+  amountPaise: integer("amount_paise").notNull(),
+  balanceAfterPaise: integer("balance_after_paise").notNull(),
+  reason: text("reason").notNull(),
+  refType: text("ref_type"), // conversation_charge | topup | plan_change
+  refId: text("ref_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// One charged 24h conversation window (Meta bills per conversation, not per
+// message) — unique per conversation+category+window so repeat messages inside
+// the same window are free, exactly like Meta's own billing.
+export const conversationCharges = pgTable("conversation_charges", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  conversationId: uuid("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  category: text("category").notNull(), // marketing | utility | authentication | service
+  countryCode: text("country_code").notNull(),
+  ratePaise: integer("rate_paise").notNull(), // milli-paise actually charged
+  windowStart: timestamp("window_start").notNull(),
+  windowEnd: timestamp("window_end").notNull(),
+  messageId: uuid("message_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.conversationId, t.category, t.windowStart)]);
+
+// ---------------------------------------------------------------------------
+// Advanced-plan platform: outbound webhooks + developer API keys
+// ---------------------------------------------------------------------------
+export const webhookEndpoints = pgTable("webhook_endpoints", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  description: text("description"),
+  secret: text("secret").notNull(), // HMAC-SHA256 signing secret, shown once on create
+  events: text("events").array().default([]),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const webhookDeliveries = pgTable("webhook_deliveries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  endpointId: uuid("endpoint_id").notNull().references(() => webhookEndpoints.id, { onDelete: "cascade" }),
+  event: text("event").notNull(),
+  payload: jsonb("payload").$type<Record<string, unknown>>().default({}),
+  status: text("status").notNull().default("pending"), // pending | delivered | failed
+  attempts: integer("attempts").notNull().default(0),
+  responseCode: integer("response_code"),
+  error: text("error"),
+  nextAttemptAt: timestamp("next_attempt_at").defaultNow(),
+  deliveredAt: timestamp("delivered_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Developer API keys for the public REST API (/api/v1/*). Only the SHA-256 hash is
+// stored — the plaintext key is returned exactly once, on create.
+export const apiKeys = pgTable("api_keys", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  prefix: text("prefix").notNull(), // first 12 chars, shown in the UI to identify a key
+  keyHash: text("key_hash").notNull(),
+  scopes: text("scopes").array().default([]),
+  createdBy: uuid("created_by").references(() => users.id),
+  lastUsedAt: timestamp("last_used_at"),
+  revokedAt: timestamp("revoked_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.keyHash)]);

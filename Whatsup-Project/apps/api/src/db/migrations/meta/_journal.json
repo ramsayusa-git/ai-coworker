@@ -43,6 +43,13 @@
       "when": 1789398496341,
       "tag": "0005_woozy_blue_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789462906266,
+      "tag": "0006_emovur_features",
+      "breakpoints": true
     }
   ]
 }

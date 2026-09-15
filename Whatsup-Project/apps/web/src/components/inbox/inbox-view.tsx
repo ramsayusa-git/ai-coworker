@@ -47,12 +47,15 @@ export function InboxView() {
     return () => { alive = false; };
   }, [selected]);
 
-  async function send(body: string) {
+  // templateId is set when the agent picks an approved template from the composer — the
+  // API then sends it with its interactive components (buttons / list / catalogue / flow)
+  // intact, rather than flattening it to text.
+  async function send(body: string, templateId?: string) {
     if (!selected) return;
     setSending(true);
     try {
       const m: Message = await apiFetch(`/conversations/${selected}/messages`, {
-        method: "POST", body: JSON.stringify({ body }),
+        method: "POST", body: JSON.stringify(templateId ? { templateId } : { body }),
       });
       setMsgs((prev) => [...prev, m]);
       await loadConvs();

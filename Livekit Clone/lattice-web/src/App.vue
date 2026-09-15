@@ -1,117 +1,87 @@
 <template>
   <div id="app" class="app">
-    <!-- DEBUG INFO -->
-    <div v-if="showDebug" class="debug-bar">
-      <div class="debug-content">
-        <span>Auth: {{ authStore.isAuthenticated ? '✅' : '❌' }} | Token: {{ authStore.token ? '✅' : '❌' }} | User: {{ authStore.user ? '✅' : '❌' }} | Route: {{ $route.name }}</span>
-        <button @click="clearAndReload">CLEAR ALL</button>
-      </div>
-    </div>
-    <router-view />
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useAuthStore } from './stores/authStore'
 import { useRouter } from 'vue-router'
 
+import '@fontsource-variable/inter'
+import '@fontsource/jetbrains-mono/400.css'
+import '@fontsource/jetbrains-mono/600.css'
+
 const authStore = useAuthStore()
 const router = useRouter()
-const showDebug = ref(true)
-
-const clearAndReload = () => {
-  console.log('🧹 Manual clear triggered')
-  localStorage.clear()
-  sessionStorage.clear()
-  window.location.href = '/'
-}
 
 onMounted(() => {
-  console.log('🚀 App.vue mounted - AGGRESSIVE CLEAR MODE')
-
-  // ALWAYS clear auth on app load - no persistence
-  localStorage.removeItem('auth_token')
-  localStorage.removeItem('auth_user')
-
   authStore.initAuth()
-  console.log('📊 Auth state:', {
-    isAuthenticated: authStore.isAuthenticated,
-    route: router.currentRoute.value.name
-  })
-
-  // If not authenticated and on protected route, FORCE to landing
   const path = router.currentRoute.value.path
-  if (!authStore.isAuthenticated && path !== '/' && path !== '/login' && path !== '/signup') {
-    console.log('🚨 BLOCKING: Protected route, forcing to landing')
+  if (!authStore.isAuthenticated && path.startsWith('/app')) {
     router.replace('/')
   }
 })
 </script>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
-  --color-primary-light: #818cf8;
-  --color-text: #1f2937;
-  --color-text-light: #6b7280;
-  --color-bg: #ffffff;
-  --color-bg-light: #f9fafb;
-  --color-border: #e5e7eb;
-  --color-success: #10b981;
-  --color-error: #ef4444;
-  --color-warning: #f59e0b;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #818cf8;
-    --color-primary-dark: #6366f1;
-    --color-primary-light: #a5b4fc;
-    --color-text: #f3f4f6;
-    --color-text-light: #d1d5db;
-    --color-bg: #111827;
-    --color-bg-light: #1f2937;
-    --color-border: #374151;
-  }
+  --color-primary: #6d5efc;
+  --color-primary-dark: #5a4ae0;
+  --color-primary-light: #8b7cff;
+  --color-accent: #22d3ee;
+  --color-text: #f2f4f8;
+  --color-text-light: #9aa2b4;
+  --color-bg: #07080d;
+  --color-bg-light: #0f111a;
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-success: #34d399;
+  --color-error: #f87171;
+  --color-warning: #fbbf24;
+  color-scheme: dark;
 }
 
 html {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: var(--color-text);
   background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background-color: var(--color-bg);
-}
+body { background-color: var(--color-bg); }
 
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: color 0.2s;
-}
+a { color: var(--color-primary-light); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--color-accent); }
 
-a:hover {
-  color: var(--color-primary-dark);
-}
+button { cursor: pointer; font-family: inherit; }
 
-button {
-  cursor: pointer;
-  font-family: inherit;
-}
+html { scroll-behavior: smooth; }
 
-.app {
-  width: 100%;
-  height: 100vh;
+::selection { background: rgba(109, 94, 252, 0.4); color: #fff; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0b0d14; }
+::-webkit-scrollbar-thumb { background: #262b3a; border-radius: 5px; border: 2px solid #0b0d14; }
+::-webkit-scrollbar-thumb:hover { background: #343a4d; }
+
+.app { width: 100%; min-height: 100vh; }
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.22s ease, transform 0.22s ease; }
+.fade-enter-from { opacity: 0; transform: translateY(8px); }
+.fade-leave-to { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .fade-enter-active, .fade-leave-active { transition: none; }
 }
 </style>

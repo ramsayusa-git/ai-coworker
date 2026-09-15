@@ -5,6 +5,9 @@ import {
   campaigns, campaignSteps, campaignRecipients, channels, contacts, conversations, messages, templates,
 } from "../db/schema.js";
 import { getAdapter } from "../adapters/index.js";
+import { specForTemplate } from "../services/outbound.js";
+import { chargeConversation, categoryFor } from "../billing.js";
+import { emitEvent } from "../events.js";
 import { sendSms, hasSmsCredentials } from "../adapters/sms.js";
 import { requireCapability } from "../rbac.js";
 
@@ -117,6 +120,7 @@ export async function processCampaigns() {
       .where(and(eq(campaignRecipients.campaignId, c.id), eq(campaignRecipients.status, "active")));
     if ((activeLeftRow?.n ?? 0) === 0) {
       await db.update(campaigns).set({ status: "completed" }).where(eq(campaigns.id, c.id));
+      await emitEvent(c.orgId, "campaign.completed", { campaignId: c.id, name: c.name });
       continue;
     }
 
@@ -154,9 +158,19 @@ export async function processCampaigns() {
       let providerMsgId: string | undefined;
       let errorMessage: string | undefined;
       let viaSms = false;
+      // An interactive template (buttons / list / catalogue / flow) goes out as a real
+      // interactive message here too — a broadcast is not a second-class send path.
+      let spec = null as Awaited<ReturnType<typeof specForTemplate>> | null;
+      try {
+        spec = await specForTemplate(db, c.orgId, tplRow, tplRow.body);
+      } catch (err) {
+        spec = null; // e.g. an unpublished Flow — fall back to the text body below
+      }
       if (adapter && hasCreds) {
         try {
-          const sendResult = await adapter.sendText(channel!.credentials!, contact.phoneE164, tplRow.body);
+          const sendResult = spec && adapter.sendInteractive
+            ? await adapter.sendInteractive(channel!.credentials!, contact.phoneE164, spec)
+            : await adapter.sendText(channel!.credentials!, contact.phoneE164, tplRow.body);
           providerMsgId = sendResult.providerMsgId;
         } catch (err) {
           errorMessage = err instanceof Error ? err.message : String(err);
@@ -179,10 +193,26 @@ export async function processCampaigns() {
         errorMessage = "Channel has no connected provider credentials";
       }
 
-      await db.insert(messages).values({
+      const [campaignMsg] = await db.insert(messages).values({
         orgId: c.orgId, conversationId: conv.id, channelId: c.channelId, direction: "out",
         body: viaSms ? `[SMS fallback] ${tplRow.body}` : tplRow.body, status, templateId: step.templateId, campaignId: c.id,
         providerMsgId, errorMessage,
+        msgType: spec && !viaSms ? "interactive" : "template",
+        interactive: spec && !viaSms ? (spec as unknown as Record<string, unknown>) : null,
+      }).returning();
+
+      // Meter the conversation against the org wallet at the template's own Meta category
+      // (marketing/utility/authentication). Idempotent per 24h window, so a drip step that
+      // lands in an already-charged marketing window costs nothing extra — same as Meta.
+      if (status === "sent" && !viaSms) {
+        await chargeConversation({
+          orgId: c.orgId, conversationId: conv.id,
+          category: categoryFor(tplRow.category), messageId: campaignMsg.id,
+        }).catch(() => undefined);
+      }
+      await emitEvent(c.orgId, "message.sent", {
+        messageId: campaignMsg.id, conversationId: conv.id, campaignId: c.id,
+        status, body: campaignMsg.body, type: campaignMsg.msgType,
       });
       await db.update(conversations).set({
         lastMessage: tplRow.body, lastMessageAt: new Date(), lastMessageDirection: "out",

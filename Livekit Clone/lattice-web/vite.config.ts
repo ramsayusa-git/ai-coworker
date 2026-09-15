@@ -7,9 +7,24 @@ export default defineConfig({
     port: 5173,
     host: '0.0.0.0',
     strictPort: false,
+    allowedHosts: [
+      'latticenet.aetosiot.com',
+      '.aetosiot.com',
+      'localhost'
+    ],
+    hmr: {
+      clientPort: 443,
+      protocol: 'wss',
+      host: 'latticenet.aetosiot.com'
+    }
+  },
+  preview: {
+    port: 4173,
+    host: '0.0.0.0',
+    allowedHosts: ['latticenet.aetosiot.com', '.aetosiot.com', 'localhost']
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: true
   }
 })

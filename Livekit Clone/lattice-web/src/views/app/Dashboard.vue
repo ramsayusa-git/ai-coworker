@@ -1,383 +1,257 @@
-<template>
-  <div class="app-layout">
-    <nav class="sidebar">
-      <div class="sidebar-header">
-        <h2>Lattice</h2>
-      </div>
-      <ul class="sidebar-menu">
-        <li><router-link to="/app" active-class="active">Dashboard</router-link></li>
-        <li><router-link to="/app/agents" active-class="active">Agents</router-link></li>
-        <li><router-link to="/app/deployments" active-class="active">Deployments</router-link></li>
-        <li><router-link to="/app/settings" active-class="active">Settings</router-link></li>
-      </ul>
-      <div class="sidebar-footer">
-        <button class="btn-logout" @click="handleLogout">Logout</button>
-      </div>
-    </nav>
-
-    <main class="main-content">
-      <header class="top-bar">
-        <h1>🔴 DASHBOARD COMPONENT LOADED 🔴</h1>
-        <div class="user-info">
-          <span>{{ authStore.user?.name }}</span>
-        </div>
-      </header>
-
-      <div class="dashboard-content">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <h3>Active Agents</h3>
-            <div class="stat-value">{{ stats.activeAgents }}</div>
-            <p class="stat-label">Running now</p>
-          </div>
-          <div class="stat-card">
-            <h3>Deployments</h3>
-            <div class="stat-value">{{ stats.deployments }}</div>
-            <p class="stat-label">Total deployments</p>
-          </div>
-          <div class="stat-card">
-            <h3>Uptime</h3>
-            <div class="stat-value">{{ stats.uptime }}%</div>
-            <p class="stat-label">Last 30 days</p>
-          </div>
-          <div class="stat-card">
-            <h3>Latency</h3>
-            <div class="stat-value">{{ stats.latency }}ms</div>
-            <p class="stat-label">Average p95</p>
-          </div>
-        </div>
-
-        <div class="content-grid">
-          <div class="card">
-            <h3>Recent Deployments</h3>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Status</th>
-                  <th>Nodes</th>
-                  <th>Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="deployment in recentDeployments" :key="deployment.id">
-                  <td>{{ deployment.name }}</td>
-                  <td><span class="badge" :class="`badge-${deployment.status}`">{{ deployment.status }}</span></td>
-                  <td>{{ deployment.nodes }}</td>
-                  <td>{{ deployment.updated }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card">
-            <h3>Quick Start</h3>
-            <ul class="action-list">
-              <li><router-link to="/app/agents">➜ Create new agent</router-link></li>
-              <li><router-link to="/app/deployments">➜ Deploy configuration</router-link></li>
-              <li><a href="https://docs.aetoslattice.com" target="_blank">➜ View documentation</a></li>
-              <li><router-link to="/app/settings">➜ Configure plugins</router-link></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/authStore'
+import { ref, onMounted, computed } from 'vue'
+import { PhoneCall, Clock, Gauge, DollarSign, RefreshCw } from '@lucide/vue'
+import { Analytics, type Overview } from '../../api'
 
-const router = useRouter()
-const authStore = useAuthStore()
+const data = ref<Overview | null>(null)
+const loading = ref(true)
+const error = ref('')
+const hours = ref(24)
 
-const stats = ref({
-  activeAgents: 3,
-  deployments: 8,
-  uptime: 99.8,
-  latency: 145,
+const RANGES = [
+  { h: 24, label: '24 h' },
+  { h: 168, label: '7 d' },
+  { h: 720, label: '30 d' },
+]
+
+async function load() {
+  loading.value = true
+  error.value = ''
+  try {
+    data.value = await Analytics.overview(hours.value)
+  } catch (e: any) {
+    error.value = e.message || 'Could not load analytics.'
+  } finally {
+    loading.value = false
+  }
+}
+
+function setRange(h: number) {
+  hours.value = h
+  load()
+}
+
+onMounted(load)
+
+const tiles = computed(() => {
+  const d = data.value
+  return [
+    { icon: PhoneCall, label: 'Calls handled', value: d ? d.calls.toLocaleString() : '—' },
+    { icon: Clock, label: 'Talk minutes', value: d ? d.minutes.toLocaleString() : '—' },
+    { icon: Gauge, label: 'Time to first byte', value: d ? `${d.ttfb_ms}` : '—', unit: 'ms' },
+    { icon: DollarSign, label: 'Spend', value: d ? `$${d.cost.toFixed(2)}` : '—' },
+  ]
 })
 
-const recentDeployments = ref([
-  { id: 1, name: 'Production Voice AI', status: 'running', nodes: 5, updated: '2 minutes ago' },
-  { id: 2, name: 'Staging Environment', status: 'running', nodes: 2, updated: '1 hour ago' },
-  { id: 3, name: 'Dev Cluster', status: 'stopped', nodes: 1, updated: '3 days ago' },
-])
+// Bars are drawn from the max so an all-zero window renders a flat baseline
+// rather than dividing by zero.
+const peak = computed(() => Math.max(1, ...(data.value?.per_hour ?? [0])))
+const outcomes = computed(() => Object.entries(data.value?.by_outcome ?? {}))
+const totalOutcomes = computed(() =>
+  outcomes.value.reduce((a, [, n]) => a + (n as number), 0) || 1)
 
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/')
+const OUTCOME_COLOR: Record<string, string> = {
+  completed: 'var(--brand-success, #34d399)',
+  transferred: 'var(--brand-accent, #22d3ee)',
+  'no-answer': 'var(--brand-muted, #9aa2b4)',
+  failed: 'var(--brand-danger, #f87171)',
+  'in-progress': 'var(--brand-primary, #6d5efc)',
 }
 </script>
 
+<template>
+  <div class="dash">
+    <div class="bar">
+      <div class="ranges">
+        <button v-for="r in RANGES" :key="r.h" :class="{ on: hours === r.h }"
+                @click="setRange(r.h)">{{ r.label }}</button>
+      </div>
+      <button class="refresh" @click="load" :disabled="loading" aria-label="Refresh">
+        <RefreshCw :size="15" :class="{ spin: loading }" /> Refresh
+      </button>
+    </div>
+
+    <div v-if="error" class="err">
+      <strong>Could not load analytics</strong>
+      <p>{{ error }}</p>
+      <button @click="load">Try again</button>
+    </div>
+
+    <template v-else>
+      <div class="tiles">
+        <div v-for="t in tiles" :key="t.label" class="tile">
+          <span class="tile-icon"><component :is="t.icon" :size="17" /></span>
+          <span class="tile-label">{{ t.label }}</span>
+          <span class="tile-value" :class="{ dim: loading }">
+            {{ t.value }}<small v-if="t.unit && data">{{ t.unit }}</small>
+          </span>
+        </div>
+      </div>
+
+      <div class="cards">
+        <section class="card">
+          <header>
+            <h2>Call volume</h2>
+            <span>per hour · {{ data?.tz || '' }}</span>
+          </header>
+          <div v-if="loading" class="chart-sk"></div>
+          <div v-else-if="!data?.calls" class="empty">
+            <strong>No calls in this window</strong>
+            <p>Once agents start taking calls, volume appears here.</p>
+          </div>
+          <div v-else class="chart" role="img"
+               :aria-label="`Call volume, peak ${peak} per hour`">
+            <div v-for="(n, i) in data.per_hour" :key="i" class="bar-col"
+                 :style="{ height: Math.max(2, (n / peak) * 100) + '%' }"
+                 :title="`${n} call${n === 1 ? '' : 's'}`"></div>
+          </div>
+          <footer v-if="data?.calls"><span>Peak {{ peak }} / hour</span></footer>
+        </section>
+
+        <section class="card">
+          <header><h2>Outcomes</h2><span>how calls ended</span></header>
+          <div v-if="loading" class="chart-sk"></div>
+          <div v-else-if="!outcomes.length" class="empty">
+            <strong>Nothing to break down yet</strong>
+          </div>
+          <ul v-else class="outcomes">
+            <li v-for="[name, n] in outcomes" :key="name">
+              <span class="dot" :style="{ background: OUTCOME_COLOR[name] || 'var(--brand-muted)' }"></span>
+              <span class="oname">{{ name }}</span>
+              <span class="obar">
+                <i :style="{ width: ((n as number) / totalOutcomes * 100) + '%',
+                             background: OUTCOME_COLOR[name] || 'var(--brand-muted)' }"></i>
+              </span>
+              <span class="ocount">{{ n }}</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="card wide">
+          <header><h2>Busiest agents</h2><span>calls in this window</span></header>
+          <div v-if="loading" class="chart-sk short"></div>
+          <div v-else-if="!data?.by_agent?.length" class="empty">
+            <strong>No agent activity yet</strong>
+            <p>Create an agent and point a number at it to see traffic here.</p>
+          </div>
+          <ul v-else class="agents">
+            <li v-for="a in data.by_agent" :key="a.agent_id">
+              <span class="aname">{{ a.agent }}</span>
+              <span class="abar">
+                <i :style="{ width: (a.calls / Math.max(...data.by_agent.map(x => x.calls)) * 100) + '%' }"></i>
+              </span>
+              <span class="acount">{{ a.calls }}</span>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </template>
+  </div>
+</template>
+
 <style scoped>
-.app-layout {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  min-height: 100vh;
+.bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.3rem; flex-wrap: wrap; }
+.ranges { display: flex; gap: .3rem; }
+.ranges button {
+  padding: .45rem .9rem; font-size: .85rem; font-weight: 600;
+  border-radius: 8px; border: 1px solid var(--line, rgba(255,255,255,.09));
+  background: rgba(255,255,255,.03); color: var(--brand-muted, #9aa2b4);
 }
-
-.sidebar {
-  background: var(--color-bg-light);
-  border-right: 1px solid var(--color-border);
-  padding: 2rem 0;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  position: sticky;
-  top: 0;
+.ranges button.on {
+  background: rgba(109,94,252,.18); color: #fff;
+  border-color: rgba(109,94,252,.45);
 }
-
-.sidebar-header h2 {
-  padding: 0 1.5rem;
-  margin-bottom: 2rem;
-  font-size: 20px;
-  color: var(--color-primary);
+.refresh {
+  margin-left: auto; display: inline-flex; align-items: center; gap: .4rem;
+  padding: .45rem .85rem; font-size: .85rem; border-radius: 8px;
+  border: 1px solid var(--line, rgba(255,255,255,.09));
+  background: rgba(255,255,255,.03); color: var(--brand-muted, #9aa2b4);
 }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.sidebar-menu {
-  list-style: none;
-  flex: 1;
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.tile {
+  padding: 1.2rem; border-radius: var(--brand-radius-md, 12px);
+  border: 1px solid var(--line, rgba(255,255,255,.09));
+  background: var(--brand-panel, #0f111a);
+  display: flex; flex-direction: column; gap: .35rem;
 }
-
-.sidebar-menu li {
-  padding: 0;
+.tile-icon {
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px;
+  background: rgba(109,94,252,.16); color: var(--brand-accent, #22d3ee); margin-bottom: .3rem;
 }
-
-.sidebar-menu a {
-  display: block;
-  padding: 12px 1.5rem;
-  color: var(--color-text-light);
-  border-left: 3px solid transparent;
-  transition: all 0.2s;
+.tile-label { font-size: .8rem; color: var(--brand-muted, #9aa2b4); }
+.tile-value {
+  font-size: 1.7rem; font-weight: 750; letter-spacing: -.03em;
+  font-family: var(--brand-mono, ui-monospace), monospace;
 }
+.tile-value.dim { opacity: .4; }
+.tile-value small { font-size: .9rem; margin-left: 2px; color: var(--brand-muted, #9aa2b4); }
 
-.sidebar-menu a:hover {
-  color: var(--color-text);
-  background: var(--color-bg);
-}
-
-.sidebar-menu a.active {
-  border-left-color: var(--color-primary);
-  color: var(--color-primary);
-  background: var(--color-bg);
-}
-
-.sidebar-footer {
-  padding: 0 1.5rem;
-  border-top: 1px solid var(--color-border);
-  padding-top: 1.5rem;
-}
-
-.btn-logout {
-  width: 100%;
-  padding: 10px;
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-logout:hover {
-  background: #dc2626;
-}
-
-.main-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.top-bar {
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
-  padding: 1.5rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 70px;
-}
-
-.top-bar h1 {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 14px;
-  color: var(--color-text-light);
-}
-
-.dashboard-content {
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1.5rem;
-}
-
-.stat-card h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-light);
-  margin-bottom: 0.5rem;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--color-primary);
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: var(--color-text-light);
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-}
-
+.cards { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; }
 .card {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.2rem; border-radius: var(--brand-radius-md, 12px);
+  border: 1px solid var(--line, rgba(255,255,255,.09));
+  background: var(--brand-panel, #0f111a);
+}
+.card.wide { grid-column: 1 / -1; }
+.card header { display: flex; align-items: baseline; gap: .7rem; margin-bottom: 1.1rem; }
+.card h2 { font-size: .98rem; font-weight: 650; }
+.card header span { font-size: .8rem; color: var(--brand-muted, #9aa2b4); }
+.card footer { margin-top: .7rem; font-size: .8rem; color: var(--brand-muted, #9aa2b4); }
+
+.chart { display: flex; align-items: flex-end; gap: 2px; height: 150px; }
+.bar-col {
+  flex: 1; min-height: 2px; border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--brand-accent, #22d3ee), var(--brand-primary, #6d5efc));
+  opacity: .9;
+}
+.chart-sk {
+  height: 150px; border-radius: 10px;
+  background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.09), rgba(255,255,255,.04));
+  background-size: 200% 100%; animation: shimmer 1.3s linear infinite;
+}
+.chart-sk.short { height: 90px; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+.empty { padding: 2.4rem 1rem; text-align: center; }
+.empty strong { display: block; font-size: .95rem; margin-bottom: .3rem; }
+.empty p { font-size: .85rem; color: var(--brand-muted, #9aa2b4); }
+
+.outcomes, .agents { list-style: none; padding: 0; margin: 0; display: grid; gap: .8rem; }
+.outcomes li { display: grid; grid-template-columns: 10px 6.5rem 1fr auto; gap: .6rem; align-items: center; font-size: .86rem; }
+.dot { width: 9px; height: 9px; border-radius: 50%; }
+.oname { text-transform: capitalize; color: var(--brand-muted, #9aa2b4); }
+.obar, .abar { height: 7px; border-radius: 4px; background: rgba(255,255,255,.07); overflow: hidden; }
+.obar i, .abar i { display: block; height: 100%; border-radius: 4px; }
+.abar i { background: linear-gradient(90deg, var(--brand-primary, #6d5efc), var(--brand-accent, #22d3ee)); }
+.ocount, .acount { font-family: var(--brand-mono, ui-monospace), monospace; font-size: .82rem; }
+.agents li { display: grid; grid-template-columns: 11rem 1fr auto; gap: .8rem; align-items: center; font-size: .87rem; }
+.aname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.err {
+  padding: 2.5rem; text-align: center;
+  border: 1px solid rgba(248,113,113,.3); border-radius: 12px;
+  background: rgba(248,113,113,.07);
+}
+.err strong { display: block; color: var(--brand-danger, #f87171); margin-bottom: .3rem; }
+.err p { color: var(--brand-muted, #9aa2b4); font-size: .88rem; margin-bottom: 1rem; }
+.err button {
+  padding: .5rem 1.1rem; border: 0; border-radius: 8px;
+  background: var(--brand-primary, #6d5efc); color: #fff; font-weight: 600;
 }
 
-.card h3 {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 1rem;
+@media (max-width: 1000px) {
+  .tiles { grid-template-columns: 1fr 1fr; }
+  .cards { grid-template-columns: 1fr; }
 }
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+@media (max-width: 560px) {
+  .tiles { grid-template-columns: 1fr; }
+  .outcomes li { grid-template-columns: 10px 5rem 1fr auto; }
+  .agents li { grid-template-columns: 7rem 1fr auto; }
 }
-
-.table th {
-  text-align: left;
-  padding: 10px 0;
-  font-weight: 600;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-text-light);
-}
-
-.table td {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.badge-running {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.badge-stopped {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-@media (prefers-color-scheme: dark) {
-  .badge-running {
-    background: #064e3b;
-    color: #86efac;
-  }
-
-  .badge-stopped {
-    background: #7f1d1d;
-    color: #fecaca;
-  }
-}
-
-.action-list {
-  list-style: none;
-}
-
-.action-list li {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.action-list li:last-child {
-  border-bottom: none;
-}
-
-.action-list a {
-  font-size: 14px;
-  color: var(--color-primary);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.action-list a:hover {
-  color: var(--color-primary-dark);
-}
-
-@media (max-width: 768px) {
-  .app-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
-    flex-direction: row;
-    padding: 0;
-  }
-
-  .sidebar-header {
-    padding: 1rem 1.5rem 0;
-  }
-
-  .sidebar-menu {
-    display: flex;
-    gap: 0.5rem;
-    padding: 1rem 1.5rem;
-  }
-
-  .sidebar-footer {
-    display: none;
-  }
-
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .spin, .chart-sk { animation: none; }
 }
 </style>

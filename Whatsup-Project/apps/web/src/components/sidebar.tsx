@@ -15,6 +15,7 @@ const nav = [
   { href: "/tasks", label: "Tasks", icon: "✅" },
   { href: "/broadcasts", label: "Broadcasts", icon: "📣" },
   { href: "/templates", label: "Templates", icon: "📄" },
+  { href: "/flows", label: "Flows", icon: "🧾" },
   { href: "/bots", label: "Bots", icon: "🤖" },
   { href: "/automations", label: "Automations", icon: "🔀" },
   { href: "/ads-manager", label: "Ads & Social", icon: "📢" },

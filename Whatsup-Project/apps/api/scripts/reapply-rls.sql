@@ -14,7 +14,10 @@ BEGIN
     'bots','campaign_recipients','campaign_steps','campaigns','canned_responses',
     'channels','contacts','conversation_notes','conversations','invites','messages',
     'org_members','saved_views','team_members','teams','templates',
-    'automation_rules','ad_campaigns','social_posts'
+    'automation_rules','ad_campaigns','social_posts',
+    'companies','tasks','pipelines','pipeline_stages','deals',
+    'flows','flow_responses','wallet_transactions','conversation_charges',
+    'webhook_endpoints','webhook_deliveries','api_keys'
   ]
   LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);

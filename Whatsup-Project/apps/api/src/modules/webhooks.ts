@@ -1,9 +1,10 @@
 import type { FastifyInstance } from "fastify";
 import { eq, and } from "drizzle-orm";
 import { db } from "../db/client.js";
-import { channels, contacts, conversations, messages, campaignRecipients } from "../db/schema.js";
+import { channels, contacts, conversations, messages, campaignRecipients, flowResponses } from "../db/schema.js";
 import { getAdapter, type NormalizedInboundMessage } from "../adapters/index.js";
 import { runAutomations } from "./automations.js";
+import { emitEvent } from "../events.js";
 
 async function ingestInbound(orgId: string, channelId: string, evt: NormalizedInboundMessage) {
   let [contact] = await db.select().from(contacts)
@@ -32,9 +33,37 @@ async function ingestInbound(orgId: string, channelId: string, evt: NormalizedIn
     }).where(eq(conversations.id, conv.id));
   }
 
-  await db.insert(messages).values({
+  const [inboundMsg] = await db.insert(messages).values({
     orgId, conversationId: conv.id, channelId, direction: "in",
     body: evt.body, status: "read", providerMsgId: evt.providerMsgId,
+    msgType: evt.msgType ?? "text",
+    interactive: evt.interactive ?? null,
+  }).returning();
+
+  // A completed WhatsApp Flow arrives as an interactive nfm_reply. Store the submission
+  // as a first-class row so it is queryable (and webhook-able) rather than buried in a
+  // message body. flowToken is the "<flowId>:<timestamp>" we set when sending.
+  if (evt.msgType === "flow_reply") {
+    const token = String((evt.interactive as any)?.flowToken ?? "");
+    const flowId = token.includes(":") ? token.split(":")[0] : null;
+    const [saved] = await db.insert(flowResponses).values({
+      orgId,
+      flowId: flowId && /^[0-9a-f-]{36}$/i.test(flowId) ? flowId : null,
+      metaFlowToken: token || null,
+      contactId: contact.id,
+      conversationId: conv.id,
+      answers: ((evt.interactive as any)?.answers ?? {}) as Record<string, unknown>,
+    }).returning();
+    await emitEvent(orgId, "flow.response", {
+      flowResponseId: saved.id, flowId: saved.flowId, contactId: contact.id,
+      conversationId: conv.id, answers: saved.answers,
+    });
+  }
+
+  await emitEvent(orgId, "message.received", {
+    messageId: inboundMsg.id, conversationId: conv.id, contactId: contact.id,
+    from: evt.phoneE164, body: evt.body, type: evt.msgType ?? "text",
+    interactive: evt.interactive ?? null,
   });
 
   // Wati's "what should happen when someone replies" — the honest, always-on version of it:
@@ -65,7 +94,14 @@ async function applyDeliveryStatuses(payload: unknown) {
       for (const st of change.value?.statuses ?? []) {
         const mapped = META_STATUS_TO_DB[st.status as string];
         if (!mapped || !st.id) continue;
-        await db.update(messages).set({ status: mapped }).where(eq(messages.providerMsgId, st.id));
+        const [updated] = await db.update(messages).set({ status: mapped })
+          .where(eq(messages.providerMsgId, st.id)).returning();
+        if (updated) {
+          await emitEvent(updated.orgId, "message.status", {
+            messageId: updated.id, conversationId: updated.conversationId,
+            status: mapped, providerMsgId: st.id,
+          });
+        }
       }
     }
   }
@@ -113,4 +149,29 @@ export async function webhookRoutes(app: FastifyInstance) {
     for (const evt of events) await ingestInbound(channel.orgId, channel.id, evt);
     return reply.status(200).send({ ok: true });
   });
+
+  // Facebook Messenger / Instagram Direct. Both are per-channel URLs like the Whapi one
+  // (.../webhooks/messenger/<channelId>) because a Page token is per channel, and both use
+  // Meta's hub.challenge handshake on GET.
+  for (const provider of ["messenger", "instagram"] as const) {
+    app.get(`/webhooks/${provider}/:channelId`, async (req, reply) => {
+      const { channelId } = req.params as { channelId: string };
+      const q = req.query as Record<string, string>;
+      const [channel] = await db.select().from(channels).where(eq(channels.id, channelId));
+      if (q["hub.mode"] === "subscribe" && channel && q["hub.verify_token"] === channel.webhookVerifyToken) {
+        return reply.status(200).send(q["hub.challenge"]);
+      }
+      return reply.status(403).send("forbidden");
+    });
+
+    app.post(`/webhooks/${provider}/:channelId`, async (req, reply) => {
+      const { channelId } = req.params as { channelId: string };
+      const [channel] = await db.select().from(channels).where(eq(channels.id, channelId));
+      if (!channel) return reply.status(404).send({ error: "unknown channel" });
+      const adapter = getAdapter(provider)!;
+      const events = adapter.parseWebhook(req.body, channel.credentials ?? {});
+      for (const evt of events) await ingestInbound(channel.orgId, channel.id, evt);
+      return reply.status(200).send("EVENT_RECEIVED");
+    });
+  }
 }

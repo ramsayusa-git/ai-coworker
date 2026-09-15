@@ -4,6 +4,8 @@ import { apiFetch, getCachedMe } from "@/lib/api";
 import type { Team } from "@/lib/types";
 import { FUNCTIONAL_ROLES, type FunctionalRole } from "@/lib/types";
 import { HelpLink } from "@/components/help-link";
+import { BillingPanel } from "./billing-panel";
+import { DeveloperPanel } from "./developer-panel";
 
 const FUNCTIONAL_ROLE_LABELS: Record<FunctionalRole, string> = {
   administrator: "Administrator", broadcast_manager: "Broadcast Manager", template_manager: "Template Manager",
@@ -261,6 +263,11 @@ function FunctionalRolesCell({ member, onSaved }: { member: Member; onSaved: () 
 
 export function SettingsView() {
   const [tab, setTab] = useState<Tab>("Organization");
+  // Real plan name for the Organization tab badge (the full picker lives in Billing).
+  const [planName, setPlanName] = useState<string | null>(null);
+  useEffect(() => {
+    apiFetch("/billing").then((b) => setPlanName(b?.plan?.name ?? "—")).catch(() => setPlanName("—"));
+  }, []);
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [showInvite, setShowInvite] = useState(false);
@@ -297,8 +304,12 @@ export function SettingsView() {
           <div>
             <label className="block text-xs text-zinc-500">Plan</label>
             <div className="mt-1 flex items-center gap-2">
-              <span className="rounded bg-emerald-100 px-2 py-1 text-sm font-medium text-emerald-700">Growth</span>
-              <button className="text-xs text-emerald-600 hover:underline">Upgrade</button>
+              <span className="rounded bg-emerald-100 px-2 py-1 text-sm font-medium text-emerald-700">
+                {planName ?? "…"}
+              </span>
+              <button onClick={() => setTab("Billing")} className="text-xs text-emerald-600 hover:underline">
+                Change plan
+              </button>
             </div>
           </div>
         </div>
@@ -390,40 +401,9 @@ export function SettingsView() {
         </div>
       )}
 
-      {tab === "Billing" && (
-        <div className="max-w-lg space-y-4">
-          <div className="rounded-lg border border-zinc-200 bg-white p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-zinc-500">Wallet balance</div>
-                <div className="text-2xl font-semibold">₹4,280.00</div>
-              </div>
-              <button className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">Top up</button>
-            </div>
-          </div>
-          <div className="rounded-lg border border-zinc-200 bg-white p-4">
-            <div className="text-sm font-medium">Growth plan</div>
-            <div className="text-xs text-zinc-500">₹2,999/mo · 5 seats · 2 channels · 10k AI tokens included</div>
-            <div className="mt-2 flex gap-2">
-              <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs hover:bg-zinc-50">Change plan</button>
-              <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs hover:bg-zinc-50">Download GST invoices</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {tab === "Billing" && <BillingPanel />}
 
-      {tab === "API & Webhooks" && (
-        <div className="max-w-lg space-y-4 rounded-lg border border-zinc-200 bg-white p-4">
-          <div>
-            <label className="block text-xs text-zinc-500">API key</label>
-            <div className="mt-1 flex items-center gap-2">
-              <code className="flex-1 rounded-md bg-zinc-100 px-2 py-1.5 text-xs">wu_live_••••••••••••3f2a</code>
-              <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-50">Rotate</button>
-            </div>
-          </div>
-          <Field label="Outbound webhook URL" value="" hint="Signed with HMAC-SHA256; verify X-AetosOneChat-Signature." />
-        </div>
-      )}
+      {tab === "API & Webhooks" && <DeveloperPanel />}
 
       {showInvite && <InviteModal onClose={() => setShowInvite(false)} onInvited={loadTeam} />}
     </div>
