@@ -66,6 +66,7 @@ const NAV = [
     ['implab','Improvement Lab','clip','Scored transcripts and prompt revisions'],
   ]],
   ['Admin', [
+    ['components','Components','cpu','Every service, provider and model — versions, health, upgrades','1'],
     ['settings','Settings','gear','Providers, storage, security, licensing'],
     ['guide','User Guide','guide','How every screen in the console works'],
   ]],
@@ -146,6 +147,33 @@ const D = {
         ['Interruption / barge-in','failed',2.8,'7 turns'],
         ['Silent caller','passed',4.8,'4 turns'],
         ['Out-of-scope question','passed',4.1,'6 turns']],
+  comps:[
+    // name, kind, version, model, contract, health, gpu MB, rtt ms, update, drain
+    ['aetos-core','core','2.1.0','—','core-api 1 · events 1','ok',0,null,null,'no'],
+    ['aetos-agent','worker','1.8.0','vad silero 1.8 · turn v1-mini','provider-api 1 · events 1','ok',0,null,null,'no'],
+    ['stt-parakeet','provider/stt','0.4.2','parakeet-tdt-0.6b-v2','provider-api 1','ok',2100,1,'0.4.3','no'],
+    ['stt-deepgram','provider/stt','7.8.1','nova-3','provider-api 1','ok',0,168,null,'no'],
+    ['tts-kokoro','provider/tts','0.9.4','kokoro-v1.0 · 4 voices','provider-api 1','ok',1050,1,null,'no'],
+    ['tts-cartesia','provider/tts','4.2.0','sonic-3','provider-api 1','warn',0,182,'4.3.0','no'],
+    ['llm-gateway','provider/llm','1.74','litellm · 3 routes','openai-compat','ok',0,2,null,'no'],
+    ['vllm-qwen3-8b','provider/llm','0.11.2','Qwen3-8B FP8','openai-compat','ok',9800,1,null,'no'],
+    ['livekit-server','platform','1.13.6','—','—','ok',0,null,'1.13.7','no'],
+    ['livekit-sip','platform','1.3.2','—','—','ok',0,null,null,'no'],
+    ['livekit-egress','platform','1.9.0','—','—','warn',0,null,null,'no'],
+    ['redis','data','7.4','—','events 1','ok',0,null,null,'no'],
+    ['qdrant','data','1.12','—','—','ok',0,null,null,'no'],
+    ['tool-booking','tool','1.2.0','n8n webhook','mcp','ok',0,4,null,'no'],
+  ],
+  store:[
+    ['stt-whisper-turbo','provider/stt','faster-whisper large-v3-turbo · 99 languages','2.1 GB VRAM','free'],
+    ['stt-indic-conformer','provider/stt','AI4Bharat · 22 Indian languages','1.0 GB VRAM','free'],
+    ['tts-orpheus','provider/tts','Expressive streaming TTS, LLM-based','6 GB VRAM','free'],
+    ['tts-elevenlabs','provider/tts','Flash v2.5 · Turbo v2.5 · cloud','—','free'],
+    ['tts-indic-parler','provider/tts','AI4Bharat Indic-Parler-TTS','3 GB VRAM','free'],
+    ['channel-whatsapp','channel','WhatsApp Business API sessions','—','pro'],
+    ['sink-bigquery','sink','Stream every session event to BigQuery','—','pro'],
+    ['tool-crm-hubspot','tool','MCP · contact + deal lookup mid-call','—','free'],
+  ],
   events:[['Egress memory above 70% for 6 min','warn','12 min ago'],
           ['Agent worker restarted after config save','info','41 min ago'],
           ['Telnyx outbound trunk re-registered','info','1 h ago'],
@@ -650,6 +678,58 @@ PAGES.implab = () => `
         .map(([n,v])=>`<div class="mrow"><span class="nm">${n}</span><span class="vl">${v}%</span>
           <div class="meter"><i style="width:${v*2.5}%"></i></div></div>`).join('')}
     </div></div>`;
+
+PAGES.components = () => {
+  const kindPill = k => k.startsWith('provider')?'vio':k==='core'||k==='worker'?'ok':'mute';
+  const gpuTotal = D.comps.reduce((a,c)=>a+c[6],0);
+  return `
+  <div class="page-head"><div><h2>Components</h2><p>Every container on this box — engines, models, platform services. Each one upgrades, rolls back and restarts on its own. Core is never touched by any other component's update.</p></div>
+    <span class="spacer"></span>
+    <span class="pill warn nodot">3 updates available</span>
+    <button class="btn ghost">${ico('report',16)} Backup all</button>
+    <button class="btn">${ico('bolt',16)} Update all safe</button></div>
+  <div class="grid k4" style="margin-bottom:14px">
+    ${stat('Components','14','','13 healthy','up','1 degraded — egress memory')}
+    ${stat('GPU memory','${(gpuTotal/1024).toFixed(1)}','/ 24 GB','RTX 4090','flat','3 engines resident, warm')}
+    ${stat('Local turn latency','412','ms','p50','up','parakeet → qwen3 → kokoro, no internet on path')}
+    ${stat('Core contract','v1','','N and N-1','flat','core-api 1 · provider-api 1 · events 1')}
+  </div>
+  <div class="tabs" id="setTabs"><button class="on">Installed</button><button>Store</button><button>Updates</button><button>Logs</button></div>
+  ${table([['Component'],['Kind'],['Engine',1],['Model / config'],['Contract'],['GPU',1],['RTT',1],['Health'],['']],
+    D.comps.map(c=>`<tr>
+      <td class="mono t-main">${c[0]}</td>
+      <td><span class="pill ${kindPill(c[1])} nodot">${c[1]}</span></td>
+      <td class="num">${c[2]}${c[8]?` <span class="trend up" title="update available">→ ${c[8]}</span>`:''}</td>
+      <td class="t-sub">${c[3]}</td>
+      <td class="mono t-sub">${c[4]}</td>
+      <td class="num">${c[6]?(c[6]/1024).toFixed(1)+' GB':'—'}</td>
+      <td class="num">${c[7]==null?'—':`<span class="pill ${c[7]>120?'crit':c[7]>60?'warn':'ok'} nodot">${c[7]} ms</span>`}</td>
+      <td><span class="pill ${c[5]}">${c[5]==='ok'?'healthy':'degraded'}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        ${c[8]?`<button class="btn" style="padding:5px 10px">Update</button> `:''}
+        <button class="btn ghost" style="padding:5px 10px">${c[1]==='core'?'Logs':'Rollback'}</button></td></tr>`))}
+  <div class="split" style="margin-top:14px">
+    <div class="card">${head('Store','engines and add-ons you can install — filtered by licence and free GPU memory')}
+      ${table([['Add-on'],['Kind'],['What it is'],['Needs'],['']],
+        D.store.map(r=>`<tr><td class="mono t-main">${r[0]}</td>
+          <td><span class="pill ${kindPill(r[1])} nodot">${r[1]}</span></td>
+          <td>${r[2]}</td><td class="t-sub mono">${r[3]}</td>
+          <td style="text-align:right"><button class="btn ghost" style="padding:5px 10px">${r[4]==='pro'?'Pro licence':'Install'}</button></td></tr>`))}</div>
+    <div class="card">${head('Upgrade tts-cartesia 4.2.0 → 4.3.0','what will happen')}
+      <div class="rows">
+        ${[['Pull image + verify signature','ok'],['Check contracts against core (provider-api 1) — compatible','ok'],
+           ['Start 4.3.0 beside 4.2.0 on a temp socket','mute'],['Health: ready within 30 s, one warm synth','mute'],
+           ['Repoint socket — new sessions use 4.3.0','mute'],['Drain 4.2.0 after last stream (max 10 min)','mute'],
+           ['Keep 4.2.0 image for instant rollback','mute']].map(([t,k],i)=>`
+          <div class="row"><div class="ic ${k==='ok'?'b':''}">${i+1}</div>
+            <div class="bd"><b style="font-weight:500">${t}</b></div></div>`).join('')}
+      </div>
+      <div class="note info" style="margin-top:12px">${ico('bolt',16)}
+        <span><b>Core is not restarted.</b> Live calls on 4.2.0 finish normally; the console stays up throughout.</span></div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn">${ico('play',16)} Run upgrade</button>
+        <button class="btn ghost">Schedule for 02:00</button></div>
+    </div></div>`;
+};
 
 PAGES.settings = () => {
   const tabs = ['General','Integrations','Dependencies','Storage','Security','System','Licensing'];
