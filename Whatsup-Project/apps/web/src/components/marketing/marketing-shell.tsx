@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useBrand } from "@/components/brand-provider";
 import { useLanguage, LANGUAGES } from "@/components/marketing/language-context";
 import type { LangCode } from "@/lib/i18n";
+import { LoqioLogo } from "@/components/logo";
 
 export function MarketingShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,15 +23,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <Link href="/" className="flex items-center gap-2 font-semibold" style={{ color: brand.primaryColor }}>
-            {brand.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={brand.logoUrl} alt={brand.brandName} className="h-7 max-w-[10rem] object-contain" />
-            ) : (
-              <>
-                <span className="grid h-7 w-7 place-items-center rounded-md bg-emerald-600 text-sm text-white">{brand.brandName.charAt(0)}</span>
-                <span>{brand.brandName}</span>
-              </>
-            )}
+            <LoqioLogo size={28} imgClassName="h-7 max-w-[10rem] object-contain" />
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm text-zinc-600 sm:flex">
@@ -74,7 +67,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="grid gap-8 sm:grid-cols-4">
             <div>
-              <div className="font-semibold" style={{ color: brand.primaryColor }}>{brand.brandName}</div>
+              <LoqioLogo size={24} textClassName="font-semibold" imgClassName="h-6 max-w-[9rem] object-contain" />
               <p className="mt-2 text-sm text-zinc-500">{t.footer.tagline}</p>
             </div>
             <div>

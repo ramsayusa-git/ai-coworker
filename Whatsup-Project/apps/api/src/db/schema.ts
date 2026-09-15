@@ -637,3 +637,14 @@ export const apiKeys = pgTable("api_keys", {
   revokedAt: timestamp("revoked_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => [unique().on(t.keyHash)]);
+
+// Per-user dashboard layout: which widgets are on the grid, in what order, and how
+// wide/tall each one is. Org-scoped (so it lives under the same RLS policy as
+// everything else) but keyed by user, because a layout is a personal arrangement.
+export const dashboardLayouts = pgTable("dashboard_layouts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  widgets: jsonb("widgets").$type<Array<{ id: string; type: string; w: number; h: number }>>().default([]),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.orgId, t.userId)]);

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
+import { ThemeToggle } from "./theme-provider";
+import { Icon } from "./nav-icons";
 import { getCachedMe, getToken, logout as logoutSession, type Me } from "@/lib/api";
 
 const PUBLIC_PATHS = ["/", "/login", "/register", "/accept-invite", "/accept-partner-invite"];
@@ -63,24 +65,34 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex flex-1 flex-col">
-        <div className={`relative flex items-center justify-end gap-3 border-b border-zinc-200 bg-white text-sm text-zinc-500 transition-[height,padding] duration-150 overflow-hidden ${
-          topbarCollapsed ? "h-0 py-0" : "h-9 px-6 py-2"
-        }`}>
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Sticky glass header. Folds to a thin strip (the fold state is kept from
+            the previous shell) and carries the theme switch. */}
+        <header
+          className={`lq-glass sticky top-0 z-30 flex items-center justify-end gap-3 border-0 border-b border-zinc-200 text-sm text-zinc-500 transition-[height,padding] duration-200 overflow-hidden ${
+            topbarCollapsed ? "h-0 py-0" : "h-12 px-4 py-2 pl-16 md:pl-6"
+          }`}
+          style={{ transitionTimingFunction: "var(--ease-out)" }}
+        >
           {!topbarCollapsed && (
             <>
-              <span>{me ? me.orgName : "Partner team account"}</span>
-              <span className="text-zinc-300">|</span>
-              <span>{me ? me.name || me.email : ""}</span>
-              <button onClick={logout} className="text-emerald-600 hover:underline">Sign out</button>
+              <span className="mr-auto truncate font-medium text-zinc-700">
+                {me ? me.orgName : "Partner team account"}
+              </span>
+              <ThemeToggle compact />
+              <span className="hidden truncate sm:inline">{me ? me.name || me.email : ""}</span>
+              <button onClick={logout}
+                className="lq-ring-focus flex items-center gap-1 rounded-lg px-2 py-1 text-emerald-600 transition-colors hover:bg-zinc-100">
+                Sign out
+              </button>
             </>
           )}
-        </div>
+        </header>
         <button onClick={toggleTopbar} title={topbarCollapsed ? "Show top bar" : "Fold top bar"}
-          className="mx-auto -mb-2 mt-1 flex h-4 w-10 items-center justify-center rounded-b-md border border-t-0 border-zinc-200 bg-white text-[9px] text-zinc-400 hover:bg-zinc-50">
-          {topbarCollapsed ? "▾" : "▴"}
+          className="lq-ring-focus mx-auto -mb-2 mt-1 flex h-4 w-10 items-center justify-center rounded-b-md border border-t-0 border-zinc-200 bg-white text-zinc-400 transition-colors hover:bg-zinc-50">
+          <Icon name="chevron" className={`h-3 w-3 ${topbarCollapsed ? "rotate-90" : "-rotate-90"}`} />
         </button>
-        <main className="flex-1 p-6">{children}</main>
+        <main key={pathname} className="lq-fade min-w-0 flex-1 p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import { useBrand } from "@/components/brand-provider";
+import { LoqioLogo } from "@/components/logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,12 +31,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-zinc-50">
       <form onSubmit={submit} className="w-full max-w-sm rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex justify-center">
-          {brand.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={brand.logoUrl} alt={brand.brandName} className="h-9 max-w-[12rem] object-contain" />
-          ) : (
-            <span className="text-xl font-semibold" style={{ color: brand.primaryColor }}>{brand.brandName}</span>
-          )}
+          <LoqioLogo size={34} textClassName="text-xl font-semibold tracking-tight" imgClassName="h-9 max-w-[12rem] object-contain" />
         </div>
         <div className="space-y-3">
           <div>

@@ -34,7 +34,7 @@ export const env = {
   sessionMaxAgeSeconds: Number(optional('SESSION_MAX_AGE_SECONDS', '2592000')),
 
   brand: {
-    productName: optional('BRAND_PRODUCT_NAME', 'Aetos One Books'),
+    productName: optional('BRAND_PRODUCT_NAME', 'Ledger'),
     vendorName: optional('BRAND_VENDOR_NAME', 'Aetos Tech Labs'),
     colorPrimary: optional('BRAND_COLOR_PRIMARY', '#1f6feb'),
   },

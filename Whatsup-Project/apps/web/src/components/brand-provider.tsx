@@ -13,8 +13,13 @@ export function useBrand(): Brand {
   return useContext(BrandContext);
 }
 
+// Falls back to the platform mark rather than leaving whatever icon was there before —
+// switching from a partner brand back to the default used to strand the old favicon.
+const PLATFORM_FAVICON = "/icon.svg";
+
 function applyFavicon(url: string | null) {
-  if (typeof document === "undefined" || !url) return;
+  if (typeof document === "undefined") return;
+  url = url || PLATFORM_FAVICON;
   let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
   if (!link) {
     link = document.createElement("link");

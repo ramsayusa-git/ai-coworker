@@ -16,10 +16,11 @@ const ROWS: { label: string; us: Cell; qb: Cell; xero: Cell; zoho: Cell; wave: C
   { label: 'Multi-currency', us: true, qb: 'partial', xero: true, zoho: true, wave: 'partial', tally: 'partial' },
   { label: 'Modern web UI', us: true, qb: true, xero: true, zoho: true, wave: true, tally: false },
   { label: 'Vendor lock-in', us: false, qb: true, xero: true, zoho: true, wave: true, tally: true },
+  { label: 'Per-org DB isolation tiers', us: true, qb: false, xero: false, zoho: false, wave: false, tally: false },
 ]
 
 const COLS: { key: keyof (typeof ROWS)[number]; label: string; highlight?: boolean }[] = [
-  { key: 'us', label: 'Aetos One Books', highlight: true },
+  { key: 'us', label: 'Ledger', highlight: true },
   { key: 'qb', label: 'QuickBooks' },
   { key: 'xero', label: 'Xero' },
   { key: 'zoho', label: 'Zoho Books' },

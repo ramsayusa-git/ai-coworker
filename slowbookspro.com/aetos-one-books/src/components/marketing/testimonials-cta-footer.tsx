@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, BookOpenCheck, Quote } from 'lucide-react'
+import { ArrowRight, Quote } from 'lucide-react'
+import { LedgerWordmark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 
 const QUOTES = [
@@ -126,11 +127,8 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <BookOpenCheck className="size-4.5" />
-              </span>
-              Aetos One Books
+            <Link href="/">
+              <LedgerWordmark />
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               Bookkeeping that stays yours. Built by Aetos Tech Labs.

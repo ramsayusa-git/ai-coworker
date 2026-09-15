@@ -115,7 +115,7 @@ export function Hero() {
             <span className="size-2.5 rounded-full bg-amber-400/70" />
             <span className="size-2.5 rounded-full bg-emerald-400/70" />
             <span className="ml-3 truncate rounded-md bg-background px-3 py-1 text-xs text-muted-foreground">
-              app.aetosonebooks.com/dashboard
+              app.ledger.app/dashboard
             </span>
           </div>
           <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-3">

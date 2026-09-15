@@ -1,7 +1,5 @@
 import Link from 'next/link'
 import {
-  ArrowDownRightIcon,
-  ArrowUpRightIcon,
   BanknoteIcon,
   FileTextIcon,
   PlusIcon,
@@ -18,12 +16,13 @@ import {
 } from '@/server/reports/financials'
 import { formatMoney } from '@/lib/money'
 import { PageHeader } from '@/components/app/page-header'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
+import { Widget, WidgetGrid } from '@/components/app/widget-grid'
 import { CashflowChart } from './cashflow-chart'
 
 export const metadata = { title: 'Dashboard' }
@@ -52,34 +51,35 @@ export default async function DashboardPage() {
 
   const kpis = [
     {
+      id: 'kpi-cash',
       label: 'Cash on hand',
       value: formatMoney(cash.cash, currency),
       sub: `${cash.accounts.filter((a) => a.account.bankKind === 'bank').length} bank accounts`,
       icon: BanknoteIcon,
-      tone: 'default' as const,
+      href: undefined as string | undefined,
     },
     {
+      id: 'kpi-ar',
       label: 'Accounts receivable',
       value: formatMoney(ar.grandTotal, currency),
       sub: `${ar.rows.length} customers owing`,
       icon: FileTextIcon,
-      tone: 'positive' as const,
       href: '/reports/ar-aging',
     },
     {
+      id: 'kpi-ap',
       label: 'Accounts payable',
       value: formatMoney(ap.grandTotal, currency),
       sub: `${ap.rows.length} vendors to pay`,
       icon: ReceiptIcon,
-      tone: 'negative' as const,
       href: '/reports/ap-aging',
     },
     {
+      id: 'kpi-net',
       label: 'Net income, month to date',
       value: formatMoney(mtd.netIncome, currency),
       sub: `${formatMoney(ytd.netIncome, currency)} year to date`,
       icon: TrendingUpIcon,
-      tone: mtd.netIncome.isNegative() ? ('negative' as const) : ('positive' as const),
       href: '/reports/profit-and-loss',
     },
   ]
@@ -101,12 +101,12 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon
-          const body = (
-            <Card className="h-full transition-shadow hover:shadow-sm">
-              <CardContent className="space-y-1 py-5">
+      <WidgetGrid storageKey={`dashboard-layout:${org.id}`}>
+        {[
+          ...kpis.map((kpi) => {
+            const Icon = kpi.icon
+            const body = (
+              <CardContent className="space-y-1 py-1">
                 <div className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Icon className="size-4" />
                   {kpi.label}
@@ -114,114 +114,108 @@ export default async function DashboardPage() {
                 <p className="num text-2xl font-semibold tracking-tight">{kpi.value}</p>
                 <p className="text-muted-foreground text-xs">{kpi.sub}</p>
               </CardContent>
-            </Card>
-          )
-          return kpi.href ? (
-            <Link key={kpi.label} href={kpi.href}>{body}</Link>
-          ) : (
-            <div key={kpi.label}>{body}</div>
-          )
-        })}
-      </div>
+            )
+            return (
+              <Widget key={kpi.id} id={kpi.id} defaultSpan={1}>
+                {kpi.href ? (
+                  <Link href={kpi.href} className="block">
+                    {body}
+                  </Link>
+                ) : (
+                  body
+                )}
+              </Widget>
+            )
+          }),
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Income and expense</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <Widget key="chart" id="chart" title="Income and expense" defaultSpan={2}>
             <CashflowChart data={series} currency={currency} />
-          </CardContent>
-        </Card>
+          </Widget>,
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Receivables aging</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {ar.buckets.map((bucket) => {
-              const amount = ar.totals[bucket]
-              const pct = ar.grandTotal.isZero()
-                ? 0
-                : amount.dividedBy(ar.grandTotal).times(100).toNumber()
-              return (
-                <div key={bucket} className="space-y-1">
-                  <div className="flex items-baseline justify-between text-sm">
-                    <span className={bucket === '90+' ? 'text-destructive font-medium' : ''}>
-                      {bucket === 'Current' ? 'Not yet due' : `${bucket} days`}
-                    </span>
-                    <span className="num">{formatMoney(amount, currency)}</span>
+          <Widget key="aging" id="aging" title="Receivables aging" defaultSpan={1}>
+            <div className="space-y-3">
+              {ar.buckets.map((bucket) => {
+                const amount = ar.totals[bucket]
+                const pct = ar.grandTotal.isZero()
+                  ? 0
+                  : amount.dividedBy(ar.grandTotal).times(100).toNumber()
+                return (
+                  <div key={bucket} className="space-y-1">
+                    <div className="flex items-baseline justify-between text-sm">
+                      <span className={bucket === '90+' ? 'text-destructive font-medium' : ''}>
+                        {bucket === 'Current' ? 'Not yet due' : `${bucket} days`}
+                      </span>
+                      <span className="num">{formatMoney(amount, currency)}</span>
+                    </div>
+                    <div className="bg-muted h-1.5 overflow-hidden rounded-full">
+                      <div
+                        className={bucket === '90+' ? 'bg-destructive h-full' : 'bg-primary h-full'}
+                        style={{ width: `${Math.max(pct, amount.isZero() ? 0 : 2)}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-                    <div
-                      className={bucket === '90+' ? 'bg-destructive h-full' : 'bg-primary h-full'}
-                      style={{ width: `${Math.max(pct, amount.isZero() ? 0 : 2)}%` }}
-                    />
-                  </div>
-                </div>
-              )
-            })}
-          </CardContent>
-        </Card>
-      </div>
+                )
+              })}
+            </div>
+          </Widget>,
 
-      <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Recent activity</CardTitle>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/journal">View journal</Link>
-          </Button>
-        </CardHeader>
-        <CardContent className="px-0 pb-0">
-          {recent.length === 0 ? (
-            <p className="text-muted-foreground px-5 pb-6 text-sm">
-              Nothing posted yet. Create an invoice or record an expense to get started.
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Accounts</TableHead>
-                  <TableHead numeric>Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recent.map((tx) => {
-                  const amount = tx.transactionLines.reduce(
-                    (acc, l) => acc + Number(l.debit),
-                    0,
-                  )
-                  const accounts = tx.transactionLines
-                    .map((l) => l.account.name)
-                    .slice(0, 2)
-                    .join(' → ')
-                  return (
-                    <TableRow key={tx.id}>
-                      <TableCell className="whitespace-nowrap">
-                        {tx.date.toISOString().slice(0, 10)}
-                      </TableCell>
-                      <TableCell className="max-w-72 truncate">
-                        {tx.description ?? tx.reference ?? '—'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="muted">{tx.sourceType ?? 'journal'}</Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground max-w-64 truncate text-xs">
-                        {accounts}
-                        {tx.transactionLines.length > 2 && ` +${tx.transactionLines.length - 2}`}
-                      </TableCell>
-                      <TableCell numeric>{formatMoney(amount, currency)}</TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+          <Widget key="activity" id="activity" defaultSpan={3} resizable={false}>
+            <div className="flex items-center justify-between px-0 pb-3">
+              <h3 className="text-sm font-medium">Recent activity</h3>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/journal">View journal</Link>
+              </Button>
+            </div>
+            {recent.length === 0 ? (
+              <p className="text-muted-foreground pb-6 text-sm">
+                Nothing posted yet. Create an invoice or record an expense to get started.
+              </p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Source</TableHead>
+                    <TableHead>Accounts</TableHead>
+                    <TableHead numeric>Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recent.map((tx) => {
+                    const amount = tx.transactionLines.reduce(
+                      (acc, l) => acc + Number(l.debit),
+                      0,
+                    )
+                    const accounts = tx.transactionLines
+                      .map((l) => l.account.name)
+                      .slice(0, 2)
+                      .join(' → ')
+                    return (
+                      <TableRow key={tx.id}>
+                        <TableCell className="whitespace-nowrap">
+                          {tx.date.toISOString().slice(0, 10)}
+                        </TableCell>
+                        <TableCell className="max-w-72 truncate">
+                          {tx.description ?? tx.reference ?? '—'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="muted">{tx.sourceType ?? 'journal'}</Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground max-w-64 truncate text-xs">
+                          {accounts}
+                          {tx.transactionLines.length > 2 && ` +${tx.transactionLines.length - 2}`}
+                        </TableCell>
+                        <TableCell numeric>{formatMoney(amount, currency)}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </Widget>,
+        ]}
+      </WidgetGrid>
     </div>
   )
 }

@@ -17,7 +17,7 @@ BEGIN
     'automation_rules','ad_campaigns','social_posts',
     'companies','tasks','pipelines','pipeline_stages','deals',
     'flows','flow_responses','wallet_transactions','conversation_charges',
-    'webhook_endpoints','webhook_deliveries','api_keys'
+    'webhook_endpoints','webhook_deliveries','api_keys','dashboard_layouts'
   ]
   LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);

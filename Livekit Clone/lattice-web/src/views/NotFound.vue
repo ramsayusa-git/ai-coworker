@@ -1,58 +1,39 @@
+<script setup lang="ts">
+import { ArrowLeft } from '@lucide/vue'
+</script>
+
 <template>
-  <div class="not-found">
-    <div class="container">
-      <h1>404</h1>
-      <h2>Page Not Found</h2>
-      <p>The page you're looking for doesn't exist.</p>
-      <router-link to="/" class="btn-primary">Back to Home</router-link>
+  <div class="nf">
+    <div class="panel surface">
+      <span class="code">404</span>
+      <h1>That page does not exist</h1>
+      <p>The link may be out of date, or the item was removed.</p>
+      <div class="acts">
+        <router-link to="/app" class="primary"><ArrowLeft :size="15" /> Back to console</router-link>
+        <router-link to="/" class="ghost">Go to site</router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.not-found {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--color-bg-light) 0%, var(--color-bg) 100%);
+.nf { min-height: 100vh; display: grid; place-items: center; padding: 2rem 1rem; background: var(--bg); }
+.panel { width: min(430px, 100%); padding: 2.4rem; text-align: center; box-shadow: var(--sh-2); }
+.code {
+  display: block; font-size: 3.4rem; font-weight: 800; letter-spacing: -.04em;
+  font-family: var(--mono); line-height: 1;
+  background: linear-gradient(120deg, var(--acc), var(--acc-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin-bottom: .8rem;
 }
-
-.container {
-  text-align: center;
+h1 { font-size: 1.12rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .4rem; }
+p { color: var(--mut); font-size: .88rem; margin-bottom: 1.6rem; }
+.acts { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+.primary, .ghost {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .6rem 1.1rem; border-radius: var(--r-sm); font-size: .88rem; font-weight: 600;
 }
-
-h1 {
-  font-size: 72px;
-  font-weight: 800;
-  color: var(--color-primary);
-  margin-bottom: 0.5rem;
-}
-
-h2 {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-p {
-  font-size: 16px;
-  color: var(--color-text-light);
-  margin-bottom: 2rem;
-}
-
-.btn-primary {
-  display: inline-block;
-  padding: 12px 24px;
-  background: var(--color-primary);
-  color: white;
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.btn-primary:hover {
-  background: var(--color-primary-dark);
-}
+.primary { background: var(--acc); color: #fff; box-shadow: 0 6px 18px color-mix(in srgb, var(--acc) 40%, transparent); }
+.ghost { border: 1px solid var(--line-2); color: var(--mut); }
+.ghost:hover { color: var(--txt); }
 </style>

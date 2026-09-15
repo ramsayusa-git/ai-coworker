@@ -34,7 +34,7 @@ export type Brand = {
 
 export const DEFAULT_BRAND: Brand = {
   productName: env.brand.productName,
-  shortName: 'AOB',
+  shortName: 'LDG',
   tagline: 'Bookkeeping that stays yours',
   vendorName: env.brand.vendorName,
   supportEmail: null,

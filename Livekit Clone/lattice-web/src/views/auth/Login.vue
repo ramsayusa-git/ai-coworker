@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { AudioWaveform, ArrowRight, Loader2 } from '@lucide/vue'
+import { ArrowRight, Loader2 } from '@lucide/vue'
 import { useAuth } from '../../stores/auth'
 import { useBranding } from '../../stores/branding'
 
@@ -47,10 +47,8 @@ async function submit() {
   <div class="auth">
     <div class="panel">
       <div class="head">
-        <span class="mark">
-          <img v-if="branding.brand.logo_url" :src="branding.brand.logo_url" :alt="productName" />
-          <AudioWaveform v-else :size="22" :stroke-width="2.4" />
-        </span>
+        <img class="mark" :src="branding.brand.logo_url || '/logo-mark.svg'"
+             :alt="productName" width="52" height="52" />
         <h1>Sign in to {{ productName }}</h1>
         <p v-if="branding.brand.tenant">{{ branding.brand.tenant.name }}</p>
       </div>
@@ -100,12 +98,10 @@ async function submit() {
 }
 .head { text-align: center; margin-bottom: 1.8rem; }
 .mark {
-  display: grid; place-items: center; width: 52px; height: 52px; margin: 0 auto 1rem;
-  border-radius: 14px; overflow: hidden;
-  background: linear-gradient(135deg, var(--brand-primary, #6d5efc), var(--brand-accent, #22d3ee));
-  color: #fff;
+  display: block; width: 52px; height: 52px; margin: 0 auto 1rem;
+  border-radius: 14px; object-fit: contain;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--acc) 45%, transparent);
 }
-.mark img { width: 100%; height: 100%; object-fit: contain; }
 .head h1 { font-size: 1.24rem; font-weight: 700; letter-spacing: -.02em; }
 .head p { color: var(--brand-muted, #9aa2b4); font-size: .88rem; margin-top: .3rem; }
 

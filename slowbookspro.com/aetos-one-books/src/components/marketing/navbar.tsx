@@ -4,7 +4,6 @@ import * as React from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  BookOpenCheck,
   ChevronDown,
   FileText,
   LandmarkIcon,
@@ -18,6 +17,7 @@ import {
   X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { LedgerWordmark } from '@/components/brand/logo'
 import { ThemeToggle } from '@/components/app/theme-toggle'
 import { cn } from '@/lib/utils'
 
@@ -88,11 +88,8 @@ export function Navbar() {
       )}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BookOpenCheck className="size-4.5" />
-          </span>
-          <span className="text-[15px]">Aetos One Books</span>
+        <Link href="/">
+          <LedgerWordmark />
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">

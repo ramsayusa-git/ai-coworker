@@ -8,6 +8,14 @@ import { ThemeProvider, themeBootScript } from "@/components/theme-provider";
 export const metadata: Metadata = {
   title: "Loqio",
   description: "WhatsApp Business messaging platform",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

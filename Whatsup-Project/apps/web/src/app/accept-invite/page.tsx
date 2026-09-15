@@ -3,6 +3,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { acceptInvite } from "@/lib/api";
 import { useBrand } from "@/components/brand-provider";
+import { LoqioLogo } from "@/components/logo";
 
 function AcceptInviteForm() {
   const router = useRouter();
@@ -33,12 +34,7 @@ function AcceptInviteForm() {
     <div className="flex min-h-screen items-center justify-center bg-zinc-50">
       <form onSubmit={submit} className="w-full max-w-sm rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex justify-center">
-          {brand.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={brand.logoUrl} alt={brand.brandName} className="h-9 max-w-[12rem] object-contain" />
-          ) : (
-            <span className="text-xl font-semibold" style={{ color: brand.primaryColor }}>{brand.brandName}</span>
-          )}
+          <LoqioLogo size={34} textClassName="text-xl font-semibold tracking-tight" imgClassName="h-9 max-w-[12rem] object-contain" />
         </div>
         <p className="mb-4 text-center text-sm text-zinc-500">Accept your team invite</p>
         <div className="space-y-3">

@@ -21,6 +21,7 @@ import { dealsRoutes } from "./modules/deals.js";
 import { companiesRoutes } from "./modules/companies.js";
 import { tasksRoutes } from "./modules/tasks.js";
 import { flowsRoutes } from "./modules/flows.js";
+import { dashboardRoutes } from "./modules/dashboard.js";
 import { billingRoutes, billingCatalogRoutes } from "./modules/billing.js";
 import { developerRoutes } from "./modules/developer.js";
 import { publicApiRoutes } from "./modules/public-api.js";
@@ -76,6 +77,7 @@ await app.register(async (scoped) => {
   await scoped.register(companiesRoutes);
   await scoped.register(tasksRoutes);
   await scoped.register(flowsRoutes);
+  await scoped.register(dashboardRoutes);
   await scoped.register(billingRoutes);
   await scoped.register(developerRoutes);
 }, { prefix: "/v1" });

@@ -114,6 +114,39 @@ export interface ApiKeyRow {
 
 // ----------------------------------------------------------- endpoints ---
 
+export interface GraphNode {
+  id: string
+  type: string
+  x: number
+  y: number
+  config: Record<string, any>
+}
+export interface GraphEdge { from: string; to: string }
+export interface Graph { nodes: GraphNode[]; edges: GraphEdge[] }
+
+export interface Problem { node?: string; msg: string }
+
+export interface AgentVersion {
+  id: string
+  version: number
+  status: 'draft' | 'published' | 'archived'
+  note: string
+  pipeline: Record<string, any>
+  prompt: string
+  tools: string[]
+  created_by: string | null
+  created_at: string
+  graph?: Graph
+  problems?: Problem[]
+}
+
+export interface VersionDiff {
+  from: number | null
+  to: number
+  changes: { field: string; from: any; to: any }[]
+  note?: string
+}
+
 export const Agents = {
   list: () => api.get<Agent[]>('/agents'),
   get: (id: string) => api.get<Agent>(`/agents/${id}`),
@@ -122,6 +155,21 @@ export const Agents = {
   action: (id: string, action: 'publish' | 'pause') =>
     api.post<Agent>(`/agents/${id}/${action}`),
   remove: (id: string) => api.del(`/agents/${id}`),
+
+  // --- designer versions ---
+  compile: (id: string, graph: Graph) =>
+    api.post<{ pipeline: Record<string, any>; problems: Problem[]; valid: boolean }>(
+      `/agents/${id}/compile`, { graph }),
+  versions: (id: string) => api.get<AgentVersion[]>(`/agents/${id}/versions`),
+  latestVersion: (id: string) => api.get<AgentVersion>(`/agents/${id}/versions/latest`),
+  saveVersion: (id: string, body: {
+    graph: Graph; prompt?: string; tools?: string[]; note?: string; publish?: boolean
+  }) => api.post<AgentVersion>(`/agents/${id}/versions`, body),
+  rollback: (id: string, versionId: string) =>
+    api.post<AgentVersion>(`/agents/${id}/versions/${versionId}/rollback`),
+  diff: (id: string, versionId: string, against?: string) =>
+    api.get<VersionDiff>(`/agents/${id}/versions/${versionId}/diff`,
+      against ? { against } : undefined),
 }
 
 export const Sessions = {
@@ -176,6 +224,24 @@ export const Admin = {
 
   branding: () => api.get<Brand>('/branding'),
   saveBranding: (b: Partial<Brand>) => api.put<Brand>('/branding', b),
+
+  /** Multipart upload — bypasses the JSON client on purpose. */
+  uploadAsset: async (kind: 'logo' | 'logo_dark' | 'favicon' | 'login_art', file: File) => {
+    const { API_BASE, currentAccess, ApiError } = await import('./client')
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch(`${API_BASE}/branding/assets?kind=${kind}`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${currentAccess() ?? ''}` },
+      body: fd,
+    })
+    const body = await res.json().catch(() => null)
+    if (!res.ok) {
+      const d = body?.detail
+      throw new ApiError(res.status, typeof d === 'string' ? d : 'Upload failed', body)
+    }
+    return body as { kind: string; url: string; bytes: number; content_type: string }
+  },
   publicBranding: (host?: string) =>
     api.get<Brand>('/branding/public', host ? { host } : undefined),
 

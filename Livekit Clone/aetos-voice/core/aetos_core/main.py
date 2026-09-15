@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from .api import v1
 from .auth import router as auth_router
 from .admin import router as admin_router
+from .versions import router as versions_router
+from .assets import router as assets_router
 from .db import init_db
 from . import VERSION, CONTRACTS
 from .settings import FRONTEND
@@ -14,6 +16,11 @@ app = FastAPI(title="Aetos Voice Core", version=VERSION, docs_url="/api/docs", o
 app.add_middleware(CORSMiddleware, allow_origins=os.environ.get("AETOS_CORS","*").split(","), allow_methods=["*"], allow_headers=["*"])
 v1.include_router(auth_router)
 v1.include_router(admin_router)
+v1.include_router(assets_router)
+
+# Mounted first, deliberately: api.py's POST /agents/{aid}/{action} is a
+# wildcard that would otherwise capture /agents/{aid}/versions.
+app.include_router(versions_router)
 app.include_router(v1)
 
 @app.get("/healthz")

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import {
-  AudioWaveform, Zap, Server, Boxes, ShieldCheck, GitBranch, Plug, Gauge,
+  AudioWaveform, Zap, Server, Boxes, GitBranch, Plug,
   ArrowRight, Check, Menu, X, Terminal, Cpu, Radio, Lock,
   Palette, Globe, KeyRound, Container, HardDrive, Network, FileBadge, Mail,
   Layers, BuildingComplex, EyeOff, Wrench,
@@ -147,7 +147,17 @@ const pipeline = [
   { icon: AudioWaveform, label: 'TTS out', detail: 'First byte 180ms' }
 ]
 
-const plans = [
+interface Plan {
+  name: string
+  price: string
+  unit?: string
+  note: string
+  features: string[]
+  cta: string
+  featured: boolean
+}
+
+const plans: Plan[] = [
   {
     name: 'Cloud', price: 'Hosted', note: 'We run it, you use it',
     features: [
@@ -272,8 +282,8 @@ const whitelabel = [
 
     <header class="nav" :class="{ solid: scrolled }">
       <div class="wrap nav-inner">
-        <router-link to="/" class="brand">
-          <span class="brand-mark"><AudioWaveform :size="18" :stroke-width="2.4" /></span>
+        <router-link to="/" class="brand" aria-label="Lattice Net home">
+          <img src="/logo-mark.svg" alt="" class="brand-mark" width="32" height="32" />
           <span class="brand-text">Lattice<span>Net</span></span>
         </router-link>
 
@@ -625,8 +635,10 @@ const whitelabel = [
     <footer class="footer">
       <div class="wrap foot-inner">
         <div class="foot-brand">
-          <span class="brand"><span class="brand-mark"><AudioWaveform :size="18" :stroke-width="2.4" /></span>
-          <span class="brand-text">Lattice<span>Net</span></span></span>
+          <span class="brand">
+            <img src="/logo-mark.svg" alt="" class="brand-mark" width="32" height="32" />
+            <span class="brand-text">Lattice<span>Net</span></span>
+          </span>
           <p>Modular voice infrastructure for teams who want to own their stack.</p>
         </div>
         <div class="foot-col"><h4>Product</h4><a href="#features">Features</a><a href="#pipeline">Pipeline</a><a href="#hosting">Cloud</a><a href="#selfhosted">On-premises</a></div>
@@ -683,8 +695,7 @@ const whitelabel = [
 
 .brand { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--txt); }
 .brand-mark {
-  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px;
-  background: linear-gradient(135deg, var(--acc), var(--acc-2)); color: #fff;
+  width: 32px; height: 32px; border-radius: 9px; display: block; flex-shrink: 0;
   box-shadow: 0 6px 20px rgba(109,94,252,.45);
 }
 .brand-text { font-weight: 700; font-size: 1.06rem; letter-spacing: -.02em; }

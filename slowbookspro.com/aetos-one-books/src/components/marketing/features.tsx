@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import {
   BadgePercent,
   BarChart3,
+  Database,
   Fingerprint,
   Globe2,
   LandmarkIcon,
@@ -61,6 +62,11 @@ const FEATURES = [
     icon: ShieldCheck,
     title: 'Self-hosted or cloud',
     desc: 'Keep every record on your own infrastructure, or let us run it. Same product either way.',
+  },
+  {
+    icon: Database,
+    title: 'Configurable data isolation',
+    desc: 'Choose shared schema, a dedicated schema per org, or a fully separate database per org — set per tenant, not baked in.',
   },
 ]
 

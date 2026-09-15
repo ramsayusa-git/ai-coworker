@@ -1,26 +1,69 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { PhoneCall, Clock, Gauge, DollarSign, RefreshCw } from '@lucide/vue'
-import { Analytics, type Overview } from '../../api'
+import { ref, onMounted, onBeforeUnmount, computed, nextTick, markRaw } from 'vue'
+import { GridStack, type GridStackNode } from 'gridstack'
+import 'gridstack/dist/gridstack.css'
+import {
+  PhoneCall, Clock, Gauge, DollarSign, RefreshCw, LayoutGrid, Check,
+  RotateCcw, Plus, X, GripVertical,
+} from '@lucide/vue'
 
-const data = ref<Overview | null>(null)
+import { Analytics, Sessions, type Overview, type CallSession } from '../../api'
+import { useLayout, type WidgetNode } from '../../stores/layout'
+import { useUI } from '../../stores/ui'
+
+import StatTile from '../../components/widgets/StatTile.vue'
+import VolumeChart from '../../components/widgets/VolumeChart.vue'
+import DonutChart from '../../components/widgets/DonutChart.vue'
+import BarList from '../../components/widgets/BarList.vue'
+import RecentCalls from '../../components/widgets/RecentCalls.vue'
+
+const layout = useLayout()
+const ui = useUI()
+
+const overview = ref<Overview | null>(null)
+const recent = ref<CallSession[]>([])
 const loading = ref(true)
 const error = ref('')
 const hours = ref(24)
 
+const gridEl = ref<HTMLElement | null>(null)
+let grid: GridStack | null = null
+
 const RANGES = [
-  { h: 24, label: '24 h' },
-  { h: 168, label: '7 d' },
-  { h: 720, label: '30 d' },
+  { h: 24, label: '24h' },
+  { h: 168, label: '7d' },
+  { h: 720, label: '30d' },
 ]
+
+/** Every widget the user can place. Title/min sizes live here, not in layout. */
+const REGISTRY: Record<string, { title: string; minW: number; minH: number; pad?: boolean }> = {
+  'stat-calls': { title: 'Calls handled', minW: 2, minH: 2 },
+  'stat-minutes': { title: 'Talk minutes', minW: 2, minH: 2 },
+  'stat-ttfb': { title: 'Time to first byte', minW: 2, minH: 2 },
+  'stat-cost': { title: 'Spend', minW: 2, minH: 2 },
+  'call-volume': { title: 'Call volume', minW: 4, minH: 4 },
+  'outcomes': { title: 'Outcomes', minW: 3, minH: 4 },
+  'top-agents': { title: 'Busiest agents', minW: 3, minH: 3 },
+  'recent-calls': { title: 'Recent calls', minW: 3, minH: 3 },
+}
+
+const addable = computed(() =>
+  Object.entries(REGISTRY).map(([type, meta]) => ({ type, title: meta.title })))
+
+const showAdd = ref(false)
 
 async function load() {
   loading.value = true
   error.value = ''
   try {
-    data.value = await Analytics.overview(hours.value)
+    const [ov, page] = await Promise.all([
+      Analytics.overview(hours.value),
+      Sessions.list({ limit: 8 }),
+    ])
+    overview.value = ov
+    recent.value = page.items
   } catch (e: any) {
-    error.value = e.message || 'Could not load analytics.'
+    error.value = e.message || 'Could not load dashboard data.'
   } finally {
     loading.value = false
   }
@@ -31,227 +74,360 @@ function setRange(h: number) {
   load()
 }
 
-onMounted(load)
+const agentItems = computed(() =>
+  (overview.value?.by_agent ?? []).map((a) => ({
+    label: a.agent, value: a.calls, id: a.agent_id,
+  })).sort((a, b) => b.value - a.value))
 
-const tiles = computed(() => {
-  const d = data.value
-  return [
-    { icon: PhoneCall, label: 'Calls handled', value: d ? d.calls.toLocaleString() : '—' },
-    { icon: Clock, label: 'Talk minutes', value: d ? d.minutes.toLocaleString() : '—' },
-    { icon: Gauge, label: 'Time to first byte', value: d ? `${d.ttfb_ms}` : '—', unit: 'ms' },
-    { icon: DollarSign, label: 'Spend', value: d ? `$${d.cost.toFixed(2)}` : '—' },
-  ]
+// ------------------------------------------------------------- gridstack ---
+
+function initGrid() {
+  if (!gridEl.value) return
+  const g = GridStack.init(
+    {
+      column: 12,
+      cellHeight: 76,
+      margin: 10,
+      float: false,
+      animate: true,
+      disableDrag: !layout.editing,
+      disableResize: !layout.editing,
+      handle: '.w-grip',
+      resizable: { handles: 'se, sw, e, s, w' },
+      columnOpts: {
+        breakpointForWindow: true,
+        breakpoints: [
+          { w: 700, c: 1 },
+          { w: 1000, c: 6 },
+          { w: 1400, c: 12 },
+        ],
+      },
+    },
+    gridEl.value,
+  )
+  if (!g) return
+  grid = g
+  g.on('change', () => { layout.dirty = true })
+}
+
+function currentNodes(): WidgetNode[] {
+  if (!grid) return layout.nodes
+  // save(false) returns widgets without their DOM content; the union type in
+  // gridstack's declarations is wider than what this overload actually yields.
+  const saved = grid.save(false) as GridStackNode[]
+  return saved.map((n) => ({
+    id: String(n.id),
+    type: String(layout.nodes.find((x) => x.id === n.id)?.type ?? ''),
+    x: n.x ?? 0, y: n.y ?? 0, w: n.w ?? 3, h: n.h ?? 3,
+  }))
+}
+
+function setInteractive(on: boolean) {
+  if (!grid) return
+  // setStatic alone does not re-enable widgets that were initialised disabled,
+  // so move and resize are toggled explicitly.
+  grid.setStatic(!on)
+  grid.enableMove(on)
+  grid.enableResize(on)
+}
+
+function toggleEdit() {
+  layout.editing = !layout.editing
+  setInteractive(layout.editing)
+  if (!layout.editing) saveLayout()
+}
+
+function saveLayout() {
+  const nodes = currentNodes().map((n) => {
+    const known = layout.nodes.find((x) => x.id === n.id)
+    return { ...n, type: n.type || known?.type || '' }
+  }).filter((n) => n.type)
+  layout.save(nodes)
+  ui.success('Layout saved')
+}
+
+async function resetLayout() {
+  if (!confirm('Reset the dashboard to its default arrangement?')) return
+  layout.reset()
+  await rebuild()
+  ui.info('Layout reset')
+}
+
+async function addWidget(type: string) {
+  showAdd.value = false
+  layout.add(type)
+  await rebuild()
+  if (!layout.editing) toggleEdit()
+}
+
+async function removeWidget(id: string) {
+  layout.remove(id)
+  await rebuild()
+}
+
+/** Tear down and re-init after the node list changes structurally. */
+async function rebuild() {
+  grid?.destroy(false)
+  grid = null
+  await nextTick()
+  initGrid()
+  setInteractive(layout.editing)
+}
+
+onMounted(async () => {
+  layout.load()
+  await load()
+  await nextTick()
+  initGrid()
 })
 
-// Bars are drawn from the max so an all-zero window renders a flat baseline
-// rather than dividing by zero.
-const peak = computed(() => Math.max(1, ...(data.value?.per_hour ?? [0])))
-const outcomes = computed(() => Object.entries(data.value?.by_outcome ?? {}))
-const totalOutcomes = computed(() =>
-  outcomes.value.reduce((a, [, n]) => a + (n as number), 0) || 1)
-
-const OUTCOME_COLOR: Record<string, string> = {
-  completed: 'var(--brand-success, #34d399)',
-  transferred: 'var(--brand-accent, #22d3ee)',
-  'no-answer': 'var(--brand-muted, #9aa2b4)',
-  failed: 'var(--brand-danger, #f87171)',
-  'in-progress': 'var(--brand-primary, #6d5efc)',
-}
+onBeforeUnmount(() => {
+  grid?.destroy(false)
+  grid = null
+})
 </script>
 
 <template>
   <div class="dash">
-    <div class="bar">
+    <!-- toolbar -->
+    <div class="bar glass">
       <div class="ranges">
         <button v-for="r in RANGES" :key="r.h" :class="{ on: hours === r.h }"
                 @click="setRange(r.h)">{{ r.label }}</button>
       </div>
-      <button class="refresh" @click="load" :disabled="loading" aria-label="Refresh">
-        <RefreshCw :size="15" :class="{ spin: loading }" /> Refresh
-      </button>
+
+      <div class="bar-right">
+        <button class="ghost" @click="load" :disabled="loading" title="Refresh data">
+          <RefreshCw :size="15" :class="{ spin: loading }" />
+          <span class="hide-sm">Refresh</span>
+        </button>
+
+        <button v-if="layout.editing" class="ghost" @click="showAdd = !showAdd">
+          <Plus :size="15" /><span class="hide-sm">Widget</span>
+        </button>
+        <button v-if="layout.editing" class="ghost" @click="resetLayout" title="Reset layout">
+          <RotateCcw :size="15" /><span class="hide-sm">Reset</span>
+        </button>
+
+        <button class="edit" :class="{ on: layout.editing }" @click="toggleEdit">
+          <component :is="layout.editing ? Check : LayoutGrid" :size="15" />
+          {{ layout.editing ? 'Done' : 'Customise' }}
+        </button>
+      </div>
+
+      <transition name="pop">
+        <div v-if="showAdd" class="add-menu surface">
+          <p>Add a widget</p>
+          <button v-for="a in addable" :key="a.type" @click="addWidget(a.type)">
+            <Plus :size="13" /> {{ a.title }}
+          </button>
+        </div>
+      </transition>
     </div>
 
-    <div v-if="error" class="err">
-      <strong>Could not load analytics</strong>
+    <div v-if="layout.editing" class="hint">
+      Drag widgets by their handle, resize from any edge, then press Done to save.
+    </div>
+
+    <div v-if="error" class="err surface">
+      <strong>Could not load dashboard data</strong>
       <p>{{ error }}</p>
       <button @click="load">Try again</button>
     </div>
 
-    <template v-else>
-      <div class="tiles">
-        <div v-for="t in tiles" :key="t.label" class="tile">
-          <span class="tile-icon"><component :is="t.icon" :size="17" /></span>
-          <span class="tile-label">{{ t.label }}</span>
-          <span class="tile-value" :class="{ dim: loading }">
-            {{ t.value }}<small v-if="t.unit && data">{{ t.unit }}</small>
-          </span>
+    <!-- grid -->
+    <div ref="gridEl" class="grid-stack" :class="{ editing: layout.editing }">
+      <div
+        v-for="n in layout.nodes"
+        :key="n.id"
+        class="grid-stack-item"
+        :gs-id="n.id"
+        :gs-x="n.x" :gs-y="n.y" :gs-w="n.w" :gs-h="n.h"
+        :gs-min-w="REGISTRY[n.type]?.minW ?? 2"
+        :gs-min-h="REGISTRY[n.type]?.minH ?? 2"
+      >
+        <div class="grid-stack-item-content widget surface">
+          <header class="w-head">
+            <span class="w-grip" v-if="layout.editing" title="Drag to move">
+              <GripVertical :size="14" />
+            </span>
+            <h3>{{ REGISTRY[n.type]?.title ?? n.type }}</h3>
+            <button v-if="layout.editing" class="w-x" @click="removeWidget(n.id)"
+                    :aria-label="`Remove ${REGISTRY[n.type]?.title}`">
+              <X :size="14" />
+            </button>
+          </header>
+
+          <div class="w-body">
+            <StatTile v-if="n.type === 'stat-calls'" label="Calls handled"
+                      :value="overview?.calls ?? null" :icon="markRaw(PhoneCall)"
+                      :loading="loading" :spark="overview?.per_hour" tone="acc" />
+            <StatTile v-else-if="n.type === 'stat-minutes'" label="Talk minutes"
+                      :value="overview?.minutes ?? null" :icon="markRaw(Clock)"
+                      :loading="loading" tone="ok" />
+            <StatTile v-else-if="n.type === 'stat-ttfb'" label="Time to first byte"
+                      :value="overview?.ttfb_ms ?? null" unit="ms" :icon="markRaw(Gauge)"
+                      :loading="loading" tone="warn" />
+            <StatTile v-else-if="n.type === 'stat-cost'" label="Spend"
+                      :value="overview?.cost ?? null" prefix="$" :decimals="2"
+                      :icon="markRaw(DollarSign)" :loading="loading" tone="acc" />
+
+            <VolumeChart v-else-if="n.type === 'call-volume'"
+                         :data="overview?.per_hour ?? []" :loading="loading"
+                         :tz="overview?.tz" />
+
+            <DonutChart v-else-if="n.type === 'outcomes'"
+                        :data="overview?.by_outcome ?? {}" :loading="loading" />
+
+            <BarList v-else-if="n.type === 'top-agents'" :items="agentItems"
+                     :loading="loading" empty-title="No agent activity"
+                     empty-body="Traffic appears once an agent takes a call."
+                     @pick="(id) => $router.push(`/app/agents/${id}`)" />
+
+            <RecentCalls v-else-if="n.type === 'recent-calls'" :items="recent"
+                         :loading="loading" />
+
+            <div v-else class="unknown">Unknown widget “{{ n.type }}”</div>
+          </div>
         </div>
       </div>
-
-      <div class="cards">
-        <section class="card">
-          <header>
-            <h2>Call volume</h2>
-            <span>per hour · {{ data?.tz || '' }}</span>
-          </header>
-          <div v-if="loading" class="chart-sk"></div>
-          <div v-else-if="!data?.calls" class="empty">
-            <strong>No calls in this window</strong>
-            <p>Once agents start taking calls, volume appears here.</p>
-          </div>
-          <div v-else class="chart" role="img"
-               :aria-label="`Call volume, peak ${peak} per hour`">
-            <div v-for="(n, i) in data.per_hour" :key="i" class="bar-col"
-                 :style="{ height: Math.max(2, (n / peak) * 100) + '%' }"
-                 :title="`${n} call${n === 1 ? '' : 's'}`"></div>
-          </div>
-          <footer v-if="data?.calls"><span>Peak {{ peak }} / hour</span></footer>
-        </section>
-
-        <section class="card">
-          <header><h2>Outcomes</h2><span>how calls ended</span></header>
-          <div v-if="loading" class="chart-sk"></div>
-          <div v-else-if="!outcomes.length" class="empty">
-            <strong>Nothing to break down yet</strong>
-          </div>
-          <ul v-else class="outcomes">
-            <li v-for="[name, n] in outcomes" :key="name">
-              <span class="dot" :style="{ background: OUTCOME_COLOR[name] || 'var(--brand-muted)' }"></span>
-              <span class="oname">{{ name }}</span>
-              <span class="obar">
-                <i :style="{ width: ((n as number) / totalOutcomes * 100) + '%',
-                             background: OUTCOME_COLOR[name] || 'var(--brand-muted)' }"></i>
-              </span>
-              <span class="ocount">{{ n }}</span>
-            </li>
-          </ul>
-        </section>
-
-        <section class="card wide">
-          <header><h2>Busiest agents</h2><span>calls in this window</span></header>
-          <div v-if="loading" class="chart-sk short"></div>
-          <div v-else-if="!data?.by_agent?.length" class="empty">
-            <strong>No agent activity yet</strong>
-            <p>Create an agent and point a number at it to see traffic here.</p>
-          </div>
-          <ul v-else class="agents">
-            <li v-for="a in data.by_agent" :key="a.agent_id">
-              <span class="aname">{{ a.agent }}</span>
-              <span class="abar">
-                <i :style="{ width: (a.calls / Math.max(...data.by_agent.map(x => x.calls)) * 100) + '%' }"></i>
-              </span>
-              <span class="acount">{{ a.calls }}</span>
-            </li>
-          </ul>
-        </section>
-      </div>
-    </template>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.3rem; flex-wrap: wrap; }
-.ranges { display: flex; gap: .3rem; }
+.dash { position: relative; }
+
+/* ---------------- toolbar ---------------- */
+.bar {
+  position: relative; display: flex; align-items: center; gap: .8rem;
+  padding: .55rem .7rem; margin-bottom: 1rem;
+  border-radius: var(--r-md); box-shadow: var(--sh-1);
+  flex-wrap: wrap;
+}
+.ranges { display: flex; gap: .25rem; }
 .ranges button {
-  padding: .45rem .9rem; font-size: .85rem; font-weight: 600;
-  border-radius: 8px; border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-muted, #9aa2b4);
+  padding: .42rem .8rem; border-radius: var(--r-sm); font-size: .83rem; font-weight: 600;
+  border: 1px solid transparent; background: transparent; color: var(--mut);
+  transition: all var(--fast) var(--ease);
 }
+.ranges button:hover { color: var(--txt); background: color-mix(in srgb, var(--txt) 6%, transparent); }
 .ranges button.on {
-  background: rgba(109,94,252,.18); color: #fff;
-  border-color: rgba(109,94,252,.45);
+  color: var(--txt); background: color-mix(in srgb, var(--acc) 16%, transparent);
+  border-color: color-mix(in srgb, var(--acc) 40%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--acc) 22%, transparent);
 }
-.refresh {
-  margin-left: auto; display: inline-flex; align-items: center; gap: .4rem;
-  padding: .45rem .85rem; font-size: .85rem; border-radius: 8px;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-muted, #9aa2b4);
+
+.bar-right { margin-left: auto; display: flex; gap: .4rem; align-items: center; }
+.ghost, .edit {
+  display: inline-flex; align-items: center; gap: .38rem;
+  padding: .45rem .8rem; border-radius: var(--r-sm); font-size: .83rem; font-weight: 600;
+  border: 1px solid var(--line); background: color-mix(in srgb, var(--txt) 3%, transparent);
+  color: var(--mut); transition: all var(--fast) var(--ease);
+}
+.ghost:hover:not(:disabled) { color: var(--txt); transform: translateY(-1px); }
+.ghost:disabled { opacity: .45; cursor: not-allowed; }
+.edit { border-color: color-mix(in srgb, var(--acc) 40%, transparent); color: var(--txt); }
+.edit.on {
+  background: var(--acc); color: #fff; border-color: transparent;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--acc) 45%, transparent);
 }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
-.tile {
-  padding: 1.2rem; border-radius: var(--brand-radius-md, 12px);
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: var(--brand-panel, #0f111a);
-  display: flex; flex-direction: column; gap: .35rem;
+.add-menu {
+  position: absolute; top: calc(100% + 8px); right: .7rem; z-index: 30;
+  width: 210px; padding: .45rem; box-shadow: var(--sh-3);
 }
-.tile-icon {
-  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px;
-  background: rgba(109,94,252,.16); color: var(--brand-accent, #22d3ee); margin-bottom: .3rem;
+.add-menu p {
+  font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--mut); padding: .4rem .55rem .3rem;
 }
-.tile-label { font-size: .8rem; color: var(--brand-muted, #9aa2b4); }
-.tile-value {
-  font-size: 1.7rem; font-weight: 750; letter-spacing: -.03em;
-  font-family: var(--brand-mono, ui-monospace), monospace;
+.add-menu button {
+  display: flex; align-items: center; gap: .45rem; width: 100%;
+  padding: .45rem .55rem; border: 0; border-radius: var(--r-sm);
+  background: none; color: var(--txt-2); font-size: .84rem; text-align: left;
+  transition: background var(--fast) var(--ease);
 }
-.tile-value.dim { opacity: .4; }
-.tile-value small { font-size: .9rem; margin-left: 2px; color: var(--brand-muted, #9aa2b4); }
+.add-menu button:hover { background: color-mix(in srgb, var(--acc) 14%, transparent); color: var(--txt); }
+.pop-enter-active, .pop-leave-active { transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease); }
+.pop-enter-from, .pop-leave-to { opacity: 0; transform: translateY(-6px) scale(.97); }
 
-.cards { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; }
-.card {
-  padding: 1.2rem; border-radius: var(--brand-radius-md, 12px);
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: var(--brand-panel, #0f111a);
+.hint {
+  padding: .6rem .9rem; margin-bottom: .9rem; border-radius: var(--r-sm);
+  font-size: .83rem; color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--acc) 40%, transparent);
 }
-.card.wide { grid-column: 1 / -1; }
-.card header { display: flex; align-items: baseline; gap: .7rem; margin-bottom: 1.1rem; }
-.card h2 { font-size: .98rem; font-weight: 650; }
-.card header span { font-size: .8rem; color: var(--brand-muted, #9aa2b4); }
-.card footer { margin-top: .7rem; font-size: .8rem; color: var(--brand-muted, #9aa2b4); }
 
-.chart { display: flex; align-items: flex-end; gap: 2px; height: 150px; }
-.bar-col {
-  flex: 1; min-height: 2px; border-radius: 3px 3px 0 0;
-  background: linear-gradient(180deg, var(--brand-accent, #22d3ee), var(--brand-primary, #6d5efc));
-  opacity: .9;
+/* ---------------- widgets ---------------- */
+.widget {
+  display: flex; flex-direction: column; height: 100%; overflow: hidden;
+  padding: .9rem 1rem 1rem;
+  transition: box-shadow var(--mid) var(--ease), transform var(--mid) var(--ease),
+              border-color var(--mid) var(--ease);
 }
-.chart-sk {
-  height: 150px; border-radius: 10px;
-  background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.09), rgba(255,255,255,.04));
-  background-size: 200% 100%; animation: shimmer 1.3s linear infinite;
+.widget::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(420px circle at 50% -30%,
+              color-mix(in srgb, var(--acc) 12%, transparent), transparent 70%);
+  opacity: 0; transition: opacity var(--mid) var(--ease); pointer-events: none;
 }
-.chart-sk.short { height: 90px; }
-@keyframes shimmer { to { background-position: -200% 0; } }
+.widget:hover { box-shadow: var(--sh-2); border-color: var(--line-2); }
+.widget:hover::before { opacity: 1; }
 
-.empty { padding: 2.4rem 1rem; text-align: center; }
-.empty strong { display: block; font-size: .95rem; margin-bottom: .3rem; }
-.empty p { font-size: .85rem; color: var(--brand-muted, #9aa2b4); }
-
-.outcomes, .agents { list-style: none; padding: 0; margin: 0; display: grid; gap: .8rem; }
-.outcomes li { display: grid; grid-template-columns: 10px 6.5rem 1fr auto; gap: .6rem; align-items: center; font-size: .86rem; }
-.dot { width: 9px; height: 9px; border-radius: 50%; }
-.oname { text-transform: capitalize; color: var(--brand-muted, #9aa2b4); }
-.obar, .abar { height: 7px; border-radius: 4px; background: rgba(255,255,255,.07); overflow: hidden; }
-.obar i, .abar i { display: block; height: 100%; border-radius: 4px; }
-.abar i { background: linear-gradient(90deg, var(--brand-primary, #6d5efc), var(--brand-accent, #22d3ee)); }
-.ocount, .acount { font-family: var(--brand-mono, ui-monospace), monospace; font-size: .82rem; }
-.agents li { display: grid; grid-template-columns: 11rem 1fr auto; gap: .8rem; align-items: center; font-size: .87rem; }
-.aname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.err {
-  padding: 2.5rem; text-align: center;
-  border: 1px solid rgba(248,113,113,.3); border-radius: 12px;
-  background: rgba(248,113,113,.07);
+.w-head { display: flex; align-items: center; gap: .45rem; margin-bottom: .6rem; position: relative; }
+.w-head h3 {
+  font-size: .78rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.err strong { display: block; color: var(--brand-danger, #f87171); margin-bottom: .3rem; }
-.err p { color: var(--brand-muted, #9aa2b4); font-size: .88rem; margin-bottom: 1rem; }
+.w-grip {
+  display: grid; place-items: center; color: var(--mut); cursor: move;
+  width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+}
+.w-grip:hover { background: color-mix(in srgb, var(--txt) 8%, transparent); color: var(--txt); }
+.w-x {
+  margin-left: auto; display: grid; place-items: center; width: 22px; height: 22px;
+  border-radius: 6px; border: 0; background: none; color: var(--mut);
+  transition: all var(--fast) var(--ease);
+}
+.w-x:hover { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
+
+.w-body { flex: 1; min-height: 0; position: relative; }
+.unknown { display: grid; place-content: center; height: 100%; color: var(--mut); font-size: .85rem; }
+
+/* editing affordance */
+.grid-stack.editing .widget {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+}
+.grid-stack.editing .widget:hover { transform: translateY(-2px); }
+
+/* gridstack chrome */
+:deep(.grid-stack-item-content) { inset: 0; }
+:deep(.ui-resizable-handle) { opacity: 0; transition: opacity var(--fast) var(--ease); }
+.grid-stack.editing :deep(.ui-resizable-handle) { opacity: .9; }
+:deep(.grid-stack-placeholder > .placeholder-content) {
+  border: 2px dashed color-mix(in srgb, var(--acc) 60%, transparent);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--acc) 8%, transparent);
+}
+
+.err { padding: 2rem; text-align: center; border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
+.err strong { display: block; color: var(--bad); margin-bottom: .3rem; }
+.err p { color: var(--mut); font-size: .87rem; margin-bottom: 1rem; }
 .err button {
-  padding: .5rem 1.1rem; border: 0; border-radius: 8px;
-  background: var(--brand-primary, #6d5efc); color: #fff; font-weight: 600;
+  padding: .5rem 1.1rem; border: 0; border-radius: var(--r-sm);
+  background: var(--acc); color: #fff; font-weight: 600;
 }
 
-@media (max-width: 1000px) {
-  .tiles { grid-template-columns: 1fr 1fr; }
-  .cards { grid-template-columns: 1fr; }
-}
-@media (max-width: 560px) {
-  .tiles { grid-template-columns: 1fr; }
-  .outcomes li { grid-template-columns: 10px 5rem 1fr auto; }
-  .agents li { grid-template-columns: 7rem 1fr auto; }
+@media (max-width: 640px) {
+  .hide-sm { display: none; }
+  .bar { gap: .5rem; }
+  .bar-right { margin-left: 0; width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .spin, .chart-sk { animation: none; }
+  .spin { animation: none; }
+  .widget:hover { transform: none; }
 }
 </style>

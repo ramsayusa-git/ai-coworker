@@ -242,6 +242,8 @@ def ensure_tenancy(s):
 def default_brand() -> dict:
     return {
         "product_name": "Lattice Net",
+        "logo_url": "/logo-mark.svg",
+        "favicon_url": "/favicon.svg",
         "colors": {
             "primary": "#6d5efc", "accent": "#22d3ee", "bg": "#07080d",
             "panel": "#0f111a", "text": "#f2f4f8", "muted": "#9aa2b4",

@@ -31,12 +31,18 @@ with Session() as s:
     if not s.query(Membership).filter_by(tenant_id=t.id, user_id=u.id).first():
         s.add(Membership(tenant_id=t.id, user_id=u.id, role="owner"))
     s.commit()
-    print("  acme tenant:", t.id)
+    # Reset the fixture so the run is idempotent — otherwise agents created by
+    # a previous run make the "count is 0" and "create succeeds" checks fail
+    # for reasons that have nothing to do with isolation.
+    from aetos_core.db import Agent
+    n = s.query(Agent).filter(Agent.tenant_id == t.id).delete()
+    s.commit()
+    print(f"  acme tenant: {t.id} (cleared {n} leftover agent(s))")
 PY
 
 login() { curl -s -X POST "$B/auth/login" -H 'content-type: application/json' -d "$1"; }
 
-A=$(login '{"email":"raamaak@outlook.com","password":"DYYgu3381MSCYczmygURfgGD2LI"}')
+A=$(login '{"email":"raamaak@outlook.com","password":"LatticeNet-Ramsay-2026"}')
 TA=$($J -c "import json,sys;print(json.loads(sys.argv[1])['access'])" "$A")
 B2=$(login '{"email":"owner@acme-demo.com","password":"AcmeOwnerPass2026!"}')
 TB=$($J -c "import json,sys;print(json.loads(sys.argv[1])['access'])" "$B2")

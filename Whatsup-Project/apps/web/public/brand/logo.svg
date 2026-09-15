@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 32" width="132" height="32" role="img" aria-label="Loqio">
+  <defs>
+    <linearGradient id="lqw" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10b981"/>
+      <stop offset="1" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#lqw)"/>
+  <circle cx="13.4" cy="13.2" r="6.1" fill="none" stroke="#ffffff" stroke-width="3.2"/>
+  <path d="M19.5 12.4 L19.5 25.4" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round"/>
+  <text x="42" y="22.5" font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+        font-size="19" font-weight="650" letter-spacing="-0.6" fill="#047857">Loqio</text>
+</svg>

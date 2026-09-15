@@ -1,274 +1,107 @@
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { Mail, ArrowLeft } from '@lucide/vue'
+import { useBranding } from '../../stores/branding'
+
+const branding = useBranding()
+const sent = ref(false)
+const email = ref('')
+const company = ref('')
+
+const productName = computed(() => branding.brand.product_name || 'Lattice Net')
+const supportUrl = computed(() => branding.brand.support_url || '')
+
+onMounted(() => branding.loadPublic())
+
+/**
+ * Self-service signup is deliberately not wired to account creation.
+ * Tenants are provisioned by an operator (or a reseller partner) so that
+ * licence limits and brand profiles are set correctly — an open signup route
+ * would let anyone create tenants against someone else's licence.
+ */
+function submit() {
+  sent.value = true
+}
+</script>
+
 <template>
-  <div class="auth-layout">
-    <div class="auth-container">
-      <div class="auth-sidebar">
-        <div class="sidebar-content">
-          <h3>Aetos Lattice</h3>
-          <p>Voice infrastructure for the future. Self-hosted, modular, zero-latency.</p>
-        </div>
+  <div class="auth">
+    <div class="panel surface">
+      <div class="head">
+        <img class="mark" :src="branding.brand.logo_url || '/logo-mark.svg'"
+             alt="" width="50" height="50" />
+        <h1>Request access to {{ productName }}</h1>
+        <p>Accounts are provisioned by your administrator so licence limits and
+           branding are applied correctly.</p>
       </div>
 
-      <div class="auth-card">
-        <div class="auth-header">
-          <h2>Create account</h2>
-          <p>Start building with Aetos Lattice today</p>
-        </div>
+      <form v-if="!sent" @submit.prevent="submit" novalidate>
+        <label><span>Work email</span>
+          <input v-model="email" type="email" required autofocus autocomplete="email" /></label>
+        <label><span>Company</span>
+          <input v-model="company" autocomplete="organization" /></label>
+        <button type="submit" class="submit" :disabled="!email">
+          <Mail :size="16" /> Request access
+        </button>
+      </form>
 
-        <form @submit.prevent="handleSignup">
-          <div class="form-group">
-            <label>Full Name</label>
-            <input
-              v-model="name"
-              type="text"
-              placeholder="John Doe"
-              required
-            />
-          </div>
+      <div v-else class="done">
+        <strong>Request noted</strong>
+        <p>
+          Send this to your administrator to have a tenant created:
+          <code>{{ email }}</code>
+        </p>
+        <p v-if="supportUrl" class="sm">
+          Or contact <a :href="supportUrl">support</a>.
+        </p>
+      </div>
 
-          <div class="form-group">
-            <label>Email</label>
-            <input
-              v-model="email"
-              type="email"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Password</label>
-            <input
-              v-model="password"
-              type="password"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Confirm Password</label>
-            <input
-              v-model="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <div v-if="error" class="error-message">{{ error }}</div>
-
-          <button
-            type="submit"
-            class="btn-primary btn-block"
-            :disabled="isLoading"
-          >
-            {{ isLoading ? 'Creating account...' : 'Create account' }}
-          </button>
-        </form>
-
-        <div class="auth-footer">
-          <p>Already have an account? <router-link to="/login">Sign in</router-link></p>
-        </div>
+      <div class="foot">
+        <router-link to="/login"><ArrowLeft :size="14" /> Back to sign in</router-link>
       </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/authStore'
-
-const router = useRouter()
-const authStore = useAuthStore()
-
-const name = ref('')
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const isLoading = ref(false)
-const error = ref('')
-
-const handleSignup = async () => {
-  error.value = ''
-
-  if (password.value !== confirmPassword.value) {
-    error.value = 'Passwords do not match'
-    return
-  }
-
-  if (password.value.length < 6) {
-    error.value = 'Password must be at least 6 characters'
-    return
-  }
-
-  isLoading.value = true
-
-  try {
-    const success = await authStore.signup(email.value, password.value, name.value)
-    if (success) {
-      router.push('/app')
-    } else {
-      error.value = authStore.error || 'Signup failed'
-    }
-  } catch (err) {
-    error.value = 'An unexpected error occurred'
-  } finally {
-    isLoading.value = false
-  }
-}
-</script>
-
 <style scoped>
-.auth-layout {
-  min-height: 100vh;
-  display: flex;
-  background: linear-gradient(135deg, var(--color-bg-light) 0%, var(--color-bg) 100%);
+.auth { min-height: 100vh; display: grid; place-items: center; padding: 2rem 1rem; background: var(--bg); }
+.panel { width: min(420px, 100%); padding: 2.1rem; box-shadow: var(--sh-3); }
+.head { text-align: center; margin-bottom: 1.6rem; }
+.mark {
+  display: block; width: 50px; height: 50px; margin: 0 auto 1rem;
+  border-radius: 14px; object-fit: contain;
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--acc) 45%, transparent);
 }
+.head h1 { font-size: 1.16rem; font-weight: 700; letter-spacing: -.02em; }
+.head p { color: var(--mut); font-size: .86rem; margin-top: .45rem; line-height: 1.5; }
 
-.auth-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100%;
+label { display: block; margin-bottom: .9rem; }
+label span { display: block; font-size: .8rem; font-weight: 600; color: var(--mut); margin-bottom: .35rem; }
+input {
+  width: 100%; padding: .68rem .8rem; font-size: .92rem;
+  border-radius: var(--r-sm); border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--txt) 3%, transparent); color: var(--txt);
 }
+input:focus { outline: none; border-color: var(--acc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 22%, transparent); }
 
-.auth-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 3rem;
-  background: var(--color-bg);
+.submit {
+  width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+  padding: .75rem 1rem; border: 0; border-radius: var(--r-sm);
+  background: var(--acc); color: #fff; font-size: .93rem; font-weight: 650;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--acc) 40%, transparent);
 }
+.submit:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
 
-.auth-header {
-  margin-bottom: 2rem;
+.done { text-align: center; padding: .5rem 0; }
+.done strong { display: block; font-size: 1rem; margin-bottom: .5rem; color: var(--ok); }
+.done p { font-size: .87rem; color: var(--mut); line-height: 1.55; }
+.done code {
+  display: inline-block; margin-top: .4rem; padding: .3rem .6rem; border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--txt) 6%, transparent); font-family: var(--mono); font-size: .83rem;
 }
+.done .sm { margin-top: .7rem; font-size: .83rem; }
 
-.auth-header h2 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.auth-header p {
-  color: var(--color-text-light);
-  font-size: 14px;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  font-size: 14px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 14px;
-  background: var(--color-bg);
-  color: var(--color-text);
-  transition: border 0.2s;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.form-group input::placeholder {
-  color: var(--color-text-light);
-}
-
-.error-message {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 1rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .error-message {
-    background: #7f1d1d;
-    color: #fecaca;
-  }
-}
-
-.btn-primary {
-  width: 100%;
-  padding: 12px;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-dark);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-block {
-  width: 100%;
-  display: block;
-}
-
-.auth-footer {
-  text-align: center;
-  margin-top: 2rem;
-  font-size: 14px;
-}
-
-.auth-footer a {
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-.auth-sidebar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: white;
-  padding: 3rem;
-}
-
-.sidebar-content h3 {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.sidebar-content p {
-  font-size: 16px;
-  line-height: 1.6;
-  opacity: 0.9;
-}
-
-@media (max-width: 768px) {
-  .auth-container {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-sidebar {
-    display: none;
-  }
-}
+.foot { margin-top: 1.4rem; text-align: center; font-size: .85rem; }
+.foot a { display: inline-flex; align-items: center; gap: .3rem; color: var(--mut); }
+.foot a:hover { color: var(--acc-2); }
 </style>
