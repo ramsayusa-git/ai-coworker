@@ -1,0 +1,13 @@
+name: tts-piper
+version: 1.2.0
+kind: provider/tts
+contracts: {provider-api: [1]}
+socket: /run/aetos/tts-piper.sock
+runtime: python
+entrypoint: python -m server
+image: ghcr.io/aetos/tts-piper
+models:
+  - name: en_US-lessac-medium
+    source: https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx
+    volume: /models
+resources: {memory: 512M, cpu: 1}

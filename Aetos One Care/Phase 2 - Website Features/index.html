@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos One Care - Medical Hub Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #003d82;
+            --primary-light: #0066cc;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --light-bg: #f8f9fb;
+            --dark-text: #1a1a1a;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: var(--dark-text);
+            background-color: #ffffff;
+        }
+
+        /* Navigation */
+        nav {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 61, 130, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .cta-button {
+            background-color: var(--accent);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            background-color: #e85a2e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 110, 64, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .compliance-badges {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Metrics */
+        .metrics {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .metric-card {
+            background: var(--light-bg);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+        }
+
+        .metric-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(0, 61, 130, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            height: 50px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: #666;
+            flex-grow: 1;
+        }
+
+        /* About Section */
+        .about-section {
+            background: var(--light-bg);
+            padding: 4rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .about-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .about-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--success);
+        }
+
+        .about-item h4 {
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .about-item p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Compliance Section */
+        .compliance-section {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .compliance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .compliance-item {
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .compliance-item:hover {
+            border-color: var(--primary);
+            background: var(--light-bg);
+        }
+
+        .compliance-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .compliance-item h4 {
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Roadmap Section */
+        .roadmap-section {
+            background: var(--light-bg);
+            padding: 4rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .roadmap-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .roadmap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .roadmap-item {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            border-top: 4px solid var(--accent);
+        }
+
+        .roadmap-item h4 {
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .roadmap-item p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .compliance-badges {
+                gap: 0.5rem;
+            }
+
+            .badge {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">Aetos One Care</a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#compliance">Compliance</a></li>
+                <li><a href="aetos-care-competitor-analysis.html" style="color: var(--accent);">Competitor Analysis</a></li>
+                <li><a href="#" class="cta-button">Get Started</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Medical Care, Simplified</h1>
+            <p>Comprehensive healthcare platform with OCR document scanning, pharmacy directory, lab tests, delivery tracking, medical history, prescription automation, and family account management.</p>
+            <div class="compliance-badges">
+                <span class="badge">✓ DPDPA 2023</span>
+                <span class="badge">✓ FHIR R4</span>
+                <span class="badge">✓ HL7 v2.5</span>
+                <span class="badge">✓ ABDM Ready</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <div class="metrics">
+        <div class="metric-card">
+            <div class="metric-number">8</div>
+            <div class="metric-label">Complete Features</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">20+</div>
+            <div class="metric-label">Pharmacy Partners</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">400+</div>
+            <div class="metric-label">Lab Tests Available</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">6</div>
+            <div class="metric-label">Export Formats</div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <h2 class="section-title">Phase 2 Features</h2>
+        <div class="features-grid">
+            <a href="aetos-phase2-ocr-document-scanning.html" class="feature-card">
+                <div class="feature-icon">📄</div>
+                <h3>OCR Document Scanning</h3>
+                <p>Scan medical documents with real-time OCR, confidence scores, and manual correction capabilities.</p>
+            </a>
+
+            <a href="aetos-phase2-pharmacy-directory-v2.html" class="feature-card">
+                <div class="feature-icon">💊</div>
+                <h3>Pharmacy Directory</h3>
+                <p>Search and compare 20+ partner pharmacies with star ratings and price comparison tools.</p>
+            </a>
+
+            <a href="aetos-phase2-lab-test-pricing.html" class="feature-card">
+                <div class="feature-icon">🧪</div>
+                <h3>Lab Test Booking</h3>
+                <p>Browse 400+ tests across 6 categories with home collection and transparent pricing (₹199-₹2,999).</p>
+            </a>
+
+            <a href="aetos-phase2-delivery-tracking.html" class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Real-Time Delivery Tracking</h3>
+                <p>Live GPS tracking with 5-step timeline, geofence alerts, and ETA displays for medication delivery.</p>
+            </a>
+
+            <a href="aetos-phase2-medical-history-timeline.html" class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>Medical History Timeline</h3>
+                <p>Color-coded medical events with filtering, search, and export capabilities. Track your health journey.</p>
+            </a>
+
+            <a href="aetos-phase2-prescription-refill-automation.html" class="feature-card">
+                <div class="feature-icon">💉</div>
+                <h3>Prescription Automation</h3>
+                <p>Auto-refill management with smart alerts, doctor verification, and savings tracking.</p>
+            </a>
+
+            <a href="aetos-phase2-consultation-history-export.html" class="feature-card">
+                <div class="feature-icon">📤</div>
+                <h3>Consultation Export</h3>
+                <p>Export to PDF, CSV, JSON, FHIR R4, HL7 v2.5, or Health Summary Card with secure sharing.</p>
+            </a>
+
+            <a href="aetos-phase2-family-account-linking.html" class="feature-card">
+                <div class="feature-icon">👨‍👩‍👧‍👦</div>
+                <h3>Family Accounts</h3>
+                <p>Multi-member accounts with role-based access, parental controls, and insurance management.</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="about-content">
+            <h2 class="section-title">Why Choose Aetos One Care?</h2>
+            <div class="about-grid">
+                <div class="about-item">
+                    <h4>🏆 Market Leadership</h4>
+                    <p>Comprehensive feature set built for Indian healthcare with local compliance and partnerships.</p>
+                </div>
+                <div class="about-item">
+                    <h4>🔒 Security First</h4>
+                    <p>AES-256 encryption, DPDPA compliance, audit logging, and ISO 27001 standards.</p>
+                </div>
+                <div class="about-item">
+                    <h4>📱 Mobile Ready</h4>
+                    <p>Fully responsive design optimized for mobile-first experiences and offline functionality.</p>
+                </div>
+                <div class="about-item">
+                    <h4>🌍 Global Standards</h4>
+                    <p>FHIR R4, HL7 v2.5, and ABDM compliance for interoperability and data exchange.</p>
+                </div>
+                <div class="about-item">
+                    <h4>👨‍⚕️ Doctor Integration</h4>
+                    <p>Seamless integration with healthcare providers for consultations and prescriptions.</p>
+                </div>
+                <div class="about-item">
+                    <h4>💰 Insurance Ready</h4>
+                    <p>Support for family policies, claims coordination, and insurance provider integration.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compliance Section -->
+    <section class="compliance-section" id="compliance">
+        <h2 class="section-title">Compliance & Standards</h2>
+        <div class="compliance-grid">
+            <div class="compliance-item">
+                <div class="compliance-icon">📋</div>
+                <h4>DPDPA 2023</h4>
+                <p>India's Data Protection Act compliance with consent management and breach notification.</p>
+            </div>
+            <div class="compliance-item">
+                <div class="compliance-icon">🏥</div>
+                <h4>FHIR R4</h4>
+                <p>Healthcare interoperability standard with proper resource bundles and SNOMED CT coding.</p>
+            </div>
+            <div class="compliance-item">
+                <div class="compliance-icon">🔗</div>
+                <h4>HL7 v2.5</h4>
+                <p>Hospital system integration with HIS/EHR compatibility for legacy systems.</p>
+            </div>
+            <div class="compliance-item">
+                <div class="compliance-icon">🆔</div>
+                <h4>ABDM</h4>
+                <p>India's Unified Health ID support with Scan & Share QR codes and Consent Manager integration.</p>
+            </div>
+            <div class="compliance-item">
+                <div class="compliance-icon">🔐</div>
+                <h4>HIPAA-Equivalent</h4>
+                <p>Enterprise-grade security with TLS 1.3, AES-256-GCM encryption, and RBAC.</p>
+            </div>
+            <div class="compliance-item">
+                <div class="compliance-icon">✅</div>
+                <h4>ISO 27001</h4>
+                <p>Information security management with complete audit trails and compliance documentation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap Section -->
+    <section class="roadmap-section">
+        <div class="roadmap-content">
+            <h2 class="section-title">Phase 3 Roadmap</h2>
+            <div class="roadmap-grid">
+                <div class="roadmap-item">
+                    <h4>📱 iOS & Android Apps</h4>
+                    <p>Native mobile applications with SwiftUI (iOS), Kotlin (Android), and full feature parity with web platform.</p>
+                </div>
+                <div class="roadmap-item">
+                    <h4>⌚ Wearable Integration</h4>
+                    <p>Apple Watch, Wear OS, and health device integration for continuous health monitoring.</p>
+                </div>
+                <div class="roadmap-item">
+                    <h4>🌐 Multi-Language Support</h4>
+                    <p>Hindi, Kannada, Telugu, Tamil, and regional language support for pan-India coverage.</p>
+                </div>
+                <div class="roadmap-item">
+                    <h4>🎯 Wellness Programs</h4>
+                    <p>Group health challenges, family wellness goals, and gamified health tracking.</p>
+                </div>
+                <div class="roadmap-item">
+                    <h4>🤖 AI Features</h4>
+                    <p>Predictive health analytics, medication recommendations, and personalized health insights.</p>
+                </div>
+                <div class="roadmap-item">
+                    <h4>🏥 Provider Dashboard</h4>
+                    <p>Healthcare provider portal for managing consultations, prescriptions, and patient records.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Features</h4>
+                <ul>
+                    <li><a href="aetos-phase2-ocr-document-scanning.html">OCR Scanning</a></li>
+                    <li><a href="aetos-phase2-pharmacy-directory-v2.html">Pharmacy Directory</a></li>
+                    <li><a href="aetos-phase2-lab-test-pricing.html">Lab Tests</a></li>
+                    <li><a href="aetos-phase2-delivery-tracking.html">Delivery Tracking</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>More Features</h4>
+                <ul>
+                    <li><a href="aetos-phase2-medical-history-timeline.html">Medical History</a></li>
+                    <li><a href="aetos-phase2-prescription-refill-automation.html">Prescription Auto</a></li>
+                    <li><a href="aetos-phase2-consultation-history-export.html">Consultation Export</a></li>
+                    <li><a href="aetos-phase2-family-account-linking.html">Family Accounts</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Analysis</h4>
+                <ul>
+                    <li><a href="aetos-care-competitor-analysis.html">Competitor Analysis</a></li>
+                    <li><a href="aetos-competitor-comparison.html">Feature Comparison</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Documentation</h4>
+                <ul>
+                    <li><a href="INDEX-Phase2-Complete-Features.md">Phase 2 Overview</a></li>
+                    <li><a href="aetos-phase2-pharmacy-features-guide.md">Pharmacy Guide</a></li>
+                    <li><a href="aetos-phase2-delivery-tracking-guide.md">Delivery Guide</a></li>
+                    <li><a href="aetos-phase2-consultation-history-export-guide.md">Export Guide</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Aetos One Care. All rights reserved. | DPDPA Compliant | FHIR R4 & HL7 v2.5 Compatible | ABDM Ready</p>
+        </div>
+    </footer>
+</body>
+</html>

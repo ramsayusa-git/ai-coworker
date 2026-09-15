@@ -1,0 +1,9 @@
+name: aetos-agent
+version: 1.0.0
+kind: worker
+contracts: {provider-api: [1], events: [1], core-api: [1]}
+runtime: python
+entrypoint: python -m aetos_agent.worker start
+image: ghcr.io/aetos/agent
+env: [LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, AETOS_CORE_URL, LLM_GATEWAY_URL, LLM_GATEWAY_KEY]
+resources: {memory: 1G, cpu: 2}

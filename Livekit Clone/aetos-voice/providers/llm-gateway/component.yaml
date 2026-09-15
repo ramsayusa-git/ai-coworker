@@ -1,0 +1,9 @@
+name: llm-gateway
+version: 1.74.0
+kind: provider/llm
+contracts: {openai-compat: [1]}
+runtime: python
+entrypoint: litellm --config config.yaml --port 4100 --host 127.0.0.1
+image: ghcr.io/berriai/litellm:main-stable
+port: 4100
+resources: {memory: 512M, cpu: 0.5}

@@ -1,0 +1,23 @@
+# One OpenAI-compatible endpoint for every LLM. The agent worker only ever talks to this.
+# Routing/fallback is config, never code. Local vLLM first, cloud when saturated or erroring.
+model_list:
+  - model_name: fast            # what agents reference in their pipeline
+    litellm_params: {model: openai/Qwen3-8B, api_base: http://127.0.0.1:8001/v1, api_key: none}   # vLLM sidecar
+  - model_name: fast
+    litellm_params: {model: anthropic/claude-haiku-4-5, api_key: os.environ/ANTHROPIC_API_KEY}
+  - model_name: fast
+    litellm_params: {model: openai/gpt-4o-mini, api_key: os.environ/OPENAI_API_KEY}
+  - model_name: smart
+    litellm_params: {model: anthropic/claude-sonnet-4-5, api_key: os.environ/ANTHROPIC_API_KEY}
+router_settings:
+  routing_strategy: latency-based-routing
+  num_retries: 1
+  timeout: 8
+  allowed_fails: 2
+  cooldown_time: 30
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+  cache: false
+general_settings:
+  master_key: os.environ/LLM_GATEWAY_KEY

@@ -1,0 +1,11 @@
+[project]
+name = "aetos-provider-sdk"
+version = "1.0.0"
+description = "Tiny base for provider-api v1 sidecars: gRPC server, health, manifest, generated stubs"
+requires-python = ">=3.11"
+dependencies = ["grpcio>=1.66", "protobuf>=5.28", "pyyaml>=6"]
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+[tool.setuptools.packages.find]
+include = ["aetos_provider*"]

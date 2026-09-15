@@ -1,0 +1,54 @@
+# Container mode — same manifests, one container per component. Providers share /run/aetos (unix sockets) with the worker.
+# NEVER put the audio path on the docker bridge; the worker and providers share the socket volume instead.
+name: aetos
+x-sock: &sock { type: volume, source: aetos-run, target: /run/aetos }
+services:
+  caddy:
+    image: caddy:2
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes: ["./Caddyfile:/etc/caddy/Caddyfile:ro", "../frontend:/srv/frontend:ro", "caddy-data:/data"]
+    environment: { AETOS_DOMAIN: "${AETOS_DOMAIN:-localhost}" }
+  core:
+    build: ../core
+    environment: { AETOS_REDIS: redis://redis:6379/0, AETOSD_URL: "http://aetosd:8110", AETOS_STATE: /state }
+    volumes: ["core-state:/state"]
+    depends_on: [redis]
+  aetosd:
+    build: ../aetosd
+    environment: { AETOS_ROOT: /repo, AETOS_STATE: /state, AETOS_RUN: /run/aetos, AETOS_MODE: docker }
+    volumes: ["..:/repo:ro", "aetosd-state:/state", "/var/run/docker.sock:/var/run/docker.sock", *sock]
+  agent:
+    build: ../agent
+    environment:
+      LIVEKIT_URL: "${LIVEKIT_URL:-ws://livekit:7880}"
+      LIVEKIT_API_KEY: "${LIVEKIT_API_KEY}"
+      LIVEKIT_API_SECRET: "${LIVEKIT_API_SECRET}"
+      AETOS_CORE_URL: http://core:8100
+      LLM_GATEWAY_URL: http://llm-gateway:4100/v1
+      LLM_GATEWAY_KEY: "${LLM_GATEWAY_KEY:-none}"
+      AETOS_RUN: /run/aetos
+    volumes: [*sock]
+    depends_on: [core, llm-gateway]
+  # ---- providers: one image per SDK. Upgrade = change one tag. ----
+  tts-mock:   { build: ../providers/tts-mock,   volumes: [*sock] }
+  stt-mock:   { build: ../providers/stt-mock,   volumes: [*sock] }
+  tts-piper:  { build: ../providers/tts-piper,  volumes: [*sock, "models-piper:/models"] }
+  stt-whisper:
+    build: ../providers/stt-whisper
+    volumes: [*sock, "models-whisper:/models"]
+    environment: { AETOS_WHISPER_MODEL: "${WHISPER_MODEL:-small}" }
+    # deploy: { resources: { reservations: { devices: [{ driver: nvidia, count: 1, capabilities: [gpu] }] } } }   # uncomment with a GPU
+  llm-gateway:
+    image: ghcr.io/berriai/litellm:main-stable
+    command: ["--config", "/config.yaml", "--port", "4100"]
+    volumes: ["../providers/llm-gateway/config.yaml:/config.yaml:ro"]
+    environment: { OPENAI_API_KEY: "${OPENAI_API_KEY:-}", ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}", LLM_GATEWAY_KEY: "${LLM_GATEWAY_KEY:-none}" }
+  # ---- platform, pinned separately from everything above ----
+  livekit:
+    image: livekit/livekit-server:v1.9
+    command: --config /etc/livekit.yaml
+    network_mode: host
+    volumes: ["./livekit.yaml:/etc/livekit.yaml:ro"]
+  redis: { image: redis:7-alpine, command: ["redis-server", "--save", "60", "1", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"], volumes: ["redis-data:/data"] }
+  qdrant: { image: qdrant/qdrant:v1.12.4, volumes: ["qdrant-data:/qdrant/storage"], profiles: [kb] }   # only when an agent uses the KB
+volumes: { aetos-run: {}, core-state: {}, aetosd-state: {}, caddy-data: {}, redis-data: {}, qdrant-data: {}, models-piper: {}, models-whisper: {} }

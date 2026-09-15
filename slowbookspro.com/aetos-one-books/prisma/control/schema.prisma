@@ -1,0 +1,566 @@
+// =============================================================================
+// Aetos One Books — CONTROL PLANE schema
+// =============================================================================
+// One control-plane database for the whole installation. It holds identity,
+// org registry, provisioning state, white-label branding and the global
+// catalogs (FX rates, state payroll tax tables).
+//
+// It holds NO business data. Every org's ledger lives in its OWN Postgres
+// database (`prisma/tenant/schema.prisma`), with its own role, its own
+// credentials, its own storage root and its own encryption key. There is no
+// `org_id` column anywhere in a tenant database, so cross-tenant reads are
+// structurally impossible rather than policy-enforced.
+//
+// Deployment modes (see DEPLOYMENT_MODE env):
+//   cloud       — many orgs, signup + provisioning, control plane is the front door
+//   self-hosted — exactly one org, provisioned at install time, no signup,
+//                 licence key optional; same code path, `SINGLE_ORG_SLUG` set
+// =============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/control"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Orgs and their isolated environments
+// ---------------------------------------------------------------------------
+
+enum OrgStatus {
+  PROVISIONING @map("provisioning")
+  ACTIVE       @map("active")
+  SUSPENDED    @map("suspended")
+  ARCHIVED     @map("archived")
+  FAILED       @map("failed")
+
+  @@map("org_status")
+}
+
+enum OrgEdition {
+  FREE       @map("free")
+  PRO        @map("pro")
+  SELF_HOSTED @map("self_hosted")
+
+  @@map("org_edition")
+}
+
+/// A tenant. One org == one isolated environment (database + storage + key).
+model Org {
+  id          Int       @id @default(autoincrement())
+  /// URL/DNS-safe identity: /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/. Immutable once
+  /// provisioned — the physical database name is derived from it.
+  slug        String    @unique @db.VarChar(40)
+  name        String    @db.VarChar(200)
+  legalName   String?   @db.VarChar(200) @map("legal_name")
+  /// Federal EIN / tax id, free-form (kept for tax forms rendered by the tenant).
+  taxId       String?   @db.VarChar(40) @map("tax_id")
+  status      OrgStatus @default(PROVISIONING)
+  edition     OrgEdition @default(FREE)
+  /// Home currency ISO-4217; the tenant DB is seeded with it.
+  baseCurrency String   @default("USD") @db.VarChar(3) @map("base_currency")
+  /// IANA zone used for period boundaries, due dates and scheduled jobs.
+  timezone    String    @default("America/Chicago") @db.VarChar(64)
+  fiscalYearStartMonth Int @default(1) @map("fiscal_year_start_month")
+  /// Nonprofit installs swap terminology (customer→donor, invoice→pledge …).
+  isNonprofit Boolean   @default(false) @map("is_nonprofit")
+  suspendedAt DateTime? @map("suspended_at") @db.Timestamptz(6)
+  archivedAt  DateTime? @map("archived_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  environment  OrgEnvironment?
+  brand        BrandProfile?
+  domains      OrgDomain[]
+  memberships  Membership[]
+  sessions     Session[]
+  apiTokens    ApiToken[]
+  jobs         ProvisioningJob[]
+  licence      Licence?
+  invites      Invite[]
+
+  @@index([status])
+  @@map("orgs")
+}
+
+/// Isolation tier — chosen per org, changeable by migration (the provisioner
+/// can promote an org up a tier without touching application code, because the
+/// tenant schema is identical at every tier).
+///
+///   SCHEMA      one shared Postgres database, one SCHEMA per org, connections
+///               pinned with `search_path`. Cheapest; ~thousands of orgs per
+///               cluster; blast radius is one cluster; noisy-neighbour possible.
+///   DATABASE    one Postgres DATABASE per org, own role/credentials. Default.
+///               Independent backup/restore/drop; still shared compute.
+///   DEDICATED   own database AND own application runtime (container/VM) and
+///               connection pool — no shared process memory, own resource
+///               limits, optionally own region.
+///   SELF_HOSTED the customer runs the whole stack; this row exists only so the
+///               same code path can describe it. Single org, local control plane.
+enum IsolationTier {
+  SCHEMA      @map("schema")
+  DATABASE    @map("database")
+  DEDICATED   @map("dedicated")
+  SELF_HOSTED @map("self_hosted")
+
+  @@map("isolation_tier")
+}
+
+/// A Postgres cluster available to the provisioner. Orgs are placed on one.
+model DbCluster {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(80)
+  host       String   @db.VarChar(255)
+  port       Int      @default(5432)
+  region     String?  @db.VarChar(40)
+  /// Encrypted superuser/provisioner DSN used to CREATE DATABASE / CREATE ROLE.
+  adminDsnEncrypted String @db.Text @map("admin_dsn_encrypted")
+  /// Shared database used for SCHEMA-tier orgs on this cluster.
+  sharedDatabase String? @db.VarChar(63) @map("shared_database")
+  maxOrgs    Int      @default(500) @map("max_orgs")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  environments OrgEnvironment[]
+
+  @@map("db_clusters")
+}
+
+/// An application runtime dedicated to one org (DEDICATED tier): its own
+/// container/VM, its own pool, its own limits. Requests for the org are routed
+/// to `baseUrl` by the edge; the shared runtime never opens that org's DB.
+model ComputeNode {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(80)
+  /// "docker" | "k8s" | "systemd" | "fly" | "ecs"
+  runtime    String   @db.VarChar(20)
+  /// Container/Pod/Machine identifier in that runtime.
+  externalId String?  @db.VarChar(200) @map("external_id")
+  baseUrl    String   @db.VarChar(500) @map("base_url")
+  region     String?  @db.VarChar(40)
+  cpuLimit   String?  @db.VarChar(20) @map("cpu_limit")
+  memoryLimit String? @db.VarChar(20) @map("memory_limit")
+  status     String   @default("provisioning") @db.VarChar(20)
+  lastHeartbeatAt DateTime? @map("last_heartbeat_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  environments OrgEnvironment[]
+
+  @@map("compute_nodes")
+}
+
+/// The physical isolation record for an org: where its database, files and
+/// secrets live. One row per org, written by the provisioner.
+model OrgEnvironment {
+  id           Int     @id @default(autoincrement())
+  orgId        Int     @unique @map("org_id")
+  org          Org     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  tier         IsolationTier @default(DATABASE)
+
+  clusterId    Int?    @map("cluster_id")
+  cluster      DbCluster? @relation(fields: [clusterId], references: [id], onDelete: Restrict)
+  /// DEDICATED tier only: the runtime that serves this org.
+  computeNodeId Int?   @map("compute_node_id")
+  computeNode  ComputeNode? @relation(fields: [computeNodeId], references: [id], onDelete: SetNull)
+
+  /// SCHEMA tier: the Postgres schema name, e.g. `org_acme`. NULL above it.
+  schemaName   String? @db.VarChar(63) @map("schema_name")
+  /// Physical Postgres database name, e.g. `aob_acme` (or the cluster's shared
+  /// database at SCHEMA tier).
+  databaseName String  @db.VarChar(63) @map("database_name")
+  /// Login role owning that database/schema, e.g. `aob_acme_owner`. At SCHEMA
+  /// tier the role is granted USAGE on its own schema only, and REVOKE'd from
+  /// `public`, so `search_path` is a convenience and not the security boundary.
+  databaseRole String  @db.VarChar(63) @map("database_role")
+  /// Host/port of the cluster holding it — lets an install shard orgs across
+  /// several Postgres servers without touching application code.
+  dbHost       String  @default("localhost") @db.VarChar(255) @map("db_host")
+  dbPort       Int     @default(5432) @map("db_port")
+  /// Fernet/AES-GCM ciphertext of the tenant connection URL (includes the role
+  /// password). Decrypted with the installation master key (MASTER_KEY env),
+  /// never with a per-request secret, and never returned by any API.
+  dsnEncrypted String  @db.Text @map("dsn_encrypted")
+  /// Per-org data key (wrapped by the master key). Encrypts that org's stored
+  /// provider credentials, AI keys and attachments-at-rest.
+  dataKeyWrapped String @db.Text @map("data_key_wrapped")
+  /// Filesystem root for attachments/backups/exports for this org only.
+  storageRoot  String  @db.VarChar(500) @map("storage_root")
+  /// Schema version actually applied to the tenant DB (`prisma migrate deploy`).
+  migrationVersion String? @db.VarChar(64) @map("migration_version")
+  /// Connection-pool ceiling for this org's PrismaClient.
+  poolSize     Int     @default(5) @map("pool_size")
+  lastMigratedAt DateTime? @map("last_migrated_at") @db.Timestamptz(6)
+  lastBackupAt   DateTime? @map("last_backup_at") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tier])
+  @@index([clusterId])
+  @@map("org_environments")
+}
+
+enum ProvisioningKind {
+  CREATE   @map("create")
+  MIGRATE  @map("migrate")
+  SEED     @map("seed")
+  BACKUP   @map("backup")
+  RESTORE  @map("restore")
+  ARCHIVE  @map("archive")
+  DESTROY  @map("destroy")
+
+  @@map("provisioning_kind")
+}
+
+enum JobStatus {
+  QUEUED  @map("queued")
+  RUNNING @map("running")
+  DONE    @map("done")
+  FAILED  @map("failed")
+
+  @@map("job_status")
+}
+
+/// Audit + state for every environment-level operation. Creating an org is a
+/// multi-step job (CREATE DATABASE → role → migrate → seed chart of accounts);
+/// this row is what makes it resumable and inspectable.
+model ProvisioningJob {
+  id         Int              @id @default(autoincrement())
+  orgId      Int              @map("org_id")
+  org        Org              @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  kind       ProvisioningKind
+  status     JobStatus        @default(QUEUED)
+  /// Step-by-step log, newest last: [{step, at, ok, detail}]
+  log        Json?
+  error      String?          @db.Text
+  startedAt  DateTime?        @map("started_at") @db.Timestamptz(6)
+  finishedAt DateTime?        @map("finished_at") @db.Timestamptz(6)
+  createdBy  String?          @db.VarChar(100) @map("created_by")
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([orgId, kind])
+  @@index([status])
+  @@map("provisioning_jobs")
+}
+
+// ---------------------------------------------------------------------------
+// White-labelling
+// ---------------------------------------------------------------------------
+
+/// Per-org (or per-deployment, when orgId is the single self-hosted org) brand.
+/// Everything here is applied at RUNTIME through CSS custom properties and
+/// server-rendered metadata — no rebuild, no per-customer fork of the code.
+model BrandProfile {
+  id            Int      @id @default(autoincrement())
+  orgId         Int      @unique @map("org_id")
+  org           Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  /// Product name shown in the UI, page titles, PDFs and emails.
+  productName   String   @default("Aetos One Books") @db.VarChar(120) @map("product_name")
+  /// Short name for tight spots (sidebar collapsed, favicon alt).
+  shortName     String   @default("AOB") @db.VarChar(40) @map("short_name")
+  tagline       String?  @db.VarChar(200)
+  vendorName    String   @default("Aetos Tech Labs") @db.VarChar(120) @map("vendor_name")
+  supportEmail  String?  @db.VarChar(200) @map("support_email")
+  supportUrl    String?  @db.VarChar(500) @map("support_url")
+  docsUrl       String?  @db.VarChar(500) @map("docs_url")
+
+  /// Asset paths inside the org's storage root (served through a signed route).
+  logoLightPath String?  @db.VarChar(500) @map("logo_light_path")
+  logoDarkPath  String?  @db.VarChar(500) @map("logo_dark_path")
+  markPath      String?  @db.VarChar(500) @map("mark_path")
+  faviconPath   String?  @db.VarChar(500) @map("favicon_path")
+  /// Letterhead used on invoices, statements and reports.
+  letterheadPath String? @db.VarChar(500) @map("letterhead_path")
+
+  /// OKLCH or hex; injected as --brand-* custom properties on <html>.
+  colorPrimary  String   @default("#1f6feb") @db.VarChar(32) @map("color_primary")
+  colorAccent   String   @default("#0fa47f") @db.VarChar(32) @map("color_accent")
+  colorSidebar  String?  @db.VarChar(32) @map("color_sidebar")
+  /// "system" | "light" | "dark" — default theme for new users of this org.
+  defaultTheme  String   @default("system") @db.VarChar(16) @map("default_theme")
+  /// Optional font family override (must be self-hosted; no external CDN).
+  fontFamily    String?  @db.VarChar(120) @map("font_family")
+  /// Extra CSS variables, validated against an allowlist before injection.
+  cssVariables  Json?    @map("css_variables")
+
+  /// Outgoing mail identity for this org.
+  emailFromName String?  @db.VarChar(120) @map("email_from_name")
+  emailFromAddr String?  @db.VarChar(200) @map("email_from_addr")
+  emailFooter   String?  @db.Text @map("email_footer")
+
+  /// Hide "powered by" and vendor links entirely (reseller white-label).
+  hideVendorMarks Boolean @default(false) @map("hide_vendor_marks")
+  /// Legal links shown in the footer and on the public payment page.
+  termsUrl      String?  @db.VarChar(500) @map("terms_url")
+  privacyUrl    String?  @db.VarChar(500) @map("privacy_url")
+
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("brand_profiles")
+}
+
+/// Custom hostnames routed to an org (white-label vanity domains).
+model OrgDomain {
+  id         Int      @id @default(autoincrement())
+  orgId      Int      @map("org_id")
+  org        Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  hostname   String   @unique @db.VarChar(255)
+  /// Primary domain wins for absolute URLs in emails and PDFs.
+  isPrimary  Boolean  @default(false) @map("is_primary")
+  verifiedAt DateTime? @map("verified_at") @db.Timestamptz(6)
+  /// DNS TXT challenge value while unverified.
+  verifyToken String? @db.VarChar(64) @map("verify_token")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([orgId])
+  @@map("org_domains")
+}
+
+/// Self-hosted licence / entitlements. Absent == unlimited local use.
+model Licence {
+  id          Int      @id @default(autoincrement())
+  orgId       Int      @unique @map("org_id")
+  org         Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  key         String   @unique @db.VarChar(200)
+  /// Ed25519 signature over the entitlement payload; verified offline.
+  signature   String   @db.Text
+  issuedTo    String   @db.VarChar(200) @map("issued_to")
+  seats       Int      @default(0)
+  /// {"payroll":true,"nonprofit":false,"ai":true,...}
+  features    Json?
+  issuedAt    DateTime @map("issued_at") @db.Timestamptz(6)
+  expiresAt   DateTime? @map("expires_at") @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("licences")
+}
+
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+
+enum PlatformRole {
+  OWNER      @map("owner")
+  ADMIN      @map("admin")
+  BOOKKEEPER @map("bookkeeper")
+  READONLY   @map("readonly")
+
+  @@map("platform_role")
+}
+
+/// A human principal, global to the installation.
+model User {
+  id           Int      @id @default(autoincrement())
+  /// Stored lowercase; every lookup lowercases first. /^[a-z0-9][a-z0-9._-]{2,49}$/
+  username     String   @unique @db.VarChar(100)
+  email        String?  @unique @db.VarChar(200)
+  displayName  String   @default("") @db.VarChar(200) @map("display_name")
+  /// argon2id PHC string. Redacted in every audit snapshot.
+  passwordHash String   @db.VarChar(512) @map("password_hash")
+  /// Installation-level operator flag (can create/suspend orgs). Never implied
+  /// by an org role.
+  isPlatformAdmin Boolean @default(false) @map("is_platform_admin")
+  /// TOTP secret, encrypted with the master key. NULL = 2FA off.
+  totpSecret   String?  @db.Text @map("totp_secret")
+  /// Users deactivate, never disappear — the username stays meaningful in audit.
+  isActive     Boolean  @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  memberships Membership[]
+  sessions    Session[]
+
+  @@index([isActive])
+  @@map("users")
+}
+
+/// Which orgs a user may open, and with what role in each.
+model Membership {
+  id             Int          @id @default(autoincrement())
+  userId         Int          @map("user_id")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orgId          Int          @map("org_id")
+  org            Org          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  role           PlatformRole @default(BOOKKEEPER)
+  isActive       Boolean      @default(true) @map("is_active")
+  lastAccessedAt DateTime?    @map("last_accessed_at") @db.Timestamptz(6)
+  invitedBy      String?      @db.VarChar(100) @map("invited_by")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sessions Session[]
+
+  @@unique([userId, orgId])
+  @@index([orgId, isActive])
+  @@map("memberships")
+}
+
+/// Pending invitation to an org.
+model Invite {
+  id         Int          @id @default(autoincrement())
+  orgId      Int          @map("org_id")
+  org        Org          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  email      String       @db.VarChar(200)
+  role       PlatformRole @default(BOOKKEEPER)
+  /// SHA-256 of the emailed token.
+  tokenHash  String       @unique @db.VarChar(64) @map("token_hash")
+  invitedBy  String?      @db.VarChar(100) @map("invited_by")
+  expiresAt  DateTime     @map("expires_at") @db.Timestamptz(6)
+  acceptedAt DateTime?    @map("accepted_at") @db.Timestamptz(6)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([orgId])
+  @@map("invites")
+}
+
+/// Server-side session. The cookie carries only an opaque token; the active org
+/// is resolved server-side and re-checked against Membership on every request,
+/// so a forged cookie cannot hop tenants.
+model Session {
+  id             Int         @id @default(autoincrement())
+  /// SHA-256 hex of the cookie value, never the value itself.
+  tokenHash      String      @unique @db.VarChar(64) @map("token_hash")
+  userId         Int         @map("user_id")
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// NULL between sign-in and org selection.
+  activeOrgId    Int?        @map("active_org_id")
+  activeOrg      Org?        @relation(fields: [activeOrgId], references: [id], onDelete: SetNull)
+  membershipId   Int?        @map("membership_id")
+  membership     Membership? @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  ip             String?     @db.VarChar(45)
+  userAgent      String?     @db.VarChar(255) @map("user_agent")
+  /// Sliding idle window (SESSION_IDLE_TIMEOUT_SECONDS, default 14400; 0 = off).
+  lastActivityAt DateTime    @default(now()) @map("last_activity_at") @db.Timestamptz(6)
+  /// Absolute cap (30 days).
+  expiresAt      DateTime    @map("expires_at") @db.Timestamptz(6)
+  revokedAt      DateTime?   @map("revoked_at") @db.Timestamptz(6)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+/// Non-human principal — agent, integration or receipt service. Always pinned
+/// to exactly one org: a token that could reach every tenant is not a feature.
+model ApiToken {
+  id         Int          @id @default(autoincrement())
+  orgId      Int          @map("org_id")
+  org        Org          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  label      String       @db.VarChar(100)
+  /// SHA-256 hex of the UTF-8 secret — deterministic on purpose (256 bits of
+  /// randomness), which is what makes the indexed lookup possible.
+  tokenHash  String       @unique @db.VarChar(64) @map("token_hash")
+  /// First 10 chars of the secret ("aob_ab12cd") so an operator can match a
+  /// token in a config file to a row. The full secret leaves the server once.
+  tokenHint  String       @db.VarChar(12) @map("token_hint")
+  role       PlatformRole
+  isActive   Boolean      @default(true) @map("is_active")
+  createdBy  String       @default("") @db.VarChar(100) @map("created_by")
+  /// Throttled to one write per 5 minutes so a chatty agent doesn't turn every
+  /// GET into a write.
+  lastUsedAt DateTime?    @map("last_used_at") @db.Timestamptz(6)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([orgId, label])
+  @@index([tokenHash])
+  @@map("api_tokens")
+}
+
+/// Every login attempt, success AND failure. No account lockout by design: the
+/// defence is per-IP rate limiting + argon2id's verify cost + this forensic
+/// table, so an attacker pacing under the limit still shows up afterwards.
+model LoginAttempt {
+  id        Int      @id @default(autoincrement())
+  username  String?  @db.VarChar(100)
+  orgSlug   String?  @db.VarChar(40) @map("org_slug")
+  ip        String?  @db.VarChar(45)
+  userAgent String?  @db.VarChar(255) @map("user_agent")
+  success   Boolean  @default(false)
+  /// "bad_password" | "unknown_user" | "inactive" | "totp" | "rate_limited"
+  reason    String?  @db.VarChar(40)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt])
+  @@index([username])
+  @@map("login_attempts")
+}
+
+/// Control-plane audit (org lifecycle, membership, branding, licences).
+/// Tenant-level audit lives inside each tenant database.
+model PlatformAudit {
+  id        Int      @id @default(autoincrement())
+  actor     String   @db.VarChar(100)
+  action    String   @db.VarChar(80)
+  entity    String   @db.VarChar(80)
+  entityId  Int?     @map("entity_id")
+  orgId     Int?     @map("org_id")
+  detail    Json?
+  ip        String?  @db.VarChar(45)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([orgId, createdAt])
+  @@index([action])
+  @@map("platform_audit")
+}
+
+// ---------------------------------------------------------------------------
+// Global catalogs (shared, read-mostly, identical for every org)
+// ---------------------------------------------------------------------------
+
+/// Daily FX rates against the installation's reference currency.
+model FxRate {
+  id           Int      @id @default(autoincrement())
+  baseCurrency String   @db.VarChar(3) @map("base_currency")
+  quoteCurrency String  @db.VarChar(3) @map("quote_currency")
+  rateDate     DateTime @map("rate_date") @db.Date
+  rate         Decimal  @db.Decimal(18, 8)
+  /// "boc" | "ecb" | "manual"
+  source       String   @default("manual") @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([baseCurrency, quoteCurrency, rateDate])
+  @@index([rateDate])
+  @@map("fx_rates")
+}
+
+enum PayrollTaxMethod {
+  TABLE     @map("table")
+  FLAT      @map("flat")
+  DEDICATED @map("dedicated")
+  NONE      @map("none")
+
+  @@map("payroll_tax_method")
+}
+
+/// State withholding / UI parameters, versioned by tax year. Data, not code —
+/// a new year is a seed, not a release.
+model PayrollTaxRate {
+  id           Int              @id @default(autoincrement())
+  state        String           @db.VarChar(2)
+  taxYear      Int              @map("tax_year")
+  method       PayrollTaxMethod @default(NONE)
+  /// Full StateSpec: brackets, standard deductions, exemption amounts,
+  /// supplemental rate, PFML/SDI/UI items, SUTA wage base, reciprocity.
+  spec         Json
+  effectiveOn  DateTime         @map("effective_on") @db.Date
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([state, taxYear])
+  @@index([taxYear])
+  @@map("payroll_tax_rates")
+}

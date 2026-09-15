@@ -1,0 +1,9 @@
+name: aetos-core
+version: 2.0.0
+kind: core
+contracts: {core-api: [1], events: [1]}
+runtime: python
+entrypoint: uvicorn aetos_core.main:app --host 0.0.0.0 --port 8100
+image: ghcr.io/aetos/core
+port: 8100
+resources: {memory: 512M, cpu: 1}

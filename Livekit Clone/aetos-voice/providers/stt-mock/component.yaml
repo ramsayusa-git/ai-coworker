@@ -1,0 +1,9 @@
+name: stt-mock
+version: 1.0.0
+kind: provider/stt
+contracts: {provider-api: [1]}
+socket: /run/aetos/stt-mock.sock
+runtime: python
+entrypoint: python -m server
+image: ghcr.io/aetos/stt-mock
+resources: {memory: 128M, cpu: 0.2}

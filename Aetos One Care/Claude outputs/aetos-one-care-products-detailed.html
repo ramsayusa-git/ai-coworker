@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos One Care - Detailed Product Information</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #003d82;
+            --primary-dark: #002855;
+            --secondary: #0066cc;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --light-bg: #f8f9fb;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+
+        /* ===== NAVIGATION ===== */
+        nav {
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .navbar {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* ===== SIDEBAR NAVIGATION ===== */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 0.8rem 1rem;
+            color: var(--text-gray);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+            border-radius: 4px;
+        }
+
+        .sidebar-menu a:hover {
+            background: var(--light-bg);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-menu a.active {
+            background: #e3f2fd;
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-section {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .product-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .product-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .product-icon {
+            font-size: 3rem;
+        }
+
+        .product-title {
+            flex: 1;
+        }
+
+        .product-title h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-title p {
+            color: var(--text-gray);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent), #ff5722);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        .section h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* ===== FEATURES LIST ===== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f5f7ff, #f0f4ff);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 61, 130, 0.15);
+        }
+
+        .feature-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* ===== SPECIFICATIONS TABLE ===== */
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .specs-table th {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .specs-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .specs-table tr:hover {
+            background: var(--light-bg);
+        }
+
+        .specs-label {
+            font-weight: 600;
+            color: var(--primary);
+            width: 30%;
+        }
+
+        /* ===== PRICING ===== */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .pricing-card {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .pricing-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(0, 61, 130, 0.1);
+        }
+
+        .pricing-card h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .price-period {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .price-features {
+            text-align: left;
+            margin: 1.5rem 0;
+            padding: 1.5rem 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .price-features li {
+            list-style: none;
+            padding: 0.5rem 0;
+            color: var(--text-gray);
+        }
+
+        .price-features li:before {
+            content: "✓ ";
+            color: var(--success);
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        /* ===== STEPS ===== */
+        .steps-timeline {
+            margin: 2rem 0;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 60px;
+            width: 2px;
+            height: calc(100% + 20px);
+            background: var(--border-color);
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent), #ff5722);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-content h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            color: var(--text-gray);
+        }
+
+        /* ===== FAQ ===== */
+        .faq-item {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            background: var(--light-bg);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .faq-question:hover {
+            background: #e3f2fd;
+        }
+
+        .faq-toggle {
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.open .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: white;
+        }
+
+        .faq-item.open .faq-answer {
+            padding: 1.5rem;
+            max-height: 500px;
+        }
+
+        .faq-answer p {
+            color: var(--text-gray);
+            line-height: 1.7;
+        }
+
+        /* ===== CTA ===== */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .cta-section h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 110, 64, 0.3);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 200px 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                gap: 0.5rem;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            .sidebar-menu li {
+                flex-shrink: 0;
+                margin-bottom: 0;
+            }
+
+            .product-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="navbar">
+            <a href="#" class="logo">❤️ Aetos One Care</a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- SIDEBAR MENU -->
+        <aside class="sidebar">
+            <h3>📋 Products</h3>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="menu-item active" onclick="showProduct(event, 'telemedicine')">Telemedicine</a></li>
+                <li><a href="#" class="menu-item" onclick="showProduct(event, 'health-records')">Health Records</a></li>
+                <li><a href="#" class="menu-item" onclick="showProduct(event, 'diagnostics')">Diagnostics</a></li>
+                <li><a href="#" class="menu-item" onclick="showProduct(event, 'medicines')">Medicines</a></li>
+                <li><a href="#" class="menu-item" onclick="showProduct(event, 'wellness')">Wellness</a></li>
+                <li><a href="#" class="menu-item" onclick="showProduct(event, 'emergency')">Emergency</a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+
+            <!-- TELEMEDICINE SECTION -->
+            <div id="telemedicine" class="product-section active">
+                <div class="product-header">
+                    <div class="product-icon">👨‍⚕️</div>
+                    <div class="product-title">
+                        <h1>Telemedicine Consultations</h1>
+                        <p>Connect with verified doctors across 50+ medical specialties</p>
+                        <span class="badge">CORE PRODUCT</span>
+                    </div>
+                </div>
+
+                <!-- OVERVIEW -->
+                <div class="section">
+                    <h2>Overview</h2>
+                    <p>Aetos One Care connects you with 50,000+ NMC-verified doctors through secure video consultations. Get expert medical advice from specialists without leaving your home. Available 24/7 with guaranteed response times.</p>
+                </div>
+
+                <!-- KEY FEATURES -->
+                <div class="section">
+                    <h2>Key Features</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h4>✓ Video Consultations</h4>
+                            <p>HD quality video calls with verified doctors. Screen sharing for symptom demonstration.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Digital Prescriptions</h4>
+                            <p>Instant digital prescriptions sent to your email and pharmacy partners.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Follow-up Consultations</h4>
+                            <p>Schedule follow-ups with the same doctor for continuity of care.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Multi-language Support</h4>
+                            <p>Consultations in 9+ Indian languages with real-time translation.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Call Recording</h4>
+                            <p>Optional consultation recording for future reference (with consent).</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Appointment Reminders</h4>
+                            <p>SMS, push, and email reminders 24 hours and 1 hour before consultation.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SPECIALTIES -->
+                <div class="section">
+                    <h2>Medical Specialties Available</h2>
+                    <table class="specs-table">
+                        <tr>
+                            <th>Specialty</th>
+                            <th>Consultation Fee</th>
+                            <th>Average Wait Time</th>
+                            <th>Doctor Count</th>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">General Physician</td>
+                            <td>₹199</td>
+                            <td>&lt; 5 min</td>
+                            <td>5000+</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Cardiology</td>
+                            <td>₹399</td>
+                            <td>&lt; 10 min</td>
+                            <td>800+</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Dermatology</td>
+                            <td>₹299</td>
+                            <td>&lt; 8 min</td>
+                            <td>1200+</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Psychiatry</td>
+                            <td>₹349</td>
+                            <td>&lt; 15 min</td>
+                            <td>600+</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Orthopedics</td>
+                            <td>₹349</td>
+                            <td>&lt; 10 min</td>
+                            <td>900+</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- PRICING -->
+                <div class="section">
+                    <h2>Consultation Pricing</h2>
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <h3>Basic</h3>
+                            <div class="price">₹199-299</div>
+                            <div class="price-period">Per consultation</div>
+                            <ul class="price-features">
+                                <li>General Physician Consultation</li>
+                                <li>Video call (15-20 min)</li>
+                                <li>Digital Prescription</li>
+                                <li>No follow-up included</li>
+                            </ul>
+                            <button class="cta-button">Book Now</button>
+                        </div>
+                        <div class="pricing-card">
+                            <h3>Specialist</h3>
+                            <div class="price">₹349-599</div>
+                            <div class="price-period">Per consultation</div>
+                            <ul class="price-features">
+                                <li>Specialist Doctor Consultation</li>
+                                <li>Video call (20-30 min)</li>
+                                <li>Digital Prescription</li>
+                                <li>1 free follow-up</li>
+                            </ul>
+                            <button class="cta-button">Book Specialist</button>
+                        </div>
+                        <div class="pricing-card">
+                            <h3>Premium Subscription</h3>
+                            <div class="price">₹499</div>
+                            <div class="price-period">Per month</div>
+                            <ul class="price-features">
+                                <li>Unlimited consultations</li>
+                                <li>All specialties included</li>
+                                <li>Priority booking</li>
+                                <li>24/7 support</li>
+                            </ul>
+                            <button class="cta-button">Subscribe</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HOW IT WORKS -->
+                <div class="section">
+                    <h2>How It Works</h2>
+                    <div class="steps-timeline">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Browse & Select Doctor</h3>
+                                <p>Choose from verified doctors based on specialty, experience, ratings, and availability.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Book Appointment</h3>
+                                <p>Select preferred time slot and confirm booking. You'll receive appointment confirmation via SMS/email.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Pay & Confirm</h3>
+                                <p>Secure payment via card, UPI, or digital wallet. Instant payment confirmation.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Join Video Call</h3>
+                                <p>At the scheduled time, click to join the secure video consultation.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h3>Get Prescription</h3>
+                                <p>Doctor sends digital prescription to your email and to pharmacy partners.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">6</div>
+                            <div class="step-content">
+                                <h3>Schedule Follow-up</h3>
+                                <p>If needed, schedule follow-up consultation with the same doctor.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ -->
+                <div class="section">
+                    <h2>Frequently Asked Questions</h2>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            Are consultations confidential?
+                            <span class="faq-toggle">▼</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Yes, all consultations are completely confidential. Your data is encrypted and stored securely. We comply with DPDPA 2023 and HIPAA-equivalent standards.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            Can I cancel an appointment?
+                            <span class="faq-toggle">▼</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Yes, you can cancel up to 2 hours before the consultation. Cancellations are refunded to your wallet instantly. Late cancellations (within 2 hours) are not refunded.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            What if I can't attend the consultation?
+                            <span class="faq-toggle">▼</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>You can reschedule up to 2 hours before the consultation without any charges. If you miss the appointment, you forfeit the consultation fee.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <h3>Ready to consult a doctor?</h3>
+                    <button class="cta-button">Browse Doctors</button>
+                </div>
+            </div>
+
+            <!-- HEALTH RECORDS SECTION -->
+            <div id="health-records" class="product-section">
+                <div class="product-header">
+                    <div class="product-icon">📋</div>
+                    <div class="product-title">
+                        <h1>Digital Health Records</h1>
+                        <p>Your complete health history in one secure place</p>
+                        <span class="badge">CORE PRODUCT</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Overview</h2>
+                    <p>Store and manage your complete health records securely in the cloud. From medical prescriptions to lab reports to vaccination records - everything in one place. Lifetime storage guarantee with ABDM integration.</p>
+                </div>
+
+                <div class="section">
+                    <h2>What You Can Store</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h4>✓ Prescriptions</h4>
+                            <p>Store digital and scanned prescriptions from doctors and pharmacies.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Lab Reports</h4>
+                            <p>Upload and organize all laboratory test reports and results.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Medical Imaging</h4>
+                            <p>Store X-rays, CT scans, MRI images, and ultrasound reports.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Vaccination Records</h4>
+                            <p>Automatic sync with government vaccination databases.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Medical History</h4>
+                            <p>Timeline view of all medical conditions and treatments.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Allergies & Medications</h4>
+                            <p>Document all allergies and current medications for doctor reference.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Technical Specifications</h2>
+                    <table class="specs-table">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Details</th>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Storage</td>
+                            <td>Unlimited lifetime storage</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Encryption</td>
+                            <td>256-bit AES encryption at rest and in transit</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Backup</td>
+                            <td>Multi-site backup with 99.9% uptime SLA</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Access Audit</td>
+                            <td>Complete audit trail showing who accessed your records and when</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">ABDM Integration</td>
+                            <td>Linked to government Ayushman Bharat Digital Mission</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Data Residency</td>
+                            <td>All data stored on India-based servers only</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="cta-section">
+                    <h3>Start building your health profile</h3>
+                    <button class="cta-button">Upload Records</button>
+                </div>
+            </div>
+
+            <!-- DIAGNOSTICS SECTION -->
+            <div id="diagnostics" class="product-section">
+                <div class="product-header">
+                    <div class="product-icon">🔬</div>
+                    <div class="product-title">
+                        <h1>Diagnostic Testing</h1>
+                        <p>400+ lab tests with home collection and 24-48 hour reports</p>
+                        <span class="badge">CORE PRODUCT</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Overview</h2>
+                    <p>Access 400+ diagnostic tests without visiting a lab. We collect samples from your home and deliver reports in 24-48 hours. Get professional lab analysis with doctor consultation on results included.</p>
+                </div>
+
+                <div class="section">
+                    <h2>Available Tests</h2>
+                    <table class="specs-table">
+                        <tr>
+                            <th>Category</th>
+                            <th>Sample Test</th>
+                            <th>Price Range</th>
+                            <th>Report Time</th>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Blood Tests</td>
+                            <td>CBC, Lipid Profile, Thyroid Profile</td>
+                            <td>₹299-₹999</td>
+                            <td>24 hours</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Urine Tests</td>
+                            <td>Routine Urinalysis, Culture</td>
+                            <td>₹199-₹599</td>
+                            <td>24 hours</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Imaging</td>
+                            <td>Ultrasound, X-ray</td>
+                            <td>₹299-₹1500</td>
+                            <td>48 hours</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Specialized</td>
+                            <td>COVID-19, Allergy Panel</td>
+                            <td>₹299-₹2999</td>
+                            <td>24-48 hours</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="cta-section">
+                    <h3>Book a diagnostic test</h3>
+                    <button class="cta-button">Browse Tests</button>
+                </div>
+            </div>
+
+            <!-- MEDICINES SECTION -->
+            <div id="medicines" class="product-section">
+                <div class="product-header">
+                    <div class="product-icon">💊</div>
+                    <div class="product-title">
+                        <h1>Medicine Delivery</h1>
+                        <p>Medicines delivered in 2-4 hours across 50+ cities</p>
+                        <span class="badge">CORE PRODUCT</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Overview</h2>
+                    <p>Order medicines from our network of certified pharmacies. Fast delivery in 2-4 hours. Accept digital prescriptions from doctors. Compare prices and choose generic alternatives to save money.</p>
+                </div>
+
+                <div class="section">
+                    <h2>Key Features</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h4>✓ Digital Prescriptions</h4>
+                            <p>Accept prescriptions directly from Aetos One Care doctors.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Fast Delivery</h4>
+                            <p>Get medicines delivered to your doorstep in 2-4 hours.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Price Comparison</h4>
+                            <p>Compare generic vs brand medicines and save up to 60%.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Refill Automation</h4>
+                            <p>Auto-refill recurring medications on schedule.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Verified Pharmacies</h4>
+                            <p>All partner pharmacies are licensed and verified.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✓ Pharmacist Consultation</h4>
+                            <p>Chat with pharmacist about side effects and interactions.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <h3>Order medicines now</h3>
+                    <button class="cta-button">Upload Prescription</button>
+                </div>
+            </div>
+
+            <!-- WELLNESS SECTION -->
+            <div id="wellness" class="product-section">
+                <div class="product-header">
+                    <div class="product-icon">🏃</div>
+                    <div class="product-title">
+                        <h1>Wellness Programs</h1>
+                        <p>Manage chronic diseases and improve your health</p>
+                        <span class="badge">PREMIUM</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Available Programs</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h4>Diabetes Management</h4>
+                            <p>Daily tracking, medication reminders, dietary guidance, and specialist consultations.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Hypertension Control</h4>
+                            <p>Blood pressure monitoring, medicine tracking, lifestyle changes with expert coaching.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Weight Management</h4>
+                            <p>AI-powered coaching, nutrition planning, fitness tracking, and monthly reviews.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Mental Health</h4>
+                            <p>Counseling sessions, stress management, and psychiatric consultations as needed.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Pregnancy Wellness</h4>
+                            <p>Complete maternity support from conception through postpartum recovery.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Cardiac Rehabilitation</h4>
+                            <p>Post-surgery recovery program with exercise and diet guidance.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <h3>Start a wellness program</h3>
+                    <button class="cta-button">View Programs</button>
+                </div>
+            </div>
+
+            <!-- EMERGENCY SECTION -->
+            <div id="emergency" class="product-section">
+                <div class="product-header">
+                    <div class="product-icon">🚨</div>
+                    <div class="product-title">
+                        <h1>Emergency Services</h1>
+                        <p>24/7 emergency medical support with <5 min response time</p>
+                        <span class="badge">24/7 AVAILABLE</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Emergency Support Features</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h4>Quick Response</h4>
+                            <p>Doctor connects within 5 minutes of emergency alert.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Ambulance Booking</h4>
+                            <p>Integrated ambulance service booking with GPS tracking.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Hospital Admission</h4>
+                            <p>Guidance on nearest hospitals and instant bed availability check.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>First Aid Guidance</h4>
+                            <p>Real-time first aid instructions while waiting for ambulance.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Mental Health Crisis</h4>
+                            <p>Specialized support for depression, anxiety, and self-harm crisis.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Auto-Notification</h4>
+                            <p>Emergency contacts automatically notified of medical incident.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Emergency SLA (Service Level Agreement)</h2>
+                    <table class="specs-table">
+                        <tr>
+                            <th>Metric</th>
+                            <th>Guarantee</th>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Response Time</td>
+                            <td>&lt; 5 minutes to first doctor</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Availability</td>
+                            <td>24/7/365</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Doctor Quality</td>
+                            <td>Minimum 10+ years experience</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Escalation</td>
+                            <td>Specialist or ambulance within 10 min</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="cta-section">
+                    <h3>Have an emergency?</h3>
+                    <button class="cta-button" style="background: var(--danger);">CALL EMERGENCY (1-800-AETOS-1)</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function showProduct(event, product) {
+            event.preventDefault();
+
+            // Hide all sections
+            document.querySelectorAll('.product-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Deactivate all menu items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(product).classList.add('active');
+
+            // Activate selected menu item
+            event.target.classList.add('active');
+
+            // Scroll to top
+            document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleFaq(element) {
+            element.parentElement.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

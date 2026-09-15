@@ -1,0 +1,7 @@
+name: aetosd
+version: 1.0.0
+kind: supervisor
+contracts: {core-api: [1], events: [1]}
+runtime: python
+entrypoint: python -m aetosd serve
+port: 8110

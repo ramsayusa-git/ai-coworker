@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetos Lab Test Pricing - Diagnostic Tests with Home Collection</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #003d82;
+            --secondary: #0066cc;
+            --accent: #ff6e40;
+            --success: #00897b;
+            --warning: #ffa726;
+            --light-bg: #f8f9fb;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        h1 { color: var(--primary); margin-bottom: 1.5rem; font-size: 2.2rem; }
+        h2 { color: var(--primary); margin: 2rem 0 1rem 0; border-left: 4px solid var(--accent); padding-left: 1rem; }
+        h3 { color: var(--primary); margin: 1.5rem 0 0.8rem 0; }
+        .section { background: var(--white); padding: 2rem; margin-bottom: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        .search-bar { display: grid; grid-template-columns: 1fr 200px; gap: 1rem; margin-bottom: 2rem; }
+        .search-input, .category-select { padding: 0.8rem 1rem; border: 2px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; }
+        .search-input:focus, .category-select:focus { outline: none; border-color: var(--secondary); }
+
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+        .test-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .test-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.1); transform: translateY(-4px); }
+
+        .test-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+        }
+        .test-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .test-category { opacity: 0.9; font-size: 0.85rem; }
+
+        .test-body { padding: 1.5rem; }
+        .test-info { margin-bottom: 1rem; font-size: 0.95rem; }
+        .info-label { color: var(--text-gray); }
+        .info-value { color: var(--text-dark); font-weight: 500; }
+
+        .price-section { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 1rem; border-radius: 6px; margin: 1rem 0; }
+        .price-title { color: var(--success); font-weight: 600; margin-bottom: 0.5rem; }
+        .price-value { font-size: 1.3rem; color: var(--success); font-weight: 700; }
+        .price-desc { color: var(--text-gray); font-size: 0.9rem; }
+
+        .test-features { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+        .feature-badge { background: #f0f7ff; color: var(--secondary); padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+
+        .test-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 1rem; }
+        .btn { padding: 0.7rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; text-align: center; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,61,130,0.2); }
+        .btn-secondary { background: var(--light-bg); color: var(--primary); border: 2px solid var(--primary); }
+        .btn-secondary:hover { background: var(--primary); color: white; }
+
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .category-card { padding: 1.5rem; background: linear-gradient(135deg, #f5f7ff, #f0f4ff); border: 2px solid var(--primary); border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+        .category-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,61,130,0.15); }
+        .category-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .category-name { font-weight: 600; color: var(--primary); }
+        .category-count { color: var(--text-gray); font-size: 0.9rem; margin-top: 0.3rem; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+        .stat-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 1.5rem; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .stat-label { opacity: 0.95; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        th { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 1rem; text-align: left; font-weight: 600; }
+        td { padding: 0.9rem; border-bottom: 1px solid var(--border-color); }
+        tr:hover { background: var(--light-bg); }
+
+        .comparison-section { margin-top: 2rem; }
+        .package-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+        .package-card { border: 2px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .package-card.featured { border-color: var(--accent); box-shadow: 0 4px 12px rgba(255,110,64,0.1); }
+        .package-badge { display: inline-block; background: var(--accent); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem; }
+        .package-name { font-size: 1.2rem; font-weight: 600; color: var(--text-dark); margin-bottom: 1rem; }
+        .package-tests { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 1rem; }
+        .package-price { font-size: 1.4rem; color: var(--success); font-weight: 700; }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .search-bar { grid-template-columns: 1fr; }
+            .test-grid { grid-template-columns: 1fr; }
+            .test-actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Lab Test Pricing & Home Collection</h1>
+        <p style="color: var(--text-gray); font-size: 1.1rem;">Phase 2 Feature: Book diagnostic tests online with transparent pricing and home sample collection</p>
+
+        <div class="section">
+            <h2>Browse Diagnostic Tests</h2>
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search tests (e.g., Blood Sugar, Thyroid Panel, Complete Blood Count)">
+                <select class="category-select">
+                    <option>All Categories</option>
+                    <option>Blood Tests</option>
+                    <option>Thyroid Tests</option>
+                    <option>Diabetes Tests</option>
+                    <option>Cardiac Tests</option>
+                    <option>Liver Tests</option>
+                    <option>Kidney Tests</option>
+                    <option>Allergy Tests</option>
+                </select>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">400+</div>
+                    <div class="stat-label">Available Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">₹199-₹2,999</div>
+                    <div class="stat-label">Price Range</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">24-48 hrs</div>
+                    <div class="stat-label">Result Timeline</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">Home Collection</div>
+                    <div class="stat-label">Free Service</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Popular Test Categories</h2>
+            <div class="category-grid">
+                <div class="category-card">
+                    <div class="category-icon">🩸</div>
+                    <div class="category-name">Blood Tests</div>
+                    <div class="category-count">180+ tests</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">💉</div>
+                    <div class="category-name">Thyroid & Hormones</div>
+                    <div class="category-count">45+ tests</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">❤️</div>
+                    <div class="category-name">Cardiac Profile</div>
+                    <div class="category-count">35+ tests</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🫁</div>
+                    <div class="category-name">Respiratory Tests</div>
+                    <div class="category-count">28+ tests</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🧬</div>
+                    <div class="category-name">Genetic Tests</div>
+                    <div class="category-count">22+ tests</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🤒</div>
+                    <div class="category-name">Infection Tests</div>
+                    <div class="category-count">50+ tests</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Popular Individual Tests</h2>
+            <div class="test-grid" id="testGrid"></div>
+        </div>
+
+        <div class="section comparison-section">
+            <h2>Health Packages - Special Pricing</h2>
+            <div class="package-grid">
+                <div class="package-card">
+                    <span class="package-badge">Basic</span>
+                    <div class="package-name">Full Body Checkup</div>
+                    <div class="package-tests">
+                        ✓ Complete Blood Count<br>
+                        ✓ Blood Sugar (Fasting)<br>
+                        ✓ Kidney Function<br>
+                        ✓ Liver Function<br>
+                        ✓ Lipid Profile<br>
+                        ✓ Thyroid Profile
+                    </div>
+                    <div class="package-price">₹2,499</div>
+                    <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 1rem;">Usually ₹3,500 | <span style="color: var(--success); font-weight: 600;">Save ₹1,001</span></p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Book Now</button>
+                </div>
+
+                <div class="package-card featured">
+                    <span class="package-badge">Popular</span>
+                    <div class="package-name">Diabetes & Hypertension</div>
+                    <div class="package-tests">
+                        ✓ Fasting Blood Sugar<br>
+                        ✓ Post-Meal Blood Sugar<br>
+                        ✓ HbA1c (3 months avg)<br>
+                        ✓ Blood Pressure Check<br>
+                        ✓ Lipid Profile<br>
+                        ✓ Kidney Function<br>
+                        ✓ Urine Microalbumin
+                    </div>
+                    <div class="package-price">₹2,799</div>
+                    <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 1rem;">Usually ₹4,200 | <span style="color: var(--success); font-weight: 600;">Save ₹1,401</span></p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem; background: linear-gradient(135deg, var(--accent), #ff5722);">Book Now</button>
+                </div>
+
+                <div class="package-card">
+                    <span class="package-badge">Premium</span>
+                    <div class="package-name">Advanced Cardiac Screen</div>
+                    <div class="package-tests">
+                        ✓ Complete Blood Count<br>
+                        ✓ Lipid Profile<br>
+                        ✓ ECG (electrocardiogram)<br>
+                        ✓ Troponin I (heart marker)<br>
+                        ✓ BNP (heart failure marker)<br>
+                        ✓ Blood Pressure<br>
+                        ✓ BMI Measurement
+                    </div>
+                    <div class="package-price">₹4,299</div>
+                    <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 1rem;">Usually ₹6,500 | <span style="color: var(--success); font-weight: 600;">Save ₹2,201</span></p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Book Now</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Price Comparison - Common Tests</h2>
+            <table>
+                <tr>
+                    <th>Test Name</th>
+                    <th>Sample Type</th>
+                    <th>Normal Price</th>
+                    <th>Aetos Price</th>
+                    <th>You Save</th>
+                    <th>Result Time</th>
+                </tr>
+                <tr>
+                    <td><strong>Complete Blood Count</strong></td>
+                    <td>Blood</td>
+                    <td>₹300</td>
+                    <td style="color: var(--success); font-weight: 600;">₹199</td>
+                    <td>₹101 (33%)</td>
+                    <td>4-6 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>Thyroid Profile (TSH, T3, T4)</strong></td>
+                    <td>Blood</td>
+                    <td>₹800</td>
+                    <td style="color: var(--success); font-weight: 600;">₹599</td>
+                    <td>₹201 (25%)</td>
+                    <td>24 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>Lipid Profile</strong></td>
+                    <td>Blood</td>
+                    <td>₹600</td>
+                    <td style="color: var(--success); font-weight: 600;">₹449</td>
+                    <td>₹151 (25%)</td>
+                    <td>6-12 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>Blood Sugar (Fasting)</strong></td>
+                    <td>Blood</td>
+                    <td>₹250</td>
+                    <td style="color: var(--success); font-weight: 600;">₹149</td>
+                    <td>₹101 (40%)</td>
+                    <td>2-4 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>Liver Function Test (LFT)</strong></td>
+                    <td>Blood</td>
+                    <td>₹500</td>
+                    <td style="color: var(--success); font-weight: 600;">₹349</td>
+                    <td>₹151 (30%)</td>
+                    <td>8-12 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>Kidney Function Test (KFT)</strong></td>
+                    <td>Blood</td>
+                    <td>₹500</td>
+                    <td style="color: var(--success); font-weight: 600;">₹349</td>
+                    <td>₹151 (30%)</td>
+                    <td>8-12 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>HbA1c (Diabetes Test)</strong></td>
+                    <td>Blood</td>
+                    <td>₹800</td>
+                    <td style="color: var(--success); font-weight: 600;">₹599</td>
+                    <td>₹201 (25%)</td>
+                    <td>24-48 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>Vitamin D (25-OH)</strong></td>
+                    <td>Blood</td>
+                    <td>₹1,200</td>
+                    <td style="color: var(--success); font-weight: 600;">₹799</td>
+                    <td>₹401 (33%)</td>
+                    <td>24-48 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>COVID-19 RT-PCR</strong></td>
+                    <td>Swab</td>
+                    <td>₹600</td>
+                    <td style="color: var(--success); font-weight: 600;">₹399</td>
+                    <td>₹201 (33%)</td>
+                    <td>24-36 hours</td>
+                </tr>
+                <tr>
+                    <td><strong>Urine Routine</strong></td>
+                    <td>Urine</td>
+                    <td>₹250</td>
+                    <td style="color: var(--success); font-weight: 600;">₹149</td>
+                    <td>₹101 (40%)</td>
+                    <td>4-6 hours</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>How It Works</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+                <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--primary); text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">1️⃣</div>
+                    <div style="font-weight: 600; color: var(--primary); margin-bottom: 0.5rem;">Book Online</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">Select tests and choose preferred date/time</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f3e5f5, #e1bee7); padding: 1.5rem; border-radius: 6px; border-left: 4px solid #7b1fa2; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">2️⃣</div>
+                    <div style="font-weight: 600; color: #7b1fa2; margin-bottom: 0.5rem;">Home Collection</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">Lab technician visits home for blood/sample collection</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success); text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">3️⃣</div>
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">Lab Processing</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">Samples analyzed in NABL-certified laboratory</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--warning); text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">4️⃣</div>
+                    <div style="font-weight: 600; color: var(--warning); margin-bottom: 0.5rem;">Digital Report</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">Results delivered via SMS/email with digital copy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Key Features</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Home Collection</div>
+                    <div style="color: var(--text-gray);">Free sample collection from your home - no visit to lab</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Fast Reports</div>
+                    <div style="color: var(--text-gray);">Results in 24-48 hours with digital delivery</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Price Transparency</div>
+                    <div style="color: var(--text-gray);">Clear pricing with no hidden charges or surprise fees</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ NABL Certified</div>
+                    <div style="color: var(--text-gray);">All partner labs are NABL-certified for accuracy</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Doctor Interpretation</div>
+                    <div style="color: var(--text-gray);">Free consultation with doctor to understand results</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 6px; border-left: 4px solid var(--success);">
+                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">✓ Digital Health Record</div>
+                    <div style="color: var(--text-gray);">All reports saved securely in your health profile</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Insurance Coverage</h2>
+            <div style="background: #f0f7ff; padding: 2rem; border-radius: 8px; border-left: 4px solid var(--secondary);">
+                <h3 style="margin-top: 0;">Covered Under</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong>✓ Ayushman Bharat PMJAY</strong>
+                        <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem;">Free diagnostic tests up to ₹500 per patient per year</div>
+                    </div>
+                    <div>
+                        <strong>✓ Employer Insurance</strong>
+                        <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem;">Most corporate health plans cover annual checkups</div>
+                    </div>
+                    <div>
+                        <strong>✓ Private Health Plans</strong>
+                        <div style="color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem;">Direct billing with HDFC, ICICI, Aditya Birla, and more</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const tests = [
+        { name: "Complete Blood Count", category: "Blood Tests", normal: 300, price: 199, time: "4-6 hrs", sample: "Blood" },
+        { name: "Thyroid Profile (TSH, T3, T4)", category: "Thyroid", normal: 800, price: 599, time: "24 hrs", sample: "Blood" },
+        { name: "Lipid Profile", category: "Cardiac", normal: 600, price: 449, time: "6-12 hrs", sample: "Blood" },
+        { name: "Blood Sugar (Fasting)", category: "Diabetes", normal: 250, price: 149, time: "2-4 hrs", sample: "Blood" },
+        { name: "HbA1c - Diabetes Test", category: "Diabetes", normal: 800, price: 599, time: "24-48 hrs", sample: "Blood" },
+        { name: "Liver Function Test", category: "Liver", normal: 500, price: 349, time: "8-12 hrs", sample: "Blood" },
+        { name: "Kidney Function Test", category: "Kidney", normal: 500, price: 349, time: "8-12 hrs", sample: "Blood" },
+        { name: "Vitamin D (25-OH)", category: "Nutritional", normal: 1200, price: 799, time: "24-48 hrs", sample: "Blood" },
+        { name: "COVID-19 RT-PCR", category: "Viral", normal: 600, price: 399, time: "24-36 hrs", sample: "Swab" },
+        { name: "Urine Routine", category: "Urine", normal: 250, price: 149, time: "4-6 hrs", sample: "Urine" }
+    ];
+
+    function renderTests() {
+        const grid = document.getElementById('testGrid');
+        tests.forEach(test => {
+            const savings = test.normal - test.price;
+            const savingPercent = Math.round((savings / test.normal) * 100);
+            const card = document.createElement('div');
+            card.className = 'test-card';
+            card.innerHTML = `
+                <div class="test-header">
+                    <div class="test-name">${test.name}</div>
+                    <div class="test-category">${test.category}</div>
+                </div>
+                <div class="test-body">
+                    <div class="test-info">
+                        <div class="info-label">Sample Type:</div>
+                        <div class="info-value">${test.sample}</div>
+                    </div>
+                    <div class="test-info">
+                        <div class="info-label">Result Time:</div>
+                        <div class="info-value">${test.time}</div>
+                    </div>
+                    <div class="price-section">
+                        <div class="price-title">Aetos Price</div>
+                        <div class="price-value">₹${test.price}</div>
+                        <div class="price-desc">Was ₹${test.normal} • Save ₹${savings} (${savingPercent}%)</div>
+                    </div>
+                    <div class="test-features">
+                        <span class="feature-badge">Home Collection</span>
+                        <span class="feature-badge">NABL Certified</span>
+                        <span class="feature-badge">Online Report</span>
+                    </div>
+                    <div class="test-actions">
+                        <button class="btn btn-primary">Book Test</button>
+                        <button class="btn btn-secondary">Learn More</button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    renderTests();
+    </script>
+</body>
+</html>

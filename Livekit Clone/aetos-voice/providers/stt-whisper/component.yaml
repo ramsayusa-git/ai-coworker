@@ -1,0 +1,14 @@
+name: stt-whisper
+version: 1.1.0
+kind: provider/stt
+contracts: {provider-api: [1]}
+socket: /run/aetos/stt-whisper.sock
+runtime: python
+entrypoint: python -m server
+image: ghcr.io/aetos/stt-whisper
+gpu: optional              # CUDA if present, else int8 on CPU
+models:
+  - name: large-v3-turbo   # override with AETOS_WHISPER_MODEL=tiny for a laptop
+    source: hf://Systran/faster-whisper-large-v3-turbo
+    volume: /models
+resources: {memory: 3G, cpu: 2}

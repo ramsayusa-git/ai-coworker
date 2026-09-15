@@ -1,0 +1,9 @@
+name: tts-mock
+version: 1.0.0
+kind: provider/tts
+contracts: {provider-api: [1]}
+socket: /run/aetos/tts-mock.sock
+runtime: python            # aetosd local mode: venv + entrypoint; docker mode: image
+entrypoint: python -m server
+image: ghcr.io/aetos/tts-mock
+resources: {memory: 128M, cpu: 0.2}
