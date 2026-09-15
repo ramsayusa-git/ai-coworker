@@ -5,6 +5,7 @@ import '@fontsource-variable/inter'
 import '@fontsource/jetbrains-mono/400.css'
 import '@fontsource/jetbrains-mono/600.css'
 import './styles/tokens.css'
+import './styles/section.css'
 
 import App from './App.vue'
 import router from './router'

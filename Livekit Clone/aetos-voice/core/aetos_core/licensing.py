@@ -16,16 +16,41 @@ import base64
 import datetime as dt
 import json
 import os
+import pathlib
 
 from nacl.exceptions import BadSignatureError
 from nacl.signing import VerifyKey
 
-# Public half of the Aetos signing key. The private half never ships.
-# Overridable for development so a dev build can use a throwaway key.
-LICENCE_PUBKEY_B64 = os.environ.get(
-    "LATTICE_LICENCE_PUBKEY",
-    "3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29",
-)
+# Public half of the Aetos signing key. The private half never ships — it lives
+# only in tools/licence-issuer.py's key store on the vendor's machine.
+#
+# Resolution order, most specific first:
+#   1. LATTICE_LICENCE_PUBKEY      — env, for containers and CI
+#   2. ~/.aetos/licence.pub        — state file, survives any launch method
+#   3. the compiled-in default     — the shipped Aetos production key
+# The state file matters because the core is started several ways (aetosd
+# supervisor, bare uvicorn, systemd); an env var set in one of them is not set
+# in the others, and a licence that verifies under one launcher but not another
+# is the worst kind of bug to chase.
+_PUBKEY_FILE = pathlib.Path(
+    os.environ.get("AETOS_STATE", pathlib.Path.home() / ".aetos")) / "licence.pub"
+
+
+def _load_pubkey() -> str:
+    env = os.environ.get("LATTICE_LICENCE_PUBKEY", "").strip()
+    if env:
+        return env
+    try:
+        if _PUBKEY_FILE.exists():
+            val = _PUBKEY_FILE.read_text().strip()
+            if val:
+                return val
+    except OSError:
+        pass
+    return "3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29"
+
+
+LICENCE_PUBKEY_B64 = _load_pubkey()
 
 UNLICENSED_LIMITS = {
     "licensee": "Unlicensed",
@@ -99,6 +124,10 @@ def licence_state(payload: dict) -> dict:
     return {
         "status": status,
         "days_left": days_left,
+        "licence_id": payload.get("licence_id", ""),
+        "owner_email": payload.get("owner_email", ""),
+        "deployment": payload.get("deployment", "any"),
+        "issued_at": payload.get("issued_at"),
         "licensee": payload.get("licensee", ""),
         "tier": payload.get("tier", ""),
         "tenants_max": payload.get("tenants_max"),

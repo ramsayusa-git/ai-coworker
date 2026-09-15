@@ -176,6 +176,11 @@ export const Sessions = {
   list: (q: { limit?: number; offset?: number; agent_id?: string; outcome?: string } = {}) =>
     api.get<Paged<CallSession>>('/sessions', q),
   get: (id: string) => api.get<CallSession>(`/sessions/${id}`),
+  /** Same endpoints a real call uses — the tester is not a separate path. */
+  start: (b: { agent_id: string; channel?: string; caller?: string }) =>
+    api.post<CallSession>('/sessions', b),
+  addTurn: (id: string, t: Turn) => api.post<{ n: number }>(`/sessions/${id}/turns`, t),
+  end: (id: string) => api.post<CallSession>(`/sessions/${id}/end`, {}),
 }
 
 export const Analytics = {

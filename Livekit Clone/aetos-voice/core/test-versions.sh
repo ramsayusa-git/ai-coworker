@@ -45,6 +45,11 @@ echo; echo "=== save + publish v1 ==="
 chk "create version" 201 "$(curl -s -o /tmp/v1.json -w '%{http_code}' -X POST -H "$H" \
   -H 'content-type: application/json' --data-binary "$GOOD" "$B/agents/$AID/versions")"
 V1=$($J -c "import json;print(json.load(open('/tmp/v1.json'))['id'])")
+# Version numbers are per-agent and monotonic, so they keep climbing across
+# runs. Assert the relationship (n, then n+1, diff n->n+1), never the literal
+# number — that was making a correct system look broken on the second run.
+N1=$($J -c "import json;print(json.load(open('/tmp/v1.json'))['version'])")
+N2=$((N1 + 1))
 chk "status published" "published" "$($J -c "import json;print(json.load(open('/tmp/v1.json'))['status'])")"
 chk "agent pipeline updated" "tts-mock" "$(curl -s -H "$H" "$B/agents/$AID" | $J -c "import json,sys;print(json.load(sys.stdin)['pipeline']['tts'])")"
 
@@ -53,12 +58,12 @@ V2BODY=$(echo "$GOOD" | sed 's/tts-mock/tts-piper/; s/"first"/"swap tts"/; s/v1 
 chk "create v2" 201 "$(curl -s -o /tmp/v2.json -w '%{http_code}' -X POST -H "$H" \
   -H 'content-type: application/json' --data-binary "$V2BODY" "$B/agents/$AID/versions")"
 V2=$($J -c "import json;print(json.load(open('/tmp/v2.json'))['id'])")
-chk "version number increments" 2 "$($J -c "import json;print(json.load(open('/tmp/v2.json'))['version'])")"
+chk "version number increments" "$N2" "$($J -c "import json;print(json.load(open('/tmp/v2.json'))['version'])")"
 chk "live pipeline now piper" "tts-piper" "$(curl -s -H "$H" "$B/agents/$AID" | $J -c "import json,sys;print(json.load(sys.stdin)['pipeline']['tts'])")"
 
 echo; echo "=== diff ==="
 curl -s -o /tmp/d.json -H "$H" "$B/agents/$AID/versions/$V2/diff" >/dev/null
-chk "diff from v1 to v2" "1->2" "$($J -c "
+chk "diff from v1 to v2" "$N1->$N2" "$($J -c "
 import json; d=json.load(open('/tmp/d.json')); print(f\"{d['from']}->{d['to']}\")")"
 chk "tts change detected" "tts-piper" "$($J -c "
 import json; d=json.load(open('/tmp/d.json'))

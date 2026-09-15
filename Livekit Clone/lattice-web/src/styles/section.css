@@ -1,0 +1,131 @@
+/* Shared chrome for the console section screens.
+ *
+ * Global rather than scoped, deliberately: eleven screens repeating the same
+ * pill/modal/button rules is how they drift apart. Every class here is
+ * prefixed `s-` so it cannot collide with a screen's own scoped styles. */
+
+.s-input,
+.s-select,
+.s-textarea {
+  padding: .5rem .7rem;
+  border-radius: var(--r-sm);
+  font-size: .86rem;
+  font-family: inherit;
+  border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--txt) 3%, transparent);
+  color: var(--txt);
+  width: 100%;
+}
+.s-textarea { min-height: 120px; resize: vertical; line-height: 1.5; }
+.s-input:focus, .s-select:focus, .s-textarea:focus {
+  outline: none; border-color: var(--acc);
+}
+.s-input::placeholder, .s-textarea::placeholder { color: var(--mut); }
+
+.s-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .5rem .9rem; border-radius: var(--r-sm);
+  font-size: .86rem; font-weight: 550; font-family: inherit;
+  border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--txt) 4%, transparent);
+  color: var(--txt);
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.s-btn:hover { border-color: var(--acc); }
+.s-btn:disabled { opacity: .5; cursor: not-allowed; }
+.s-btn.primary { background: var(--acc); border-color: var(--acc); color: #fff; font-weight: 600; }
+.s-btn.primary:hover { filter: brightness(1.08); }
+.s-btn.danger:hover { border-color: var(--bad); color: var(--bad); }
+
+.s-icon-btn {
+  display: grid; place-items: center; width: 30px; height: 30px;
+  border-radius: 7px; border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--txt) 4%, transparent); color: var(--mut);
+}
+.s-icon-btn:hover { color: var(--txt); border-color: var(--acc); }
+.s-icon-btn.danger:hover { color: var(--bad); border-color: var(--bad); }
+
+.s-acts { display: flex; gap: .3rem; justify-content: flex-end; }
+
+.s-pill {
+  display: inline-block;
+  padding: .18rem .5rem; border-radius: 999px;
+  font-size: .74rem; font-weight: 650; text-transform: capitalize;
+  background: color-mix(in srgb, var(--txt) 8%, transparent);
+  color: var(--mut);
+}
+.s-pill.ok, .s-pill.live, .s-pill.indexed, .s-pill.complete,
+.s-pill.open, .s-pill.enabled, .s-pill.online {
+  background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok);
+}
+.s-pill.bad, .s-pill.failed, .s-pill.closed, .s-pill.disabled {
+  background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad);
+}
+.s-pill.warn, .s-pill.pending, .s-pill.recording, .s-pill.escalated {
+  background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn);
+}
+
+.s-mono { font-family: var(--mono); font-size: .82rem; }
+.s-name { font-weight: 600; font-size: .9rem; }
+.s-sub { display: block; font-size: .78rem; color: var(--mut); margin-top: 2px; }
+
+/* modal */
+.s-scrim {
+  position: fixed; inset: 0; z-index: 120; display: grid; place-items: center;
+  padding: 1rem; background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+}
+.s-modal {
+  width: min(520px, 100%); max-height: 86vh; overflow-y: auto;
+  padding: 1.2rem; border-radius: var(--r-md);
+  display: flex; flex-direction: column; gap: .75rem;
+  /* Solid, not glass: a form floating over a table has to be readable. */
+  background: var(--panel-solid);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-3);
+}
+.s-modal h3 { font-size: 1rem; font-weight: 700; }
+.s-modal label { display: flex; flex-direction: column; gap: .3rem; font-size: .8rem; color: var(--mut); }
+/* A checkbox row is the exception: stacking it centres the box above its own
+   label, which reads as a stray tick mark. */
+.s-modal label.s-switch {
+  flex-direction: row; align-items: center; gap: .55rem;
+  font-size: .86rem; color: var(--txt); align-self: flex-start;
+}
+.s-modal .hint { font-size: .76rem; color: var(--mut); }
+.s-modal .row { display: flex; gap: .5rem; justify-content: flex-end; margin-top: .4rem; }
+
+/* settings forms */
+.s-form { display: grid; gap: 1rem; max-width: 720px; }
+.s-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.s-field { display: flex; flex-direction: column; gap: .3rem; }
+.s-field > span { font-size: .8rem; color: var(--mut); }
+.s-field .note { font-size: .76rem; color: var(--mut); }
+.s-switch { display: flex; align-items: center; gap: .55rem; font-size: .86rem; }
+.s-switch input { width: 16px; height: 16px; accent-color: var(--acc); }
+
+.s-card {
+  padding: 1rem; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--panel);
+}
+.s-cards { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+.s-kv { display: flex; justify-content: space-between; gap: 1rem; padding: .4rem 0; font-size: .85rem; }
+.s-kv + .s-kv { border-top: 1px solid var(--line); }
+.s-kv dt { color: var(--mut); }
+.s-kv dd { font-family: var(--mono); font-size: .82rem; text-align: right; }
+
+.s-tabs { display: flex; gap: .3rem; flex-wrap: wrap; }
+.s-tabs button {
+  padding: .4rem .8rem; border-radius: var(--r-sm);
+  font-size: .84rem; font-family: inherit;
+  border: 1px solid transparent; background: none; color: var(--mut);
+}
+.s-tabs button:hover { color: var(--txt); background: color-mix(in srgb, var(--txt) 5%, transparent); }
+.s-tabs button.on {
+  color: var(--txt); border-color: var(--line-2);
+  background: color-mix(in srgb, var(--acc) 14%, transparent);
+}
+
+@media (max-width: 640px) {
+  .s-grid2 { grid-template-columns: 1fr; }
+}

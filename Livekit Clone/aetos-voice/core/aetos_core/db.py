@@ -201,6 +201,178 @@ class Rule(Base):
     number: Mapped[str] = mapped_column(String); agent_id: Mapped[str] = mapped_column(String)
     schedule: Mapped[str] = mapped_column(String, default="always")
 
+# ------------------------------------------------------- rooms & realtime ---
+
+class Room(Base):
+    """A realtime media room. Agents and human participants meet here; a voice
+    session is attached to one."""
+    __tablename__ = "rooms"
+    __table_args__ = (UniqueConstraint("tenant_id", "name", name="uq_room_name"),)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: uid("rm"))
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    name: Mapped[str] = mapped_column(String)
+    kind: Mapped[str] = mapped_column(String, default="voice")          # voice | video | data
+    status: Mapped[str] = mapped_column(String, default="idle")         # idle | live | closed
+    agent_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    max_participants: Mapped[int] = mapped_column(Integer, default=8)
+    empty_timeout_s: Mapped[int] = mapped_column(Integer, default=300)
+    participants: Mapped[list] = mapped_column(JSON, default=list)      # [{identity,role,joined_at}]
+    metadata_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now)
+    last_active_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+# --------------------------------------------------------------- chat ---
+
+class ChatSession(Base):
+    """A chatbot conversation. Kept apart from Session_ on purpose: a voice call
+    has duration, TTFB and cost per minute; a chat thread has none of those and
+    lives for days, so folding them into one table makes both queries wrong."""
+    __tablename__ = "chat_sessions"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: uid("cht"))
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    agent_id: Mapped[str] = mapped_column(ForeignKey("agents.id"))
+    channel: Mapped[str] = mapped_column(String, default="web")         # web | whatsapp | sms | api
+    visitor: Mapped[str] = mapped_column(String, default="")
+    status: Mapped[str] = mapped_column(String, default="open")         # open | closed | escalated
+    started_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now, index=True)
+    ended_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    message_count: Mapped[int] = mapped_column(Integer, default=0)
+    tokens_in: Mapped[int] = mapped_column(Integer, default=0)
+    tokens_out: Mapped[int] = mapped_column(Integer, default=0)
+    cost: Mapped[float] = mapped_column(Float, default=0.0)
+    summary: Mapped[str] = mapped_column(Text, default="")
+    messages: Mapped[list] = mapped_column(JSON, default=list)          # [{who,text,ts}]
+    agent = relationship(Agent)
+
+
+# ---------------------------------------------------- recording & egress ---
+
+class Recording(Base):
+    __tablename__ = "recordings"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: uid("rec"))
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    session_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    room_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    kind: Mapped[str] = mapped_column(String, default="audio")          # audio | video | transcript
+    status: Mapped[str] = mapped_column(String, default="pending")      # pending|recording|complete|failed
+    destination: Mapped[str] = mapped_column(String, default="local")   # local | s3 | gcs | azure
+    path: Mapped[str] = mapped_column(String, default="")
+    size_bytes: Mapped[int] = mapped_column(Integer, default=0)
+    duration_s: Mapped[int] = mapped_column(Integer, default=0)
+    error: Mapped[str] = mapped_column(Text, default="")
+    started_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now, index=True)
+    finished_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+# --------------------------------------------------------------- tools ---
+
+class Tool(Base):
+    """A function an agent can call: an HTTP webhook, a built-in, or an MCP tool."""
+    __tablename__ = "tools"
+    __table_args__ = (UniqueConstraint("tenant_id", "name", name="uq_tool_name"),)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: uid("tl"))
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    name: Mapped[str] = mapped_column(String)
+    kind: Mapped[str] = mapped_column(String, default="http")           # http | builtin | mcp
+    description: Mapped[str] = mapped_column(Text, default="")
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    method: Mapped[str] = mapped_column(String, default="POST")
+    url: Mapped[str] = mapped_column(String, default="")
+    headers: Mapped[dict] = mapped_column(JSON, default=dict)
+    parameters: Mapped[dict] = mapped_column(JSON, default=dict)        # JSON Schema
+    timeout_s: Mapped[int] = mapped_column(Integer, default=10)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now)
+    updated_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now, onupdate=now)
+
+
+# ------------------------------------------------- knowledge base / memory ---
+
+class KnowledgeBase(Base):
+    __tablename__ = "knowledge_bases"
+    __table_args__ = (UniqueConstraint("tenant_id", "name", name="uq_kb_name"),)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: uid("kb"))
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    name: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(Text, default="")
+    embedding_model: Mapped[str] = mapped_column(String, default="local-minilm")
+    chunk_size: Mapped[int] = mapped_column(Integer, default=800)
+    chunk_overlap: Mapped[int] = mapped_column(Integer, default=120)
+    doc_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now)
+
+class KbDocument(Base):
+    __tablename__ = "kb_documents"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: uid("doc"))
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    kb_id: Mapped[str] = mapped_column(ForeignKey("knowledge_bases.id"), index=True)
+    title: Mapped[str] = mapped_column(String)
+    source: Mapped[str] = mapped_column(String, default="upload")       # upload | url | text
+    uri: Mapped[str] = mapped_column(String, default="")
+    content: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String, default="pending")      # pending|indexed|failed
+    chunks: Mapped[int] = mapped_column(Integer, default=0)
+    bytes: Mapped[int] = mapped_column(Integer, default=0)
+    error: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now)
+
+
+# ------------------------------------------------------ reports & notes ---
+
+class Report(Base):
+    __tablename__ = "reports"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: uid("rpt"))
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    name: Mapped[str] = mapped_column(String)
+    kind: Mapped[str] = mapped_column(String, default="calls")          # calls|chats|spend|agents|quality
+    window: Mapped[str] = mapped_column(String, default="7d")
+    filters: Mapped[dict] = mapped_column(JSON, default=dict)
+    schedule: Mapped[str] = mapped_column(String, default="")           # "" | daily | weekly | monthly
+    recipients: Mapped[list] = mapped_column(JSON, default=list)
+    last_run_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now)
+
+class Note(Base):
+    """Operator runbooks and internal guides, kept beside the system they describe."""
+    __tablename__ = "notes"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: uid("nt"))
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    title: Mapped[str] = mapped_column(String)
+    category: Mapped[str] = mapped_column(String, default="guide")      # guide | runbook | note
+    body: Mapped[str] = mapped_column(Text, default="")
+    pinned: Mapped[bool] = mapped_column(Boolean, default=False)
+    updated_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now, onupdate=now)
+
+
+# ------------------------------------------------------------- settings ---
+
+class TenantSetting(Base):
+    """One row per settings group per tenant, value held as JSON.
+
+    A column per setting would mean a migration every time a checkbox is added,
+    and these groups (server, security, email, storage, finance, mcp) change
+    shape often. The API validates each group's shape on write, so the
+    looseness stops at the edge.
+    """
+    __tablename__ = "tenant_settings"
+    __table_args__ = (UniqueConstraint("tenant_id", "group", name="uq_setting_group"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), index=True,
+                                           default=DEFAULT_TENANT_ID)
+    group: Mapped[str] = mapped_column(String)
+    value: Mapped[dict] = mapped_column(JSON, default=dict)
+    updated_at: Mapped[dt.datetime] = mapped_column(DateTime, default=now, onupdate=now)
+    updated_by: Mapped[str] = mapped_column(String, default="")
+
+
 class Audit(Base):
     __tablename__ = "audit"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

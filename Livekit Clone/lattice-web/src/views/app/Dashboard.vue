@@ -96,10 +96,15 @@ function initGrid() {
       resizable: { handles: 'se, sw, e, s, w' },
       columnOpts: {
         breakpointForWindow: true,
+        // Gridstack rescales each widget's span proportionally and then packs
+        // whatever lands where it fits. With mixed widths (quarter tiles at
+        // w:3, half panels at w:6, a w:8 chart) any intermediate column count
+        // rounds some of them to a fraction and the rows come out staggered.
+        // Only 12 and 6 divide every width cleanly; below that, one column is
+        // the honest answer — a two-up grid of misaligned cards reads as a bug.
         breakpoints: [
-          { w: 700, c: 1 },
-          { w: 1000, c: 6 },
-          { w: 1400, c: 12 },
+          { w: 1000, c: 1 },
+          { w: 1400, c: 6 },
         ],
       },
     },

@@ -200,18 +200,18 @@ onMounted(load)
 .search {
   display: flex; align-items: center; gap: .5rem; flex: 1; min-width: 200px;
   padding: 0 .8rem; border-radius: 9px;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-muted, #9aa2b4);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: color-mix(in srgb, var(--txt) 3%, transparent); color: var(--mut);
 }
 .search input {
   flex: 1; padding: .55rem 0; border: 0; background: none;
-  color: var(--brand-text, #f2f4f8); font-family: inherit; font-size: .9rem;
+  color: var(--txt); font-family: inherit; font-size: .9rem;
 }
 .search input:focus { outline: none; }
 select {
   padding: .55rem .8rem; border-radius: 9px; font-size: .88rem; font-family: inherit;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-text, #f2f4f8);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: color-mix(in srgb, var(--txt) 3%, transparent); color: var(--txt);
 }
 button.primary {
   display: inline-flex; align-items: center; gap: .4rem;
@@ -222,7 +222,7 @@ button.primary {
 button.primary:disabled { opacity: .5; cursor: not-allowed; }
 
 .cell-name strong { display: block; font-weight: 600; font-size: .9rem; }
-.cell-name small { display: block; color: var(--brand-muted, #9aa2b4); font-size: .79rem; margin-top: 2px; }
+.cell-name small { display: block; color: var(--mut); font-size: .79rem; margin-top: 2px; }
 
 .pill {
   display: inline-block; padding: .2rem .55rem; border-radius: 999px;
@@ -230,15 +230,15 @@ button.primary:disabled { opacity: .5; cursor: not-allowed; }
 }
 .pill.online { background: rgba(52,211,153,.15); color: #34d399; }
 .pill.paused { background: rgba(251,191,36,.15); color: #fbbf24; }
-.pill.draft { background: rgba(255,255,255,.08); color: var(--brand-muted, #9aa2b4); }
+.pill.draft { background: color-mix(in srgb, var(--txt) 8%, transparent); color: var(--mut); }
 
 .acts { display: flex; gap: .3rem; justify-content: flex-end; }
 .ic {
   display: grid; place-items: center; width: 30px; height: 30px; border-radius: 7px;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-muted, #9aa2b4);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: color-mix(in srgb, var(--txt) 3%, transparent); color: var(--mut);
 }
-.ic:hover { background: rgba(255,255,255,.09); color: var(--brand-text, #f2f4f8); }
+.ic:hover { background: color-mix(in srgb, var(--txt) 9%, transparent); color: var(--txt); }
 .ic.danger:hover { color: var(--brand-danger, #f87171); border-color: rgba(248,113,113,.4); }
 
 .modal-scrim {
@@ -247,19 +247,19 @@ button.primary:disabled { opacity: .5; cursor: not-allowed; }
 }
 .modal {
   width: min(460px, 100%); padding: 1.6rem; border-radius: 16px;
-  background: #14161f; border: 1px solid var(--line-2, rgba(255,255,255,.16));
+  background: #14161f; border: 1px solid var(--line-2, color-mix(in srgb, var(--txt) 16%, transparent));
   box-shadow: 0 24px 60px rgba(0,0,0,.6);
 }
 .modal h2 { font-size: 1.05rem; font-weight: 650; margin-bottom: 1.2rem; }
 .modal label { display: block; margin-bottom: .9rem; }
 .modal label span {
   display: block; font-size: .8rem; font-weight: 600;
-  color: var(--brand-muted, #9aa2b4); margin-bottom: .35rem;
+  color: var(--mut); margin-bottom: .35rem;
 }
 .modal input, .modal textarea, .modal select {
   width: 100%; padding: .6rem .75rem; font-size: .9rem; font-family: inherit;
-  border-radius: 9px; border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04); color: var(--brand-text, #f2f4f8);
+  border-radius: 9px; border: 1px solid color-mix(in srgb, var(--txt) 14%, transparent);
+  background: color-mix(in srgb, var(--txt) 4%, transparent); color: var(--txt);
   resize: vertical;
 }
 .modal input:focus, .modal textarea:focus, .modal select:focus {
@@ -273,8 +273,8 @@ button.primary:disabled { opacity: .5; cursor: not-allowed; }
 .modal-acts { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.2rem; }
 .modal-acts button:not(.primary) {
   padding: .55rem 1rem; border-radius: 9px; font-size: .88rem; font-family: inherit;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: none; color: var(--brand-muted, #9aa2b4);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: none; color: var(--mut);
 }
 
 @media (max-width: 600px) {

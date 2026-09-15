@@ -82,13 +82,13 @@ async function submit() {
 <style scoped>
 .auth {
   min-height: 100vh; display: grid; place-items: center; padding: 2rem 1rem;
-  background: var(--brand-bg, #07080d); color: var(--brand-text, #f2f4f8);
+  background: var(--bg); color: var(--txt);
 }
 .panel {
   width: min(430px, 100%); padding: 2.2rem;
-  border: 1px solid rgba(255,255,255,.1);
+  border: 1px solid color-mix(in srgb, var(--txt) 10%, transparent);
   border-radius: var(--brand-radius-lg, 18px);
-  background: var(--brand-panel, #0f111a);
+  background: var(--panel-solid);
   box-shadow: 0 24px 64px rgba(0,0,0,.5);
 }
 .head { text-align: center; margin-bottom: 1.6rem; }
@@ -98,20 +98,20 @@ async function submit() {
   background: linear-gradient(135deg, var(--brand-primary, #6d5efc), var(--brand-accent, #22d3ee));
 }
 .head h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -.02em; }
-.head p { color: var(--brand-muted, #9aa2b4); font-size: .88rem; margin-top: .4rem; line-height: 1.5; }
+.head p { color: var(--mut); font-size: .88rem; margin-top: .4rem; line-height: 1.5; }
 
 label { display: block; margin-bottom: 1rem; }
 label span {
   display: block; font-size: .82rem; font-weight: 600;
-  color: var(--brand-muted, #9aa2b4); margin-bottom: .4rem;
+  color: var(--mut); margin-bottom: .4rem;
 }
-label small { display: block; font-size: .78rem; color: var(--brand-muted, #9aa2b4); margin-top: .35rem; }
+label small { display: block; font-size: .78rem; color: var(--mut); margin-top: .35rem; }
 label small.bad { color: var(--brand-warning, #fbbf24); }
 input {
   width: 100%; padding: .7rem .85rem; font-size: .93rem;
   border-radius: var(--brand-radius-sm, 9px);
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04); color: inherit; font-family: inherit;
+  border: 1px solid color-mix(in srgb, var(--txt) 14%, transparent);
+  background: color-mix(in srgb, var(--txt) 4%, transparent); color: inherit; font-family: inherit;
 }
 input:focus {
   outline: none; border-color: var(--brand-primary, #6d5efc);
@@ -129,7 +129,7 @@ input:focus {
   font-size: .95rem; font-weight: 650; font-family: inherit;
 }
 .submit:disabled { opacity: .55; cursor: not-allowed; }
-.note { margin-top: 1.1rem; font-size: .8rem; color: var(--brand-muted, #9aa2b4); text-align: center; }
+.note { margin-top: 1.1rem; font-size: .8rem; color: var(--mut); text-align: center; }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }

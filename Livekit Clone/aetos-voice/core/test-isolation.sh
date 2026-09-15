@@ -16,10 +16,30 @@ code() { curl -s -o /tmp/r.json -w '%{http_code}' "$@"; }
 echo "=== setup: second tenant with its own owner ==="
 cd "$SRC"
 PYTHONPATH=. $CORE/python3.12 - <<'PY'
-from aetos_core.db import Session, Tenant, User, Membership, BrandProfile, default_brand, ensure_tenancy
+from aetos_core.db import (Session, Tenant, User, Membership, BrandProfile,
+                           default_brand, ensure_tenancy, DEFAULT_TENANT_ID)
 from aetos_core.security import hash_password
 with Session() as s:
     ensure_tenancy(s)
+
+    # A fixture owner of its own on the default tenant. The suite used to log in
+    # as the real operator account, which meant rotating that password broke
+    # security tests, and promoting that account to platform owner silently
+    # inverted the "non-platform surfaces are refused" assertions. The fixture
+    # is deliberately NOT a platform member.
+    d = s.get(Tenant, DEFAULT_TENANT_ID)
+    du = s.query(User).filter(User.email=="owner@default-demo.com").first()
+    if not du:
+        du = User(email="owner@default-demo.com", name="Default Owner",
+                  password_hash=hash_password("DefaultOwnerPass2026!"))
+        s.add(du); s.flush()
+    else:
+        du.password_hash = hash_password("DefaultOwnerPass2026!")
+    if not s.query(Membership).filter_by(tenant_id=d.id, user_id=du.id).first():
+        s.add(Membership(tenant_id=d.id, user_id=du.id, role="owner"))
+    s.query(Membership).filter(Membership.user_id==du.id,
+                               Membership.tenant_id!=d.id).delete()
+
     t = s.query(Tenant).filter(Tenant.slug=="acme").first()
     if not t:
         t = Tenant(slug="acme", name="Acme Pty Ltd"); s.add(t); s.flush()
@@ -42,7 +62,7 @@ PY
 
 login() { curl -s -X POST "$B/auth/login" -H 'content-type: application/json' -d "$1"; }
 
-A=$(login '{"email":"raamaak@outlook.com","password":"LatticeNet-Ramsay-2026"}')
+A=$(login '{"email":"owner@default-demo.com","password":"DefaultOwnerPass2026!"}')
 TA=$($J -c "import json,sys;print(json.loads(sys.argv[1])['access'])" "$A")
 B2=$(login '{"email":"owner@acme-demo.com","password":"AcmeOwnerPass2026!"}')
 TB=$($J -c "import json,sys;print(json.loads(sys.argv[1])['access'])" "$B2")
@@ -60,11 +80,15 @@ echo
 echo "=== 2. each tenant sees only its own rows ==="
 NA=$(curl -s -H "Authorization: Bearer $TA" $B/agents | $J -c "import json,sys;print(len(json.load(sys.stdin)))")
 NB=$(curl -s -H "Authorization: Bearer $TB" $B/agents | $J -c "import json,sys;print(len(json.load(sys.stdin)))")
-chk "default tenant agent count"  3 "$NA"
+# The security property is "acme sees none of default's rows", not a fixed
+# count — pinning the number made the suite fail every time demo data changed,
+# which trains you to ignore it. So: default must be non-empty (otherwise the
+# cross-tenant checks below prove nothing) and acme must be exactly zero.
+chk "default tenant has agents"   yes "$([ "${NA:-0}" -gt 0 ] && echo yes || echo no)"
 chk "acme tenant agent count"     0 "$NB"
 SA=$(curl -s -H "Authorization: Bearer $TA" $B/sessions | $J -c "import json,sys;print(json.load(sys.stdin)['total'])")
 SB=$(curl -s -H "Authorization: Bearer $TB" $B/sessions | $J -c "import json,sys;print(json.load(sys.stdin)['total'])")
-chk "default tenant session count" 48 "$SA"
+chk "default tenant has sessions" yes "$([ "${SA:-0}" -gt 0 ] && echo yes || echo no)"
 chk "acme tenant session count"    0  "$SB"
 
 echo

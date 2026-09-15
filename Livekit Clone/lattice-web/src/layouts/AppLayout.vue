@@ -4,7 +4,10 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   LayoutDashboard, Bot, PhoneCall, Boxes, Radio, Settings, LogOut, Menu, X,
   ChevronDown, ShieldAlert, Sun, Moon, MonitorSmartphone, Users, KeyRound,
-  Palette, FileBadge, Activity, ListTree, Search, CornerDownLeft, Workflow,
+  Palette, FileBadge, Activity, ListTree, Search, CornerDownLeft,
+  ChartColumn, DoorOpen, MessagesSquare, Disc, Wrench, BookOpen, Route, Hash,
+  Megaphone, FlaskConical, Play, Sparkles, Building, ShieldCheck, Mail,
+  HardDrive, Wallet, Plug, Server, StickyNote, Gauge,
 } from '@lucide/vue'
 import { useAuth, type Role } from '../stores/auth'
 import { useBranding } from '../stores/branding'
@@ -32,37 +35,95 @@ interface NavItem {
   label: string
   icon: any
   min: Role
+  platformOnly?: boolean
   children?: NavChild[]
 }
 
+/* The whole console, in five groups. Everything reachable is declared here and
+   nowhere else: the dropdowns, the mobile drawer and the ⌘K palette are all
+   rendered from this array, so adding a screen means adding one line. */
 const NAV: NavItem[] = [
-  { key: 'dash', to: '/app', label: 'Dashboard', icon: markRaw(LayoutDashboard), min: 'viewer' },
+  { key: 'analytics', to: '/app', label: 'Analytics', icon: markRaw(ChartColumn), min: 'viewer' },
+
+  {
+    key: 'core', label: 'Workspace', icon: markRaw(LayoutDashboard), min: 'viewer',
+    children: [
+      { to: '/app/reports', label: 'Reports', icon: markRaw(FileBadge), min: 'viewer', hint: 'Saved and scheduled reporting' },
+      { to: '/app/rooms', label: 'Rooms', icon: markRaw(DoorOpen), min: 'viewer', hint: 'Live media rooms and participants' },
+      { to: '/app/sessions', label: 'Call history', icon: markRaw(PhoneCall), min: 'viewer', hint: 'Transcripts and latency legs' },
+      { to: '/app/chats', label: 'Chat history', icon: markRaw(MessagesSquare), min: 'viewer', hint: 'Chatbot conversations' },
+      { to: '/app/recordings', label: 'Recording / egress', icon: markRaw(Disc), min: 'viewer', hint: 'Captures and where they land' },
+    ],
+  },
+
   {
     key: 'agents', label: 'Agents', icon: markRaw(Bot), min: 'viewer',
     children: [
-      { to: '/app/agents', label: 'All agents', icon: markRaw(ListTree), min: 'viewer', hint: 'Create, publish and pause' },
-      { to: '/app/sessions', label: 'Sessions', icon: markRaw(PhoneCall), min: 'viewer', hint: 'Call history and transcripts' },
+      { to: '/app/agents', label: 'Voice agents', icon: markRaw(ListTree), min: 'viewer', hint: 'Create, publish and pause' },
+      { to: '/app/chatbots', label: 'Chatbot agents', icon: markRaw(MessagesSquare), min: 'viewer', hint: 'Web, SMS and WhatsApp' },
+      { to: '/app/tools', label: 'Tools', icon: markRaw(Wrench), min: 'viewer', hint: 'Webhooks and functions agents can call' },
+      { to: '/app/knowledge', label: 'Knowledge base', icon: markRaw(BookOpen), min: 'viewer', hint: 'Documents and memory' },
     ],
   },
-  { key: 'tel', to: '/app/telephony', label: 'Telephony', icon: markRaw(Radio), min: 'viewer' },
-  { key: 'comp', to: '/app/components', label: 'Components', icon: markRaw(Boxes), min: 'viewer' },
+
+  {
+    key: 'tel', label: 'Telephony', icon: markRaw(Radio), min: 'viewer',
+    children: [
+      { to: '/app/telephony/trunks', label: 'SIP trunks', icon: markRaw(Radio), min: 'viewer', hint: 'Carriers and registration' },
+      { to: '/app/telephony/rules', label: 'Dispatch rules', icon: markRaw(Route), min: 'viewer', hint: 'Which number reaches which agent' },
+      { to: '/app/telephony/numbers', label: 'Phone numbers', icon: markRaw(Hash), min: 'viewer', hint: 'Inventory and routing' },
+      { to: '/app/telephony/campaigns', label: 'Campaigns', icon: markRaw(Megaphone), min: 'operator', hint: 'Outbound calling' },
+    ],
+  },
+
+  {
+    key: 'testing', label: 'Testing', icon: markRaw(FlaskConical), min: 'operator',
+    children: [
+      { to: '/app/testing/tester', label: 'Agent tester', icon: markRaw(Play), min: 'operator', hint: 'Talk to an agent right now' },
+      { to: '/app/testing/simulation', label: 'Simulation', icon: markRaw(Gauge), min: 'operator', hint: 'Replay calls at volume' },
+      { to: '/app/testing/autoresearch', label: 'AutoResearch', icon: markRaw(Search), min: 'operator', hint: 'Mine transcripts for patterns' },
+      { to: '/app/testing/improvement-lab', label: 'Improvement lab', icon: markRaw(Sparkles), min: 'operator', hint: 'Compare prompt and model changes' },
+    ],
+  },
+
+  {
+    // Components and tenants are install-wide, and the API refuses them from a
+    // normal tenant. Showing the group anyway would just be a menu that 403s.
+    key: 'platform', label: 'Platform', icon: markRaw(Building), min: 'admin',
+    platformOnly: true,
+    children: [
+      { to: '/app/components', label: 'Components', icon: markRaw(Boxes), min: 'admin', hint: 'Providers and supervisor' },
+      { to: '/app/tenants', label: 'Tenants', icon: markRaw(Building), min: 'owner', hint: 'Every tenant on this install' },
+    ],
+  },
+
   {
     key: 'settings', label: 'Settings', icon: markRaw(Settings), min: 'admin',
     children: [
-      { to: '/app/settings/users', label: 'Users & roles', icon: markRaw(Users), min: 'admin', hint: 'Invite people, set roles' },
-      { to: '/app/settings/keys', label: 'API keys', icon: markRaw(KeyRound), min: 'owner', hint: 'Machine access' },
-      { to: '/app/settings/branding', label: 'Branding', icon: markRaw(Palette), min: 'admin', hint: 'Logo, colours, white-label' },
-      { to: '/app/settings/licence', label: 'Licence', icon: markRaw(FileBadge), min: 'admin', hint: 'Entitlements and expiry' },
+      { to: '/app/settings/server', label: 'Server', icon: markRaw(Server), min: 'admin', hint: 'URLs, limits, maintenance' },
+      { to: '/app/settings/integrations', label: 'Integrations / API', icon: markRaw(Plug), min: 'admin', hint: 'Provider keys, REST, MCP' },
+      { to: '/app/settings/dependencies', label: 'Dependencies', icon: markRaw(Boxes), min: 'admin', hint: 'What this install runs on' },
+      { to: '/app/settings/users', label: 'User management', icon: markRaw(Users), min: 'admin', hint: 'Invite people, set roles' },
+      { to: '/app/settings/security', label: 'Security', icon: markRaw(ShieldCheck), min: 'owner', hint: 'Policy, allowlist, events' },
       { to: '/app/settings/system', label: 'System', icon: markRaw(Activity), min: 'admin', hint: 'Version and audit log' },
+      { to: '/app/settings/finance', label: 'Finance', icon: markRaw(Wallet), min: 'owner', hint: 'Rates, budget, billing' },
+      { to: '/app/settings/email', label: 'Email', icon: markRaw(Mail), min: 'admin', hint: 'Outbound mail' },
+      { to: '/app/settings/storage', label: 'Storage', icon: markRaw(HardDrive), min: 'admin', hint: 'Where recordings live' },
+      { to: '/app/settings/notes', label: 'Notes / guides', icon: markRaw(StickyNote), min: 'viewer', hint: 'Runbooks for your team' },
+      { to: '/app/settings/branding', label: 'Branding', icon: markRaw(Palette), min: 'admin', hint: 'Logo, colours, white-label' },
+      { to: '/app/settings/keys', label: 'API keys', icon: markRaw(KeyRound), min: 'owner', hint: 'Machine access' },
+      { to: '/app/settings/licence', label: 'Licensing', icon: markRaw(FileBadge), min: 'admin', hint: 'Entitlements and expiry' },
     ],
   },
 ]
 
 const nav = computed(() =>
-  NAV.filter((i) => auth.can(i.min)).map((i) => ({
-    ...i,
-    children: i.children?.filter((c) => auth.can(c.min)),
-  })))
+  NAV
+    .filter((i) => auth.can(i.min) && (!i.platformOnly || auth.isPlatform))
+    .map((i) => ({ ...i, children: i.children?.filter((c) => auth.can(c.min)) }))
+    // A group whose every child was filtered out would render as a button that
+    // opens an empty panel.
+    .filter((i) => i.to || (i.children?.length ?? 0) > 0))
 
 /* --------------------------------------------------------------- search --- */
 /* The palette is built FROM the menu, so a new nav entry is searchable with
@@ -224,21 +285,26 @@ onBeforeUnmount(() => {
         <!-- horizontal menu -->
         <nav class="menu">
           <template v-for="i in nav" :key="i.key">
+            <!-- title= is not decoration: below 1024px the label span is hidden
+                 and this becomes the only thing naming the icon. -->
             <router-link v-if="!i.children" :to="i.to!" class="menu-item"
-                         :class="{ active: isActive(i.to) }">
+                         :class="{ active: isActive(i.to) }"
+                         :title="i.label" :aria-label="i.label">
               <component :is="i.icon" :size="16" :stroke-width="2.1" />
               <span>{{ i.label }}</span>
             </router-link>
 
             <div v-else class="menu-item wrap" :class="{ active: groupActive(i) }">
-              <button @click.stop="toggleMenu(i.key)" :aria-expanded="openMenu === i.key">
+              <button @click.stop="toggleMenu(i.key)" :aria-expanded="openMenu === i.key"
+                      :title="i.label" :aria-label="i.label">
                 <component :is="i.icon" :size="16" :stroke-width="2.1" />
                 <span>{{ i.label }}</span>
                 <ChevronDown :size="13" class="chev" :class="{ flip: openMenu === i.key }" />
               </button>
 
               <transition name="drop">
-                <div v-if="openMenu === i.key" class="dropdown surface">
+                <div v-if="openMenu === i.key" class="dropdown surface"
+                     :class="{ wide: (i.children?.length ?? 0) > 7 }">
                   <router-link v-for="c in i.children" :key="c.to" :to="c.to"
                                :class="{ on: isActive(c.to) }">
                     <span class="di"><component :is="c.icon" :size="15" /></span>
@@ -431,11 +497,27 @@ onBeforeUnmount(() => {
 .chev { opacity: .65; transition: transform var(--fast) var(--ease); }
 .chev.flip { transform: rotate(180deg); }
 
+/* Anything that floats OVER page content gets a solid background, not glass.
+   Glass is for chrome pinned above a backdrop we control; a translucent menu
+   sitting on top of a chart is just unreadable. */
+.dropdown, .palette, .drawer {
+  background: var(--panel-solid);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
 .dropdown {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 60;
   min-width: 248px; padding: .35rem; box-shadow: var(--sh-3);
+  /* Settings carries thirteen entries. One column of thirteen runs off the
+     bottom of a laptop screen, so a long panel goes two-up and, failing that,
+     scrolls — it never simply overflows. */
+  max-height: min(70vh, 560px); overflow-y: auto; overscroll-behavior: contain;
+}
+.dropdown.wide {
+  display: grid; grid-template-columns: repeat(2, minmax(210px, 1fr)); gap: 0 .2rem;
 }
 .dropdown.right { left: auto; right: 0; }
+/* A group near the right-hand end would otherwise open off screen. */
+.menu-item:nth-last-child(-n+2) .dropdown { left: auto; right: 0; }
 .dropdown a, .dropdown .plain {
   display: flex; align-items: flex-start; gap: .6rem; width: 100%;
   padding: .55rem .6rem; border-radius: var(--r-sm); border: 0; background: none;
@@ -587,21 +669,65 @@ kbd {
 }
 .drop-enter-from, .drop-leave-to { opacity: 0; transform: translateY(-6px) scale(.98); }
 
-@media (max-width: 1080px) {
-  .search { min-width: 0; }
-  .search .sl, .search kbd { display: none; }
+/* ---------------- responsive ladder ----------------
+   The bar degrades in four steps rather than one. Each step gives up the
+   least useful thing at that width, so the menu never wraps, never overflows,
+   and the command palette stays one tap away at every size — it is the
+   fallback that makes dropping labels safe.
+
+     >= 1200   full: labelled menu, search field with the shortcut hint
+     1024-1199 laptop: labels stay, everything tightens, the hint goes
+     860-1023  tablet: menu goes icon-only (labels become tooltips)
+     < 860     phone: menu collapses into the drawer, search becomes an icon
+--------------------------------------------------------------------------- */
+
+/* laptop — keep every label, buy the room back from padding */
+@media (max-width: 1199px) {
+  .bar-inner { gap: .45rem; padding: 0 .9rem; }
+  .menu { margin-left: .5rem; }
+  .menu-item > a, .menu-item > button, a.menu-item {
+    padding: .5rem .55rem; font-size: .845rem; gap: .34rem;
+  }
+  .search { min-width: 150px; }
+  .search kbd { display: none; }
 }
-@media (max-width: 900px) {
+
+/* tablet — icons only. The title attribute carries the label. */
+@media (max-width: 1023px) {
+  .menu { gap: .05rem; }
+  .menu-item > a > span, .menu-item > button > span, a.menu-item > span { display: none; }
+  .menu-item > a, .menu-item > button, a.menu-item { padding: .52rem .6rem; }
+  .menu-item .chev { display: none; }
+  .search { min-width: 0; }
+  .search .sl { display: none; }
+  /* A dropdown under a right-hand group would run off screen at this width. */
+  .dropdown { max-width: calc(100vw - 1.6rem); }
+}
+
+/* phone — the drawer takes over; the bar keeps only what you tap */
+@media (max-width: 859px) {
   .menu { display: none; }
   .only-mobile { display: grid; }
-  .bname { display: none; }
-  .menu { flex: 0; }
   .search { margin-left: auto; }
 }
 @media (max-width: 560px) {
-  .bar-inner { padding: 0 .8rem; gap: .4rem; }
+  .bar-inner { padding: 0 .75rem; gap: .35rem; height: 54px; }
+  .bname { display: none; }
   .content { padding: 1rem .9rem 2.5rem; }
   .page-head { padding: 1.1rem .9rem .2rem; }
-  .lic { margin: .8rem .9rem 0; }
+  .page-head h1 { font-size: 1.16rem; }
+  .lic { margin: .8rem .9rem 0; font-size: .8rem; }
+  .pscrim { padding: 6vh .7rem .7rem; }
+  .palette { max-height: 76vh; }
+  .drawer { width: min(86vw, 300px); }
+}
+
+/* Touch pointers get no hover, so a tooltip-only label is a dead end —
+   give the icon-only tier back its text on touch devices by widening the
+   drawer's reach instead of relying on the bar. */
+@media (hover: none) and (max-width: 1023px) {
+  .menu { display: none; }
+  .only-mobile { display: grid; }
+  .search { margin-left: auto; }
 }
 </style>

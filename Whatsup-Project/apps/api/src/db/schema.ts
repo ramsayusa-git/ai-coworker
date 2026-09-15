@@ -74,6 +74,8 @@ export const orgs = pgTable("orgs", {
   planRenewsAt: timestamp("plan_renews_at"),
   // Billing country decides which conversationRates row applies to this org's sends
   billingCountryCode: text("billing_country_code").notNull().default("IN"),
+  // Which edition this org runs under — hosted | self_hosted | dedicated
+  deployment: text("deployment").notNull().default("hosted"),
   walletPaise: integer("wallet_paise").default(0),
   timezone: text("timezone").default("Asia/Kolkata"),
   locale: text("locale").default("en"),
@@ -546,6 +548,13 @@ export const plans = pgTable("plans", {
   // Feature flags gating whole modules (webhooks, api access, flows, drip, ...)
   features: jsonb("features").$type<Record<string, boolean>>().default({}),
   highlights: text("highlights").array().default([]),
+  // hosted (our SaaS) | self_hosted (customer's servers) | dedicated (single-tenant cloud)
+  deployment: text("deployment").notNull().default("hosted"),
+  // direct (self-serve SMB) | reseller (agencies selling on) | enterprise
+  audience: text("audience").notNull().default("direct"),
+  // Enterprise tiers are quoted, not listed — the price columns stay 0 and the UI
+  // shows "Custom" instead of a made-up number.
+  customPricing: boolean("custom_pricing").notNull().default(false),
   position: integer("position").notNull().default(0),
   active: boolean("active").default(true),
 });
@@ -648,3 +657,55 @@ export const dashboardLayouts = pgTable("dashboard_layouts", {
   widgets: jsonb("widgets").$type<Array<{ id: string; type: string; w: number; h: number }>>().default([]),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [unique().on(t.orgId, t.userId)]);
+
+// ---------------------------------------------------------------------------
+// Deployment editions. The same product is sold three ways — hosted (our SaaS),
+// self-hosted (the customer's own servers) and dedicated cloud (a single-tenant
+// instance we run) — each to two audiences, resellers and enterprises, and all
+// of them fully white-labelled. Deployment lives on the plan rather than being a
+// separate product so entitlements, billing and the partner console all keep
+// working unchanged.
+// ---------------------------------------------------------------------------
+
+// A licence is what makes self-hosted and dedicated deployments possible: the key
+// is signed, carries its own entitlements, and can be validated by an instance
+// that has never talked to us before. Resellers issue them to their clients;
+// enterprises get them issued directly.
+export const licenses = pgTable("licenses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  // The signed key string handed to the customer (LQ-<payload>-<sig>).
+  key: text("key").notNull(),
+  keyHash: text("key_hash").notNull(),
+  planId: text("plan_id").notNull(),
+  deployment: text("deployment").notNull().default("self_hosted"), // self_hosted | dedicated
+  // Who it was issued BY (a partner/reseller, or null for platform-issued)…
+  partnerId: uuid("partner_id").references(() => partners.id, { onDelete: "set null" }),
+  // …and who it was issued TO. orgId is set when the customer also has an org here.
+  orgId: uuid("org_id").references(() => orgs.id, { onDelete: "set null" }),
+  issuedToName: text("issued_to_name").notNull(),
+  issuedToEmail: text("issued_to_email"),
+  // Entitlement caps baked into the key. -1 = unlimited.
+  seats: integer("seats").notNull().default(-1),
+  channels: integer("channels").notNull().default(-1),
+  maxInstances: integer("max_instances").notNull().default(1),
+  whiteLabel: boolean("white_label").notNull().default(true),
+  validFrom: timestamp("valid_from").defaultNow().notNull(),
+  validUntil: timestamp("valid_until"),
+  status: text("status").notNull().default("active"), // active | suspended | revoked | expired
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique().on(t.keyHash)]);
+
+// One running instance that has activated against a licence. This is how seat and
+// instance limits are actually enforced for software we don't host.
+export const licenseActivations = pgTable("license_activations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  licenseId: uuid("license_id").notNull().references(() => licenses.id, { onDelete: "cascade" }),
+  instanceId: text("instance_id").notNull(),
+  hostname: text("hostname"),
+  version: text("version"),
+  ipAddress: text("ip_address"),
+  firstSeenAt: timestamp("first_seen_at").defaultNow().notNull(),
+  lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
+  revokedAt: timestamp("revoked_at"),
+}, (t) => [unique().on(t.licenseId, t.instanceId)]);

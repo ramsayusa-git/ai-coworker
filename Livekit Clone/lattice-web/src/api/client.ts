@@ -6,7 +6,18 @@
  * "[object Object]".
  */
 
-export const API_BASE = (import.meta as any).env?.VITE_API_BASE || 'http://localhost:8100/api/v1'
+/**
+ * Same-origin by default, proxied to the core by the dev server (vite.config.ts)
+ * and by the reverse proxy in production.
+ *
+ * It used to point straight at http://localhost:8100. That works on exactly one
+ * machine and fails everywhere else: over https://latticenet.aetosiot.com it is
+ * mixed content, in embedded browsers the cross-origin call comes back
+ * ERR_BLOCKED_BY_CLIENT, and the login screen can only report "could not reach
+ * the server". Same-origin has none of those failure modes. Set VITE_API_BASE
+ * only when the console is deliberately hosted apart from its core.
+ */
+export const API_BASE = (import.meta as any).env?.VITE_API_BASE || '/api/v1'
 
 export class ApiError extends Error {
   status: number

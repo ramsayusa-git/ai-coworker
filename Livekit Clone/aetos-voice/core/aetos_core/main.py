@@ -7,6 +7,7 @@ from .auth import router as auth_router
 from .admin import router as admin_router
 from .versions import router as versions_router
 from .assets import router as assets_router
+from .sections import router as sections_router
 from .db import init_db
 from . import VERSION, CONTRACTS
 from .settings import FRONTEND
@@ -21,6 +22,9 @@ v1.include_router(assets_router)
 # Mounted first, deliberately: api.py's POST /agents/{aid}/{action} is a
 # wildcard that would otherwise capture /agents/{aid}/versions.
 app.include_router(versions_router)
+# Same reason: sections.py owns literal prefixes (/rooms, /tools, /settings/…)
+# that must be matched before any wildcard route in api.py gets a chance.
+app.include_router(sections_router)
 app.include_router(v1)
 
 @app.get("/healthz")

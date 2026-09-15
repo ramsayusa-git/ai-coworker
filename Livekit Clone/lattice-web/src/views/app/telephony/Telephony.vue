@@ -236,8 +236,8 @@ onMounted(async () => {
 .tabs { display: flex; gap: .4rem; margin-bottom: 1.1rem; flex-wrap: wrap; align-items: center; }
 .tabs button {
   padding: .5rem .9rem; border-radius: 9px; font-size: .88rem; font-family: inherit;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-muted, #9aa2b4);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: color-mix(in srgb, var(--txt) 3%, transparent); color: var(--mut);
 }
 .tabs button.on { background: rgba(109,94,252,.18); color: #fff; border-color: rgba(109,94,252,.45); }
 .tabs button small { opacity: .6; margin-left: .25rem; }
@@ -249,28 +249,28 @@ onMounted(async () => {
 .pill {
   display: inline-block; padding: .2rem .55rem; border-radius: 999px;
   font-size: .74rem; font-weight: 650; text-transform: capitalize;
-  background: rgba(255,255,255,.08); color: var(--brand-muted, #9aa2b4);
+  background: color-mix(in srgb, var(--txt) 8%, transparent); color: var(--mut);
 }
 .pill.registered { background: rgba(52,211,153,.15); color: #34d399; }
 .pill.unregistered { background: rgba(251,191,36,.15); color: #fbbf24; }
 
 .dispatch {
   margin-top: 1.4rem; padding: 1.3rem; border-radius: 12px;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: var(--brand-panel, #0f111a);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: var(--panel-solid);
 }
 .dispatch h3 { font-size: .95rem; font-weight: 650; margin-bottom: .3rem; }
-.dispatch > p { font-size: .85rem; color: var(--brand-muted, #9aa2b4); margin-bottom: .9rem; }
+.dispatch > p { font-size: .85rem; color: var(--mut); margin-bottom: .9rem; }
 .dispatch-row { display: flex; gap: .6rem; flex-wrap: wrap; }
 .search {
   display: flex; align-items: center; gap: .5rem; flex: 1; min-width: 200px;
   padding: 0 .8rem; border-radius: 9px;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-muted, #9aa2b4);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: color-mix(in srgb, var(--txt) 3%, transparent); color: var(--mut);
 }
 .search input {
   flex: 1; padding: .55rem 0; border: 0; background: none; font-family: inherit;
-  color: var(--brand-text, #f2f4f8); font-size: .9rem;
+  color: var(--txt); font-size: .9rem;
 }
 .search input:focus { outline: none; }
 .dispatch-row button {
@@ -291,19 +291,19 @@ onMounted(async () => {
 }
 .modal {
   width: min(460px, 100%); padding: 1.6rem; border-radius: 16px;
-  background: #14161f; border: 1px solid var(--line-2, rgba(255,255,255,.16));
+  background: #14161f; border: 1px solid var(--line-2, color-mix(in srgb, var(--txt) 16%, transparent));
 }
 .modal h2 { font-size: 1.05rem; font-weight: 650; margin-bottom: 1.1rem; }
 .modal label { display: block; margin-bottom: .85rem; }
 .modal label span {
   display: block; font-size: .8rem; font-weight: 600;
-  color: var(--brand-muted, #9aa2b4); margin-bottom: .35rem;
+  color: var(--mut); margin-bottom: .35rem;
 }
-.modal label small { display: block; font-size: .76rem; color: var(--brand-muted, #9aa2b4); margin-top: .3rem; }
+.modal label small { display: block; font-size: .76rem; color: var(--mut); margin-top: .3rem; }
 .modal input, .modal select {
   width: 100%; padding: .6rem .75rem; font-size: .9rem; font-family: inherit;
-  border-radius: 9px; border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04); color: var(--brand-text, #f2f4f8);
+  border-radius: 9px; border: 1px solid color-mix(in srgb, var(--txt) 14%, transparent);
+  background: color-mix(in srgb, var(--txt) 4%, transparent); color: var(--txt);
 }
 .modal input:focus, .modal select:focus { outline: none; border-color: var(--brand-primary, #6d5efc); }
 .err {
@@ -313,8 +313,8 @@ onMounted(async () => {
 .modal-acts { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.1rem; }
 .modal-acts button {
   padding: .55rem 1rem; border-radius: 9px; font-size: .88rem; font-family: inherit;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: none; color: var(--brand-muted, #9aa2b4);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: none; color: var(--mut);
 }
 .modal-acts button.primary { background: var(--brand-primary, #6d5efc); color: #fff; border: 0; font-weight: 600; }
 

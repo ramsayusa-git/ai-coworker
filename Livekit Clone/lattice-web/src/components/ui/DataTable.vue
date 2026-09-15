@@ -108,14 +108,14 @@ tbody td {
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr.clickable { cursor: pointer; transition: background .15s; }
 tbody tr.clickable:hover, tbody tr.clickable:focus-visible {
-  background: rgba(255,255,255,.04); outline: none;
+  background: color-mix(in srgb, var(--txt) 4%, transparent); outline: none;
 }
 tbody tr.clickable:focus-visible { box-shadow: inset 0 0 0 2px var(--brand-primary, #6d5efc); }
 td.mono { font-family: var(--brand-mono, ui-monospace), monospace; font-size: .84rem; }
 
 .sk {
   display: block; height: 12px; border-radius: 6px;
-  background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.11), rgba(255,255,255,.05));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--txt) 5%, transparent), color-mix(in srgb, var(--txt) 11%, transparent), color-mix(in srgb, var(--txt) 5%, transparent));
   background-size: 200% 100%;
   animation: shimmer 1.3s linear infinite;
 }

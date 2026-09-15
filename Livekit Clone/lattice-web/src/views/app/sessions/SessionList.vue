@@ -121,15 +121,15 @@ onMounted(async () => {
 .toolbar { display: flex; gap: .7rem; margin-bottom: 1.1rem; align-items: center; flex-wrap: wrap; }
 select {
   padding: .55rem .8rem; border-radius: 9px; font-size: .88rem; font-family: inherit;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-text, #f2f4f8);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: color-mix(in srgb, var(--txt) 3%, transparent); color: var(--txt);
 }
-.count { margin-left: auto; font-size: .85rem; color: var(--brand-muted, #9aa2b4); }
+.count { margin-left: auto; font-size: .85rem; color: var(--mut); }
 
 .pill {
   display: inline-block; padding: .2rem .55rem; border-radius: 999px;
   font-size: .74rem; font-weight: 650; text-transform: capitalize;
-  background: rgba(255,255,255,.08); color: var(--brand-muted, #9aa2b4);
+  background: color-mix(in srgb, var(--txt) 8%, transparent); color: var(--mut);
 }
 .pill.completed { background: rgba(52,211,153,.15); color: #34d399; }
 .pill.transferred { background: rgba(34,211,238,.15); color: #22d3ee; }
@@ -138,13 +138,13 @@ select {
 
 .pager {
   display: flex; align-items: center; justify-content: center; gap: 1rem;
-  margin-top: 1.1rem; font-size: .85rem; color: var(--brand-muted, #9aa2b4);
+  margin-top: 1.1rem; font-size: .85rem; color: var(--mut);
 }
 .pager button {
   display: inline-flex; align-items: center; gap: .3rem;
   padding: .45rem .85rem; border-radius: 8px; font-size: .85rem; font-family: inherit;
-  border: 1px solid var(--line, rgba(255,255,255,.09));
-  background: rgba(255,255,255,.03); color: var(--brand-text, #f2f4f8);
+  border: 1px solid var(--line, color-mix(in srgb, var(--txt) 9%, transparent));
+  background: color-mix(in srgb, var(--txt) 3%, transparent); color: var(--txt);
 }
 .pager button:disabled { opacity: .4; cursor: not-allowed; }
 

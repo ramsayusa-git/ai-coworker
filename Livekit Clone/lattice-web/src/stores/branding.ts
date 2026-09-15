@@ -35,10 +35,12 @@ export const useBranding = defineStore('branding', () => {
     const vars = [
       `--brand-primary:${c.primary}`,
       `--brand-accent:${c.accent}`,
-      `--brand-bg:${c.bg}`,
-      `--brand-panel:${c.panel}`,
-      `--brand-text:${c.text}`,
-      `--brand-muted:${c.muted}`,
+      // Deliberately NOT emitted: bg, panel, text and muted. A brand profile
+      // carries one fixed value for each, so publishing them as globals pins
+      // the whole console to whichever theme those values were picked for —
+      // a dark-mode text colour turns light mode into white on white. Surfaces
+      // and text belong to the light/dark tokens in tokens.css; a tenant brands
+      // the accent colours, logo, radii and fonts, which work in both.
       `--brand-success:${c.success}`,
       `--brand-warning:${c.warning}`,
       `--brand-danger:${c.danger}`,
