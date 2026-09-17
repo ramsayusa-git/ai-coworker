@@ -22,6 +22,7 @@ import { companiesRoutes } from "./modules/companies.js";
 import { tasksRoutes } from "./modules/tasks.js";
 import { flowsRoutes } from "./modules/flows.js";
 import { dashboardRoutes } from "./modules/dashboard.js";
+import { licenseActivationRoutes, partnerLicenseRoutes } from "./modules/licenses.js";
 import { billingRoutes, billingCatalogRoutes } from "./modules/billing.js";
 import { developerRoutes } from "./modules/developer.js";
 import { publicApiRoutes } from "./modules/public-api.js";
@@ -43,6 +44,8 @@ app.get("/health", async () => ({ ok: true, ts: new Date().toISOString() }));
 // Unauthenticated — hit by our own frontend (auth) or by Meta/Whapi's servers directly (webhooks)
 await app.register(authRoutes, { prefix: "/v1" });
 await app.register(webhookRoutes, { prefix: "/v1" });
+// Self-hosted / dedicated instances activate here — no session, only a licence key.
+await app.register(licenseActivationRoutes, { prefix: "/v1" });
 // Authenticated but no :orgId in the URL
 await app.register(meRoutes, { prefix: "/v1" });
 // Plan/rate catalogue — authenticated but not org-scoped (pricing page + plan picker)
@@ -52,6 +55,10 @@ await app.register(publicApiRoutes, { prefix: "/api/v1" });
 // Partner (multi-vendor/reseller) console — scoped by :partnerId, not :orgId; each handler
 // authenticates and checks partner_members itself, since a partner isn't an org.
 await app.register(partnersRoutes, { prefix: "/v1" });
+await app.register(async (scoped) => {
+  scoped.addHook("preHandler", async (req, reply) => { await app.authenticate(req, reply); });
+  await scoped.register(partnerLicenseRoutes);
+}, { prefix: "/v1" });
 
 // Everything under /v1/orgs/:orgId/* requires a valid token whose orgId matches the URL.
 await app.register(async (scoped) => {

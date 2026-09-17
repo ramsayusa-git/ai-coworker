@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { partnerFetch } from "@/lib/api";
+import { LicensesPanel } from "./licenses-panel";
 
 type PartnerRef = { id: string; name: string; slug: string; role: string };
 type Partner = {
@@ -251,7 +252,7 @@ function ClientConversationsModal({ partnerId, org, onClose }: { partnerId: stri
 }
 
 function Console({ partnerRef }: { partnerRef: PartnerRef }) {
-  const [tab, setTab] = useState<"Clients" | "Branding" | "Team">("Clients");
+  const [tab, setTab] = useState<"Clients" | "Licences" | "Branding" | "Team">("Clients");
   const [partner, setPartner] = useState<Partner | null>(null);
   const [clientOrgs, setClientOrgs] = useState<ClientOrg[]>([]);
   const [members, setMembers] = useState<PartnerMember[]>([]);
@@ -348,7 +349,7 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
         </div>
       </div>
       <div className="mb-4 flex gap-1 border-b border-zinc-200">
-        {(["Clients", "Branding", "Team"] as const).map((t) => (
+        {(["Clients", "Licences", "Branding", "Team"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`-mb-px border-b-2 px-3 py-2 text-sm ${tab === t ? "border-emerald-600 font-medium text-emerald-700" : "border-transparent text-zinc-500 hover:text-zinc-700"}`}>
             {t}
@@ -401,6 +402,8 @@ function Console({ partnerRef }: { partnerRef: PartnerRef }) {
           </div>
         </div>
       )}
+
+      {tab === "Licences" && partner && <LicensesPanel partnerId={partner.id} />}
 
       {tab === "Branding" && (
         <div className="max-w-md space-y-4 rounded-lg border border-zinc-200 bg-white p-4">

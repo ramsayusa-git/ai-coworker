@@ -8,6 +8,15 @@ import type { ConversationRate, Plan } from "@/lib/types";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 type Cycle = "monthly" | "quarterly" | "annual";
+type Deployment = "hosted" | "self_hosted" | "dedicated";
+
+// The same product, sold three ways. Every one of them is fully white-labelled —
+// that is the point of the row, not an upsell hidden in the enterprise column.
+const DEPLOYMENTS: Array<{ id: Deployment; label: string; blurb: string }> = [
+  { id: "hosted", label: "Hosted", blurb: "We run it. You sign in and go — nothing to provision." },
+  { id: "self_hosted", label: "Self-hosted", blurb: "Runs on your own servers. No conversation data leaves them." },
+  { id: "dedicated", label: "Private cloud", blurb: "A single-tenant instance we deploy and operate for you." },
+];
 const CYCLES: Array<[Cycle, string, string]> = [
   ["monthly", "Billed monthly", ""],
   ["quarterly", "Billed quarterly", "save ~17%"],
@@ -67,6 +76,7 @@ export function PricingPageContent() {
   const [plans, setPlans] = useState<Plan[]>(FALLBACK_PLANS);
   const [rates, setRates] = useState<ConversationRate[]>([]);
   const [cycle, setCycle] = useState<Cycle>("monthly");
+  const [deployment, setDeployment] = useState<Deployment>("hosted");
 
   useEffect(() => {
     fetch(`${API_BASE}/v1/plans`)
@@ -76,6 +86,8 @@ export function PricingPageContent() {
     fetch(`${API_BASE}/v1/conversation-rates`).then((r) => r.json()).then(setRates).catch(() => setRates([]));
   }, []);
 
+  // Older plan rows predate the deployment column, so anything unlabelled is hosted.
+  const shown = plans.filter((p) => (p.deployment ?? "hosted") === deployment);
   const priceFor = (p: Plan) =>
     cycle === "annual" ? p.priceAnnualPaise : cycle === "quarterly" ? p.priceQuarterlyPaise : p.priceMonthlyPaise;
 
@@ -88,7 +100,29 @@ export function PricingPageContent() {
           <p className="mt-3 text-zinc-600">{t.pricing.subtitle}</p>
         </div>
 
-        <div className="mt-8 flex justify-center gap-1">
+        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          {DEPLOYMENTS.map((d) => (
+            <button key={d.id} onClick={() => setDeployment(d.id)}
+              className={`rounded-xl border p-4 text-left transition-all ${
+                deployment === d.id
+                  ? "border-emerald-500 bg-emerald-50 shadow-sm"
+                  : "border-zinc-200 bg-white hover:border-emerald-300"
+              }`}>
+              <div className="flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${deployment === d.id ? "bg-emerald-600" : "bg-zinc-300"}`} />
+                <span className="text-sm font-semibold">{d.label}</span>
+              </div>
+              <p className="mt-1 text-xs text-zinc-500">{d.blurb}</p>
+            </button>
+          ))}
+        </div>
+
+        <p className="mt-4 text-center text-xs font-medium text-emerald-700">
+          Every edition is fully white-labelled — your name, logo, colours and domain, on every screen your
+          customers see.
+        </p>
+
+        <div className="mt-6 flex justify-center gap-1">
           {CYCLES.map(([v, labelText, save]) => (
             <button key={v} onClick={() => setCycle(v)}
               className={`rounded-full px-4 py-1.5 text-xs font-medium ${cycle === v ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
@@ -98,8 +132,8 @@ export function PricingPageContent() {
         </div>
 
         <div className="mt-8 grid gap-5 lg:grid-cols-4">
-          {plans.map((p) => {
-            const highlight = p.id === "advanced";
+          {shown.map((p) => {
+            const highlight = p.id === "advanced" || p.audience === "reseller";
             return (
               <div key={p.id}
                 className={`flex flex-col rounded-xl border p-6 ${highlight ? "border-emerald-400 bg-emerald-50 shadow-md" : "border-zinc-200 bg-white"}`}>
@@ -110,8 +144,10 @@ export function PricingPageContent() {
                 )}
                 <div className="text-lg font-semibold text-zinc-900">{p.name}</div>
                 <div className="mt-1 flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-zinc-900">{priceFor(p) === 0 ? "₹0" : rupees(priceFor(p))}</span>
-                  <span className="text-sm text-zinc-500">/month</span>
+                  <span className="text-3xl font-bold text-zinc-900">
+                    {p.customPricing ? "Custom" : priceFor(p) === 0 ? "₹0" : rupees(priceFor(p))}
+                  </span>
+                  <span className="text-sm text-zinc-500">{p.customPricing ? "quote" : "/month"}</span>
                 </div>
                 <p className="mt-2 text-xs text-zinc-500">{p.tagline}</p>
                 <ul className="mt-4 flex-1 space-y-1.5 text-xs text-zinc-700">
@@ -119,46 +155,24 @@ export function PricingPageContent() {
                     <li key={f} className="flex gap-1.5"><span className="text-emerald-500">✓</span><span>{f}</span></li>
                   ))}
                 </ul>
-                <Link href="/register"
+                <Link href={p.customPricing || p.audience !== "direct" ? "/product/compare" : "/register"}
                   className={`mt-5 rounded-md px-3 py-2 text-center text-sm font-medium ${
                     highlight ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border border-zinc-300 text-zinc-700 hover:border-emerald-400 hover:text-emerald-700"
                   }`}>
-                  {p.id === "free" ? "Start free" : "Start free trial"}
+                  {p.customPricing ? "Talk to sales" : p.audience === "reseller" ? "Become a partner" : p.id === "free" ? "Start free" : "Start free trial"}
                 </Link>
               </div>
             );
           })}
 
-          <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-6">
-            <div className="text-lg font-semibold text-zinc-900">Partner</div>
-            <div className="mt-1 flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-zinc-900">Custom</span>
-              <span className="text-sm text-zinc-500">quote</span>
-            </div>
-            <p className="mt-2 text-xs text-zinc-500">For agencies and resellers running client accounts.</p>
-            <ul className="mt-4 flex-1 space-y-1.5 text-xs text-zinc-700">
-              {[
-                "Everything in Advanced, plus:",
-                "Partner console with client sub-organisations",
-                "Full white-label: logo, colours, custom domain",
-                "Wholesale billing and revenue share",
-                "Client-owned WABA — no lock-in",
-              ].map((f) => (
-                <li key={f} className="flex gap-1.5"><span className="text-emerald-500">✓</span><span>{f}</span></li>
-              ))}
-            </ul>
-            <Link href="/product/compare"
-              className="mt-5 rounded-md border border-zinc-300 px-3 py-2 text-center text-sm font-medium text-zinc-700 hover:border-emerald-400 hover:text-emerald-700">
-              Talk to us
-            </Link>
-          </div>
         </div>
 
         {rates.length > 0 && (
           <div className="mt-12 rounded-xl border border-zinc-200 bg-white p-6">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Conversation charges — at Meta actuals</h2>
             <p className="mt-1 text-xs text-zinc-500">
-              No markup, on every plan including Free. These are the same rates the platform meters your wallet against.
+              No markup, on every plan and every deployment — including Free. WhatsApp charges these per
+              conversation wherever the software runs; self-hosted and private-cloud customers pay Meta directly.
             </p>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-left text-sm">

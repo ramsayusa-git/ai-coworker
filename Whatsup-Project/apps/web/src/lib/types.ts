@@ -152,6 +152,34 @@ export interface Plan {
   id: string; name: string; tagline?: string | null; position: number;
   priceMonthlyPaise: number; priceQuarterlyPaise: number; priceAnnualPaise: number;
   limits: Record<string, number>; features: Record<string, boolean>; highlights: string[];
+  deployment?: "hosted" | "self_hosted" | "dedicated";
+  audience?: "direct" | "reseller" | "enterprise";
+  customPricing?: boolean;
+}
+
+export interface License {
+  id: string;
+  planId: string;
+  deployment: string;
+  issuedToName: string;
+  issuedToEmail?: string | null;
+  seats: number;
+  channels: number;
+  maxInstances: number;
+  whiteLabel: boolean;
+  status: "active" | "suspended" | "revoked" | "expired";
+  validFrom: string;
+  validUntil?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  keyTail?: string;
+  key?: string;
+}
+
+export interface LicenseActivation {
+  id: string; licenseId: string; instanceId: string;
+  hostname?: string | null; version?: string | null; ipAddress?: string | null;
+  firstSeenAt: string; lastSeenAt: string; revokedAt?: string | null;
 }
 export interface ConversationRate {
   id: string; country: string; countryCode: string;
