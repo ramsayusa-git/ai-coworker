@@ -88,3 +88,60 @@ cross-tenant leak.
 **Known gap:** `CREATE TABLE ... LIKE INCLUDING ALL` does not carry RLS policies, so
 provisioning returns an explicit manual step to run `scripts/reapply-rls.sql` against the
 new schema before it serves traffic. Automating that is the obvious follow-up.
+
+## 2026-09-17 — RLS moved into a migration, and made strict
+
+**What:** `0004_rls_policies.sql` now enables FORCE ROW LEVEL SECURITY and the
+`org_isolation` policy on 40 org-scoped tables as part of the migration chain.
+
+**Why:** `scripts/reapply-rls.sql` was never in the chain. Every fresh install — including
+every self-hosted and on-prem deployment — came up with row isolation silently OFF until
+someone remembered to run that script by hand. The `row` isolation tier depends entirely on
+these policies.
+
+**The bigger find:** the old policy read
+`org_id::text = current_setting(...) OR coalesce(current_setting(...), '') = ''`.
+That second clause makes RLS a **no-op for any query that forgets `withOrgDb`** — an unset
+GUC meant unrestricted access to every org's rows, which is precisely the bug the policy
+exists to catch. Replaced with an explicit `app.bypass_rls`, set only by seed/migration
+processes via `RLS_BYPASS=on` as a connection option (never by the API server, so
+request-serving code cannot reach for it by accident).
+
+Verified: an unscoped `select count(*) from contacts` now returns 0 where it previously
+returned every row in the database.
+
+**Three bugs the strict policy exposed**, none catchable by the old suite:
+- `creditWallet` wrote the balance and its ledger row through the unscoped `db` — money
+  movement running with no org scoping, and not atomic. Now one `withOrgDb` transaction.
+- The conversation-charge debit path had the same defect across three writes. Now atomic,
+  so a partial failure can neither double-charge nor lose the audit trail.
+- `withOrgDb` was doing a routing lookup on a SEPARATE connection before every transaction
+  (introduced by the tenancy work), which made `integration-crm` flake ~1 run in 4. Added a
+  fast path that skips routing entirely while every org is on `row` tier.
+
+**Correction to an earlier claim in this file:** I previously recorded that `licenses`
+needed RLS because licence rows were "readable across orgs". That was wrong. `licenses`,
+`api_keys` and `org_members` are credential-lookup tables — the credential is what
+*establishes* org context, so RLS cannot guard the query that determines the org. Adding
+policies to them broke login and offline licence activation outright. All three are now
+documented exclusions in the migration.
+
+## 2026-09-17 — Marketing site reflects what is actually built
+
+**What:** Added the five shipped CRM modules (Service Desk, Lead Scoring & Distribution,
+Quotes, Appointments, CSAT & NPS Surveys) to `marketing-data.ts`, plus two comparison
+groups (CRM & service desk, Deployment & isolation) to `compare-data.ts`.
+
+**Why the copy is written the way it is:** every bullet describes behaviour that exists and
+was verified in the browser against demo data. The "edge" lines state the actual design
+decision rather than a marketing claim — e.g. surveys say CSAT and NPS are never averaged
+together, which is the bug fixed earlier today.
+
+The hero stat already derived from `features.length`, so it reads 20 automatically; the two
+hardcoded "Twelve modules" strings were changed to "Every module" so the count cannot drift
+again.
+
+**Mobile (390x844) verified** across 11 pages by measuring real horizontal overflow in a
+390px viewport. One genuine bug found and fixed: `/contacts` used `overflow-hidden` around a
+718px table, which pushed the whole page sideways instead of scrolling the table. Now
+`overflow-x-auto` with `min-w-[640px]`, matching the other tables.

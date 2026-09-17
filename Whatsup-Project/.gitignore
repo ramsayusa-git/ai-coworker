@@ -1,0 +1,37 @@
+# Secrets — never commit. apps/api/.env holds DATABASE_URL, JWT_SECRET and the licence
+# signing secret; apps/web/.env.local holds the API base URL. Use the .example files.
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+.vitest/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local scratch
+tmp/
+.cache/

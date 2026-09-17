@@ -211,8 +211,11 @@ export function ContactsView() {
         <span className="ml-auto text-xs text-zinc-400">{filtered.length} contacts</span>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
-        <table className="w-full text-sm">
+      {/* overflow-x-auto, not overflow-hidden: this table needs ~718px of columns, so on a
+          phone it has to scroll inside its own box. With overflow-hidden the table pushed
+          the whole page sideways instead (35px of horizontal page scroll at 390px wide). */}
+      <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="border-b border-zinc-200 bg-zinc-50 text-left text-xs text-zinc-500">
             <tr>
               <th className="px-4 py-2 font-medium">Name</th>

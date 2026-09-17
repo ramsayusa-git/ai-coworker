@@ -67,4 +67,32 @@ export const compareGroups: { group: string; rows: CompareRow[] }[] = [
       { feature: "SSO/SAML, ISO 27001", values: ["◐ roadmap", "○", "○", "○", "○", "●"] },
     ],
   },
+  {
+    // Competitor marks here are from their public feature pages. Where a tool offers the
+    // capability but shallower than ours it is ◐, not ○ — the point of this table is to be
+    // useful to someone deciding, not to flatter us.
+    group: "CRM & service desk",
+    rows: [
+      { feature: "Tickets with SLA timers and an activity log", values: ["●", "◐", "○", "◐", "◐", "○"] },
+      { feature: "Routing rules (priority, category, round-robin)", values: ["●", "◐", "○", "◐", "◐", "○"] },
+      { feature: "Lead scoring with per-rule reasons", values: ["●", "○", "○", "○", "◐", "○"] },
+      { feature: "Lead distribution with a dry-run preview", values: ["●", "○", "○", "○", "○", "○"] },
+      { feature: "Quotes with server-computed totals", values: ["●", "○", "○", "○", "○", "○"] },
+      { feature: "Appointments with WhatsApp reminders", values: ["●", "◐", "◐", "◐", "●", "○"] },
+      { feature: "CSAT / NPS captured from the chat reply", values: ["●", "◐", "○", "◐", "◐", "○"] },
+      { feature: "One contact timeline across every module", values: ["●", "◐", "○", "◐", "◐", "○"] },
+    ],
+  },
+  {
+    group: "Deployment & isolation",
+    rows: [
+      { feature: "Hosted (we run it)", values: ["●", "●", "●", "●", "●", "●"] },
+      { feature: "Self-hosted on your servers", values: ["●", "○", "○", "○", "○", "○"] },
+      { feature: "On-premises, air-gapped, offline activation", values: ["●", "○", "○", "○", "○", "○"] },
+      { feature: "Private cloud (single-tenant, we operate)", values: ["●", "○", "○", "○", "○", "◐"] },
+      { feature: "Schema-per-tenant isolation", values: ["●", "○", "○", "○", "○", "○"] },
+      { feature: "Database-per-tenant isolation", values: ["●", "○", "○", "○", "○", "◐"] },
+      { feature: "Full application separation per tenant", values: ["●", "○", "○", "○", "○", "◐"] },
+    ],
+  },
 ];
