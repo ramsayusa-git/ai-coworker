@@ -74,8 +74,21 @@ export const orgs = pgTable("orgs", {
   planRenewsAt: timestamp("plan_renews_at", { withTimezone: true }),
   // Billing country decides which conversationRates row applies to this org's sends
   billingCountryCode: text("billing_country_code").notNull().default("IN"),
-  // Which edition this org runs under — hosted | self_hosted | dedicated
+  // Which edition this org runs under — hosted | on_prem | self_hosted | dedicated
   deployment: text("deployment").notNull().default("hosted"),
+  // How this org's data is physically separated from other orgs':
+  //   row      — shared schema, shared database; Postgres RLS on app.current_org_id (default)
+  //   schema   — shared database, its own Postgres schema (search_path swap)
+  //   database — its own database, reached by its own connection pool
+  //   app      — its own database AND its own API/web process; this row exists here only
+  //              so the control plane can describe and bill it
+  // Each tier is strictly stronger than the one above: schema/database/app all still run
+  // RLS underneath, so an isolation misconfiguration degrades to row-level, never to none.
+  isolation: text("isolation").notNull().default("row"),
+  // Only set for schema/database/app. dbSecretRef names a secret in the deployment's secret
+  // store — a connection string is NEVER stored in this table.
+  dbSchemaName: text("db_schema_name"),
+  dbSecretRef: text("db_secret_ref"),
   walletPaise: integer("wallet_paise").default(0),
   timezone: text("timezone").default("Asia/Kolkata"),
   locale: text("locale").default("en"),

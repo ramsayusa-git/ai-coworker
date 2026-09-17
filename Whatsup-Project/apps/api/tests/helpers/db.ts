@@ -41,7 +41,7 @@ export function recreateTestDatabase() {
 
 export function migrateTestDatabase() {
   execSync("npx tsx src/db/migrate.ts", {
-    env: { ...process.env, DATABASE_URL: testDatabaseUrl(), NODE_ENV: "development" },
+    env: { ...process.env, DATABASE_URL: testDatabaseUrl(), NODE_ENV: "development", RLS_BYPASS: "on" },
     stdio: "pipe",
   });
 }
@@ -50,7 +50,9 @@ export function migrateTestDatabase() {
 // database has no plans, so every entitlement check would fail. Running the real seeds
 // here also means a broken seed script fails the test run.
 export function seedTestCatalogue() {
-  const env = { ...process.env, DATABASE_URL: testDatabaseUrl(), NODE_ENV: "development" };
+  // Seeds write plan/rate rows across orgs, so they need the explicit RLS bypass that
+  // migration 0004 requires of any query not scoped by withOrgDb.
+  const env = { ...process.env, DATABASE_URL: testDatabaseUrl(), NODE_ENV: "development", RLS_BYPASS: "on" };
   execSync("npx tsx src/db/seed-billing.ts", { env, stdio: "pipe" });
   execSync("npx tsx src/db/seed-editions.ts", { env, stdio: "pipe" });
 }

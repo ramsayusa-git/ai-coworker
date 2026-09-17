@@ -152,7 +152,7 @@ export interface Plan {
   id: string; name: string; tagline?: string | null; position: number;
   priceMonthlyPaise: number; priceQuarterlyPaise: number; priceAnnualPaise: number;
   limits: Record<string, number>; features: Record<string, boolean>; highlights: string[];
-  deployment?: "hosted" | "self_hosted" | "dedicated";
+  deployment?: "hosted" | "on_prem" | "self_hosted" | "dedicated";
   audience?: "direct" | "reseller" | "enterprise";
   customPricing?: boolean;
 }

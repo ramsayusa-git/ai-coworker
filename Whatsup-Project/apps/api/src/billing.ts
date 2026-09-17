@@ -1,5 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "./db/client.js";
+import { db, withOrgDb } from "./db/client.js";
 import { orgs, plans, conversationRates, walletTransactions, conversationCharges, conversations } from "./db/schema.js";
 
 // Money convention: paise everywhere. Conversation rates are stored in MILLI-paise
@@ -67,57 +67,76 @@ export async function chargeConversation(opts: {
   const windowStart = windowStartFor();
   const windowEnd = new Date(windowStart.getTime() + WINDOW_MS);
 
-  const inserted = await db.insert(conversationCharges).values({
-    orgId: opts.orgId,
-    conversationId: opts.conversationId,
-    category: opts.category,
-    countryCode,
-    ratePaise: milliPaise,
-    windowStart,
-    windowEnd,
-    messageId: opts.messageId,
-  }).onConflictDoNothing().returning();
+  // The charge row, the balance change and the ledger entry are one org-scoped
+  // transaction: conversation_charges and wallet_transactions are RLS-protected, and a
+  // partial write here would either double-charge or lose the audit trail for money.
+  const outcome = await withOrgDb(opts.orgId, async (sdb) => {
+    const inserted = await sdb.insert(conversationCharges).values({
+      orgId: opts.orgId,
+      conversationId: opts.conversationId,
+      category: opts.category,
+      countryCode,
+      ratePaise: milliPaise,
+      windowStart,
+      windowEnd,
+      messageId: opts.messageId,
+    }).onConflictDoNothing().returning();
 
-  if (!inserted.length) return { charged: false, reason: "already_charged" };
+    // The unique constraint on the 24h window is what makes metering idempotent.
+    if (!inserted.length) return null;
 
-  // Debit the wallet in whole paise (round up so fractional paise never accrue to the
-  // platform's loss) and write the ledger row.
-  const debitPaise = Math.ceil(milliPaise / MILLI);
-  const [updated] = await db.update(orgs)
-    .set({ walletPaise: sql`${orgs.walletPaise} - ${debitPaise}` })
-    .where(eq(orgs.id, opts.orgId))
-    .returning({ walletPaise: orgs.walletPaise });
+    // Debit the wallet in whole paise (round up so fractional paise never accrue to the
+    // platform's loss) and write the ledger row.
+    const debitPaise = Math.ceil(milliPaise / MILLI);
+    const [updated] = await sdb.update(orgs)
+      .set({ walletPaise: sql`${orgs.walletPaise} - ${debitPaise}` })
+      .where(eq(orgs.id, opts.orgId))
+      .returning({ walletPaise: orgs.walletPaise });
 
-  await db.insert(walletTransactions).values({
-    orgId: opts.orgId,
-    kind: "debit",
-    amountPaise: -debitPaise,
-    balanceAfterPaise: updated?.walletPaise ?? 0,
-    reason: `${opts.category} conversation (${countryCode})`,
-    refType: "conversation_charge",
-    refId: opts.conversationId,
+    await sdb.insert(walletTransactions).values({
+      orgId: opts.orgId,
+      kind: "debit",
+      amountPaise: -debitPaise,
+      balanceAfterPaise: updated?.walletPaise ?? 0,
+      reason: `${opts.category} conversation (${countryCode})`,
+      refType: "conversation_charge",
+      refId: opts.conversationId,
+    });
+
+    return { balanceAfterPaise: updated?.walletPaise ?? 0 };
   });
 
-  return { charged: true, milliPaise, balanceAfterPaise: updated?.walletPaise ?? 0, category: opts.category };
+  if (!outcome) return { charged: false, reason: "already_charged" };
+
+  return { charged: true, milliPaise, balanceAfterPaise: outcome.balanceAfterPaise, category: opts.category };
 }
 
 export async function creditWallet(opts: {
   orgId: string; amountPaise: number; reason: string; kind?: string; refType?: string; refId?: string;
 }) {
-  const [updated] = await db.update(orgs)
-    .set({ walletPaise: sql`${orgs.walletPaise} + ${opts.amountPaise}` })
-    .where(eq(orgs.id, opts.orgId))
-    .returning({ walletPaise: orgs.walletPaise });
-  const [tx] = await db.insert(walletTransactions).values({
-    orgId: opts.orgId,
-    kind: opts.kind ?? "credit",
-    amountPaise: opts.amountPaise,
-    balanceAfterPaise: updated?.walletPaise ?? 0,
-    reason: opts.reason,
-    refType: opts.refType,
-    refId: opts.refId,
-  }).returning();
-  return tx;
+  // The balance lives on `orgs` (a platform table) while the ledger row goes to
+  // `walletTransactions` (org-scoped, RLS-protected). Both run inside ONE withOrgDb
+  // transaction, so the balance and its ledger entry can never diverge — and so the
+  // ledger insert carries the org context the RLS policy requires. Previously this used
+  // the unscoped `db`, which only worked because the old policy treated an unset GUC as
+  // full access; money movement was running with no org scoping at all.
+  return withOrgDb(opts.orgId, async (sdb) => {
+    const [updated] = await sdb.update(orgs)
+      .set({ walletPaise: sql`${orgs.walletPaise} + ${opts.amountPaise}` })
+      .where(eq(orgs.id, opts.orgId))
+      .returning({ walletPaise: orgs.walletPaise });
+
+    const [tx] = await sdb.insert(walletTransactions).values({
+      orgId: opts.orgId,
+      kind: opts.kind ?? "credit",
+      amountPaise: opts.amountPaise,
+      balanceAfterPaise: updated?.walletPaise ?? 0,
+      reason: opts.reason,
+      refType: opts.refType,
+      refId: opts.refId,
+    }).returning();
+    return tx;
+  });
 }
 
 // ---- Plan entitlements -----------------------------------------------------

@@ -51,3 +51,40 @@ once instead of eleven times.
 
 **Why:** CSAT is out of 5 and NPS is out of 10. Averaging both produced "Average CSAT
 6 / 5" and a 120% ring on the surveys screen.
+
+## 2026-09-17 — Tenant isolation tiers, resolved inside `withOrgDb`
+
+**What:** Added four isolation tiers (`row` | `schema` | `database` | `app`) as a column on
+`orgs`, plus `on_prem` as a fourth deployment target. Tier resolution happens inside
+`withOrgDb`, so it picks the database/schema a transaction runs against.
+
+**Why there:** every org-scoped route already funnels through `withOrgDb`, so tiering it
+means zero route changes and no route can accidentally bypass isolation. Verified end to
+end: an insert through an unchanged route landed in the tenant's own schema (1 row) with
+zero rows in `public`.
+
+**Alternatives considered:** per-request middleware handing each handler a request-scoped
+db — spreads a security invariant across 40+ modules, where one missed call site is a
+cross-tenant leak.
+
+**Invariants chosen deliberately:**
+- Tiers are cumulative, not alternatives. RLS runs in *every* tier, so a routing
+  misconfiguration degrades to row isolation rather than to no isolation.
+- A `database`/`app` tenant whose secret cannot be resolved **fails closed** — it must never
+  quietly serve queries from the shared database. A `schema` tenant missing its schema name
+  degrades to row isolation instead, because RLS still isolates it and failing closed would
+  take a working tenant offline for a metadata bug.
+- Connection strings are never stored in `orgs`; the column holds a *reference* to a secret,
+  so reading that table (or a leaked backup) cannot yield every tenant's credentials.
+- `search_path` cannot be parameterised, so schema names are validated against a strict
+  allowlist (`^[a-z_][a-z0-9_]{0,62}$`) rather than escaped — covered by injection tests.
+- Downgrades are refused by the API (409): moving rows back into shared storage is a
+  data-exposure decision for an operator, not a settings toggle.
+- Tier migration is copy → verify → switch, leaving the source rows in place so the switch
+  can be reverted.
+- DB CHECK constraints reject half-configured states (schema tier with no schema name,
+  database tier with no secret ref) so the application never discovers them at request time.
+
+**Known gap:** `CREATE TABLE ... LIKE INCLUDING ALL` does not carry RLS policies, so
+provisioning returns an explicit manual step to run `scripts/reapply-rls.sql` against the
+new schema before it serves traffic. Automating that is the obvious follow-up.

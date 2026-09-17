@@ -8,15 +8,15 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed.ts",
+    "db:migrate": "RLS_BYPASS=on tsx src/db/migrate.ts",
+    "db:seed": "RLS_BYPASS=on tsx src/db/seed.ts",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit-*.test.ts",
     "test:e2e": "vitest run tests/integration-*.test.ts",
     "test:watch": "vitest",
-    "db:demo": "tsx src/db/demo-seed.ts",
-    "db:seed:billing": "tsx src/db/seed-billing.ts",
-    "db:seed:editions": "tsx src/db/seed-editions.ts"
+    "db:demo": "RLS_BYPASS=on tsx src/db/demo-seed.ts",
+    "db:seed:billing": "RLS_BYPASS=on tsx src/db/seed-billing.ts",
+    "db:seed:editions": "RLS_BYPASS=on tsx src/db/seed-editions.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",

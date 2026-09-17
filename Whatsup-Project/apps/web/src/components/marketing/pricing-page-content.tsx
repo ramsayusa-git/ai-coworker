@@ -8,14 +8,42 @@ import type { ConversationRate, Plan } from "@/lib/types";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 type Cycle = "monthly" | "quarterly" | "annual";
-type Deployment = "hosted" | "self_hosted" | "dedicated";
+type Deployment = "hosted" | "on_prem" | "self_hosted" | "dedicated";
 
-// The same product, sold three ways. Every one of them is fully white-labelled —
+// The same product, sold four ways. Every one of them is fully white-labelled —
 // that is the point of the row, not an upsell hidden in the enterprise column.
 const DEPLOYMENTS: Array<{ id: Deployment; label: string; blurb: string }> = [
   { id: "hosted", label: "Hosted", blurb: "We run it. You sign in and go — nothing to provision." },
   { id: "self_hosted", label: "Self-hosted", blurb: "Runs on your own servers. No conversation data leaves them." },
+  { id: "on_prem", label: "On-premises", blurb: "Inside your own building, air-gapped, with offline licence activation." },
   { id: "dedicated", label: "Private cloud", blurb: "A single-tenant instance we deploy and operate for you." },
+];
+
+// How far a tenant's data is separated from every other tenant's. Sold as an option on
+// top of the edition rather than as separate SKUs, because one edition can run different
+// tiers for different clients. Ordered weakest to strongest; each tier keeps the
+// row-level policies of the ones above it rather than replacing them.
+const ISOLATION_TIERS: Array<{ id: string; label: string; blurb: string; availableIn: Deployment[] }> = [
+  {
+    id: "row", label: "Shared (row-level)",
+    blurb: "One schema, one database. Postgres row-level security scopes every query to the tenant.",
+    availableIn: ["hosted", "on_prem", "self_hosted"],
+  },
+  {
+    id: "schema", label: "Schema separation",
+    blurb: "Each tenant gets its own Postgres schema in a shared database. Separate tables, separate backups per schema.",
+    availableIn: ["hosted", "on_prem", "self_hosted"],
+  },
+  {
+    id: "database", label: "Database separation",
+    blurb: "Each tenant gets its own database and its own connection pool. Nothing is shared but the application process.",
+    availableIn: ["hosted", "on_prem", "self_hosted", "dedicated"],
+  },
+  {
+    id: "app", label: "Application separation",
+    blurb: "Its own database and its own API and web processes, on its own domain. Nothing shared at all.",
+    availableIn: ["on_prem", "self_hosted", "dedicated"],
+  },
 ];
 const CYCLES: Array<[Cycle, string, string]> = [
   ["monthly", "Billed monthly", ""],
@@ -100,7 +128,7 @@ export function PricingPageContent() {
           <p className="mt-3 text-zinc-600">{t.pricing.subtitle}</p>
         </div>
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {DEPLOYMENTS.map((d) => (
             <button key={d.id} onClick={() => setDeployment(d.id)}
               className={`rounded-xl border p-4 text-left transition-all ${
@@ -121,6 +149,38 @@ export function PricingPageContent() {
           Every edition is fully white-labelled — your name, logo, colours and domain, on every screen your
           customers see.
         </p>
+
+        {/* Isolation is an option on top of the chosen edition, not a separate SKU — the
+            tiers shown change with the deployment selected above. */}
+        <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50/60 p-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-sm font-semibold">Tenant isolation — how far apart your clients&apos; data sits</h2>
+            <span className="text-[11px] text-zinc-500">
+              Available on {DEPLOYMENTS.find((d) => d.id === deployment)?.label}
+            </span>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {ISOLATION_TIERS.map((tier) => {
+              const available = tier.availableIn.includes(deployment);
+              return (
+                <div key={tier.id}
+                  className={`rounded-lg border p-3 ${
+                    available ? "border-zinc-200 bg-white" : "border-dashed border-zinc-200 bg-transparent opacity-50"
+                  }`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold">{tier.label}</span>
+                    {!available && <span className="text-[10px] text-zinc-400">n/a</span>}
+                  </div>
+                  <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">{tier.blurb}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-[11px] text-zinc-500">
+            Each tier keeps the protections of the ones before it — row-level security stays switched on even
+            when a client has its own database, so isolation is layered rather than swapped.
+          </p>
+        </div>
 
         <div className="mt-6 flex justify-center gap-1">
           {CYCLES.map(([v, labelText, save]) => (

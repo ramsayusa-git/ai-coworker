@@ -22,6 +22,20 @@
       "when": 1789625297532,
       "tag": "0002_timestamptz",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789627192588,
+      "tag": "0003_tenant_isolation",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789629100067,
+      "tag": "0004_rls_policies",
+      "breakpoints": true
     }
   ]
 }

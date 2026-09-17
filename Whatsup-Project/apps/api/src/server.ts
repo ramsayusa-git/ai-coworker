@@ -26,6 +26,7 @@ import { ticketsRoutes } from "./modules/tickets.js";
 import { leadsRoutes } from "./modules/leads.js";
 import { quotesRoutes, appointmentsRoutes } from "./modules/sales-extras.js";
 import { surveysRoutes } from "./modules/surveys.js";
+import { tenancyRoutes } from "./modules/tenancy.js";
 import { timelineRoutes } from "./modules/timeline.js";
 import { licenseActivationRoutes, partnerLicenseRoutes } from "./modules/licenses.js";
 import { billingRoutes, billingCatalogRoutes } from "./modules/billing.js";
@@ -95,6 +96,7 @@ await app.register(async (scoped) => {
   await scoped.register(quotesRoutes);
   await scoped.register(appointmentsRoutes);
   await scoped.register(surveysRoutes);
+  await scoped.register(tenancyRoutes);
   await scoped.register(timelineRoutes);
   await scoped.register(billingRoutes);
   await scoped.register(developerRoutes);

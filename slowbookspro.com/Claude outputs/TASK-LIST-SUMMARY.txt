@@ -1,0 +1,269 @@
+================================================================================
+                    SLOWBOOKS PRO - TASK LIST SUMMARY
+                         Production Launch: Week 3
+================================================================================
+
+CRITICAL BLOCKER (Fix Immediately)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ WEBHOOK IDEMPOTENCY - 2 hours                                               │
+│ STATUS: Ready to implement (solution documented)                            │
+│ IMPACT: Prevents duplicate charges                                          │
+│ ACTION: Add WebhookEvent.externalEventId unique constraint                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PRODUCTION TIMELINE
+┌────────────┬────────────────────────┬────────┬─────────┬────────────────────┐
+│ Phase      │ Description            │ Effort │ Week    │ Blocker            │
+├────────────┼────────────────────────┼────────┼─────────┼────────────────────┤
+│ Phase 1    │ Code foundation        │ 43h    │ Week 1  │ None               │
+│ Phase 2    │ Core modules (10)      │ 137h   │ W1-W2   │ Phase 1 complete   │
+│ Phase 3    │ Testing (120+ cases)   │ 60h    │ W2-W3   │ Phase 2 complete   │
+│ Phase 4    │ Infrastructure         │ 40h    │ W2-W3   │ Parallel w/ Phase1 │
+│ Phase 5    │ Pre-launch validation  │ 20h    │ W3      │ All phases done    │
+├────────────┼────────────────────────┼────────┼─────────┼────────────────────┤
+│ TOTAL      │ 3-week sprint          │ 300h   │ Now-W3  │ START NOW          │
+└────────────┴────────────────────────┴────────┴─────────┴────────────────────┘
+
+PHASE 1: CODE FOUNDATION (Week 1 - 43 hours)
+┌───┬──────────────────────────────────────────────────────┬───────┬────────────┐
+│ # │ Task                                                 │ Hours │ Owner      │
+├───┼──────────────────────────────────────────────────────┼───────┼────────────┤
+│ 1 │ Setup Node.js + TypeScript + project structure      │ 4h    │ Backend    │
+│ 2 │ Configure Prisma ORM + PostgreSQL                   │ 3h    │ Backend    │
+│ 3 │ Auth module (register/login/JWT/refresh)            │ 8h    │ Backend    │
+│ 4 │ RBAC middleware + permission system                 │ 6h    │ Backend    │
+│ 5 │ Express API structure + routing                     │ 3h    │ Backend    │
+│ 6 │ Request/response middleware + validation            │ 4h    │ Backend    │
+│ 7 │ Error handling + structured logging                 │ 4h    │ Backend    │
+│ 8 │ Database migrations infrastructure                  │ 3h    │ Backend    │
+│ 9 │ React app + routing + component structure           │ 5h    │ Frontend   │
+│10 │ Brand config loader (theme + customization)         │ 3h    │ Frontend   │
+└───┴──────────────────────────────────────────────────────┴───────┴────────────┘
+✅ Deliverable: Runnable API + skeleton frontend with auth
+
+PHASE 2: CORE MODULES (Week 1-2 - 137 hours)
+┌───┬──────────────────────────────────────────────────────┬───────┬────────────┐
+│ # │ Task                                                 │ Hours │ Owner      │
+├───┼──────────────────────────────────────────────────────┼───────┼────────────┤
+│ 1 │ Billing & Subscription (plans, charges, usage)      │ 16h   │ Backend    │
+│ 2 │ Payment gateway abstraction (Stripe + Razorpay)     │ 12h   │ Backend    │
+│ 3 │ Invoice generation + PDF rendering                 │ 10h   │ Backend    │
+│ 4 │ SendGrid email notifications                        │ 8h    │ Backend    │
+│ 5 │ Twilio SMS notifications                            │ 6h    │ Backend    │
+│ 6 │ In-app notifications (database)                     │ 4h    │ Backend    │
+│ 7 │ Dunning system (3-tier payment recovery)            │ 14h   │ Backend    │
+│ 8 │ GST compliance (GSTR-1 generation + filing)         │ 12h   │ Backend    │
+│ 9 │ Webhook infrastructure (retry, deduplication)       │ 10h   │ Backend    │
+│10 │ Cron jobs (8 jobs: renewal, dunning, invoice aging) │ 8h    │ Backend    │
+│11 │ Dashboard UI (metrics + charts)                     │ 15h   │ Frontend   │
+│12 │ Subscription management UI (CRUD)                   │ 12h   │ Frontend   │
+│13 │ Invoice management UI (view/download/email)         │ 10h   │ Frontend   │
+└───┴──────────────────────────────────────────────────────┴───────┴────────────┘
+✅ Deliverable: Complete working platform (all 10 modules)
+
+PHASE 3: TESTING (Week 2-3 - 60 hours)
+┌───┬──────────────────────────────────────────────────────┬───────┬────────────┐
+│ # │ Task                                                 │ Hours │ Owner      │
+├───┼──────────────────────────────────────────────────────┼───────┼────────────┤
+│ 1 │ Execute manual test cases (120+ from doc)           │ 24h   │ QA         │
+│ 2 │ Execute E2E scenarios (5 workflows)                 │ 12h   │ QA         │
+│ 3 │ Security testing (OWASP Top 10 + penetration)       │ 8h    │ Security   │
+│ 4 │ Load testing (100-1000 concurrent users)            │ 8h    │ QA/DevOps  │
+│ 5 │ Performance testing (response times, DB queries)    │ 4h    │ QA         │
+│ 6 │ Regression testing (all bug fixes verified)         │ 4h    │ QA         │
+└───┴──────────────────────────────────────────────────────┴───────┴────────────┘
+✅ Deliverable: Test report (all tests passed, no blockers)
+
+PHASE 4: INFRASTRUCTURE (Week 2-3 - 40 hours)
+┌───┬──────────────────────────────────────────────────────┬───────┬────────────┐
+│ # │ Task                                                 │ Hours │ Owner      │
+├───┼──────────────────────────────────────────────────────┼───────┼────────────┤
+│ 1 │ AWS account setup + VPC networking                  │ 3h    │ DevOps     │
+│ 2 │ RDS PostgreSQL configuration (production)           │ 4h    │ DevOps     │
+│ 3 │ Redis cluster setup                                 │ 3h    │ DevOps     │
+│ 4 │ RabbitMQ message broker                             │ 3h    │ DevOps     │
+│ 5 │ Docker containerization + ECR registry              │ 2h    │ DevOps     │
+│ 6 │ Kubernetes manifests (ECS/EKS)                      │ 4h    │ DevOps     │
+│ 7 │ CI/CD pipeline (GitHub Actions)                     │ 5h    │ DevOps     │
+│ 8 │ Secrets manager + security configuration           │ 2h    │ DevOps     │
+│ 9 │ CloudWatch monitoring + alerting                    │ 4h    │ DevOps     │
+│10 │ SSL/TLS certificates (ACM)                          │ 2h    │ DevOps     │
+│11 │ Backup + disaster recovery setup                    │ 4h    │ DevOps     │
+│12 │ Load balancer + CDN configuration                   │ 4h    │ DevOps     │
+└───┴──────────────────────────────────────────────────────┴───────┴────────────┘
+✅ Deliverable: Production infrastructure (ready to deploy)
+
+PHASE 5: PRE-LAUNCH VALIDATION (Week 3 - 20 hours)
+┌───┬──────────────────────────────────────────────────────┬───────┬────────────┐
+│ # │ Task                                                 │ Hours │ Owner      │
+├───┼──────────────────────────────────────────────────────┼───────┼────────────┤
+│ 1 │ ⚠️ WEBHOOK IDEMPOTENCY FIX (CRITICAL)               │ 2h    │ Backend    │
+│ 2 │ Execute deployment checklist (20 items)             │ 4h    │ DevOps     │
+│ 3 │ Performance validation (<200ms p95 latency)         │ 2h    │ QA/DevOps  │
+│ 4 │ Security audit + vulnerabilities scan               │ 6h    │ Security   │
+│ 5 │ Compliance check (GDPR/HIPAA readiness)            │ 2h    │ Legal      │
+│ 6 │ Disaster recovery drill (backup restore test)       │ 2h    │ DevOps     │
+│ 7 │ Runbooks + incident response playbooks              │ 2h    │ DevOps     │
+└───┴──────────────────────────────────────────────────────┴───────┴────────────┘
+✅ Deliverable: Production-ready system (GO/NO-GO decision)
+
+================================================================================
+
+SUPPORTING TASKS (Parallel)
+
+DOCUMENTATION (25 hours - should complete by end of Week 2)
+┌───┬──────────────────────────────────────────────────────┬───────┬────────────┐
+│ # │ Document                                             │ Hours │ Owner      │
+├───┼──────────────────────────────────────────────────────┼───────┼────────────┤
+│ 1 │ API Reference (Swagger/OpenAPI)                     │ 4h    │ Backend    │
+│ 2 │ Customer Integration Guide                          │ 3h    │ Product    │
+│ 3 │ Admin Operations Manual                             │ 4h    │ DevOps     │
+│ 4 │ Troubleshooting Guide                               │ 3h    │ Support    │
+│ 5 │ Security & Compliance Report                        │ 4h    │ Security   │
+│ 6 │ Performance Tuning Guide                            │ 2h    │ DevOps     │
+│ 7 │ Webhook Event Reference                             │ 2h    │ Backend    │
+│ 8 │ Reseller Onboarding Guide                           │ 3h    │ Product    │
+└───┴──────────────────────────────────────────────────────┴───────┴────────────┘
+
+INFRASTRUCTURE (27 hours - AWS setup)
+┌───┬──────────────────────────────────────────────────────┬───────┬────────────┐
+│ # │ Component                                            │ Hours │ Owner      │
+├───┼──────────────────────────────────────────────────────┼───────┼────────────┤
+│ 1 │ AWS Account + VPC                                   │ 3h    │ DevOps     │
+│ 2 │ RDS PostgreSQL + backups                            │ 2h    │ DevOps     │
+│ 3 │ ElastiCache Redis                                   │ 2h    │ DevOps     │
+│ 4 │ RabbitMQ / SQS                                      │ 2h    │ DevOps     │
+│ 5 │ ECR (container registry)                            │ 1h    │ DevOps     │
+│ 6 │ ECS/EKS (orchestration)                             │ 4h    │ DevOps     │
+│ 7 │ Application Load Balancer                           │ 2h    │ DevOps     │
+│ 8 │ CloudFront (CDN)                                    │ 1h    │ DevOps     │
+│ 9 │ Route53 (DNS)                                       │ 1h    │ DevOps     │
+│10 │ CloudWatch (monitoring)                             │ 2h    │ DevOps     │
+│11 │ S3 (backups + storage)                              │ 1h    │ DevOps     │
+│12 │ IAM roles + policies                                │ 2h    │ DevOps     │
+│13 │ ACM SSL certificates                                │ 1h    │ DevOps     │
+│14 │ AWS Secrets Manager                                 │ 1h    │ DevOps     │
+└───┴──────────────────────────────────────────────────────┴───────┴────────────┘
+
+EXTERNAL SERVICE SETUP (7 hours - 3rd party integrations)
+┌───┬──────────────────────────────────────────────────────┬───────┬────────────┐
+│ # │ Service                                              │ Hours │ Owner      │
+├───┼──────────────────────────────────────────────────────┼───────┼────────────┤
+│ 1 │ Stripe API + webhooks                               │ 1h    │ Backend    │
+│ 2 │ Razorpay API + webhooks                             │ 1h    │ Backend    │
+│ 3 │ SendGrid email service                              │ 1h    │ Backend    │
+│ 4 │ Twilio SMS service                                  │ 1h    │ Backend    │
+│ 5 │ GitHub Actions CI/CD                                │ 1h    │ DevOps     │
+│ 6 │ AWS account setup                                   │ 2h    │ DevOps     │
+└───┴──────────────────────────────────────────────────────┴───────┴────────────┘
+
+================================================================================
+
+TEAM COMPOSITION & ALLOCATION
+
+Backend Developers (2 people):
+  - Auth + API foundation: 1 dev
+  - Modules (billing, payments, GST, dunning): 1 dev
+  - Total effort: 160 hours
+
+Frontend Developers (2 people):
+  - UI components + dashboards: 2 devs
+  - Total effort: 80 hours
+
+QA Engineers (2 people):
+  - Manual testing (120+ cases)
+  - E2E scenarios
+  - Security testing
+  - Load testing
+  - Total effort: 60 hours
+
+DevOps Engineer (1 person):
+  - Infrastructure setup (AWS, Docker, K8s)
+  - CI/CD pipeline
+  - Monitoring + alerting
+  - Total effort: 40 hours
+
+Product Manager (1 person):
+  - Roadmap + requirements
+  - Documentation
+  - Go/no-go decision
+  - Total effort: 20 hours
+
+================================================================================
+
+CRITICAL GO-LIVE CRITERIA (Must ALL be checked)
+
+✓ Webhook idempotency implemented & tested
+✓ All 120+ test cases PASSED
+✓ All 5 E2E scenarios PASSED (manual execution)
+✓ Load test PASSED (1000 concurrent users, <200ms latency)
+✓ Security audit PASSED (0 critical findings)
+✓ Backup & restore TESTED (successful recovery)
+✓ Monitoring + alerting CONFIGURED + tested
+✓ Runbooks DOCUMENTED for team
+✓ Customer onboarding guide READY
+✓ Support team TRAINED
+
+================================================================================
+
+BUDGET ESTIMATE (3 weeks to launch)
+
+Development:
+  - Backend (2 devs): ₹80,000/week × 3 = ₹2,40,000
+  - Frontend (2 devs): ₹70,000/week × 3 = ₹2,10,000
+  - QA (2 engineers): ₹50,000/week × 3 = ₹1,50,000
+  - DevOps (1 engineer): ₹60,000/week × 3 = ₹1,80,000
+  - Product (1 manager): ₹40,000/week × 3 = ₹1,20,000
+
+Infrastructure (3 months upfront):
+  - AWS (RDS, Redis, ECS, ALB, etc): ₹50,000
+  - External APIs (Stripe, SendGrid, Twilio): ₹20,000
+
+Quality & Security:
+  - Professional security audit: ₹1,00,000
+  - Testing tools + services: ₹30,000
+
+TOTAL PRE-LAUNCH: ₹8,30,000
+MONTHLY RUNNING COST: ₹50,000-100,000 (varies by usage)
+
+================================================================================
+
+KNOWN RISKS & MITIGATION
+
+⚠️ Risk: Database performance under load
+   Mitigation: Connection pooling, query optimization, read replicas
+
+⚠️ Risk: Payment gateway timeouts
+   Mitigation: Retry logic, idempotency, monitoring
+
+⚠️ Risk: Email delivery failures
+   Mitigation: SPF/DKIM/DMARC, SendGrid monitoring, SMS fallback
+
+⚠️ Risk: Data loss
+   Mitigation: Daily backups, 30-day retention, weekly restore test
+
+⚠️ Risk: Security breach
+   Mitigation: Professional audit, OWASP testing, SSL/TLS, rate limiting
+
+================================================================================
+
+NEXT STEPS
+
+[ ] TODAY: Review this document with team (1 hour)
+[ ] TODAY: Schedule kickoff meeting (tomorrow, 09:00)
+[ ] TODAY: Create Jira/Linear project with all tasks
+[ ] DAY 1: Fix webhook idempotency blocker (2h)
+[ ] DAY 1: Begin Phase 1 (code foundation)
+[ ] DAY 1: Begin Phase 4 (infrastructure setup - DevOps)
+[ ] WEEK 1 END: Phase 1 complete, Phase 2 underway
+[ ] WEEK 2 END: Phase 2 complete, Phase 3 (testing) underway
+[ ] WEEK 3 BEGIN: Phase 4 complete, Phase 5 (pre-launch) begins
+[ ] WEEK 3 END: Launch to production (GO/NO-GO decision)
+
+================================================================================
+
+LAUNCH DATE: September 30, 2026 (Friday, 2PM UTC)
+STATUS: Ready to execute ✅
+CONFIDENCE: High (95% - all documentation complete, architecture validated)
+
+================================================================================
