@@ -147,64 +147,95 @@ const pipeline = [
   { icon: AudioWaveform, label: 'TTS out', detail: 'First byte 180ms' }
 ]
 
-interface Plan {
-  name: string
-  price: string
-  unit?: string
-  note: string
-  features: string[]
-  cta: string
-  featured: boolean
-}
-
-const plans: Plan[] = [
+/*
+ * Deployment and commercial tier are two independent choices, so they are
+ * priced as a grid rather than a ladder.
+ *
+ * Where you run it — Cloud, Self-hosted, On-premises — and what rights you buy
+ * — Reseller or Enterprise — combine freely. The old four-card list forced a
+ * false choice: picking "White-Label" appeared to rule out on-premises, and
+ * picking "Enterprise" appeared to rule out resale. Both were wrong.
+ *
+ * Full white-labelling is in every cell. It is not an upsell here — a partner
+ * who cannot put their own name on it has not really bought anything.
+ */
+const deployments = [
   {
-    name: 'Cloud', price: 'Hosted', note: 'We run it, you use it',
-    features: [
-      'Managed and monitored by us',
-      'Autoscaling workers',
-      'Upgrades applied for you',
-      'Regional data residency',
-      '99.9% SLA'
+    key: 'cloud',
+    name: 'Cloud-hosted',
+    note: 'We run it. You never touch a server.',
+    basis: 'Per concurrent session, billed monthly',
+    included: [
+      'Managed, monitored and upgraded by us',
+      'Autoscaling workers, 99.9% SLA',
+      'Regional data residency of your choosing',
+      'Your domain, your TLS, your brand',
     ],
-    cta: 'Start a trial', featured: false
   },
   {
-    name: 'Self-Hosted', price: 'Licensed', note: 'Annual, per deployment',
-    features: [
-      'Runs entirely on your hardware',
+    key: 'selfhosted',
+    name: 'Self-hosted',
+    note: 'Your cloud account, your hardware, your rules.',
+    basis: 'Annual licence per deployment',
+    included: [
+      'Runs entirely on infrastructure you own',
+      'Offline licence verification — no phone-home',
+      'Signed release channel, you choose when to upgrade',
       'Unlimited agents and providers',
-      'Offline licence verification',
-      'Signed release channel',
-      'Business-hours support'
     ],
-    cta: 'Request a quote', featured: false
   },
   {
-    name: 'White-Label', price: 'Reseller', note: 'Sell it as your own product',
-    features: [
-      'Cloud or self-hosted, your choice',
-      'Full brand replacement',
-      'Your domain and mail templates',
-      'Per-customer tenant provisioning',
-      'Wholesale pricing and margin',
-      'Named solutions engineer'
+    key: 'onprem',
+    name: 'On-premises',
+    note: 'Your racks, optionally with no route out at all.',
+    basis: 'Annual licence per site',
+    included: [
+      'Air-gapped installation supported',
+      'Bring your own STT, TTS and LLM models',
+      'No egress required in any code path',
+      'Hardware sizing done with you',
     ],
-    cta: 'Become a partner', featured: true
   },
-  {
-    name: 'Enterprise', price: 'Custom', note: 'Air-gapped or regulated',
-    features: [
-      'Everything in White-Label',
-      'Air-gapped installation',
-      'Source escrow available',
-      'Custom provider development',
-      'Security and compliance review',
-      'Contracted SLA'
-    ],
-    cta: 'Contact us', featured: false
-  }
 ]
+
+const tiers = [
+  {
+    key: 'reseller',
+    name: 'Reseller',
+    tagline: 'Sell it as your own product.',
+    featured: true,
+    features: [
+      'Full white-label — brand, domain, mail, docs, CLI',
+      'Zero attribution to Lattice Net anywhere',
+      'Per-customer tenant provisioning',
+      'Wholesale pricing, you set retail',
+      'One aggregate invoice to you',
+      'You own tier 1; we back tier 2 and 3 privately',
+      'Named solutions engineer',
+    ],
+  },
+  {
+    key: 'enterprise',
+    name: 'Enterprise',
+    tagline: 'Run it yourself, at your own scale.',
+    featured: false,
+    features: [
+      'Full white-label — brand, domain, mail, docs, CLI',
+      'Unlimited internal tenants and business units',
+      'Source-available under NDA; escrow on request',
+      'Custom provider and integration development',
+      'Security, privacy and compliance review',
+      'Contracted SLA and named escalation path',
+      'Migration and onboarding included',
+    ],
+  },
+]
+
+/*
+ * Figures are deliberately absent. Real numbers depend on concurrency,
+ * deployment count and resale rights, and inventing them here would put a
+ * price on the site that no quote would honour.
+ */
 
 const hosting = [
   {
@@ -601,21 +632,57 @@ const whitelabel = [
       <div class="wrap">
         <div class="head reveal">
           <span class="eyebrow">Licensing</span>
-          <h2>Priced per deployment, not per minute</h2>
-          <p>Commercial licences only. Pricing scales with concurrency and rights, and is quoted per deployment.</p>
+          <h2>Choose where it runs, then choose what you may do with it</h2>
+          <p>
+            Two independent decisions. Every deployment is available on both commercial
+            tiers, and full white-labelling is included in all six — not sold as an
+            upgrade. Commercial licences only; no open-source grant applies.
+          </p>
         </div>
-        <div class="price-grid">
-          <article v-for="(p, i) in plans" :key="p.name" class="plan reveal" :class="{ featured: p.featured }" :style="{ '--d': i * 90 + 'ms' }">
-            <span v-if="p.featured" class="plan-badge">Most popular</span>
-            <h3>{{ p.name }}</h3>
-            <div class="plan-price">{{ p.price }}<span v-if="p.unit">{{ p.unit }}</span></div>
-            <p class="plan-note">{{ p.note }}</p>
+
+        <!-- Step 1: where it runs -->
+        <div class="dep-grid">
+          <article v-for="(d, i) in deployments" :key="d.key" class="dep reveal"
+                   :style="{ '--d': i * 80 + 'ms' }">
+            <h3>{{ d.name }}</h3>
+            <p class="dep-note">{{ d.note }}</p>
+            <span class="dep-basis">{{ d.basis }}</span>
             <ul>
-              <li v-for="f in p.features" :key="f"><Check :size="15" :stroke-width="3" /> {{ f }}</li>
+              <li v-for="f in d.included" :key="f"><Check :size="14" :stroke-width="3" /> {{ f }}</li>
             </ul>
-            <router-link to="/signup" class="btn" :class="p.featured ? 'primary' : 'outline'">{{ p.cta }}</router-link>
           </article>
         </div>
+
+        <!-- Step 2: what you may do with it -->
+        <div class="tier-head reveal">
+          <h3>Both tiers, on any of the three above</h3>
+        </div>
+        <div class="tier-grid">
+          <article v-for="(t, i) in tiers" :key="t.key" class="tier reveal"
+                   :class="{ featured: t.featured }" :style="{ '--d': i * 90 + 'ms' }">
+            <span v-if="t.featured" class="plan-badge">Most partners start here</span>
+            <h3>{{ t.name }}</h3>
+            <p class="tier-tag">{{ t.tagline }}</p>
+            <span class="wl-chip"><Check :size="13" :stroke-width="3" /> Full white-label included</span>
+            <ul>
+              <li v-for="f in t.features" :key="f"><Check :size="15" :stroke-width="3" /> {{ f }}</li>
+            </ul>
+            <div class="tier-avail">
+              Available on
+              <strong>{{ deployments.map(d => d.name).join(' · ') }}</strong>
+            </div>
+            <router-link to="/signup" class="btn" :class="t.featured ? 'primary' : 'outline'">
+              {{ t.key === 'reseller' ? 'Become a partner' : 'Talk to us' }}
+            </router-link>
+          </article>
+        </div>
+
+        <p class="price-foot reveal">
+          Pricing is quoted, not listed. It scales with concurrent sessions, the number
+          of deployments and the resale rights you need — so a number on this page would
+          be one no quote could honour. Tell us the shape of your deployment and you get
+          a real figure the same week.
+        </p>
       </div>
     </section>
 
@@ -874,15 +941,61 @@ const whitelabel = [
 }
 @keyframes flow { to { left: 110%; } }
 
-/* ---------- pricing ---------- */
-.price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.3rem; align-items: start; }
-.plan {
+/* ---------- pricing: deployment row, then tier row ---------- */
+.dep-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  align-items: start; margin-bottom: 2.6rem;
+}
+.dep {
+  padding: 1.5rem 1.3rem; border-radius: 16px;
+  border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(6px);
+  transition: border-color .3s, transform .3s;
+}
+.dep:hover { border-color: var(--line-2); transform: translateY(-3px); }
+.dep h3 { font-size: 1rem; font-weight: 700; margin-bottom: .35rem; }
+.dep-note { color: var(--mut); font-size: .86rem; line-height: 1.5; margin-bottom: .7rem; }
+.dep-basis {
+  display: inline-block; margin-bottom: 1rem;
+  padding: .22rem .6rem; border-radius: 999px;
+  font-size: .73rem; font-weight: 650; letter-spacing: .01em;
+  background: rgba(109,94,252,.16); color: var(--acc-2);
+}
+.dep ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; }
+.dep li { display: flex; align-items: flex-start; gap: .5rem; font-size: .85rem; color: var(--mut); }
+.dep li svg { color: #34d399; flex-shrink: 0; margin-top: 3px; }
+
+.tier-head { margin-bottom: 1.1rem; }
+.tier-head h3 { font-size: 1rem; font-weight: 700; color: var(--mut); }
+.tier-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.3rem; align-items: start;
+}
+.tier-tag { color: var(--mut); font-size: .88rem; margin-bottom: .8rem; }
+/* The point of the whole section: white-label is in both, so it is stated
+   inside both rather than implied by the more expensive one. */
+.wl-chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  margin-bottom: 1.2rem; padding: .28rem .7rem; border-radius: 999px;
+  font-size: .76rem; font-weight: 650;
+  background: rgba(52,211,153,.16); color: #34d399;
+}
+.tier-avail {
+  margin: -.4rem 0 1.4rem; padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  font-size: .8rem; color: var(--mut);
+}
+.tier-avail strong { display: block; margin-top: .2rem; color: var(--txt); font-weight: 600; }
+.price-foot {
+  margin-top: 2rem; max-width: 74ch;
+  font-size: .88rem; line-height: 1.65; color: var(--mut);
+}
+
+.plan, .tier {
   position: relative; padding: 2rem 1.7rem; border-radius: 18px;
   border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(6px);
   transition: transform .3s, border-color .3s, box-shadow .3s;
 }
-.plan:hover { transform: translateY(-5px); border-color: var(--line-2); }
-.plan.featured {
+.plan:hover, .tier:hover { transform: translateY(-5px); border-color: var(--line-2); }
+.plan.featured, .tier.featured {
   border-color: rgba(109,94,252,.6);
   background: linear-gradient(170deg, rgba(109,94,252,.14), rgba(255,255,255,.03));
   box-shadow: 0 22px 60px rgba(109,94,252,.22);
@@ -892,14 +1005,14 @@ const whitelabel = [
   padding: .25rem .75rem; border-radius: 999px; font-size: .7rem; font-weight: 700; white-space: nowrap;
   background: linear-gradient(135deg, var(--acc), var(--acc-2)); color: #fff;
 }
-.plan h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .55rem; }
+.plan h3, .tier h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .55rem; }
 .plan-price { font-size: 2.3rem; font-weight: 800; letter-spacing: -.035em; }
 .plan-price span { font-size: .95rem; font-weight: 500; color: var(--mut); }
 .plan-note { color: var(--mut); font-size: .85rem; margin-bottom: 1.4rem; }
-.plan ul { list-style: none; padding: 0; margin: 0 0 1.6rem; display: grid; gap: .6rem; }
-.plan li { display: flex; align-items: flex-start; gap: .55rem; font-size: .9rem; color: var(--mut); }
-.plan li svg { color: #34d399; flex-shrink: 0; margin-top: 2px; }
-.plan .btn { width: 100%; }
+.plan ul, .tier ul { list-style: none; padding: 0; margin: 0 0 1.6rem; display: grid; gap: .6rem; }
+.plan li, .tier li { display: flex; align-items: flex-start; gap: .55rem; font-size: .9rem; color: var(--mut); }
+.plan li svg, .tier li svg { color: #34d399; flex-shrink: 0; margin-top: 2px; }
+.plan .btn, .tier .btn { width: 100%; }
 
 /* ---------- cta band ---------- */
 .cta-band {
@@ -925,7 +1038,8 @@ const whitelabel = [
 @media (max-width: 960px) {
   .hero-inner { grid-template-columns: 1fr; }
   .hero-visual { order: -1; }
-  .feat-grid, .price-grid, .pipe { grid-template-columns: 1fr 1fr; }
+  .feat-grid, .pipe { grid-template-columns: 1fr 1fr; }
+  .dep-grid { grid-template-columns: 1fr 1fr; }
   .stat-grid { grid-template-columns: 1fr 1fr; }
   .foot-inner { grid-template-columns: 1fr 1fr; }
   .pipe-link { display: none; }
@@ -940,7 +1054,8 @@ const whitelabel = [
   }
   .nav-links.open { display: flex; }
   .nav-links .cta { justify-content: center; }
-  .feat-grid, .price-grid, .pipe, .stat-grid, .foot-inner { grid-template-columns: 1fr; }
+  .feat-grid, .pipe, .stat-grid, .foot-inner { grid-template-columns: 1fr; }
+  .dep-grid, .tier-grid { grid-template-columns: 1fr; }
   .float-card { display: none; }
   .cta-band { padding: 1.8rem; }
 }
@@ -1015,19 +1130,18 @@ const whitelabel = [
 .host li { display: flex; align-items: flex-start; gap: .55rem; font-size: .89rem; color: var(--mut); }
 .host li svg { color: #34d399; flex-shrink: 0; margin-top: 2px; }
 
-/* Four pricing tiers now, so the grid needs to breathe differently. */
-.price-grid { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-.plan { padding: 1.8rem 1.4rem; }
-.plan-price { font-size: 1.95rem; }
+/* Pricing is a 3-wide deployment row above a 2-wide tier row; the old
+   four-abreast plan grid it used to override is gone. */
+.tier { padding: 1.9rem 1.5rem; }
 
 @media (max-width: 1100px) {
-  .price-grid { grid-template-columns: repeat(2, 1fr); }
+  .dep-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 960px) {
   .host-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 680px) {
-  .price-grid { grid-template-columns: 1fr; }
+  .dep-grid, .tier-grid { grid-template-columns: 1fr; }
   .host { padding: 1.4rem; }
 }
 </style>

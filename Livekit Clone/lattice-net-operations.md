@@ -204,7 +204,45 @@ State machine: **valid → grace → read-only**. In read-only, existing calls a
 never cut; only writes are refused (402). Unlicensed installs run with trial
 limits (1 tenant, 2 concurrent sessions).
 
-Set `LATTICE_LICENCE_PUBKEY` to use your own signing key.
+### 6.1 Issuing licences (vendor side)
+
+`aetos-voice/tools/licence-issuer.py` is the only place the private half of the
+signing key exists. It never ships to a customer.
+
+```bash
+python tools/licence-issuer.py keygen          # once, ever — then back it up offline
+python tools/licence-issuer.py pubkey          # the value every runtime needs
+
+python tools/licence-issuer.py issue \
+  --licensee "Acme Pty Ltd" \
+  --owner-email owner@acme.example \
+  --tier enterprise \
+  --tenants-max -1 --sessions-max -1 \
+  --out acme.json
+```
+
+Keys live at `~/.aetos/issuer/signing.key` (0600) and `~/.aetos/issuer/public.key`.
+Rotating the signing key invalidates every licence already issued, which is why
+`keygen` refuses to overwrite without `--force`.
+
+Tiers: `starter`, `business`, `enterprise`. `--years N` for a fixed term, omit
+it for perpetual. `-1` on either cap means unlimited.
+
+### 6.2 Telling a runtime which key to trust
+
+Resolution order, most specific first:
+
+1. `LATTICE_LICENCE_PUBKEY` — env, for containers and CI
+2. `~/.aetos/licence.pub` — state file
+3. the compiled-in production key
+
+The state file matters because Core gets started several ways (aetosd, bare
+uvicorn, systemd). An env var set in one launcher is not set in the others, and
+a licence that verifies under one but not another is a miserable bug to chase.
+
+```bash
+python tools/licence-issuer.py pubkey > ~/.aetos/licence.pub
+```
 
 ---
 
@@ -259,14 +297,35 @@ in lockstep. Roll a provider back from Components; roll Core back with
 
 ## 10. Verification checklist
 
-Run `bash aetos-voice/core/test-isolation.sh` after any change to auth,
-tenancy or routing. It asserts, and all 19 currently pass:
+Four suites live in `aetos-voice/core/`. All 135 assertions currently pass.
 
-- every route rejects unauthenticated and malformed tokens (401)
-- each tenant sees only its own agents, sessions and audit rows
-- cross-tenant GET/PATCH/DELETE return 404, not 403
-- the same agent name is allowed in two tenants, rejected twice in one
-- platform-only surfaces refuse non-platform tenants (403)
+| Suite | Asserts | Count |
+| --- | --- | --- |
+| `test-isolation.sh` | auth gates, tenant isolation, cross-tenant 404, platform-only surfaces | 19 |
+| `test-versions.sh` | designer compile/publish/rollback/diff, brand asset upload safety | 27 |
+| `test-console.sh` | every endpoint each console screen calls, as a signed-in owner | 26 |
+| `test-sections.sh` | rooms, tools, knowledge base, reports, notes, recordings, settings groups | 63 |
+
+```bash
+cd aetos-voice/core
+for t in test-isolation.sh test-versions.sh test-console.sh test-sections.sh; do bash $t; done
+```
+
+Two rules these encode, worth keeping:
+
+- **Suites own their fixtures.** They seed `owner@default-demo.com` and
+  `owner@acme-demo.com` rather than borrowing a real account. Borrowing bit us
+  once: rotating the real owner's password broke the security tests, and
+  promoting that account to platform owner silently *inverted* the
+  "platform surfaces are refused" assertions — they passed for the wrong reason.
+- **Assert relationships, not literals.** Version numbers climb across runs and
+  demo data changes, so the checks are "n then n+1" and "non-empty vs exactly
+  zero", never a pinned count. A suite that fails on correct behaviour trains
+  you to ignore it.
+
+`test-sections.sh` restarts `tts-mock` as its last platform check. Running the
+suites back to back can catch that component mid-restart and report a transient
+502 — re-run rather than chasing it.
 
 Console: `npx vue-tsc --noEmit` must be clean (it is), and `npx vite build`
 must succeed (it does).
@@ -275,17 +334,39 @@ must succeed (it does).
 
 ## 11. Known gaps
 
-Honest list of what is **not** finished:
+Honest list of what is **not** finished. Anything absent from this list is
+built and covered by a test.
 
-- **Brand asset upload** is a URL field, not a file upload. `POST /branding/assets`
-  is specified but not implemented; host assets yourself for now.
-- **Agent designer** compiles to the flat `Pipeline` Core accepts today. The
-  `agent_versions` table exists and is migrated, but publish/rollback/diff
-  against stored versions is not yet wired — saving overwrites the live pipeline.
-- **Branch, transfer, hangup and webhook nodes** can be placed and configured in
-  the designer, but the runtime ignores them; only STT/LLM/TTS reach the agent.
-- **Sessions** have no audio playback — recordings are not yet surfaced.
-- **Tests** cover auth and tenant isolation only. There is no frontend test suite.
-- **Signup** is a request form, not self-service provisioning. Deliberate: open
-  signup would let anyone create tenants against your licence.
-- **Pricing figures on the marketing site are placeholders.**
+**Not built at all**
+
+- **Outbound dialer.** No queue, pacing, retry ladder or answering-machine
+  detection. The Campaigns screen says so on its face and does the part that is
+  real — outbound readiness and routing checks. Single dispatch works.
+- **Session audio playback.** `Recording` rows are created, listed, stopped and
+  deleted, but no media is captured or streamed yet — the row is metadata about
+  a capture the media plane does not yet perform.
+- **Knowledge base embedding.** Documents are stored and chunk counts are
+  computed with the real chunking arithmetic, but nothing is embedded or
+  retrieved. An agent cannot yet answer from a knowledge base.
+- **Frontend test suite.** Typecheck and build are enforced; there are no
+  component or end-to-end tests. Screens are verified by hand.
+
+**Built but shallow**
+
+- **Designer branch, transfer, hangup and webhook nodes** can be placed and
+  configured, and they compile, but the runtime ignores them; only STT/LLM/TTS
+  reach the agent.
+- **Provider API keys** (Integrations → API keys) stores Lattice Net's own
+  machine credentials. The long list of upstream provider keys VAAI carries —
+  OpenAI, Deepgram, ElevenLabs and the rest — is not modelled here yet;
+  providers take their credentials from their own sidecar environment.
+- **Simulation and Improvement lab** compute over stored sessions. They are
+  observational, not controlled experiments, and both say so on screen.
+
+**Deliberate**
+
+- **Signup is a request form**, not self-service provisioning. Open signup
+  would let anyone create tenants against your licence.
+- **Pricing figures are absent from the marketing site**, not placeholder
+  numbers. The licensing section presents the deployment × tier grid and says
+  pricing is quoted. Replace with real figures when the tiers are set.
