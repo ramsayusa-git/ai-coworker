@@ -26,13 +26,13 @@ export const partners = pgTable("partners", {
   // lookups — see partners.ts verify-domain route) or failed (checked, one or both missing).
   customDomainStatus: text("custom_domain_status").default("unset"),
   domainVerificationToken: text("domain_verification_token"),
-  domainVerifiedAt: timestamp("domain_verified_at"),
+  domainVerifiedAt: timestamp("domain_verified_at", { withTimezone: true }),
   // Verified (DNS resolves) and active (admin has switched it live) are separate on purpose —
   // an admin can verify a domain ahead of time, or pause a live one, without losing the DNS
   // check state. Public branding lookups require both.
   customDomainActive: boolean("custom_domain_active").default(false),
   billingMode: text("billing_mode").default("direct"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Partner-level team: users who manage a partner's client orgs (multi-vendor/reseller
@@ -45,7 +45,7 @@ export const partnerMembers = pgTable("partner_members", {
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   role: roleEnum("role").notNull().default("partner_admin"), // partner_owner | partner_admin | partner_support
   status: text("status").default("active"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.partnerId, t.userId)]);
 
 export const partnerInvites = pgTable("partner_invites", {
@@ -55,9 +55,9 @@ export const partnerInvites = pgTable("partner_invites", {
   role: roleEnum("role").notNull().default("partner_admin"), // partner_owner | partner_admin | partner_support
   token: text("token").notNull().unique(),
   invitedBy: uuid("invited_by").references(() => users.id),
-  acceptedAt: timestamp("accepted_at"),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const orgs = pgTable("orgs", {
@@ -71,7 +71,7 @@ export const orgs = pgTable("orgs", {
   // monthly | quarterly | annual — the brochure prices the same tiers three ways
   planCycle: text("plan_cycle").notNull().default("monthly"),
   planStatus: text("plan_status").notNull().default("active"), // active | past_due | cancelled
-  planRenewsAt: timestamp("plan_renews_at"),
+  planRenewsAt: timestamp("plan_renews_at", { withTimezone: true }),
   // Billing country decides which conversationRates row applies to this org's sends
   billingCountryCode: text("billing_country_code").notNull().default("IN"),
   // Which edition this org runs under — hosted | self_hosted | dedicated
@@ -80,7 +80,7 @@ export const orgs = pgTable("orgs", {
   timezone: text("timezone").default("Asia/Kolkata"),
   locale: text("locale").default("en"),
   settings: jsonb("settings").$type<Record<string, unknown>>().default({}),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const users = pgTable("users", {
@@ -89,7 +89,7 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash"),
   name: text("name"),
   mfaEnabled: boolean("mfa_enabled").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const orgMembers = pgTable("org_members", {
@@ -110,7 +110,7 @@ export const teams = pgTable("teams", {
   id: uuid("id").primaryKey().defaultRandom(),
   orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.orgId, t.name)]);
 
 export const teamMembers = pgTable("team_members", {
@@ -127,9 +127,9 @@ export const invites = pgTable("invites", {
   role: roleEnum("role").notNull().default("agent"),
   token: text("token").notNull().unique(),
   invitedBy: uuid("invited_by").references(() => users.id),
-  acceptedAt: timestamp("accepted_at"),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const channels = pgTable("channels", {
@@ -147,7 +147,7 @@ export const channels = pgTable("channels", {
   // Production per the architecture doc: move this into Vault/KMS and store only a reference here.
   credentials: jsonb("credentials").$type<Record<string, string>>().default({}),
   webhookVerifyToken: text("webhook_verify_token"),
-  connectedAt: timestamp("connected_at").defaultNow(),
+  connectedAt: timestamp("connected_at", { withTimezone: true }).defaultNow(),
 });
 
 // CRM company/account — the B2B entity a contact (person) belongs to. Optional: plenty of
@@ -163,7 +163,7 @@ export const companies = pgTable("companies", {
   address: text("address"),
   notes: text("notes"),
   ownerId: uuid("owner_id").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const contacts = pgTable("contacts", {
@@ -181,8 +181,8 @@ export const contacts = pgTable("contacts", {
   tags: text("tags").array().default([]),
   stage: text("stage").default("lead"),
   optIn: boolean("opt_in").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  lastContactedAt: timestamp("last_contacted_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }).defaultNow(),
 }, (t) => [unique().on(t.orgId, t.phoneE164)]);
 
 // CRM follow-ups/reminders/activities — a task tied to a contact and/or a deal, assignable,
@@ -200,13 +200,13 @@ export const tasks = pgTable("tasks", {
   description: text("description"),
   type: taskTypeEnum("type").default("follow_up"),
   status: taskStatusEnum("status").default("open"),
-  dueAt: timestamp("due_at"),
+  dueAt: timestamp("due_at", { withTimezone: true }),
   contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "cascade" }),
   dealId: uuid("deal_id").references(() => deals.id, { onDelete: "cascade" }),
   assigneeId: uuid("assignee_id").references(() => users.id),
   createdBy: uuid("created_by").references(() => users.id),
-  completedAt: timestamp("completed_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const conversations = pgTable("conversations", {
@@ -219,11 +219,11 @@ export const conversations = pgTable("conversations", {
   assignedTeamId: uuid("assigned_team_id").references(() => teams.id),
   unread: integer("unread").default(0),
   lastMessage: text("last_message"),
-  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  lastMessageAt: timestamp("last_message_at", { withTimezone: true }).defaultNow(),
   // Direction of the most recent message — drives the "pending your reply" SLA flag below
   // without a per-message lookup on every inbox render.
   lastMessageDirection: directionEnum("last_message_direction"),
-  serviceWindowExpiresAt: timestamp("service_window_expires_at"),
+  serviceWindowExpiresAt: timestamp("service_window_expires_at", { withTimezone: true }),
   // Gallabox-style "pin high-intent conversations" — kept at the top of the inbox
   // independent of status/assignment filters.
   pinned: boolean("pinned").default(false),
@@ -238,7 +238,7 @@ export const cannedResponses = pgTable("canned_responses", {
   shortcut: text("shortcut").notNull(),
   body: text("body").notNull(),
   createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.orgId, t.shortcut)]);
 
 // Refresh-token rotation: each login/refresh issues one row. `family` links every token
@@ -249,9 +249,9 @@ export const refreshTokens = pgTable("refresh_tokens", {
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   tokenHash: text("token_hash").notNull().unique(),
   family: uuid("family").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  revokedAt: timestamp("revoked_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Saved "Team Views" in the Inbox — a shared, named combination of filters (status,
@@ -264,7 +264,7 @@ export const savedViews = pgTable("saved_views", {
   name: text("name").notNull(),
   filters: jsonb("filters").$type<{ status?: string; assignFilter?: string; tag?: string }>().notNull().default({}),
   createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const conversationNotes = pgTable("conversation_notes", {
@@ -273,7 +273,7 @@ export const conversationNotes = pgTable("conversation_notes", {
   conversationId: uuid("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
   authorId: uuid("author_id").references(() => users.id),
   body: text("body").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const messages = pgTable("messages", {
@@ -294,7 +294,7 @@ export const messages = pgTable("messages", {
   campaignId: uuid("campaign_id"),
   providerMsgId: text("provider_msg_id"),
   errorMessage: text("error_message"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const templates = pgTable("templates", {
@@ -328,7 +328,7 @@ export const templates = pgTable("templates", {
   flowId: uuid("flow_id"),
   flowCtaText: text("flow_cta_text"),
   rejectionReason: text("rejection_reason"),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.orgId, t.name, t.language)]);
 
 export const bots = pgTable("bots", {
@@ -340,7 +340,7 @@ export const bots = pgTable("bots", {
   triggerSummary: text("trigger_summary").notNull(),
   nodes: jsonb("nodes").$type<Array<{ id: string; type: string; label: string; detail: string; x: number; y: number }>>().default([]),
   edges: jsonb("edges").$type<Array<{ from: string; to: string; label?: string }>>().default([]),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const campaigns = pgTable("campaigns", {
@@ -351,7 +351,7 @@ export const campaigns = pgTable("campaigns", {
   segment: text("segment").notNull(),
   audienceCount: integer("audience_count").default(0),
   status: text("status").default("draft"),
-  scheduledAt: timestamp("scheduled_at"),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
   channelId: uuid("channel_id").references(() => channels.id),
   dailyLimit: integer("daily_limit").default(250),
   // "single" = the original one-message blast; "drip" = a real multi-step sequence,
@@ -362,7 +362,7 @@ export const campaigns = pgTable("campaigns", {
   smsFallback: boolean("sms_fallback").default(false),
   stats: jsonb("stats").$type<{ sent: number; delivered: number; read: number; failed: number }>()
     .default({ sent: 0, delivered: 0, read: 0, failed: 0 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const campaignSteps = pgTable("campaign_steps", {
@@ -385,9 +385,9 @@ export const campaignRecipients = pgTable("campaign_recipients", {
   orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
   contactId: uuid("contact_id").notNull().references(() => contacts.id, { onDelete: "cascade" }),
   currentStep: integer("current_step").default(0),
-  nextSendAt: timestamp("next_send_at").defaultNow(),
+  nextSendAt: timestamp("next_send_at", { withTimezone: true }).defaultNow(),
   status: text("status").default("active"), // active | paused | completed
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.campaignId, t.contactId)]);
 
 // Wati-style Automations "Rules": trigger + filter + action, evaluated live against real
@@ -409,8 +409,8 @@ export const automationRules = pgTable("automation_rules", {
     | { type: "change_status"; status: string }
     | { type: "create_deal"; pipelineId: string; stageId: string; title?: string; valuePaise?: number }
   >>().default([]),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Wati's "Ads" module — Click-to-WhatsApp campaigns on Meta Ads. Real Graph Marketing API
@@ -425,11 +425,11 @@ export const adCampaigns = pgTable("ad_campaigns", {
   platform: text("platform").notNull().default("whatsapp"), // whatsapp|facebook|instagram|twitter|linkedin|google_ads|tiktok
   name: text("name").notNull(),
   dailyBudgetPaise: integer("daily_budget_paise").notNull(),
-  scheduledAt: timestamp("scheduled_at"), // null = launch immediately on create
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }), // null = launch immediately on create
   status: text("status").default("draft"), // draft | scheduled | active | failed
   externalCampaignId: text("external_campaign_id"),
   errorMessage: text("error_message"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Organic social posts — Facebook/Instagram/Twitter(X)/LinkedIn/TikTok. Real publish API
@@ -441,10 +441,10 @@ export const socialPosts = pgTable("social_posts", {
   platforms: text("platforms").array().notNull().default([]), // subset of facebook|instagram|twitter|linkedin|tiktok
   caption: text("caption").notNull(),
   mediaUrl: text("media_url"),
-  scheduledAt: timestamp("scheduled_at"),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
   status: text("status").default("draft"), // draft | scheduled | published | failed
   results: jsonb("results").$type<Record<string, { status: "published" | "failed"; externalId?: string; error?: string }>>().default({}),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 
@@ -457,7 +457,7 @@ export const pipelines = pgTable("pipelines", {
   orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   isDefault: boolean("is_default").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const pipelineStages = pgTable("pipeline_stages", {
@@ -482,12 +482,12 @@ export const deals = pgTable("deals", {
   contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
   conversationId: uuid("conversation_id").references(() => conversations.id, { onDelete: "set null" }),
   assigneeId: uuid("assignee_id").references(() => users.id),
-  expectedCloseDate: timestamp("expected_close_date"),
+  expectedCloseDate: timestamp("expected_close_date", { withTimezone: true }),
   notes: text("notes"),
   status: dealStatusEnum("status").default("open"),
   position: integer("position").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ---------------------------------------------------------------------------
@@ -512,9 +512,9 @@ export const flows = pgTable("flows", {
   metaFlowId: text("meta_flow_id"),
   channelId: uuid("channel_id").references(() => channels.id, { onDelete: "set null" }),
   publishError: text("publish_error"),
-  publishedAt: timestamp("published_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // One customer's completed flow submission (Meta delivers it as an interactive
@@ -527,7 +527,7 @@ export const flowResponses = pgTable("flow_responses", {
   contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "cascade" }),
   conversationId: uuid("conversation_id").references(() => conversations.id, { onDelete: "cascade" }),
   answers: jsonb("answers").$type<Record<string, unknown>>().default({}),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ---------------------------------------------------------------------------
@@ -570,7 +570,7 @@ export const conversationRates = pgTable("conversation_rates", {
   authenticationMilliPaise: integer("authentication_milli_paise").notNull().default(0),
   serviceMilliPaise: integer("service_milli_paise").notNull().default(0),
   markupBps: integer("markup_bps").notNull().default(0), // 0 = no markup, brochure promise
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.countryCode)]);
 
 // Wallet ledger. Every credit (top-up, signup bonus) and debit (a charged
@@ -584,7 +584,7 @@ export const walletTransactions = pgTable("wallet_transactions", {
   reason: text("reason").notNull(),
   refType: text("ref_type"), // conversation_charge | topup | plan_change
   refId: text("ref_id"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // One charged 24h conversation window (Meta bills per conversation, not per
@@ -597,10 +597,10 @@ export const conversationCharges = pgTable("conversation_charges", {
   category: text("category").notNull(), // marketing | utility | authentication | service
   countryCode: text("country_code").notNull(),
   ratePaise: integer("rate_paise").notNull(), // milli-paise actually charged
-  windowStart: timestamp("window_start").notNull(),
-  windowEnd: timestamp("window_end").notNull(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+  windowEnd: timestamp("window_end", { withTimezone: true }).notNull(),
   messageId: uuid("message_id"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.conversationId, t.category, t.windowStart)]);
 
 // ---------------------------------------------------------------------------
@@ -614,7 +614,7 @@ export const webhookEndpoints = pgTable("webhook_endpoints", {
   secret: text("secret").notNull(), // HMAC-SHA256 signing secret, shown once on create
   events: text("events").array().default([]),
   active: boolean("active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const webhookDeliveries = pgTable("webhook_deliveries", {
@@ -627,9 +627,9 @@ export const webhookDeliveries = pgTable("webhook_deliveries", {
   attempts: integer("attempts").notNull().default(0),
   responseCode: integer("response_code"),
   error: text("error"),
-  nextAttemptAt: timestamp("next_attempt_at").defaultNow(),
-  deliveredAt: timestamp("delivered_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).defaultNow(),
+  deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Developer API keys for the public REST API (/api/v1/*). Only the SHA-256 hash is
@@ -642,9 +642,9 @@ export const apiKeys = pgTable("api_keys", {
   keyHash: text("key_hash").notNull(),
   scopes: text("scopes").array().default([]),
   createdBy: uuid("created_by").references(() => users.id),
-  lastUsedAt: timestamp("last_used_at"),
-  revokedAt: timestamp("revoked_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.keyHash)]);
 
 // Per-user dashboard layout: which widgets are on the grid, in what order, and how
@@ -655,7 +655,7 @@ export const dashboardLayouts = pgTable("dashboard_layouts", {
   orgId: uuid("org_id").notNull().references(() => orgs.id, { onDelete: "cascade" }),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   widgets: jsonb("widgets").$type<Array<{ id: string; type: string; w: number; h: number }>>().default([]),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.orgId, t.userId)]);
 
 // ---------------------------------------------------------------------------
@@ -689,11 +689,11 @@ export const licenses = pgTable("licenses", {
   channels: integer("channels").notNull().default(-1),
   maxInstances: integer("max_instances").notNull().default(1),
   whiteLabel: boolean("white_label").notNull().default(true),
-  validFrom: timestamp("valid_from").defaultNow().notNull(),
-  validUntil: timestamp("valid_until"),
+  validFrom: timestamp("valid_from", { withTimezone: true }).defaultNow().notNull(),
+  validUntil: timestamp("valid_until", { withTimezone: true }),
   status: text("status").notNull().default("active"), // active | suspended | revoked | expired
   notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.keyHash)]);
 
 // One running instance that has activated against a licence. This is how seat and
@@ -705,7 +705,7 @@ export const licenseActivations = pgTable("license_activations", {
   hostname: text("hostname"),
   version: text("version"),
   ipAddress: text("ip_address"),
-  firstSeenAt: timestamp("first_seen_at").defaultNow().notNull(),
-  lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
-  revokedAt: timestamp("revoked_at"),
+  firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).defaultNow().notNull(),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).defaultNow().notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
 }, (t) => [unique().on(t.licenseId, t.instanceId)]);

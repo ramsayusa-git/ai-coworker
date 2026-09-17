@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { recreateTestDatabase, migrateTestDatabase, seedTestCatalogue, dropTestDatabase } from "./helpers/db.js";
 
-// Build the schema BEFORE importing anything that opens a connection pool.
-recreateTestDatabase();
-migrateTestDatabase();
-seedTestCatalogue();
+// The test database is built once in tests/helpers/global-setup.ts.
 
 const { buildApp, body } = await import("./helpers/app.js");
 
@@ -31,7 +27,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await app?.close();
-  dropTestDatabase();
 });
 
 const auth = () => ({ authorization: `Bearer ${token}` });

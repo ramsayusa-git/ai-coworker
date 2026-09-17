@@ -5,6 +5,7 @@ import { channels, contacts, conversations, messages, campaignRecipients, flowRe
 import { getAdapter, type NormalizedInboundMessage } from "../adapters/index.js";
 import { runAutomations } from "./automations.js";
 import { emitEvent } from "../events.js";
+import { captureSurveyAnswer } from "./surveys.js";
 
 async function ingestInbound(orgId: string, channelId: string, evt: NormalizedInboundMessage) {
   let [contact] = await db.select().from(contacts)
@@ -59,6 +60,10 @@ async function ingestInbound(orgId: string, channelId: string, evt: NormalizedIn
       conversationId: conv.id, answers: saved.answers,
     });
   }
+
+  // A bare number arriving shortly after we asked is a survey score, not a message to
+  // route. Returns false for anything else, which then flows on as normal.
+  await captureSurveyAnswer(orgId, contact.id, conv.id, evt.body);
 
   await emitEvent(orgId, "message.received", {
     messageId: inboundMsg.id, conversationId: conv.id, contactId: contact.id,

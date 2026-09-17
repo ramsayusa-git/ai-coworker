@@ -15,6 +15,13 @@
       "when": 1789622948475,
       "tag": "0001_crm_service_desk",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789625297532,
+      "tag": "0002_timestamptz",
+      "breakpoints": true
     }
   ]
 }

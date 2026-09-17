@@ -21,6 +21,11 @@ export async function buildApp() {
   const { licenseActivationRoutes, partnerLicenseRoutes } = await import("../../src/modules/licenses.js");
   const { partnersRoutes } = await import("../../src/modules/partners.js");
   const { dashboardRoutes } = await import("../../src/modules/dashboard.js");
+  const { ticketsRoutes } = await import("../../src/modules/tickets.js");
+  const { leadsRoutes } = await import("../../src/modules/leads.js");
+  const { quotesRoutes, appointmentsRoutes } = await import("../../src/modules/sales-extras.js");
+  const { surveysRoutes } = await import("../../src/modules/surveys.js");
+  const { timelineRoutes } = await import("../../src/modules/timeline.js");
 
   const app = Fastify({ logger: false });
   await app.register(cors, { origin: true, methods: ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE"] });
@@ -48,6 +53,12 @@ export async function buildApp() {
     await scoped.register(billingRoutes);
     await scoped.register(developerRoutes);
     await scoped.register(dashboardRoutes);
+    await scoped.register(ticketsRoutes);
+    await scoped.register(leadsRoutes);
+    await scoped.register(quotesRoutes);
+    await scoped.register(appointmentsRoutes);
+    await scoped.register(surveysRoutes);
+    await scoped.register(timelineRoutes);
   }, { prefix: "/v1" });
 
   await app.ready();

@@ -2,7 +2,7 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "./client.js";
-import * as s from "./schema.js";
+import * as s from "./schema-all.js";
 
 // Full-fat demo data: one org with enough real history that every screen in the app
 // shows something. Idempotent — everything hangs off a single org with a fixed slug,
@@ -370,11 +370,140 @@ async function main() {
       ratePaise: 11500, windowStart, windowEnd: new Date(windowStart.getTime() + DAY) },
   ]).onConflictDoNothing();
 
+  // ---- service desk -------------------------------------------------------
+  await db.insert(s.ticketRules).values([
+    { orgId: org.id, name: "Billing goes to Front Desk", position: 0,
+      conditions: [{ field: "subject", op: "contains", value: "invoice" }],
+      action: "round_robin", actionConfig: { teamId: team.id } },
+    { orgId: org.id, name: "Delivery issues are high priority", position: 1,
+      conditions: [{ field: "category", op: "eq", value: "delivery" }],
+      action: "set_priority", actionConfig: { priority: "high" } },
+  ]);
+
+  const ticketSpecs = [
+    ["Blue Fronx delivery is late", "delivery", "high", "open", 0, 0, 30],
+    ["Wrong invoice amount on #4821", "billing", "urgent", "open", 1, 1, 3],
+    ["Service centre closed on arrival", "service", "normal", "pending", 2, 0, 26],
+    ["Need duplicate registration papers", "documents", "low", "resolved", 5, 1, 72],
+    ["App login not working", "technical", "normal", "closed", 7, 0, 96],
+  ] as const;
+
+  for (let i = 0; i < ticketSpecs.length; i++) {
+    const [subject, category, priority, status, contactIdx, agentIdx, hoursAgo] = ticketSpecs[i];
+    const created = ago(0, hoursAgo);
+    const slaHours = priority === "urgent" ? 2 : priority === "high" ? 4 : priority === "low" ? 72 : 24;
+    // The first two are deliberately left without a first response and past their SLA,
+    // so the breach badge has something real to show.
+    const answered = i > 1;
+    const [t] = await db.insert(s.tickets).values({
+      orgId: org.id, number: i + 1, subject,
+      body: `Customer reported: ${subject.toLowerCase()}.`,
+      category, priority, status: status as any, source: "whatsapp",
+      contactId: contacts[contactIdx].id,
+      conversationId: convRows[contactIdx % convRows.length].id,
+      assigneeId: agents[agentIdx].id,
+      slaDueAt: new Date(created.getTime() + slaHours * 3600_000),
+      firstResponseAt: answered ? new Date(created.getTime() + 40 * 60_000) : null,
+      resolvedAt: status === "resolved" || status === "closed" ? ago(0, hoursAgo - 4) : null,
+      closedAt: status === "closed" ? ago(0, hoursAgo - 2) : null,
+      createdBy: owner.id, createdAt: created, updatedAt: created,
+    }).returning();
+
+    await db.insert(s.ticketEvents).values([
+      { orgId: org.id, ticketId: t.id, kind: "created", body: "Created from a WhatsApp conversation.", actorId: owner.id, createdAt: created },
+      ...(answered ? [{ orgId: org.id, ticketId: t.id, kind: "reply", body: "Thanks for flagging — looking into this now.", actorId: agents[agentIdx].id, createdAt: new Date(created.getTime() + 40 * 60_000) }] : []),
+      ...(status === "resolved" || status === "closed" ? [{ orgId: org.id, ticketId: t.id, kind: "status", body: `Status open → ${status}`, actorId: agents[agentIdx].id, createdAt: ago(0, hoursAgo - 4) }] : []),
+    ] as any);
+  }
+
+  // ---- lead scoring + distribution ----------------------------------------
+  await db.insert(s.leadScoringRules).values([
+    { orgId: org.id, name: "VIP tag", criterion: "has_tag", value: "vip", points: 30 },
+    { orgId: org.id, name: "Has an open deal", criterion: "has_open_deal", points: 25 },
+    { orgId: org.id, name: "Replied in the last 7 days", criterion: "replied_within_days", value: "7", points: 20 },
+    { orgId: org.id, name: "Repeat customer", criterion: "has_tag", value: "repeat", points: 15 },
+  ]);
+  await db.insert(s.distributionRules).values({
+    orgId: org.id, name: "Round-robin across Front Desk", strategy: "round_robin",
+    targetTeamId: team.id, conditions: [], position: 0,
+  });
+
+  // ---- quotes -------------------------------------------------------------
+  const quoteSpecs = [
+    ["Fronx Sigma + accessories", 0, "sent", 18, 5000_00, [["Fronx Sigma", 1, 985000_00], ["Extended warranty", 2, 15000_00]]],
+    ["Annual service package", 1, "accepted", 18, 0, [["AMC gold, 12 months", 1, 42000_00]]],
+    ["Fleet of 4 — Nova Interiors", 4, "draft", 18, 50000_00, [["Ertiga ZXi", 4, 950000_00], ["Fleet branding", 4, 12000_00]]],
+  ] as const;
+
+  for (let i = 0; i < quoteSpecs.length; i++) {
+    const [title, contactIdx, status, taxPercent, discountPaise, lines] = quoteSpecs[i];
+    const subtotal = lines.reduce((acc, [, qty, price]) => acc + (qty as number) * (price as number), 0);
+    const taxable = subtotal - discountPaise;
+    const taxPaise = Math.round((taxable * taxPercent) / 100);
+    const [q] = await db.insert(s.quotes).values({
+      orgId: org.id, number: i + 1, title, contactId: contacts[contactIdx].id,
+      status: status as any, taxPercent, discountPaise,
+      subtotalPaise: subtotal, taxPaise, totalPaise: taxable + taxPaise,
+      validUntil: new Date(Date.now() + 14 * DAY),
+      sentAt: status === "draft" ? null : ago(3 + i),
+      acceptedAt: status === "accepted" ? ago(1) : null,
+      createdBy: owner.id, createdAt: ago(5 + i),
+    }).returning();
+    await db.insert(s.quoteItems).values(lines.map(([description, quantity, unitPricePaise], j) => ({
+      orgId: org.id, quoteId: q.id, description: description as string,
+      quantity: quantity as number, unitPricePaise: unitPricePaise as number, position: j,
+    })));
+  }
+
+  // ---- appointments -------------------------------------------------------
+  await db.insert(s.appointments).values([
+    { orgId: org.id, title: "Test drive — Fronx Sigma", contactId: contacts[0].id, assigneeId: agents[0].id,
+      startsAt: new Date(Date.now() + 1 * DAY), durationMinutes: 45, location: "Delhi showroom", status: "confirmed" },
+    { orgId: org.id, title: "Service pickup — Audi R8", contactId: contacts[2].id, assigneeId: agents[1].id,
+      startsAt: new Date(Date.now() + 2 * DAY + 3 * 3600_000), durationMinutes: 30, location: "Customer address", status: "scheduled" },
+    { orgId: org.id, title: "Fleet walkthrough", contactId: contacts[4].id, assigneeId: agents[1].id,
+      startsAt: new Date(Date.now() + 4 * DAY), durationMinutes: 90, location: "Nova Interiors office", status: "scheduled" },
+    { orgId: org.id, title: "Handover — Ertiga", contactId: contacts[5].id, assigneeId: agents[0].id,
+      startsAt: ago(2), durationMinutes: 60, location: "Delhi showroom", status: "completed" },
+  ]);
+
+  // ---- surveys ------------------------------------------------------------
+  const [csat] = await db.insert(s.surveys).values({
+    orgId: org.id, name: "Post-service CSAT", kind: "csat",
+    question: "How did we do today?", trigger: "conversation_resolved",
+    channelId: channel.id, delayMinutes: 15,
+  }).returning();
+  const [nps] = await db.insert(s.surveys).values({
+    orgId: org.id, name: "Quarterly NPS", kind: "nps",
+    question: "How likely are you to recommend Aetos Demo Store?", trigger: "none",
+    channelId: channel.id, delayMinutes: 0,
+  }).returning();
+
+  const csatScores = [5, 4, 5, 3, null];
+  for (let i = 0; i < csatScores.length; i++) {
+    const score = csatScores[i];
+    await db.insert(s.surveyResponses).values({
+      orgId: org.id, surveyId: csat.id, contactId: contacts[i].id,
+      conversationId: convRows[i % convRows.length].id,
+      score, comment: score === 3 ? "Took a while to get a reply" : score ? "All good" : null,
+      status: score === null ? "sent" : "answered",
+      sentAt: ago(i + 1), answeredAt: score === null ? null : ago(i + 1, -2),
+    }).onConflictDoNothing();
+  }
+  for (const [i, score] of [9, 10, 6].entries()) {
+    await db.insert(s.surveyResponses).values({
+      orgId: org.id, surveyId: nps.id, contactId: contacts[i + 2].id,
+      conversationId: convRows[(i + 2) % convRows.length].id,
+      score, status: "answered", sentAt: ago(6 + i), answeredAt: ago(6 + i, -3),
+    }).onConflictDoNothing();
+  }
+
   console.log(JSON.stringify({
     orgId: org.id, login: DEMO_EMAIL, password: DEMO_PASSWORD,
     contacts: contacts.length, conversations: convRows.length, templates: templateRows.length,
     companies: companyRows.length, deals: dealSpecs.length, agents: agents.length,
     campaigns: 3, flows: 1, pipelineStages: stages.length,
+    tickets: ticketSpecs.length, quotes: quoteSpecs.length, appointments: 4, surveys: 2,
   }, null, 2));
   process.exit(0);
 }

@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { recreateTestDatabase, migrateTestDatabase, seedTestCatalogue, dropTestDatabase } from "./helpers/db.js";
 
-recreateTestDatabase();
-migrateTestDatabase();
-seedTestCatalogue();
 
 const { buildApp, body } = await import("./helpers/app.js");
 
@@ -32,7 +28,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await app?.close();
-  dropTestDatabase();
 });
 
 const auth = () => ({ authorization: `Bearer ${token}` });

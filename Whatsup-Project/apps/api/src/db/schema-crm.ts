@@ -30,14 +30,14 @@ export const tickets = pgTable("tickets", {
   assignedTeamId: uuid("assigned_team_id").references(() => teams.id, { onDelete: "set null" }),
   // Merging keeps the duplicate row so its number still resolves, pointing at the survivor.
   mergedIntoId: uuid("merged_into_id"),
-  firstResponseAt: timestamp("first_response_at"),
-  slaDueAt: timestamp("sla_due_at"),
-  resolvedAt: timestamp("resolved_at"),
-  closedAt: timestamp("closed_at"),
+  firstResponseAt: timestamp("first_response_at", { withTimezone: true }),
+  slaDueAt: timestamp("sla_due_at", { withTimezone: true }),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  closedAt: timestamp("closed_at", { withTimezone: true }),
   tags: text("tags").array().default([]),
   createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.orgId, t.number)]);
 
 // Append-only activity log — every status change, assignment, note and reply.
@@ -50,7 +50,7 @@ export const ticketEvents = pgTable("ticket_events", {
   body: text("body"),
   meta: jsonb("meta").$type<Record<string, unknown>>().default({}),
   actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Auto-assignment and routing, evaluated in `position` order on ticket creation.
@@ -65,7 +65,7 @@ export const ticketRules = pgTable("ticket_rules", {
   // assign_team | assign_agent | round_robin | set_priority | set_category | set_sla
   action: text("action").notNull(),
   actionConfig: jsonb("action_config").$type<Record<string, unknown>>().default({}),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ---------------------------------------------------------------------------
@@ -80,7 +80,7 @@ export const leadScoringRules = pgTable("lead_scoring_rules", {
   criterion: text("criterion").notNull(),
   value: text("value"),
   points: integer("points").notNull().default(10),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const distributionRules = pgTable("distribution_rules", {
@@ -98,7 +98,7 @@ export const distributionRules = pgTable("distribution_rules", {
   targetTeamId: uuid("target_team_id").references(() => teams.id, { onDelete: "set null" }),
   // Where round-robin got to last time, so assignment survives a restart.
   cursor: integer("cursor").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ---------------------------------------------------------------------------
@@ -122,12 +122,12 @@ export const quotes = pgTable("quotes", {
   discountPaise: integer("discount_paise").notNull().default(0),
   totalPaise: integer("total_paise").notNull().default(0),
   notes: text("notes"),
-  validUntil: timestamp("valid_until"),
-  sentAt: timestamp("sent_at"),
-  acceptedAt: timestamp("accepted_at"),
+  validUntil: timestamp("valid_until", { withTimezone: true }),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
   createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [unique().on(t.orgId, t.number)]);
 
 export const quoteItems = pgTable("quote_items", {
@@ -150,7 +150,7 @@ export const appointments = pgTable("appointments", {
   contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
   dealId: uuid("deal_id").references(() => deals.id, { onDelete: "set null" }),
   assigneeId: uuid("assignee_id").references(() => users.id, { onDelete: "set null" }),
-  startsAt: timestamp("starts_at").notNull(),
+  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
   durationMinutes: integer("duration_minutes").notNull().default(30),
   location: text("location"),
   notes: text("notes"),
@@ -159,9 +159,9 @@ export const appointments = pgTable("appointments", {
   // Reminder sent over WhatsApp; the timestamp stops it being sent twice.
   reminderTemplateId: uuid("reminder_template_id").references(() => templates.id, { onDelete: "set null" }),
   reminderMinutesBefore: integer("reminder_minutes_before").default(60),
-  reminderSentAt: timestamp("reminder_sent_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  reminderSentAt: timestamp("reminder_sent_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ---------------------------------------------------------------------------
@@ -182,7 +182,7 @@ export const surveys = pgTable("surveys", {
   // Wait this long after the trigger before asking, so the survey doesn't land
   // in the middle of the conversation it is asking about.
   delayMinutes: integer("delay_minutes").notNull().default(15),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const surveyResponses = pgTable("survey_responses", {
@@ -196,6 +196,6 @@ export const surveyResponses = pgTable("survey_responses", {
   comment: text("comment"),
   // sent | answered | expired
   status: text("status").notNull().default("sent"),
-  sentAt: timestamp("sent_at").defaultNow().notNull(),
-  answeredAt: timestamp("answered_at"),
+  sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow().notNull(),
+  answeredAt: timestamp("answered_at", { withTimezone: true }),
 }, (t) => [unique().on(t.surveyId, t.conversationId)]);

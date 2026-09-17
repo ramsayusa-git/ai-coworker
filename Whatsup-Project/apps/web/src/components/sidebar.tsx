@@ -25,6 +25,7 @@ const navSections: NavSection[] = [
     section: "Conversations",
     items: [
       { href: "/inbox", label: "Inbox", icon: "inbox" },
+      { href: "/tickets", label: "Tickets", icon: "help" },
       { href: "/channels", label: "Channels", icon: "channels" },
     ],
   },
@@ -35,7 +36,10 @@ const navSections: NavSection[] = [
         href: "/contacts", label: "Contacts", icon: "contacts",
         children: [
           { href: "/companies", label: "Companies", icon: "companies" },
+          { href: "/leads", label: "Leads", icon: "users" },
           { href: "/deals", label: "Deals", icon: "deals" },
+          { href: "/quotes", label: "Quotes", icon: "templates" },
+          { href: "/appointments", label: "Appointments", icon: "tasks" },
           { href: "/tasks", label: "Tasks", icon: "tasks" },
         ],
       },
@@ -57,6 +61,7 @@ const navSections: NavSection[] = [
     items: [
       { href: "/bots", label: "Bots", icon: "bots" },
       { href: "/automations", label: "Rules", icon: "automations" },
+      { href: "/surveys", label: "Surveys", icon: "analytics" },
     ],
   },
   {
