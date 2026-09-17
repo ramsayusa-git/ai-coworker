@@ -9,7 +9,14 @@
     "start": "node dist/server.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit-*.test.ts",
+    "test:e2e": "vitest run tests/integration-*.test.ts",
+    "test:watch": "vitest",
+    "db:demo": "tsx src/db/demo-seed.ts",
+    "db:seed:billing": "tsx src/db/seed-billing.ts",
+    "db:seed:editions": "tsx src/db/seed-editions.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
@@ -28,8 +35,10 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.20.2",
+    "@vitest/coverage-v8": "^5.0.1",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
   }
 }

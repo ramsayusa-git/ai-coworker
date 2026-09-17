@@ -22,6 +22,10 @@ const CAPABILITIES = {
   update_conversation_status: ["org_owner", "org_admin", "supervisor", "agent"],
   manage_automations: ["org_owner", "org_admin", "supervisor"],
   manage_ads: ["org_owner", "org_admin"],
+  manage_tickets: ["org_owner", "org_admin", "supervisor", "agent"],
+  manage_quotes: ["org_owner", "org_admin", "supervisor", "agent"],
+  manage_appointments: ["org_owner", "org_admin", "supervisor", "agent"],
+  manage_surveys: ["org_owner", "org_admin", "supervisor"],
 } as const;
 
 export type Capability = keyof typeof CAPABILITIES;
@@ -41,8 +45,8 @@ const FUNCTIONAL_ROLE_CAPS: Record<FunctionalRole, Capability[]> = {
   administrator: Object.keys(CAPABILITIES) as Capability[],
   broadcast_manager: ["manage_campaigns", "send_messages", "manage_ads"],
   template_manager: ["manage_templates"],
-  contact_manager: ["manage_contacts", "manage_deals", "manage_companies", "manage_tasks"],
-  operator: ["send_messages", "update_conversation_status", "assign_conversations"],
+  contact_manager: ["manage_contacts", "manage_deals", "manage_companies", "manage_tasks", "manage_quotes", "manage_appointments"],
+  operator: ["send_messages", "update_conversation_status", "assign_conversations", "manage_tickets"],
   developer: ["manage_channels", "manage_settings"],
   billing_manager: ["manage_billing"],
   dashboard_viewer: [],

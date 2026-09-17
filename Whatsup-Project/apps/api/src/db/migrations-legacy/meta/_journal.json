@@ -1,0 +1,69 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789206480106,
+      "tag": "0000_tan_beast",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789206965688,
+      "tag": "0001_perfect_black_tom",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789207861042,
+      "tag": "0002_tired_black_panther",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789207919942,
+      "tag": "0003_low_hercules",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789383596490,
+      "tag": "0004_overrated_microchip",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789398496341,
+      "tag": "0005_woozy_blue_blade",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789462906266,
+      "tag": "0006_emovur_features",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789464889127,
+      "tag": "0007_dashboard_layouts",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789471368539,
+      "tag": "0008_deployment_editions",
+      "breakpoints": true
+    }
+  ]
+}

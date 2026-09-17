@@ -17,7 +17,8 @@ BEGIN
     'automation_rules','ad_campaigns','social_posts',
     'companies','tasks','pipelines','pipeline_stages','deals',
     'flows','flow_responses','wallet_transactions','conversation_charges',
-    'webhook_endpoints','webhook_deliveries','api_keys','dashboard_layouts'
+    'webhook_endpoints','webhook_deliveries','api_keys','dashboard_layouts',
+    'tickets','ticket_events','ticket_rules','lead_scoring_rules','distribution_rules','quotes','quote_items','appointments','surveys','survey_responses'
   ]
   LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);

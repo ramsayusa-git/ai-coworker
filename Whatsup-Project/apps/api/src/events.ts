@@ -15,6 +15,9 @@ export const WEBHOOK_EVENTS = [
   "campaign.completed",
   "flow.response",
   "deal.stage_changed",
+  "ticket.created",
+  "ticket.status_changed",
+  "survey.answered",
 ] as const;
 export type WebhookEvent = (typeof WEBHOOK_EVENTS)[number];
 
