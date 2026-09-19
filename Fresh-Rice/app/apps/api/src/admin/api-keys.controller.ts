@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -28,9 +28,51 @@ export class ApiKeysController {
     return { id: key.id, name: key.name, prefix: key.prefix, scopes, user: { id: usr.id, name: usr.name, role: usr.role }, key: plain, note: 'Copy this key now — it is not shown again.' };
   }
 
+  /** Edit a key: rename, change scopes, change expiry. The secret itself is never
+   *  editable (we only store its hash), and a revoked key cannot be brought back —
+   *  if you need it working again, issue a new one. */
+  @Patch(':id') async update(@CurrentUser() u: any, @Param('id') id: string, @Body() b: { name?: string; scopes?: string[]; expiresInDays?: number | null }) {
+    const cur = await this.db.apiKey.findUnique({ where: { id } });
+    if (!cur) throw new NotFoundException('Key not found');
+    if (cur.revokedAt) throw new BadRequestException('This key is revoked — issue a new one instead of editing it');
+
+    const data: any = {};
+    if (b.name !== undefined) {
+      if (!b.name.trim()) throw new BadRequestException('name cannot be empty');
+      data.name = b.name.trim();
+    }
+    if (b.scopes !== undefined) {
+      const scopes = b.scopes.filter((s) => ['read', 'write'].includes(s));
+      if (!scopes.includes('read')) scopes.push('read'); // read is implied by write; never leave a key with nothing
+      data.scopes = scopes;
+    }
+    if (b.expiresInDays !== undefined) {
+      data.expiresAt = b.expiresInDays === null ? null : new Date(Date.now() + Number(b.expiresInDays) * 86400000);
+    }
+    if (!Object.keys(data).length) throw new BadRequestException('Nothing to update');
+
+    const k = await this.db.apiKey.update({ where: { id }, data });
+    await this.db.event.create({ data: { actor: u.sub, type: 'api_key_updated', payload: { id, before: { name: cur.name, scopes: cur.scopes, expiresAt: cur.expiresAt }, after: data } } });
+    return { ...k, keyHash: undefined };
+  }
+
+  /** Revoke: the key stops working immediately but the row stays, so the audit trail
+   *  and lastUsedAt survive. This is the safe default and what the UI offers first. */
   @Delete(':id') async revoke(@CurrentUser() u: any, @Param('id') id: string) {
     const k = await this.db.apiKey.update({ where: { id }, data: { revokedAt: new Date() } });
     await this.db.event.create({ data: { actor: u.sub, type: 'api_key_revoked', payload: { id, name: k.name } } });
     return { ok: true };
+  }
+
+  /** Hard delete, for clearing out old revoked keys. Deliberately only possible on a
+   *  key that is ALREADY revoked — that makes destroying a working integration a
+   *  two-step action rather than one mis-click, and the Event row keeps the history. */
+  @Delete(':id/permanent') async purge(@CurrentUser() u: any, @Param('id') id: string) {
+    const k = await this.db.apiKey.findUnique({ where: { id } });
+    if (!k) throw new NotFoundException('Key not found');
+    if (!k.revokedAt) throw new BadRequestException('Revoke the key first — a key still in use cannot be deleted outright');
+    await this.db.apiKey.delete({ where: { id } });
+    await this.db.event.create({ data: { actor: u.sub, type: 'api_key_deleted', payload: { id, name: k.name, prefix: k.prefix, revokedAt: k.revokedAt } } });
+    return { ok: true, deleted: k.name };
   }
 }
