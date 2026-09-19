@@ -3,6 +3,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import { api, fetcher, paise, fmtDate, fmtDT, API, getToken, getUser } from '@/lib/api';
 import { StatusBadge, useToast, Field, Modal, Stat, Empty } from '@/components/ui';
+import { CostComposition, CostByVehicle } from '@/components/cost-bars';
 
 const TABS = ['Overview', 'Vehicles', 'Vendors', 'Expenses', 'Checks'] as const;
 const thisMonth = () => new Date().toISOString().slice(0, 7);
@@ -21,6 +22,17 @@ function Overview() {
   return <div><div className="flex gap-2 items-center mb-3"><input type="month" className="input" value={month} onChange={(e) => setMonth(e.target.value)} /><a className="btn-secondary !py-1" target="_blank" href={`${API}/v1/admin/fleet/export?dataset=costs&month=${month}&format=xlsx&t=${getToken()}`}>Cost sheet XLSX</a></div>
     <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 mb-4"><Stat label="Vehicles" value={c.vehicles} sub={`${c.hired} hired`} /><Stat label="Active" value={c.active} sub={`${c.unassigned} unassigned`} warn={c.unassigned > 0} /><Stat label="In maintenance" value={c.maintenance} warn={c.maintenance > 0} /><Stat label="Doc / service alerts" value={c.docAlerts} warn={c.docAlerts > 0} /><Stat label="Failed checks (7d)" value={c.failedChecks7d} warn={c.failedChecks7d > 0} /><Stat label="Owed to vendors" value={paise(c.vendorsOwedPaise)} warn={c.vendorsOwedPaise > 0} /><Stat label={`Fleet cost ${month}`} value={paise(m.totalPaise)} sub={`fuel ${paise(m.fuelPaise)} · hire ${paise(m.hirePaise)}`} /><Stat label="Cost per drop" value={m.costPerDropPaise != null ? paise(m.costPerDropPaise) : '—'} sub={`${m.drops} drops`} /></div>
     {d.alerts.length > 0 && <div className="card mb-4"><b>Alerts</b><div className="mt-1 flex flex-wrap gap-1">{d.alerts.map((a: any, i: number) => <span key={i} className={'badge ' + (a.severity === 'due' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800')}>{a.regNo} · {a.kind} {a.detail}</span>)}</div></div>}
+    <div className="grid gap-3 lg:grid-cols-2 mb-4">
+      <div className="card-modern">
+        <div className="font-semibold mb-1">Where the money went · {month}</div>
+        <div className="text-xs text-gray-500 mb-2">Total {paise(m.totalPaise)}{m.costPerDropPaise ? ` · ${paise(m.costPerDropPaise)} per drop` : ''}</div>
+        <CostComposition parts={m} total={m.totalPaise} />
+      </div>
+      <div className="card-modern">
+        <div className="font-semibold mb-2">Cost by vehicle</div>
+        <CostByVehicle rows={d.costs.map((v: any) => ({ id: v.vehicleId, label: v.regNo, sub: [v.vendor, v.type?.replace('_', ' ').toLowerCase()].filter(Boolean).join(' · '), parts: v, total: v.totalPaise }))} />
+      </div>
+    </div>
     <div className="card overflow-auto"><b>Cost per vehicle · {month}</b><table className="tbl text-sm mt-2"><thead><tr><th>Vehicle</th><th>Vendor</th><th>Hire</th><th>Fuel</th><th>Maint.</th><th>Other</th><th>Total</th><th>Trips</th><th>Drops</th><th>km</th><th>₹/drop</th><th>₹/km</th><th>km/l</th></tr></thead><tbody>
       {d.costs.map((v: any) => <tr key={v.vehicleId}><td><b>{v.regNo}</b><br /><small>{v.type.replace('_', ' ').toLowerCase()} · {v.ownership.toLowerCase()} · <StatusBadge s={v.status} /></small></td><td className="text-xs">{v.vendor || '—'}</td><td>{paise(v.hirePaise)}{v.hireEstimated && <small className="text-gray-400"> est.</small>}</td><td>{paise(v.fuelPaise)}</td><td>{paise(v.maintenancePaise)}</td><td>{paise(v.otherPaise)}</td><td className="font-semibold">{paise(v.totalPaise)}</td><td>{v.trips}</td><td>{v.drops}</td><td>{v.km}</td><td>{v.costPerDropPaise != null ? paise(v.costPerDropPaise) : '—'}</td><td>{v.costPerKmPaise != null ? paise(v.costPerKmPaise) : '—'}</td><td>{v.kmPerLitre ?? '—'}</td></tr>)}</tbody></table>{!d.costs.length && <Empty text="Add vehicles to see costs" />}</div></div>;
 }
