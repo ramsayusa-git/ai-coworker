@@ -44,7 +44,7 @@ check "referrer wallet +₹100 on delivery" "$(curl -s -H "Authorization: Bearer
 check "referrer notified" "$(curl -s -H "Authorization: Bearer $AD" $A/notifications | py "print(any(x['template']=='referral_reward' for x in d[:5]))")" True
 check "referral stats" "$(curl -s -H "Authorization: Bearer $C" $A/auth/referrals/mine | py "print(d['converted']>=1)")" True
 check "reports daily" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/reports/daily" -o /dev/null -w '%{http_code}')" 200
-check "reports gst csv" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/reports/gst?format=csv" | head -1 | cut -c1-9)" 'invoiceNo'
+check "reports gst csv" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/reports/gst?format=csv" | head -1 | grep -c "Invoice No")" 1
 
 # --- RBAC: marketing, sales, vendor portal, warehouse staff ---
 MK=$(tok 9000000005); SL=$(tok 9000000006); WH=$(tok 9000000007); VN=$(tok 9000000008)
