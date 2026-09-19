@@ -71,7 +71,7 @@ export class DataIoController {
       const reps = await this.db.user.findMany({ where: { role: { in: ['SALES', 'ADMIN', 'OPS'] } }, select: { id: true, name: true, phone: true } });
       for (const [i, r] of rows.entries()) {
         const errors: string[] = []; const name = g(r, 'name', 'lead', 'contact'); const phone = norm(g(r, 'phone', 'mobile')); const status = (g(r, 'status', 'stage') || 'NEW').toUpperCase();
-        if (!name) errors.push('name missing'); if (!phone) errors.push('phone invalid (10-digit Indian mobile)'); if (!['NEW', 'CONTACTED', 'QUALIFIED', 'PROPOSAL', 'WON', 'LOST'].includes(status)) errors.push(`status ${status} not one of NEW/CONTACTED/QUALIFIED/PROPOSAL/WON/LOST`);
+        if (!name) errors.push('name missing'); if (!phone) errors.push('phone invalid (10-digit Indian mobile)'); if (!['NEW', 'CONTACTED', 'QUALIFIED', 'PROPOSAL', 'WAITING_APPROVAL', 'WON', 'LOST'].includes(status)) errors.push(`status ${status} not one of NEW/CONTACTED/QUALIFIED/PROPOSAL/WAITING_APPROVAL/WON/LOST`);
         const repName = g(r, 'assignedTo', 'owner', 'rep'); const rep = repName ? reps.find((x) => x.name?.toLowerCase() === repName.toLowerCase() || x.phone === norm(repName)) : null; if (repName && !rep) errors.push(`rep "${repName}" not found`);
         const est = g(r, 'estValue', 'value', 'estValueRupees'); if (est && isNaN(Number(est))) errors.push('estValue not a number');
         const existing = phone ? await this.db.lead.findFirst({ where: { phone } }) : null;

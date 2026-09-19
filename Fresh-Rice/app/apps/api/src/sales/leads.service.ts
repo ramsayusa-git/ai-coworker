@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { startOfDay, addDays } from '../common/money';
@@ -19,7 +19,10 @@ export class LeadsService {
   }
 
   async get(u: any, id: string) {
-    const lead = await this.db.lead.findUniqueOrThrow({ where: { id }, include: { assignedTo: true, activities: { orderBy: { createdAt: 'desc' }, include: { createdBy: { select: { name: true } } } } } });
+    // findUniqueOrThrow raises a Prisma error that surfaces as a 500; a lead that was
+    // deleted (or a stale bookmark) is a 404, not a server fault.
+    const lead = await this.db.lead.findUnique({ where: { id }, include: { assignedTo: true, activities: { orderBy: { createdAt: 'desc' }, include: { createdBy: { select: { name: true } } } } } });
+    if (!lead) throw new NotFoundException('Lead not found');
     if (u.role === 'SALES' && lead.assignedToId && lead.assignedToId !== u.sub) throw new ForbiddenException('Not your lead');
     return lead;
   }
@@ -32,6 +35,29 @@ export class LeadsService {
     const lead = await this.db.lead.findUniqueOrThrow({ where: { id } });
     if (u.role === 'SALES' && lead.assignedToId && lead.assignedToId !== u.sub) throw new ForbiddenException('Not your lead');
     return this.db.lead.update({ where: { id }, data: { status: b.status as any, assignedToId: b.assignedToId, estValuePaise: b.estValueRupees != null ? Math.round(b.estValueRupees * 100) : undefined, notes: b.notes, name: b.name, company: b.company } });
+  }
+
+  /** Delete a lead and its activity history.
+   *  - SALES may only delete a lead assigned to them (same rule as update).
+   *  - A converted lead is refused: it is tied to a real B2B account, and losing the
+   *    trail of where that customer came from is worse than a stale row. Mark it LOST
+   *    instead if it is dead.
+   *  LeadActivity has no onDelete: Cascade, so the children go first, in one transaction. */
+  async remove(u: any, id: string) {
+    const lead = await this.db.lead.findUniqueOrThrow({ where: { id }, include: { _count: { select: { activities: true } } } });
+    if (u.role === 'SALES' && lead.assignedToId && lead.assignedToId !== u.sub) throw new ForbiddenException('Not your lead');
+    if (lead.b2bAccountId) throw new BadRequestException('This lead was converted to a B2B account — mark it LOST instead of deleting it');
+
+    await this.db.$transaction([
+      this.db.leadActivity.deleteMany({ where: { leadId: id } }),
+      this.db.lead.delete({ where: { id } }),
+      // Snapshot the row so a deletion can still be explained months later.
+      this.db.event.create({ data: { actor: u.sub, type: 'lead_deleted', payload: {
+        id, name: lead.name, phone: lead.phone, company: lead.company,
+        status: lead.status, estValuePaise: lead.estValuePaise, activities: lead._count.activities,
+      } } }),
+    ]);
+    return { ok: true, deleted: lead.name, activitiesRemoved: lead._count.activities };
   }
 
   async addActivity(u: any, leadId: string, b: { type: string; note?: string; nextFollowUpAt?: string }) {

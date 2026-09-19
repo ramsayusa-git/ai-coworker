@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { LeadsService } from './leads.service';
 import { CurrentUser, Roles } from '../common/auth.guard';
@@ -15,6 +15,7 @@ export class LeadsController {
   @Patch(':id') update(@CurrentUser() u: any, @Param('id') id: string, @Body() b: any) { return this.svc.update(u, id, b); }
   @Post(':id/activities') addActivity(@CurrentUser() u: any, @Param('id') id: string, @Body() b: any) { return this.svc.addActivity(u, id, b); }
   @Post(':id/convert') convert(@CurrentUser() u: any, @Param('id') id: string, @Body() b: any) { return this.svc.convert(u, id, b); }
+  @Delete(':id') remove(@CurrentUser() u: any, @Param('id') id: string) { return this.svc.remove(u, id); }
 }
 
 @ApiTags('sales-crm') @ApiBearerAuth() @Roles('ADMIN', 'OPS', 'SALES') @Controller('sales/followups')
