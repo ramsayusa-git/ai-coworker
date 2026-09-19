@@ -30,11 +30,11 @@ The HTTP transport is gated by a bearer token (`keys/mcp-bearer.txt`). Both the 
 ## Claude Code
 
 ```bash
-claude mcp add --transport http freshrice http://aiserver:4300/mcp --header "Authorization: Bearer IrsDgL6wCTcQS0OLeB9Vc60c"
+claude mcp add --transport http freshrice http://aiserver:4300/mcp --header "Authorization: Bearer <keys/mcp-bearer.txt>"
 ```
 
 ## Cowork / claude.ai custom connector
-Add a remote MCP server with URL `http://aiserver:4300/mcp` (expose via your tunnel/domain for off-LAN use) and header `Authorization: Bearer IrsDgL6wCTcQS0OLeB9Vc60c`. The existing `energymonitor` connector in Cowork is the same pattern.
+Add a remote MCP server with URL `http://aiserver:4300/mcp` (expose via your tunnel/domain for off-LAN use) and header `Authorization: Bearer <keys/mcp-bearer.txt>`. The existing `energymonitor` connector in Cowork is the same pattern.
 
 ## Skills
 `claude/skills/*/SKILL.md` — copy each folder into `~/.claude/skills/` (Claude Code) or add via Cowork's skills settings:
