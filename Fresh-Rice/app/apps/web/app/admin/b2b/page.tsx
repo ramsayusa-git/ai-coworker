@@ -1,0 +1,14 @@
+'use client';
+import { useState } from 'react';
+import useSWR from 'swr';
+import { api, fetcher } from '@/lib/api';
+import { Modal, Field, useToast } from '@/components/ui';
+export default function B2B() {
+  const { data, mutate } = useSWR('/admin/b2b', fetcher); const { show, Toast } = useToast(); const [open, setOpen] = useState(false); const [f, setF] = useState<any>({ name: '', gstin: '', phone: '', contactName: '', tier: 1 });
+  return <div><Toast /><div className="flex justify-between items-center mb-4"><h1 className="text-2xl font-bold">B2B accounts</h1><button className="btn-primary" onClick={() => setOpen(true)}>+ Account</button></div>
+    <p className="text-sm text-gray-600 mb-3">Business accounts get bulk packs at tier pricing and GST invoices. All orders are prepaid (UPI / card / cash on delivery) — no credit terms.</p>
+    <div className="card overflow-auto"><table className="tbl"><thead><tr><th>Account</th><th>GSTIN</th><th>Users</th><th>Price tier</th><th>Orders</th><th>Status</th></tr></thead><tbody>
+      {data?.map((a: any) => <tr key={a.id}><td className="font-medium">{a.name}</td><td className="font-mono text-xs">{a.gstin}</td><td className="text-xs">{a.users.map((u: any) => `${u.name || ''} ${u.phone}`).join(', ')}</td><td><input type="number" className="input !w-16 !py-0.5" defaultValue={a.tier} onBlur={async (e) => { await api('/admin/b2b/' + a.id, { method: 'PATCH', body: { tier: Number(e.target.value) } }); show('Tier updated'); }} /></td><td>{a._count.orders}</td><td><button className={'btn-secondary !py-0.5 !px-2 ' + (a.onHold ? 'text-red-600' : '')} onClick={async () => { await api('/admin/b2b/' + a.id, { method: 'PATCH', body: { onHold: !a.onHold } }); mutate(); }}>{a.onHold ? 'BLOCKED' : 'active'}</button></td></tr>)}</tbody></table></div>
+    <Modal title="New B2B account" open={open} onClose={() => setOpen(false)}><div className="grid grid-cols-2 gap-2"><div className="col-span-2"><Field label="Business name"><input className="input" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field></div><Field label="GSTIN"><input className="input" value={f.gstin} onChange={(e) => setF({ ...f, gstin: e.target.value })} /></Field><Field label="Contact name"><input className="input" value={f.contactName} onChange={(e) => setF({ ...f, contactName: e.target.value })} /></Field><Field label="Login mobile"><input className="input" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></Field><Field label="Price tier"><input type="number" className="input" value={f.tier} onChange={(e) => setF({ ...f, tier: Number(e.target.value) })} /></Field>
+      <button className="btn-primary col-span-2" disabled={!f.name || !f.phone} onClick={async () => { try { await api('/admin/b2b', { body: f }); mutate(); setOpen(false); show('Account created; user can log in with OTP'); } catch (e: any) { show(e.message, true); } }}>Create</button></div></Modal></div>;
+}

@@ -1,0 +1,12 @@
+'use client';
+import useSWR from 'swr';
+import { fetcher, paise, fmtDate, API, getToken } from '@/lib/api';
+import { StatusBadge } from '@/components/ui';
+export default function Invoices() {
+  const { data } = useSWR('/admin/invoices', fetcher);
+  const totals = data?.reduce((a: any, i: any) => ({ n: a.n + 1, sub: a.sub + i.subtotalPaise, gst: a.gst + i.gstPaise, tot: a.tot + i.totalPaise }), { n: 0, sub: 0, gst: 0, tot: 0 });
+  return <div><h1 className="text-2xl font-bold mb-1">Invoices</h1><p className="text-sm text-gray-600 mb-4">Tax invoices are issued automatically when an order is confirmed and opened. GST at 5% (CGST 2.5 + SGST 2.5) on pre-packed rice ≤ 25 kg; HSN 1006.</p>
+    {totals && <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4"><div className="card"><div className="text-xs text-gray-500">Invoices</div><b className="text-xl">{totals.n}</b></div><div className="card"><div className="text-xs text-gray-500">Taxable value</div><b className="text-xl">{paise(totals.sub)}</b></div><div className="card"><div className="text-xs text-gray-500">GST collected</div><b className="text-xl">{paise(totals.gst)}</b></div><div className="card"><div className="text-xs text-gray-500">Total billed</div><b className="text-xl">{paise(totals.tot)}</b></div></div>}
+    <div className="card overflow-auto"><table className="tbl"><thead><tr><th>Invoice</th><th>Date</th><th>Order</th><th>Buyer</th><th>GSTIN</th><th className="text-right">Taxable</th><th className="text-right">GST</th><th className="text-right">Total</th><th>Payment</th><th></th></tr></thead><tbody>
+      {data?.map((i: any) => <tr key={i.id}><td className="font-mono text-xs">{i.invoiceNo}</td><td>{fmtDate(i.issuedAt)}</td><td>#{i.order.orderNo} <span className="badge bg-gray-100">{i.order.channel}</span></td><td>{i.buyerName}</td><td className="font-mono text-xs">{i.buyerGstin || '—'}</td><td className="text-right">{paise(i.subtotalPaise)}</td><td className="text-right">{paise(i.gstPaise)}</td><td className="text-right font-semibold">{paise(i.totalPaise)}</td><td className="text-xs">{i.order.payment?.method} <StatusBadge s={i.order.payment?.status || '-'} /></td><td><a className="underline text-xs" target="_blank" href={`${API}/v1/orders/${i.orderId}/invoice.html?t=${getToken()}`}>Open / print</a></td></tr>)}</tbody></table>{data && !data.length && <div className="text-gray-400 text-center py-6">No invoices issued yet</div>}</div></div>;
+}

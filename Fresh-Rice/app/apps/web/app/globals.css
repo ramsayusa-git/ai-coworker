@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body { @apply bg-rice-50 text-gray-900; }
+.btn { @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium text-sm transition disabled:opacity-50 disabled:cursor-not-allowed; }
+.btn-primary { @apply btn bg-leaf-600 text-white hover:bg-leaf-700; }
+.btn-secondary { @apply btn bg-white border border-gray-300 hover:bg-gray-50; }
+.btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
+.card { @apply bg-white rounded-xl border border-gray-200 shadow-sm p-4; }
+.input { @apply w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-500; }
+.label { @apply block text-xs font-medium text-gray-600 mb-1; }
+.badge { @apply inline-block rounded-full px-2 py-0.5 text-xs font-medium; }
+table.tbl { @apply w-full text-sm; }
+table.tbl th { @apply text-left text-xs uppercase tracking-wide text-gray-500 font-semibold py-2 px-2 border-b; }
+table.tbl td { @apply py-2 px-2 border-b border-gray-100 align-top; }
+@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+@keyframes gradientShift { 0%, 100% { background-position: 0% 50% } 50% { background-position: 100% 50% } }
+.hero-bg { background: linear-gradient(120deg, #1d5133, #2e7d4f 40%, #7a5716 100%); background-size: 200% 200%; animation: gradientShift 14s ease infinite; }
+.marquee { display: flex; gap: 1.5rem; width: max-content; animation: marquee 32s linear infinite; }
+@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+.glass { background: rgba(255,255,255,.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.25); }
