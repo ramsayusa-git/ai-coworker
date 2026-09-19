@@ -25,6 +25,45 @@ function Today() {
       {d.rows.map((r: any) => <tr key={r.user.id}><td>{r.user.name}<br /><small className="text-gray-500">{r.user.phone}</small></td><td className="text-xs">{r.user.role}{r.user.isField ? ' · field' : ''}</td><td>{r.onDutyNow ? <span className="badge bg-leaf-100 text-leaf-800">on duty since {hmm(r.since)}</span> : r.code ? <span className={'badge ' + CODE[r.code]?.bg}>{CODE[r.code]?.t}{r.leaveType ? ` (${r.leaveType})` : ''}</span> : r.hours > 0 ? <span className="badge bg-gray-100">clocked out</span> : <span className="badge bg-red-50 text-red-700">not in</span>}</td><td className="text-xs">{hmm(r.firstIn)}</td><td className="text-xs">{hmm(r.lastOut)}</td><td>{r.hours}</td><td className="text-xs">{r.late && <span className="badge bg-amber-100 mr-1">late {r.lateMin}m</span>}{r.geoFlag && <span className="badge bg-red-100">outside geofence</span>}</td></tr>)}</tbody></table></div></div>;
 }
 
+
+/** Per-day share of the team that actually worked (P counts 1, half-day 0.5), as a
+ *  sequential single-hue ramp — this is a magnitude, so one hue light->dark, never a
+ *  rainbow and never the status colours, which mean something else in the grid below.
+ *  Week-offs and holidays are excluded from the denominator: a quiet Sunday is not a
+ *  staffing problem, and colouring it "empty" would cry wolf every week. */
+const PRESENCE_RAMP = ['#eaf3ee', '#c3dfd0', '#8dc2a7', '#4f9a74', '#2e7d4f'];
+function PresenceStrip({ a }: { a: any }) {
+  const [tip, setTip] = useState<string | null>(null);
+  const days = Array.from({ length: a.days }, (_, i) => i);
+  const per = days.map((i) => {
+    let worked = 0, expected = 0;
+    for (const r of a.rows) {
+      const c = r.days[i]?.code;
+      if (!c || c === 'WO' || c === 'HO') continue;
+      expected++;
+      if (c === 'P' || c === 'WFH') worked++;
+      else if (c === 'H') worked += 0.5;
+    }
+    return { i, worked, expected, pct: expected ? worked / expected : null };
+  });
+  return <div className="card-modern mb-3">
+    <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <div className="font-semibold text-sm">Team present, by day</div>
+      <div className="flex items-center gap-1 text-[11px] text-gray-500">
+        none{PRESENCE_RAMP.map((c) => <span key={c} className="h-2.5 w-4 rounded-sm" style={{ background: c }} />)}all
+      </div>
+    </div>
+    <div className="mt-2 flex flex-wrap gap-[2px]">
+      {per.map(({ i, pct, worked, expected }) => <div key={i}
+        className="flex h-7 w-7 items-center justify-center rounded-[4px] text-[10px] text-gray-600"
+        style={{ background: pct === null ? '#f3f4f6' : PRESENCE_RAMP[Math.min(4, Math.round(pct * 4))] }}
+        onMouseEnter={() => setTip(pct === null ? `Day ${i + 1}: week off / holiday` : `Day ${i + 1}: ${worked} of ${expected} worked (${Math.round(pct * 100)}%)`)}
+        onMouseLeave={() => setTip(null)}>{i + 1}</div>)}
+    </div>
+    <div className="mt-1 h-4 text-xs text-gray-500">{tip}</div>
+  </div>;
+}
+
 function Attendance() {
   const [month, setMonth] = useState(thisMonth());
   const { data: a } = useSWR(`/admin/hr/attendance?month=${month}`, fetcher);
@@ -32,8 +71,8 @@ function Attendance() {
   return <div><div className="flex gap-2 items-center mb-3 flex-wrap"><input type="month" className="input" value={month} onChange={(e) => setMonth(e.target.value)} />
     {['csv', 'xlsx', 'pdf'].map((f) => <a key={f} className="btn-secondary !py-1" href={`${API}/v1/admin/hr/attendance.export?month=${month}&format=${f}&t=${getToken()}`} target="_blank">{f.toUpperCase()}</a>)}
     <span className="text-xs text-gray-500 ml-2">{Object.entries(CODE).filter(([k]) => k).map(([k, v]) => <span key={k} className={'badge mr-1 ' + v.bg}>{k} {v.t}</span>)}</span></div>
-    {!a ? <div className="text-gray-400">Loading…</div> : <div className="card overflow-auto"><table className="tbl text-xs"><thead><tr><th className="sticky left-0 bg-white">Name</th>{Array.from({ length: a.days }, (_, i) => <th key={i} className="!px-1 text-center">{i + 1}</th>)}<th>P</th><th>½</th><th>A</th><th>L</th><th>Late</th><th>Hrs</th><th>OT</th><th>Payable</th></tr></thead><tbody>
-      {a.rows.map((r: any) => <tr key={r.user.id}><td className="sticky left-0 bg-white whitespace-nowrap">{r.user.name}<br /><span className="text-gray-400">{r.user.role}</span></td>{r.days.map((d: any) => <td key={d.date} title={`${d.date} · ${CODE[d.code]?.t || '—'} · ${d.hours}h${d.lateMin ? ` · late ${d.lateMin}m` : ''}${d.note ? ' · ' + d.note : ''}`} className={'!px-1 text-center cursor-pointer ' + (CODE[d.code]?.bg || '')} onClick={() => setSel({ user: r.user, d })}>{d.code || '·'}</td>)}<td>{r.summary.present}</td><td>{r.summary.half}</td><td className={r.summary.absent ? 'text-red-700 font-semibold' : ''}>{r.summary.absent}</td><td>{r.summary.paidLeave + r.summary.unpaidLeave}</td><td className={r.summary.late ? 'text-amber-700' : ''}>{r.summary.late}</td><td>{r.summary.hours}</td><td>{r.summary.ot}</td><td className="font-semibold">{r.summary.payableDays}</td></tr>)}</tbody></table></div>}
+    {!a ? <div className="text-gray-400">Loading…</div> : <><PresenceStrip a={a} /><div className="card overflow-auto"><table className="tbl text-xs"><thead><tr><th className="sticky left-0 bg-white">Name</th>{Array.from({ length: a.days }, (_, i) => <th key={i} className="!px-1 text-center">{i + 1}</th>)}<th>P</th><th>½</th><th>A</th><th>L</th><th>Late</th><th>Hrs</th><th>OT</th><th>Payable</th></tr></thead><tbody>
+      {a.rows.map((r: any) => <tr key={r.user.id}><td className="sticky left-0 bg-white whitespace-nowrap">{r.user.name}<br /><span className="text-gray-400">{r.user.role}</span></td>{r.days.map((d: any) => <td key={d.date} title={`${d.date} · ${CODE[d.code]?.t || '—'} · ${d.hours}h${d.lateMin ? ` · late ${d.lateMin}m` : ''}${d.note ? ' · ' + d.note : ''}`} className={'!px-1 text-center cursor-pointer ' + (CODE[d.code]?.bg || '')} onClick={() => setSel({ user: r.user, d })}>{d.code || '·'}</td>)}<td>{r.summary.present}</td><td>{r.summary.half}</td><td className={r.summary.absent ? 'text-red-700 font-semibold' : ''}>{r.summary.absent}</td><td>{r.summary.paidLeave + r.summary.unpaidLeave}</td><td className={r.summary.late ? 'text-amber-700' : ''}>{r.summary.late}</td><td>{r.summary.hours}</td><td>{r.summary.ot}</td><td className="font-semibold">{r.summary.payableDays}</td></tr>)}</tbody></table></div></>}
     <Modal title={sel ? `${sel.user.name} · ${sel.d.date}` : ''} open={!!sel} onClose={() => setSel(null)}>{sel && <div className="text-sm space-y-1"><div>Status: <b>{CODE[sel.d.code]?.t || 'No record'}</b>{sel.d.leaveType ? ` (${sel.d.leaveType})` : ''}{sel.d.note ? ` — ${sel.d.note}` : ''}</div><div>In {hmm(sel.d.firstIn)} · Out {hmm(sel.d.lastOut)} · {sel.d.hours} h{sel.d.ot ? ` · OT ${sel.d.ot} h` : ''}</div>{sel.d.lateMin > 0 && <div className="text-amber-700">Late by {sel.d.lateMin} min</div>}{sel.d.geoFlag && <div className="text-red-700">Clocked in outside the warehouse geofence</div>}</div>}</Modal></div>;
 }
 
