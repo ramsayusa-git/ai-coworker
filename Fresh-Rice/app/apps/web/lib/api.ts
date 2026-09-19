@@ -10,12 +10,22 @@ export function getToken() { try { return localStorage.getItem('fr_token'); } ca
 export function setSession(token: string | null, user: any) { try { token ? localStorage.setItem('fr_token', token) : localStorage.removeItem('fr_token'); user ? localStorage.setItem('fr_user', JSON.stringify(user)) : localStorage.removeItem('fr_user'); } catch {} }
 export function getUser(): any { try { const u = localStorage.getItem('fr_user'); return u ? JSON.parse(u) : null; } catch { return null; } }
 
+export class ApiError extends Error {
+  status: number; network: boolean;
+  constructor(msg: string, status = 0, network = false) { super(msg); this.name = 'ApiError'; this.status = status; this.network = network; }
+}
 export async function api<T = any>(path: string, opts: { method?: string; body?: any; auth?: boolean } = {}): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const t = getToken(); if (t) headers['Authorization'] = 'Bearer ' + t;
-  const res = await fetch(API + '/v1' + path, { method: opts.method || (opts.body ? 'POST' : 'GET'), headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  let res: Response;
+  try {
+    res = await fetch(API + '/v1' + path, { method: opts.method || (opts.body ? 'POST' : 'GET'), headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  } catch (e: any) {
+    // fetch() only rejects on network failure (server down / restarting / offline). Never treat this as an auth failure.
+    throw new ApiError('Cannot reach server — retrying…', 0, true);
+  }
   const text = await res.text(); let data: any = null; try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-  if (!res.ok) { const msg = Array.isArray(data?.message) ? data.message.join(', ') : data?.message || res.statusText; throw new Error(msg); }
+  if (!res.ok) { const msg = Array.isArray(data?.message) ? data.message.join(', ') : data?.message || res.statusText || `HTTP ${res.status}`; throw new ApiError(msg, res.status); }
   return data as T;
 }
 export const fetcher = (p: string) => api(p);

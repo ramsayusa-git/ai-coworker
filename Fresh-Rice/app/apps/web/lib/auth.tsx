@@ -6,7 +6,16 @@ type Ctx = { user: any; loading: boolean; login: (token: string, user: any) => v
 const C = createContext<Ctx>({ user: null, loading: true, login: () => {}, logout: () => {}, refresh: async () => {} });
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null); const [loading, setLoading] = useState(true);
-  const refresh = async () => { if (!getToken()) { setUser(null); setLoading(false); return; } try { const me = await api('/auth/me'); setUser(me); setSession(getToken(), me); } catch { setSession(null, null); setUser(null); } finally { setLoading(false); } };
+  const refresh = async () => {
+    if (!getToken()) { setUser(null); setLoading(false); return; }
+    try { const me = await api('/auth/me'); setUser(me); setSession(getToken(), me); }
+    catch (e: any) {
+      // Only a real auth rejection invalidates the session. Network errors / 5xx (server restarting,
+      // dev server recompiling) keep the cached user so the app does not bounce to /login.
+      if (e?.status === 401 || e?.status === 403) { setSession(null, null); setUser(null); }
+      else setUser((u: any) => u ?? getUser());
+    } finally { setLoading(false); }
+  };
   useEffect(() => { setUser(getUser()); refresh(); }, []);
   return <C.Provider value={{ user, loading, login: (t, u) => { setSession(t, u); setUser(u); refresh(); }, logout: () => { setSession(null, null); setUser(null); }, refresh }}>{children}</C.Provider>;
 }
