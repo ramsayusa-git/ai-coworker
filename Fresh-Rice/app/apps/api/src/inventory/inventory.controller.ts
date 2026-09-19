@@ -23,6 +23,10 @@ import { InventoryService } from './inventory.service';
 import { Roles, ScopeWarehouse, CurrentUser } from '../common/auth.guard';
 // WAREHOUSE_STAFF may use the warehouse-scoped endpoints below (their own warehouseId only,
 // enforced by @ScopeWarehouse); transfers between warehouses stay ADMIN/OPS only.
+// Same pattern as invoices/issues: customer-facing links must come from PUBLIC_WEB_URL, never a hardcoded host.
+// This one ends up printed on physical bags, so a wrong host here is permanent once the bags ship.
+const PUBLIC_BASE = process.env.PUBLIC_WEB_URL || 'https://freshrice.in';
+
 @ApiTags('inventory') @ApiBearerAuth() @Roles('ADMIN', 'OPS', 'WAREHOUSE_STAFF') @Controller('inventory')
 export class InventoryController {
   constructor(private svc: InventoryService, private db: PrismaService, private jwt: JwtService) {}
@@ -67,7 +71,7 @@ export class InventoryController {
     try { const u: any = await this.jwt.verifyAsync(t || '', { secret: process.env.JWT_SECRET || 'dev' }); if (!['ADMIN', 'OPS', 'WAREHOUSE_STAFF'].includes(u.role)) throw new Error(); } catch { return res.status(401).send('Login required'); }
     const lot = await this.db.lot.findUniqueOrThrow({ where: { id }, include: { vendor: true, variety: true, warehouse: true } });
     const aged = Math.floor((Date.now() - lot.milledOn.getTime()) / 2592000000);
-    const qr = await QRCode.toDataURL(`https://freshrice.in/trace/${lot.lotNo}`, { margin: 0, width: 160 });
+    const qr = await QRCode.toDataURL(`${PUBLIC_BASE}/trace/${lot.lotNo}`, { margin: 0, width: 160 });
     const label = `<div class=l><div class=h><b>FreshRice</b><span>${lot.variety.name}</span></div><div class=big>${packKg} kg</div><div class=g><img src="${qr}"><div class=s>Lot <b>${lot.lotNo}</b><br>Mill: ${lot.vendor.name}, ${lot.vendor.district || ''}<br>Harvest ${lot.harvestSeason} · Milled ${lot.milledOn.toLocaleDateString('en-IN')}<br>${lot.variety.agedPreferred ? 'Aged ' + aged + ' months' : 'Milled ' + aged + ' months ago'} · Moisture ${lot.moisturePct}% · Brokens ${lot.brokenPct}%<br><small>FSSAI 13626000000000 · Net Qty ${packKg} kg · Packed at ${lot.warehouse.code} · MRP incl. GST · Store cool & dry</small></div></div></div>`;
     res.type('html').send(`<!doctype html><meta charset=utf-8><title>Labels ${lot.lotNo}</title><style>body{font-family:Arial;margin:8mm}.l{width:100mm;height:60mm;border:1px dashed #999;padding:4mm;box-sizing:border-box;display:inline-block;margin:2mm;vertical-align:top;page-break-inside:avoid}.h{display:flex;justify-content:space-between;font-size:14px}.big{font-size:32px;font-weight:bold}.g{display:flex;gap:4mm}.g img{width:34mm;height:34mm}.s{font-size:10px;line-height:1.35}small{font-size:8px;color:#555}@media print{button{display:none}}</style><button onclick="print()">Print</button><br>${label.repeat(Number(count))}`);
   }

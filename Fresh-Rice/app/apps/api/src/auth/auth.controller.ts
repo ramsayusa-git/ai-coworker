@@ -6,6 +6,8 @@ import { Public, CurrentUser } from '../common/auth.guard';
 import { Throttle } from '@nestjs/throttler';
 import { PrismaService } from '../prisma/prisma.service';
 
+const PUBLIC_BASE = process.env.PUBLIC_WEB_URL || 'https://freshrice.in';
+
 class OtpReq { @IsString() phone: string; }
 class AdminLoginDto { @IsEmail() email: string; @IsString() password: string; }
 class OtpVerify { @IsString() phone: string; @IsString() @Length(4, 6) code: string; @IsOptional() @IsString() name?: string; @IsOptional() @IsString() referral?: string; }
@@ -30,7 +32,7 @@ export class AuthController {
     const invited = await this.db.user.findMany({ where: { referredById: u.sub }, select: { id: true, name: true, phone: true, createdAt: true, orders: { where: { status: 'DELIVERED' }, select: { id: true }, take: 1 } }, orderBy: { createdAt: 'desc' } });
     const earned = await this.db.walletLedger.aggregate({ where: { userId: u.sub, reason: 'referral' }, _sum: { deltaPaise: true } });
     return { code: me.referralCode, rewardPaise: 10000, invited: invited.length, converted: invited.filter((i) => i.orders.length).length, earnedPaise: earned._sum.deltaPaise || 0, walletBalance: me.walletBalance,
-      shareText: `Try FreshRice — mill-direct, correctly aged Sona Masoori delivered to your door in Hyderabad. Use my code ${me.referralCode} for ₹100 off your first bag: https://freshrice.in/r/${me.referralCode}`,
+      shareText: `Try FreshRice — mill-direct, correctly aged Sona Masoori delivered to your door in Hyderabad. Use my code ${me.referralCode} for ₹100 off your first bag: ${PUBLIC_BASE}/r/${me.referralCode}`,
       list: invited.map((i) => ({ name: i.name || i.phone.replace(/(\+91)(\d{2})\d{6}(\d{2})/, '$1 $2******$3'), joined: i.createdAt, status: i.orders.length ? 'delivered' : 'signed up' })) };
   }
   @ApiBearerAuth() @Patch('me') async update(@CurrentUser() u: any, @Body() b: ProfileDto) {

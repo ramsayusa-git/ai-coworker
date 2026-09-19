@@ -8,6 +8,8 @@ import { NotificationsService } from '../notifications/notifications.service';
  * hit the sweet spot; past 12 months, nudge them to a fresher lot. One message per (customer, lot, milestone),
  * only for bags delivered in the last 60 days, aged-preferred varieties only.
  */
+const PUBLIC_BASE = process.env.PUBLIC_WEB_URL || 'https://freshrice.in';
+
 @Injectable()
 export class LotMilestonesService {
   private log = new Logger('LotMilestones');
@@ -35,8 +37,8 @@ export class LotMilestonesService {
       if (already) { skipped++; continue; }
       const first = (user.name || '').split(' ')[0] || 'there';
       const body = milestone === '6m'
-        ? `Hi ${first}, the ${lot.variety.name} you bought (lot ${lot.lotNo}) just crossed 6 months since milling — it's in its sweet spot now. Cook it with a little more water than usual. Details: https://freshrice.in/trace/${lot.lotNo}`
-        : `Hi ${first}, your ${lot.variety.name} (lot ${lot.lotNo}) is now over 12 months old. Still fine to eat, but a fresher lot will cook up better — reply RESUME or order at https://freshrice.in/shop`;
+        ? `Hi ${first}, the ${lot.variety.name} you bought (lot ${lot.lotNo}) just crossed 6 months since milling — it's in its sweet spot now. Cook it with a little more water than usual. Details: ${PUBLIC_BASE}/trace/${lot.lotNo}`
+        : `Hi ${first}, your ${lot.variety.name} (lot ${lot.lotNo}) is now over 12 months old. Still fine to eat, but a fresher lot will cook up better — reply RESUME or order at ${PUBLIC_BASE}/shop`;
       await this.notify.send(user.phone, 'lot_milestone', body);
       await this.db.event.create({ data: { actor: user.id, type: 'lot_milestone', payload: { lotNo: lot.lotNo, milestone, orderId: it.orderId } } });
       sent++;

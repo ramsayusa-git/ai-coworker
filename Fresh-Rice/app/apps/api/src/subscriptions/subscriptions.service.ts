@@ -6,6 +6,8 @@ import { OrdersService } from '../orders/orders.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { addDays, startOfDay } from '../common/money';
 
+const PUBLIC_BASE = process.env.PUBLIC_WEB_URL || 'https://freshrice.in';
+
 const DAYS: Record<SubFrequency, number> = { WEEKLY: 7, BIWEEKLY: 14, TRIWEEKLY: 21, MONTHLY: 30 };
 
 @Injectable()
@@ -55,7 +57,7 @@ export class SubscriptionsService {
       } catch (e: any) {
         result.failed++; result.errors.push(`${s.id}: ${e.message}`);
         this.log.warn(`Subscription ${s.id} failed: ${e.message}`);
-        await this.notify.send(s.user.phone, 'sub_failed', `We couldn't place your ${s.sku.variety.name} delivery (${e.message}). Tap to pay & confirm: https://freshrice.in/pay/${s.id}`);
+        await this.notify.send(s.user.phone, 'sub_failed', `We couldn't place your ${s.sku.variety.name} delivery (${e.message}). Tap to pay & confirm: ${PUBLIC_BASE}/pay/${s.id}`);
       }
     }
     this.log.log(`Run ${date.toDateString()}: ${JSON.stringify({ ...result, errors: undefined })}`);
