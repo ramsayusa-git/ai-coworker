@@ -22,6 +22,7 @@ const NAV: [string, string, string[]?][] = [
   ['/admin/pricing', 'Pricing'],
   ['/admin/coupons', 'Coupons', ['ADMIN', 'OPS', 'MARKETING']],
   ['/admin/reports', 'Reports', ['ADMIN', 'OPS', 'SALES', 'MARKETING']],
+  ['/admin/data', 'Import / export'],
   ['/admin/messages', 'WhatsApp log', ['ADMIN', 'OPS', 'MARKETING']],
   ['/admin/team', 'Team', ['ADMIN']],
 ];

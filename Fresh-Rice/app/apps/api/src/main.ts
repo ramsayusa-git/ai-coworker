@@ -6,6 +6,11 @@ import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 
+// Last line of defence: log instead of dying on a stray stream/promise error (pm2 keeps nest --watch alive, but the
+// child API process it spawned would otherwise stay dead until the next file change).
+process.on('uncaughtException', (e) => console.error('[uncaughtException]', e));
+process.on('unhandledRejection', (e) => console.error('[unhandledRejection]', e));
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: { origin: (process.env.CORS_ORIGINS || '*').split(',') }, rawBody: true });
   app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));

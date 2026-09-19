@@ -103,4 +103,16 @@ check "field staff hidden from customers" "$(curl -s -H "Authorization: Bearer $
 check "field staff clocks out" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/me/shift/end -d '{}' | py "print(d.get('endedAt') is not None)")" True
 check "hours report lists them" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/shifts" | py "print(any(r['userId']=='$SID' and r['shifts']>=1 for r in d))")" True
 
+# --- Exports (csv/xlsx/pdf) + imports with validation ---
+for fmt in csv xlsx pdf; do check "daily report $fmt" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $AD" "$A/admin/reports/daily?format=$fmt")" 200; done
+check "orders export pdf is a PDF" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/export/orders?format=pdf" | head -c 4)" "%PDF"
+check "customers export xlsx" "$(curl -s -o /dev/null -w '%{content_type}' -H "Authorization: Bearer $AD" "$A/admin/export/customers?format=xlsx" | cut -d';' -f1)" "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+check "sales can export leads" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $SL" "$A/admin/export/leads?format=csv")" 200
+check "marketing blocked from customers export" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $MK" "$A/admin/export/customers?format=csv")" 400
+IMPP="98480$(date +%s | tail -c 6)"
+check "import validates bad rows" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/import/leads -d "{\"rows\":[{\"name\":\"Smoke Import\",\"phone\":\"$IMPP\",\"status\":\"NEW\"},{\"name\":\"Bad\",\"phone\":\"12\",\"status\":\"MAYBE\"}],\"commit\":false}" | py "print(d['valid'],d['invalid'],d['committed'])")" "1 1 False"
+check "import commits valid rows" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/import/leads -d "{\"rows\":[{\"name\":\"Smoke Import\",\"phone\":\"$IMPP\",\"status\":\"NEW\"}],\"commit\":true}" | py "print(d['created'])")" 1
+check "import updates on re-run (no dupes)" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/import/leads -d "{\"rows\":[{\"name\":\"Smoke Import\",\"phone\":\"$IMPP\",\"status\":\"CONTACTED\"}],\"commit\":true}" | py "print(d['updated'])")" 1
+check "api still alive after exports" "$(curl -s -o /dev/null -w '%{http_code}' "$A/zones/check?pincode=500072")" 200
+
 [ $fail = 0 ] && echo "ALL PASS" || { echo "SOME FAILED"; exit 1; }
