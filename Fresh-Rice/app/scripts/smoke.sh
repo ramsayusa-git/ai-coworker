@@ -210,6 +210,34 @@ check "attendance csv" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/hr/at
 check "roster upsert" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X PUT $A/admin/hr/roster -d "{\"rows\":[{\"userId\":\"$MID\",\"date\":\"$NXT\",\"start\":\"06:00\",\"end\":\"14:00\",\"label\":\"early\"}]}" | py "print(d['upserted'])")" 1
 check "ops cannot edit policy" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X PUT $A/admin/hr/policy -d '{"graceMin":5}' -o /dev/null -w '%{http_code}')" 403
 curl -s -X DELETE -H "Authorization: Bearer $AD" $A/admin/hr/holidays/$HOL >/dev/null
+# --- Fleet: vehicles, vendors, ledger, checks, costs ---
+REG="TS09S$(date +%s | tail -c 5)"; FV=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vendors -d '{"name":"Smoke Autos","phone":"9800000011","paymentTerms":"monthly net 7"}'); FVID=$(echo "$FV" | py "print(d['id'])")
+check "fleet vendor created" "$(echo "$FV" | py "print(d['name'])")" "Smoke Autos"
+check "hired vehicle needs vendor" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vehicles -d "{\"regNo\":\"$REG\",\"ownership\":\"HIRED\"}" -o /dev/null -w '%{http_code}')" 400
+VH=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vehicles -d "{\"regNo\":\"$REG\",\"ownership\":\"HIRED\",\"vendorId\":\"$FVID\",\"hireRatePaise\":1500000,\"hireBasis\":\"PER_MONTH\",\"odometerKm\":12000,\"insuranceExpiry\":\"$(date -d '+10 day' +%F)\"}"); VHID=$(echo "$VH" | py "print(d['id'])")
+check "vehicle created (regNo normalised)" "$(echo "$VH" | py "print(d['regNo']=='$REG' and d['status']=='ACTIVE')")" True
+check "assign rider to vehicle" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X PATCH $A/admin/fleet/vehicles/$VHID -d "{\"assignedRiderId\":\"$RID\"}" | py "print(d['assignedRiderId']=='$RID')")" True
+check "doc alert within 30d" "$(curl -s -H "Authorization: Bearer $AD" $A/admin/fleet/alerts | py "print(any(a['regNo']=='$REG' and a['kind']=='Insurance' for a in d))")" True
+check "rider sees vehicle" "$(curl -s -H "Authorization: Bearer $R" $A/rider/vehicle | py "print(d['regNo']=='$REG' and d['checkedToday']==False)")" True
+check "odometer below last rejected" "$(curl "${J[@]}" -H "Authorization: Bearer $R" -X POST $A/rider/vehicle/$VHID/logs -d '{"type":"FUEL","amountPaise":50000,"litres":5,"odometerKm":100}' -o /dev/null -w '%{http_code}')" 400
+check "rider logs fuel" "$(curl "${J[@]}" -H "Authorization: Bearer $R" -X POST $A/rider/vehicle/$VHID/logs -d '{"type":"FUEL","amountPaise":50000,"litres":5,"odometerKm":12050}' | py "print(d['type'])")" FUEL
+check "rider cannot log maintenance" "$(curl "${J[@]}" -H "Authorization: Bearer $R" -X POST $A/rider/vehicle/$VHID/logs -d '{"type":"MAINTENANCE","amountPaise":1}' -o /dev/null -w '%{http_code}')" 403
+check "pre-trip check ok" "$(curl "${J[@]}" -H "Authorization: Bearer $R" -X POST $A/rider/vehicle/check -d '{"odometerStart":12050,"checklist":{"brakes":true,"lights":true}}' | py "print(d['ok'], d['vehicleStatus'])")" "True ACTIVE"
+check "end trip" "$(curl "${J[@]}" -H "Authorization: Bearer $R" -X POST $A/rider/vehicle/end-trip -d '{"odometerEnd":12090}' | py "print(d['odometerEnd'])")" 12090
+check "failed brakes → maintenance + ops alert" "$(curl "${J[@]}" -H "Authorization: Bearer $R" -X POST $A/rider/vehicle/check -d '{"checklist":{"brakes":false},"issues":"brake lever loose"}' | py "print(d['ok'], d['vehicleStatus'])")" "False MAINTENANCE"
+check "ops alerted on whatsapp" "$(curl -s -H "Authorization: Bearer $AD" $A/notifications | py "print(any(x['template']=='vehicle_issue' and '$REG' in x['body'] for x in d))")" True
+check "maintenance vehicle blocks route assign" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/dispatch/routes/$RT/assign -d "{\"riderId\":\"$RID\"}" -o /dev/null -w '%{http_code}')" 400
+check "ops logs repair → back to active" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vehicles/$VHID/logs -d '{"type":"REPAIR","amountPaise":120000,"vendorName":"Bajaj service","description":"brake lever","nextDueKm":15000}' >/dev/null; curl -s -H "Authorization: Bearer $AD" $A/admin/fleet/vehicles/$VHID | py "print(d['status'], d['serviceDue']['kmLeft'])")" "ACTIVE 2910"
+check "bill monthly hire" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vendors/$FVID/bill-hire -d "{\"month\":\"$MON\"}" | py "print(d['results'][0]['billedPaise'])")" 1500000
+check "bill hire idempotent" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vendors/$FVID/bill-hire -d "{\"month\":\"$MON\"}" | py "print(d['results'][0].get('skipped'))")" "already billed"
+check "payment needs ref" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vendors/$FVID/ledger -d '{"reason":"PAYMENT","amountPaise":500000}' -o /dev/null -w '%{http_code}')" 400
+check "record payment" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vendors/$FVID/ledger -d '{"reason":"PAYMENT","amountPaise":500000,"method":"UPI","ref":"UTR123"}' | py "print(d['deltaPaise'])")" -500000
+check "vendor balance" "$(curl -s -H "Authorization: Bearer $AD" $A/admin/fleet/vendors/$FVID/ledger | py "print(d['balancePaise'], d['billed'], d['paid'])")" "1000000 1500000 500000"
+check "cost per vehicle" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/fleet/costs?month=$MON" | py "print([ (c['hirePaise'], c['fuelPaise'], c['maintenancePaise'], c['km']) for c in d if c['regNo']=='$REG'][0])")" "(1500000, 50000, 120000, 40)"
+check "fleet dashboard" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/fleet/dashboard?month=$MON" | py "print(d['counts']['vehicles']>=1 and d['month_cost']['totalPaise']>0)")" True
+check "fleet export xlsx" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $AD" "$A/admin/fleet/export?dataset=costs&month=$MON&format=xlsx")" 200
+check "sales blocked from fleet" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $SL" $A/admin/fleet/vehicles)" 403
+curl "${J[@]}" -H "Authorization: Bearer $AD" -X PATCH $A/admin/fleet/vehicles/$VHID -d '{"assignedRiderId":null,"active":false}' >/dev/null
 # --- Service API keys (MCP) ---
 AK=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/api-keys -d '{"name":"smoke ro"}')
 AKEY=$(echo "$AK" | py "print(d['key'])"); AKID=$(echo "$AK" | py "print(d['id'])")

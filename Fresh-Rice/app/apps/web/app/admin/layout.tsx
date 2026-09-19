@@ -10,6 +10,7 @@ const NAV: [string, string, string[]?][] = [
   ['/admin/issues', 'Issues desk', ['ADMIN', 'OPS', 'SALES']],
   ['/admin/approvals', 'Approvals', ['ADMIN', 'OPS']],
   ['/admin/hr', 'HR', ['ADMIN', 'OPS']],
+  ['/admin/fleet', 'Fleet', ['ADMIN', 'OPS']],
   ['/admin/dispatch', 'Dispatch'],
   ['/admin/riders', 'Field · live', ['ADMIN', 'OPS', 'SALES', 'MARKETING']],
   ['/admin/zones', 'Zones & slots'],

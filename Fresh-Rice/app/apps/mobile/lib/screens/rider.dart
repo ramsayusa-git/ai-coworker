@@ -7,6 +7,7 @@ import '../profiles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../api.dart';
 import 'orders.dart';
+import 'vehicle.dart';
 
 class RiderScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -16,6 +17,7 @@ class RiderScreen extends StatefulWidget {
 }
 
 class _RiderScreenState extends State<RiderScreen> {
+  final vehicleKey = GlobalKey<VehicleBarState>();
   List? routes; Timer? gps;
   Position? get last => Duty.I.last;
   @override
@@ -34,7 +36,7 @@ class _RiderScreenState extends State<RiderScreen> {
   Future<void> load() async { try { routes = await Api.call('/rider/manifest'); } catch (e) { snack('$e'); } if (mounted) setState(() {}); }
   void snack(String m) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m))); }
 
-  Future<void> start(String id) async { try { if (!Duty.I.onDuty) { await Duty.I.clockIn(); } await Api.call('/rider/routes/$id/start', method: 'POST'); snack('Route started — customers received their OTPs'); load(); } catch (e) { snack('$e'); } }
+  Future<void> start(String id) async { try { final checked = await vehicleKey.currentState?.ensureChecked() ?? true; if (!checked) { snack('Complete the pre-trip check first'); return; } if (!Duty.I.onDuty) { await Duty.I.clockIn(); } await Api.call('/rider/routes/$id/start', method: 'POST'); snack('Route started — customers received their OTPs'); load(); } catch (e) { snack('$e'); } }
 
   Future<void> deliver(Map s) async {
     final otp = TextEditingController(); String? photoB64; String? fail;
@@ -59,7 +61,7 @@ class _RiderScreenState extends State<RiderScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: Text('🛵 ${Api.user?['name'] ?? 'Rider'}'), backgroundColor: Colors.grey.shade900, actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: load)]),
-    body: Column(children: [dutyBar(), Expanded(child: RefreshIndicator(onRefresh: load, child: routes == null ? const Center(child: CircularProgressIndicator()) : routes!.isEmpty ? const Center(child: Text('No routes assigned. Check with ops.')) : ListView(padding: const EdgeInsets.all(12), children: [
+    body: Column(children: [dutyBar(), VehicleBar(key: vehicleKey), Expanded(child: RefreshIndicator(onRefresh: load, child: routes == null ? const Center(child: CircularProgressIndicator()) : routes!.isEmpty ? const Center(child: Text('No routes assigned. Check with ops.')) : ListView(padding: const EdgeInsets.all(12), children: [
       for (final r in routes!) Card(child: Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [Expanded(child: Text('${r['zone']['name']} · ${fmtDate(r['date'])}', style: const TextStyle(fontWeight: FontWeight.bold))), StatusChip(r['status'])]),
         Text('${(r['vehicleType'] as String).replaceAll('_', ' ')} · ${r['loadKg']} kg · ${(r['stops'] as List).length} stops', style: const TextStyle(fontSize: 12, color: Colors.grey)),

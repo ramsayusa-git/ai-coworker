@@ -1,6 +1,6 @@
 # Connecting Claude to FreshRice
 
-FreshRice ships an MCP server (`apps/mcp`) with 33 tools: daily brief, orders, customers, stock & lots, traceability, live riders, working hours, issues desk, sales CRM, reports, invoices (resend / reissue), coupons, message log.
+FreshRice ships an MCP server (`apps/mcp`) with 42 tools: daily brief, orders, customers, stock & lots, traceability, live riders, working hours, issues desk, sales CRM, reports, invoices (resend / reissue), coupons, message log.
 
 It authenticates to the FreshRice API with a **service API key** (`frk_…`) created at **Admin → API keys**. The key is linked to a staff account; that account's role and the key's scope (read / read+write) decide what Claude may do. Every write is audited under that account.
 

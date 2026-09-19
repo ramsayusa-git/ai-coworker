@@ -104,7 +104,10 @@ export class DispatchService {
   async assign(routeId: string, riderId: string) {
     const rider = await this.db.user.findFirst({ where: { id: riderId, role: 'RIDER' } });
     if (!rider) throw new NotFoundException('Rider not found');
-    return this.db.route.update({ where: { id: routeId }, data: { riderId, status: 'PUBLISHED' } });
+    // the rider's assigned vehicle rides along for fleet cost-per-drop; a vehicle in MAINTENANCE can't be dispatched
+    const vehicle = await this.db.vehicle.findFirst({ where: { assignedRiderId: riderId, active: true } });
+    if (vehicle?.status === 'MAINTENANCE') throw new BadRequestException(`${vehicle.regNo} is in maintenance — assign another rider or clear the vehicle first`);
+    return this.db.route.update({ where: { id: routeId }, data: { riderId, status: 'PUBLISHED', vehicleId: vehicle?.id || null } });
   }
 
   async start(routeId: string, riderId: string) {

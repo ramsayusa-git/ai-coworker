@@ -810,7 +810,125 @@ model Route {
   loadKg      Float       @default(0)
   status      RouteStatus @default(DRAFT)
   stops       RouteStop[]
+  vehicle     Vehicle?    @relation(fields: [vehicleId], references: [id])
+  vehicleId   String?
   createdAt   DateTime    @default(now())
+}
+
+/// ---- Fleet ----
+enum VehicleOwnership {
+  OWNED
+  HIRED
+}
+
+enum VehicleStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+}
+
+enum HireBasis {
+  PER_DAY
+  PER_MONTH
+  PER_TRIP
+  PER_KM
+}
+
+model VehicleVendor {
+  id           String   @id @default(uuid())
+  name         String
+  contactName  String?
+  phone        String
+  gstin        String?
+  address      String?
+  paymentTerms String?  // e.g. "Monthly, net 7"
+  bankNote     String?  // bank / UPI for payouts
+  active       Boolean  @default(true)
+  vehicles     Vehicle[]
+  ledger       VehicleVendorLedger[]
+  createdAt    DateTime @default(now())
+}
+
+/// Vendor account: + bills we owe, − payments made. Balance = sum(deltaPaise).
+model VehicleVendorLedger {
+  id         String        @id @default(uuid())
+  vendor     VehicleVendor @relation(fields: [vendorId], references: [id])
+  vendorId   String
+  date       DateTime      @default(now())
+  reason     String        // BILL | PAYMENT | ADJUST
+  deltaPaise Int
+  vehicleId  String?
+  periodFrom DateTime?
+  periodTo   DateTime?
+  dueDate    DateTime?
+  method     String?       // UPI | BANK | CASH
+  ref        String?       // UTR / invoice no
+  note       String?
+  byUserId   String?
+  @@index([vendorId, date])
+}
+
+model Vehicle {
+  id              String           @id @default(uuid())
+  regNo           String           @unique
+  type            VehicleType      @default(THREE_WHEELER)
+  ownership       VehicleOwnership @default(OWNED)
+  vendor          VehicleVendor?   @relation(fields: [vendorId], references: [id])
+  vendorId        String?
+  make            String?
+  model           String?
+  capacityKg      Float            @default(150)
+  fuelType        String           @default("PETROL") // PETROL | DIESEL | CNG | EV
+  hireRatePaise   Int              @default(0)
+  hireBasis       HireBasis        @default(PER_MONTH)
+  assignedRiderId String?
+  status          VehicleStatus    @default(ACTIVE)
+  odometerKm      Int              @default(0)
+  insuranceExpiry DateTime?
+  pucExpiry       DateTime?
+  fitnessExpiry   DateTime?
+  permitExpiry    DateTime?
+  notes           String?
+  logs            VehicleLog[]
+  checks          TripCheck[]
+  routes          Route[]
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+}
+
+/// Fuel, maintenance, repairs, tolls, fines — every rupee spent on a vehicle.
+model VehicleLog {
+  id          String   @id @default(uuid())
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicleId   String
+  type        String   // FUEL | MAINTENANCE | REPAIR | TOLL | FINE | OTHER
+  date        DateTime @default(now())
+  amountPaise Int      @default(0)
+  odometerKm  Int?
+  litres      Float?
+  vendorName  String?
+  description String?
+  photo       String?  // data: URL receipt <=400 KB
+  byUserId    String?
+  nextDueKm   Int?     // for MAINTENANCE: next service due
+  nextDueOn   DateTime?
+  @@index([vehicleId, date])
+}
+
+/// Rider pre-trip checklist. Any failed item flags the vehicle to Ops.
+model TripCheck {
+  id            String   @id @default(uuid())
+  vehicle       Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicleId     String
+  riderId       String
+  routeId       String?
+  date          DateTime @default(now())
+  odometerStart Int?
+  odometerEnd   Int?
+  checklist     Json     // { brakes: true, lights: true, tyres: true, horn: true, fuel: true, documents: true }
+  ok            Boolean  @default(true)
+  issues        String?
+  @@index([vehicleId, date])
 }
 
 model RouteStop {
