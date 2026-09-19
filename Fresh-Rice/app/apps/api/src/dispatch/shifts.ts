@@ -1,6 +1,7 @@
 import { Injectable, Logger, BadRequestException, ForbiddenException, Controller, Post, Get, Body, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Cron } from '@nestjs/schedule';
+import { HrService, STAFF_ROLES } from '../hr/hr.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CurrentUser, Roles } from '../common/auth.guard';
 
@@ -63,11 +64,11 @@ export function istDayStart(d: Date) { const ist = new Date(d.getTime() + 5.5 * 
 
 @ApiTags('shifts') @ApiBearerAuth() @Controller()
 export class ShiftsController {
-  constructor(private svc: ShiftsService) {}
-  private guard(u: any) { if (u.role !== 'RIDER' && !u.isField) throw new ForbiddenException('Duty tracking is for riders and field staff'); }
-  @Get('me/shift') async mine(@CurrentUser() u: any) { const cur = await this.svc.current(u.sub); return { onDuty: !!cur, since: cur?.startedAt || null, hoursToday: await this.svc.hoursToday(u.sub), canTrack: u.role === 'RIDER' || !!u.isField }; }
-  @Post('me/shift/start') start(@CurrentUser() u: any, @Body() b: { lat?: number; lng?: number }) { this.guard(u); return this.svc.start(u.sub, b?.lat, b?.lng); }
-  @Post('me/shift/end') end(@CurrentUser() u: any, @Body() b: { lat?: number; lng?: number }) { this.guard(u); return this.svc.end(u.sub, b?.lat, b?.lng); }
+  constructor(private svc: ShiftsService, private hr: HrService) {}
+  private guard(u: any) { if (!STAFF_ROLES.includes(u.role)) throw new ForbiddenException('Duty tracking is for staff accounts'); }
+  @Get('me/shift') async mine(@CurrentUser() u: any) { const cur = await this.svc.current(u.sub); return { onDuty: !!cur, since: cur?.startedAt || null, hoursToday: await this.svc.hoursToday(u.sub), canTrack: STAFF_ROLES.includes(u.role), canTrackLocation: u.role === 'RIDER' || !!u.isField }; }
+  @Post('me/shift/start') start(@CurrentUser() u: any, @Body() b: { lat?: number; lng?: number }) { this.guard(u); return this.hr.clockIn(u, b?.lat, b?.lng); }
+  @Post('me/shift/end') end(@CurrentUser() u: any, @Body() b: { lat?: number; lng?: number }) { this.guard(u); return this.hr.clockOut(u, b?.lat, b?.lng); }
   @Roles('ADMIN', 'OPS', 'SALES', 'MARKETING') @Get('admin/shifts') report(@Query('from') from: string, @Query('to') to: string, @Query('userId') userId?: string) {
     const today = new Date().toISOString().slice(0, 10);
     return this.svc.report(from || today, to || today, userId);

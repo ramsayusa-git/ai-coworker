@@ -307,6 +307,9 @@ model Warehouse {
   name         String
   address      String?
   pincode      String?
+  lat          Float?
+  lng          Float?
+  geofenceM    Int             @default(300)
   active       Boolean         @default(true)
   zones        Zone[]
   lots         Lot[]
@@ -441,7 +444,72 @@ model Shift {
   endLat    Float?
   endLng    Float?
   autoClosed Boolean  @default(false) // ended by the 16h safety cron, not the person
+  source    String    @default("app") // app | regularised | admin
+  geoOk     Boolean?  // clock-in inside the warehouse geofence (null = no fence / no GPS)
+  lateMin   Int?      // minutes after rostered start (0 = on time)
+  note      String?
   @@index([userId, startedAt])
+}
+
+/// ---- HR ----
+model StaffProfile {
+  id                 String    @id @default(uuid())
+  userId             String    @unique
+  employeeCode       String?   @unique
+  designation        String?
+  joinedOn           DateTime?
+  monthlySalaryPaise Int       @default(0)
+  weeklyOffs         Int[]     @default([0]) // 0 = Sunday
+  shiftStart         String    @default("09:00")
+  shiftEnd           String    @default("18:00")
+  managerId          String?
+  notes              String?
+  updatedAt          DateTime  @updatedAt
+}
+
+model Holiday {
+  id       String   @id @default(uuid())
+  date     DateTime @unique
+  name     String
+  optional Boolean  @default(false)
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+/// Leave / WFH / attendance-regularisation requests. type is a code from hr_policy.leaveTypes, WFH, or REG.
+model LeaveRequest {
+  id           String      @id @default(uuid())
+  userId       String
+  type         String
+  from         DateTime
+  to           DateTime
+  days         Float
+  halfDay      Boolean     @default(false)
+  reason       String
+  status       LeaveStatus @default(PENDING)
+  approverId   String?
+  decisionNote String?
+  decidedAt    DateTime?
+  claimedIn    DateTime?   // REG: the shift the person says they worked
+  claimedOut   DateTime?
+  createdAt    DateTime    @default(now())
+  @@index([userId, from])
+  @@index([status])
+}
+
+model Roster {
+  id     String   @id @default(uuid())
+  userId String
+  date   DateTime
+  start  String   // "06:00"
+  end    String   // "14:00"
+  label  String?
+  @@unique([userId, date])
 }
 
 /// Key/value app settings edited from the admin UI (invoice templates, approval limits, ...). Value is JSON.

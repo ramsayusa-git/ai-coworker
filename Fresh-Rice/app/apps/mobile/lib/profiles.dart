@@ -50,16 +50,19 @@ class Profiles {
 /// pings run every 30s ONLY while on duty — nothing is sent when clocked out.
 class Duty extends ChangeNotifier {
   static final Duty I = Duty();
-  bool onDuty = false; DateTime? since; double hoursToday = 0; bool canTrack = false; Timer? _gps; Position? last; String? lastError;
+  bool onDuty = false; DateTime? since; double hoursToday = 0; bool canTrack = false; bool tracksLocation = false; Timer? _gps; Position? last; String? lastError;
+  static const staffRoles = ['ADMIN', 'OPS', 'SALES', 'MARKETING', 'RIDER', 'WAREHOUSE_STAFF'];
 
-  bool get eligible => Api.user?['role'] == 'RIDER' || Api.user?['isField'] == true;
+  /// Every staff role clocks in/out (attendance); only riders and field staff share GPS while on duty.
+  bool get eligible => staffRoles.contains(Api.user?['role']);
+  bool get sharesLocation => Api.user?['role'] == 'RIDER' || Api.user?['isField'] == true;
 
   Future<void> refresh() async {
     if (Api.token == null || !eligible) { onDuty = false; canTrack = false; _stopGps(); notifyListeners(); return; }
     try {
       final r = await Api.call('/me/shift');
-      onDuty = r['onDuty'] == true; since = r['since'] != null ? DateTime.tryParse(r['since']) : null; hoursToday = (r['hoursToday'] ?? 0).toDouble(); canTrack = r['canTrack'] == true;
-      onDuty ? _startGps() : _stopGps();
+      onDuty = r['onDuty'] == true; since = r['since'] != null ? DateTime.tryParse(r['since']) : null; hoursToday = (r['hoursToday'] ?? 0).toDouble(); canTrack = r['canTrack'] == true; tracksLocation = r['canTrackLocation'] == true || sharesLocation;
+      onDuty && tracksLocation ? _startGps() : _stopGps();
     } catch (e) { lastError = '$e'; }
     notifyListeners();
   }

@@ -12,6 +12,7 @@ import 'screens/sales.dart';
 import 'screens/marketing.dart';
 import 'screens/settings.dart';
 import 'screens/issues.dart';
+import 'screens/hr.dart';
 
 const leaf = Color(0xFF2E7D4F);
 const rice = Color(0xFFFBF8F1);
@@ -76,10 +77,11 @@ class _StaffShellState extends State<StaffShell> {
   @override
   Widget build(BuildContext context) {
     final staffDesk = ['ADMIN', 'OPS', 'SALES'].contains(Api.user?['role']);
-    final pages = [widget.main, const LiveScreen(), if (staffDesk) const IssuesScreen(), widget.settings];
+    final pages = [widget.main, const LiveScreen(), const HrScreen(), if (staffDesk) const IssuesScreen(), widget.settings];
     return Scaffold(body: IndexedStack(index: idx, children: pages), bottomNavigationBar: NavigationBar(selectedIndex: idx, onDestinationSelected: (i) => setState(() => idx = i), destinations: [
       NavigationDestination(icon: Icon(widget.mainIcon), label: widget.title),
       const NavigationDestination(icon: Icon(Icons.map), label: 'Live'),
+      const NavigationDestination(icon: Icon(Icons.badge), label: 'Attendance'),
       if (staffDesk) const NavigationDestination(icon: Icon(Icons.support_agent), label: 'Issues'),
       const NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
     ]));

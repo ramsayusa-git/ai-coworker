@@ -28,7 +28,8 @@ export class AuthGuard implements CanActivate {
     const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [ctx.getHandler(), ctx.getClass()]);
     const req = ctx.switchToHttp().getRequest();
     const auth: string = req.headers['authorization'] || '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+    // GET downloads opened in a new tab (exports, PDFs) can't set headers — accept ?t=<jwt> there only.
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : (req.method === 'GET' && typeof req.query?.t === 'string' && req.query.t.length > 20 ? req.query.t : null);
     if (token && token.startsWith('frk_')) {
       // Service API key (MCP server, scripts): resolves to its linked user; read-only keys can't hit @Write() handlers.
       const key = await this.db.apiKey.findUnique({ where: { keyHash: createHash('sha256').update(token).digest('hex') } });

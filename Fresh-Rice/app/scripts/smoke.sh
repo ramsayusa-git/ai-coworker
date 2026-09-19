@@ -178,6 +178,38 @@ check "admin approves" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST 
 check "approved discount applied to order" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$MOID | py "print(d['discountPaise'])")" 20000
 check "already decided" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/approvals/$PDID/approve -d '{}' -o /dev/null -w '%{http_code}')" 400
 check "approval stats" "$(curl -s -H "Authorization: Bearer $SL" $A/admin/approvals/stats | py "print(d['discountsToday']>=2)")" True
+# --- HR: attendance, leave, roster, payroll ---
+MON=$(date +%Y-%m); MID=$(curl -s -H "Authorization: Bearer $AD" $A/admin/staff | py "print([s['id'] for s in d if s['role']=='MARKETING'][0])")
+check "hr policy default" "$(curl -s -H "Authorization: Bearer $AD" $A/admin/hr/policy | py "print(d['fullDayHours'], len(d['leaveTypes']))")" "8 4"
+check "customer blocked from hr" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $C" $A/me/hr)" 403
+check "marketing (office role) can clock in" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/clock-in -d '{}' | py "print('lateMin' in d)")" True
+check "clock in twice is idempotent" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/clock-in -d '{}' | py "print(d['alreadyOn'])")" True
+check "me/hr shows on duty" "$(curl -s -H "Authorization: Bearer $MK" $A/me/hr | py "print(d['onDuty'] and d['today'] is not None and d['today']['firstIn'] is not None)")" True
+check "clock out" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/clock-out -d '{}' | py "print(d['endedAt'] is not None)")" True
+check "hr today lists staff" "$(curl -s -H "Authorization: Bearer $AD" $A/admin/hr/today | py "print(any(r['user']['id']=='$MID' and r['firstIn'] for r in d['rows']))")" True
+check "sales cannot see hr admin" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $SL" $A/admin/hr/today)" 403
+check "profile: salary + manager" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X PATCH $A/admin/hr/staff/$MID/profile -d "{\"employeeCode\":\"FR-MK1\",\"joinedOn\":\"2025-01-01\",\"designation\":\"Marketing exec\",\"monthlySalaryPaise\":3000000,\"weeklyOffs\":[0],\"managerId\":\"$SID\"}" | py "print(d['employeeCode'], d['monthlySalaryPaise'])")" "FR-MK1 3000000"
+check "profile: bad weekly off rejected" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X PATCH $A/admin/hr/staff/$MID/profile -d '{"weeklyOffs":[9]}' -o /dev/null -w '%{http_code}')" 400
+NXT=$(date -d "next monday +$((RANDOM % 40 + 2)) week" +%F); HOL=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/hr/holidays -d "{\"date\":\"$(date -d '+40 day' +%F)\",\"name\":\"Smoke holiday\"}" | py "print(d['id'])")
+check "holiday listed to staff" "$(curl -s -H "Authorization: Bearer $MK" "$A/hr/holidays?year=$(date -d '+40 day' +%Y)" | py "print(any(h['id']=='$HOL' for h in d))")" True
+check "leave balances" "$(curl -s -H "Authorization: Bearer $MK" $A/me/hr/balances | py "print([b['balance'] for b in d if b['code']=='CL'][0] >= 0)")" True
+check "leave needs reason" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/leave -d "{\"type\":\"CL\",\"from\":\"$NXT\"}" -o /dev/null -w '%{http_code}')" 400
+LV=$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/leave -d "{\"type\":\"LWP\",\"from\":\"$NXT\",\"to\":\"$(date -d "$NXT +1 day" +%F)\",\"reason\":\"family function\"}"); LVID=$(echo "$LV" | py "print(d['id'])")
+check "leave request 2 days pending" "$(echo "$LV" | py "print(d['status'], d['days'])")" "PENDING 2"
+check "overlapping leave rejected" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/leave -d "{\"type\":\"SL\",\"from\":\"$NXT\",\"reason\":\"x\"}" -o /dev/null -w '%{http_code}')" 400
+check "manager (sales) sees report's request" "$(curl -s -H "Authorization: Bearer $SL" $A/hr/leave-queue | py "print(any(r['id']=='$LVID' for r in d))")" True
+check "requester cannot self-approve" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/hr/leave/$LVID/approve -d '{}' -o /dev/null -w '%{http_code}')" 403
+check "manager approves" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/hr/leave/$LVID/approve -d '{}' | py "print(d['status'])")" APPROVED
+check "usage counted" "$(curl -s -H "Authorization: Bearer $MK" "$A/me/hr/balances?year=${NXT:0:4}" | py "print([b['used'] for b in d if b['code']=='LWP'][0] >= 2)")" True
+YD=$(date -d "-$((RANDOM % 300 + 3)) day" +%F); RG=$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/leave -d "{\"type\":\"REG\",\"from\":\"$YD\",\"reason\":\"forgot to punch\",\"claimedIn\":\"${YD}T03:30:00Z\",\"claimedOut\":\"${YD}T12:30:00Z\"}"); RGID=$(echo "$RG" | py "print(d['id'])")
+check "regularisation pending" "$(echo "$RG" | py "print(d['status'], d['type'])")" "PENDING REG"
+check "admin approves regularisation → shift created" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/hr/leave/$RGID/approve -d '{}' >/dev/null; curl -s -H "Authorization: Bearer $AD" "$A/admin/hr/attendance?month=${YD:0:7}&userId=$MID" | py "print([x['code'] for x in d['rows'][0]['days'] if x['date']=='$YD'][0])")" P
+check "payroll json has net" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/hr/payroll?month=$MON" | py "print([r['netPayableRupees']>0 for r in d if r['employeeCode']=='FR-MK1'][0])")" True
+check "payroll xlsx" "$(curl -s -o /dev/null -w '%{content_type}' -H "Authorization: Bearer $AD" "$A/admin/hr/payroll?month=$MON&format=xlsx" | cut -d';' -f1)" "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+check "attendance csv" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/hr/attendance.export?month=$MON&format=csv" | head -1 | grep -c 'Employee Code.*D01')" 1
+check "roster upsert" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X PUT $A/admin/hr/roster -d "{\"rows\":[{\"userId\":\"$MID\",\"date\":\"$NXT\",\"start\":\"06:00\",\"end\":\"14:00\",\"label\":\"early\"}]}" | py "print(d['upserted'])")" 1
+check "ops cannot edit policy" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X PUT $A/admin/hr/policy -d '{"graceMin":5}' -o /dev/null -w '%{http_code}')" 403
+curl -s -X DELETE -H "Authorization: Bearer $AD" $A/admin/hr/holidays/$HOL >/dev/null
 # --- Service API keys (MCP) ---
 AK=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/api-keys -d '{"name":"smoke ro"}')
 AKEY=$(echo "$AK" | py "print(d['key'])"); AKID=$(echo "$AK" | py "print(d['id'])")
