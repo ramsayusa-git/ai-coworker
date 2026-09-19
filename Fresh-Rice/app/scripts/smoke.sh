@@ -47,6 +47,8 @@ check "reports daily" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/report
 check "reports gst csv" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/reports/gst?format=csv" | head -1 | grep -c "Invoice No")" 1
 
 # --- RBAC: marketing, sales, vendor portal, warehouse staff ---
+# Sales rep is field staff (flag set before login so the JWT carries isField) — one OTP per phone per run keeps us under the 5/10min per-phone cap.
+SID=$(curl -s -H "Authorization: Bearer $AD" $A/admin/staff | py "print([s['id'] for s in d if s['role']=='SALES'][0])"); curl "${J[@]}" -H "Authorization: Bearer $AD" -X PATCH $A/admin/staff/$SID -d '{"isField":true}' >/dev/null
 MK=$(tok 9000000005); SL=$(tok 9000000006); WH=$(tok 9000000007); VN=$(tok 9000000008)
 check "marketing can read coupons" "$(curl -s -H "Authorization: Bearer $MK" "$A/admin/coupons" -o /dev/null -w '%{http_code}')" 200
 check "marketing forbidden from vendors" "$(curl -s -H "Authorization: Bearer $MK" "$A/admin/vendors" -o /dev/null -w '%{http_code}')" 403
@@ -93,9 +95,6 @@ check "staff sees live list" "$(curl -s -H "Authorization: Bearer $SL" $A/admin/
 check "customer sees on-duty riders only" "$(curl -s -H "Authorization: Bearer $C" $A/riders/live | py "print(all(r['kind']=='rider' and r['route'] for r in d))")" True
 check "customer cannot share location" "$(curl "${J[@]}" -H "Authorization: Bearer $C" -X POST $A/rider/location -d '{"lat":1,"lng":1}' -o /dev/null -w '%{http_code}')" 403
 check "rider-location carries rider phone" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$OID/rider-location | py "print(d is None or ('rider' in d and 'phone' in d['rider']))")" True
-SID=$(curl -s -H "Authorization: Bearer $AD" $A/admin/staff | py "print([s['id'] for s in d if s['role']=='SALES'][0])")
-curl "${J[@]}" -H "Authorization: Bearer $AD" -X PATCH $A/admin/staff/$SID -d '{"isField":true}' >/dev/null
-SL=$(tok 9000000006)  # re-login so the JWT carries isField
 check "field staff clocks in" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/me/shift/start -d '{"lat":17.44,"lng":78.35}' | py "print(d.get('id') is not None)")" True
 check "field staff can share location" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/rider/location -d '{"lat":17.44,"lng":78.35}' | py "print(d['ok'])")" True
 check "field staff on live map for staff" "$(curl -s -H "Authorization: Bearer $AD" $A/admin/dispatch/live | py "print(any(r['kind']=='field' and r['onDuty'] for r in d))")" True
