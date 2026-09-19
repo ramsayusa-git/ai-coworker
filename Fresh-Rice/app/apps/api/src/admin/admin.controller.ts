@@ -21,7 +21,7 @@ export class AdminController {
     for (const r of rows) {
       const ips = await this.db.traceScan.findMany({ where: { lotNo: r.lotNo, at: { gte: since } }, distinct: ['ip'], select: { ip: true } });
       const lot = await this.db.lot.findUnique({ where: { lotNo: r.lotNo }, select: { onHandKg: true, receivedKg: true, variety: { select: { name: true } }, vendor: { select: { name: true } } } });
-      out.push({ lotNo: r.lotNo, scans: r._count._all, distinctIps: ips.length, flagged: ips.length >= Number(minIps), variety: lot?.variety.name || null, mill: lot?.vendor.name || null, onHandKg: lot?.onHandKg ?? null, known: !!lot });
+      out.push({ lotNo: r.lotNo, scans: r._count._all, distinctIps: ips.length, flagged: !lot || ips.length >= Number(minIps), variety: lot?.variety.name || null, mill: lot?.vendor.name || null, onHandKg: lot?.onHandKg ?? null, known: !!lot });
     }
     return out.sort((a, b) => Number(b.flagged) - Number(a.flagged) || b.distinctIps - a.distinctIps);
   }

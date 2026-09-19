@@ -31,10 +31,12 @@ export class InventoryController {
    *  only skips the "token required" check, it doesn't clear an inherited @Roles() list. */
   @Public() @Roles() @Get('trace/:lotNo') async trace(@Param('lotNo') lotNo: string, @Req() req: Request) {
     const lot = await this.db.lot.findUnique({ where: { lotNo }, include: { vendor: true, variety: { include: { skus: { where: { active: true }, include: { prices: { where: { scope: 'BASE', validFrom: { lte: new Date() }, OR: [{ validTo: null }, { validTo: { gt: new Date() } }] }, orderBy: { validFrom: 'desc' }, take: 1 } } } } } } });
-    if (!lot) return { found: false };
-    // Log the scan (fire-and-forget) for the duplicate-scan flag. Behind nginx the real IP is in X-Forwarded-For.
+    // Log the scan (fire-and-forget) for the duplicate-scan flag — BEFORE the not-found return, so a QR carrying a
+    // lot code we never issued is also recorded and shows up as "unknown lot" on Stock & Lots.
+    // Behind nginx the real IP is in X-Forwarded-For.
     const ip = ((req.headers['x-forwarded-for'] as string) || '').split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';
-    this.db.traceScan.create({ data: { lotNo, ip, ua: (req.headers['user-agent'] || '').toString().slice(0, 200) } }).catch(() => {});
+    this.db.traceScan.create({ data: { lotNo: lotNo.slice(0, 64), ip, ua: (req.headers['user-agent'] || '').toString().slice(0, 200) } }).catch(() => {});
+    if (!lot) return { found: false };
     const agedDays = Math.max(0, Math.floor((Date.now() - lot.milledOn.getTime()) / 86400000));
     const agedMonths = Math.floor(agedDays / 30);
     // Cheapest per-kg base price for this variety, so the page can compare against a supermarket bag.

@@ -9,6 +9,16 @@ const VARIETIES = [{ n: 'Sona Masoori', t: 'సోనా మసూరి', d: 'T
 const STEPS = [['Pick your rice', 'Variety, pack size and how often — every 3 weeks is the household favourite.'], ['We message you the night before', 'Reply SKIP if you\'re away. No app needed.'], ['Bag arrives, OTP handover', 'Carried up to your kitchen. Lot label on every bag.'], ['Refer a neighbour', '₹100 in your wallet the moment their first bag is delivered.']];
 const QUOTES = ['"First time rice came with the milling date. My mother approved." — Lakshmi, KPHB', '"25 kg to the 4th floor, no lift, on time. Every week." — Suresh, Ameerpet PG', '"Aged Sona Masoori that actually tastes like the village rice." — Padma, Madhapur', '"WhatsApp SKIP when we travel. That\'s it." — Ravi, Gachibowli'];
 
+// Each card links to where the feature actually lives. The trace links open a real lot so visitors see live numbers.
+const FEATURES = [
+  { i: '🍚', t: 'Cook mode for your exact lot', d: 'Rice : water ratio, soak time and cooker whistles worked out from that lot’s real age and moisture. A 7-month lot at 12.8 % moisture says 1 : 1.9, 20 min soak, 3 whistles.', h: '/trace/LOT-SONA-2508-02', c: 'See a live lot' },
+  { i: '🏭', t: 'From the mill, in their words', d: 'The mill that milled your bag writes its own story and photo. It appears on every trace page for their lots — the lot number on your bag is theirs.', h: '/trace/LOT-SONA-2508-02', c: 'Read Sri Balaji’s' },
+  { i: '⚖️', t: 'Compare your supermarket bag', d: 'Type the packed-on date and MRP from the bag you have at home. We show how old it is at minimum and what you pay per kg vs ours.', h: '/trace/LOT-SONA-2508-02', c: 'Try the comparison' },
+  { i: '📏', t: 'Household rice meter', d: 'On your account page: how much of the last bag is left, the day it runs out, and one tap to put the right pack back in the cart. Learns your pace after 3 weeks.', h: '/shop/account', c: 'Open my account' },
+  { i: '🎂', t: 'Your rice’s birthday', d: 'A WhatsApp when a bag you bought crosses 6 months (it’s in the sweet spot now) and again past 12 (time for a fresher lot). Once per bag, never spam.', h: '/shop/orders', c: 'My orders' },
+  { i: '🔍', t: 'Every scan is watched', d: 'Each QR scan is logged. If one lot code starts showing up from many different phones — or a code we never printed — our ops desk sees it in red the same day.', h: '/trace/LOT-SONA-2508-02', c: 'Scan a real label' },
+];
+
 export default function Landing() {
   const [pin, setPin] = useState(''); const [res, setRes] = useState<any>(null); const [checking, setChecking] = useState(false);
   const check = async () => { setChecking(true); try { setRes(await api('/zones/check?pincode=' + pin)); } catch (e: any) { setRes({ error: e.message }); } finally { setChecking(false); } };
@@ -39,6 +49,14 @@ export default function Landing() {
     <Section className="max-w-6xl mx-auto px-4 py-16"><motion.h2 variants={fadeUp} className="text-3xl font-bold text-center">What's in the warehouse this week</motion.h2>
       <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-5 gap-4">{VARIETIES.map((v, i) => <motion.div key={v.n} variants={fadeUp} whileHover={{ y: -6, rotate: i % 2 ? 0.6 : -0.6 }} className={'rounded-2xl bg-gradient-to-b p-4 border border-white shadow-sm ' + v.c}><motion.div animate={{ rotate: [0, 6, -6, 0] }} transition={{ duration: 5, repeat: Infinity, delay: i * 0.4 }} className="w-fit"><Grain size={26} /></motion.div><div className="font-bold mt-2">{v.n}</div><div className="text-xs text-gray-500">{v.t}</div><div className="text-sm text-gray-700 mt-2">{v.d}</div></motion.div>)}</div>
       <motion.div variants={fadeUp} className="text-center mt-6"><Link href="/shop" className="btn-primary">Open the shop →</Link></motion.div></Section>
+
+    {/* WITH EVERY BAG — the traceability + household features, each linked to where it lives */}
+    <Section className="bg-white border-y"><div className="max-w-6xl mx-auto px-4 py-16">
+      <motion.div variants={fadeUp} className="text-xs uppercase tracking-widest text-rice-700 font-semibold text-center">More than rice</motion.div>
+      <motion.h2 variants={fadeUp} className="text-3xl font-bold text-center mt-2">What comes with every bag</motion.h2>
+      <motion.p variants={fadeUp} className="text-center text-gray-600 mt-2 max-w-2xl mx-auto">Scan the QR on the label. Everything below is worked out from <em>that</em> lot — its real age, moisture and mill — not a generic chart.</motion.p>
+      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">{FEATURES.map((f, i) => <motion.div key={f.t} variants={fadeUp} whileHover={{ y: -4 }} className="card flex flex-col"><div className="text-3xl">{f.i}</div><div className="font-bold mt-2">{f.t}</div><div className="text-sm text-gray-600 mt-1 flex-1">{f.d}</div><Link href={f.h} className="text-sm font-semibold text-leaf-700 mt-3 underline underline-offset-2">{f.c} →</Link></motion.div>)}</div>
+    </div></Section>
 
     {/* HOW */}
     <Section className="bg-leaf-700 text-white"><div id="how" className="max-w-5xl mx-auto px-4 py-16"><motion.h2 variants={fadeUp} className="text-3xl font-bold">Set it and forget it</motion.h2>
