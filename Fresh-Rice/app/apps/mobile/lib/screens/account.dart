@@ -5,8 +5,8 @@ import '../cart.dart';
 import 'checkout.dart';
 
 class AccountScreen extends StatefulWidget {
-  final VoidCallback onLogout;
-  const AccountScreen({super.key, required this.onLogout});
+  final VoidCallback onLogout; final VoidCallback? onSettings;
+  const AccountScreen({super.key, required this.onLogout, this.onSettings});
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
@@ -19,7 +19,7 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final u = me ?? Api.user ?? {};
-    return Scaffold(appBar: AppBar(title: const Text('Account')), body: ListView(padding: const EdgeInsets.all(12), children: [
+    return Scaffold(appBar: AppBar(title: const Text('Account'), actions: [if (widget.onSettings != null) IconButton(icon: const Icon(Icons.settings), tooltip: 'Settings & profile', onPressed: widget.onSettings)]), body: ListView(padding: const EdgeInsets.all(12), children: [
       if (meter != null) _riceMeter(context, u),
       Card(child: Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(u['name'] ?? 'Set your name', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), Text(u['phone'] ?? '', style: const TextStyle(color: Colors.grey)),

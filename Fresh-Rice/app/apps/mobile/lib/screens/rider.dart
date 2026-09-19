@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import '../profiles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../api.dart';
 import 'orders.dart';
@@ -15,17 +16,15 @@ class RiderScreen extends StatefulWidget {
 }
 
 class _RiderScreenState extends State<RiderScreen> {
-  List? routes; Timer? gps; Position? last;
+  List? routes; Timer? gps;
+  Position? get last => Duty.I.last;
   @override
-  void initState() { super.initState(); load(); startGps(); }
+  void initState() { super.initState(); load(); Duty.I.addListener(_r); Duty.I.refresh(); }
   @override
-  void dispose() { gps?.cancel(); super.dispose(); }
-  Future<void> startGps() async {
-    var perm = await Geolocator.checkPermission();
-    if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
-    if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) return;
-    gps = Timer.periodic(const Duration(seconds: 30), (_) async { try { last = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium); await Api.call('/rider/location', body: {'lat': last!.latitude, 'lng': last!.longitude}); } catch (_) {} });
-  }
+  void dispose() { Duty.I.removeListener(_r); super.dispose(); }
+  void _r() { if (mounted) setState(() {}); }
+  Future<void> duty() async { try { Duty.I.onDuty ? await Duty.I.clockOut() : await Duty.I.clockIn(); } catch (e) { snack('$e'); } }
+  Widget dutyBar() { final d = Duty.I; return Material(color: d.onDuty ? Colors.green.shade50 : Colors.amber.shade50, child: ListTile(dense: true, leading: Icon(d.onDuty ? Icons.gps_fixed : Icons.gps_off, color: d.onDuty ? Colors.green : Colors.orange), title: Text(d.onDuty ? 'On duty · sharing live location · ${d.hoursToday.toStringAsFixed(1)} h today' : 'Off duty — clock in to start sharing your location', style: const TextStyle(fontSize: 13)), trailing: d.onDuty ? OutlinedButton(onPressed: duty, child: const Text('Clock out')) : FilledButton(onPressed: duty, child: const Text('Clock in')))); }
   Future<void> scan(Map s) async {
     final ctl = TextEditingController();
     final ok = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(title: Text('Load bag for order #${s['order']['orderNo']}'), content: TextField(controller: ctl, autofocus: true, decoration: const InputDecoration(labelText: 'Scan / type lot number from bag QR')), actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirm'))]));
@@ -35,7 +34,7 @@ class _RiderScreenState extends State<RiderScreen> {
   Future<void> load() async { try { routes = await Api.call('/rider/manifest'); } catch (e) { snack('$e'); } if (mounted) setState(() {}); }
   void snack(String m) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m))); }
 
-  Future<void> start(String id) async { try { await Api.call('/rider/routes/$id/start', method: 'POST'); snack('Route started — customers received their OTPs'); load(); } catch (e) { snack('$e'); } }
+  Future<void> start(String id) async { try { if (!Duty.I.onDuty) { await Duty.I.clockIn(); } await Api.call('/rider/routes/$id/start', method: 'POST'); snack('Route started — customers received their OTPs'); load(); } catch (e) { snack('$e'); } }
 
   Future<void> deliver(Map s) async {
     final otp = TextEditingController(); String? photoB64; String? fail;
@@ -59,15 +58,15 @@ class _RiderScreenState extends State<RiderScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text('🛵 ${Api.user?['name'] ?? 'Rider'}'), backgroundColor: Colors.grey.shade900, actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: load), IconButton(icon: const Icon(Icons.logout), onPressed: () async { await Api.setSession(null, null); widget.onLogout(); })]),
-    body: RefreshIndicator(onRefresh: load, child: routes == null ? const Center(child: CircularProgressIndicator()) : routes!.isEmpty ? const Center(child: Text('No routes assigned. Check with ops.')) : ListView(padding: const EdgeInsets.all(12), children: [
+    appBar: AppBar(title: Text('🛵 ${Api.user?['name'] ?? 'Rider'}'), backgroundColor: Colors.grey.shade900, actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: load)]),
+    body: Column(children: [dutyBar(), Expanded(child: RefreshIndicator(onRefresh: load, child: routes == null ? const Center(child: CircularProgressIndicator()) : routes!.isEmpty ? const Center(child: Text('No routes assigned. Check with ops.')) : ListView(padding: const EdgeInsets.all(12), children: [
       for (final r in routes!) Card(child: Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [Expanded(child: Text('${r['zone']['name']} · ${fmtDate(r['date'])}', style: const TextStyle(fontWeight: FontWeight.bold))), StatusChip(r['status'])]),
         Text('${(r['vehicleType'] as String).replaceAll('_', ' ')} · ${r['loadKg']} kg · ${(r['stops'] as List).length} stops', style: const TextStyle(fontSize: 12, color: Colors.grey)),
         if (r['status'] == 'PUBLISHED') Padding(padding: const EdgeInsets.only(top: 8), child: FilledButton(onPressed: () => start(r['id']), child: Text('Start route (load ${r['loadKg']} kg)'))),
         for (final s in r['stops']) _stop(r, s),
       ]))),
-    ])));
+    ])))]));
 
   Widget _stop(Map r, Map s) {
     final o = s['order']; final a = o['address']; final cod = o['payment']?['method'] == 'COD' && o['payment']?['status'] != 'PAID';
