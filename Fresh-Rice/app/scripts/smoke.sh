@@ -154,4 +154,15 @@ check "whatsapp RATE closes + rates" "$(curl "${J[@]}" -X POST $A/webhooks/whats
 check "whatsapp ISSUE opens or appends ticket" "$(curl "${J[@]}" -X POST $A/webhooks/whatsapp -d '{"phone":"919000000003","text":"ISSUE order is late"}' | py "print(d['action'].startswith('issue_'))")" True
 check "issue stats" "$(curl -s -H "Authorization: Bearer $AD" $A/issues/stats | py "print(d['open']>=1 and 'byCategory30d' in d)")" True
 
+# --- Service API keys (MCP) ---
+AK=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/api-keys -d '{"name":"smoke ro"}')
+AKEY=$(echo "$AK" | py "print(d['key'])"); AKID=$(echo "$AK" | py "print(d['id'])")
+check "api key reads" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $AKEY" $A/admin/orders)" 200
+check "read-only key cannot write" "$(curl "${J[@]}" -H "Authorization: Bearer $AKEY" -X POST $A/admin/coupons -d '{"code":"X"}' -o /dev/null -w '%{http_code}')" 403
+check "sales cannot mint keys" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/admin/api-keys -d '{"name":"x"}' -o /dev/null -w '%{http_code}')" 403
+curl -s -X DELETE -H "Authorization: Bearer $AD" $A/admin/api-keys/$AKID >/dev/null
+check "revoked key rejected" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $AKEY" $A/admin/orders)" 401
+check "mcp http health" "$(curl -s http://localhost:4300/health | py "print(d['ok'])")" True
+check "mcp http needs bearer" "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:4300/mcp -H 'Content-Type: application/json' -d '{}')" 401
+
 [ $fail = 0 ] && echo "ALL PASS" || { echo "SOME FAILED"; exit 1; }

@@ -27,6 +27,7 @@ const NAV: [string, string, string[]?][] = [
   ['/admin/data', 'Import / export'],
   ['/admin/messages', 'WhatsApp log', ['ADMIN', 'OPS', 'MARKETING']],
   ['/admin/team', 'Team', ['ADMIN']],
+  ['/admin/api-keys', 'API keys (Claude / MCP)', ['ADMIN']],
 ];
 const ALL_ROLES = ['ADMIN', 'OPS', 'MARKETING', 'SALES'];
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
