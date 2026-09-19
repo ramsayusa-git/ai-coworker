@@ -45,7 +45,7 @@ export class AuthService {
       user = await this.db.user.create({ data: { phone, name: name || null, referralCode: this.makeCode(phone), referredById: referrer?.id } });
     } else if (name && !user.name) user = await this.db.user.update({ where: { id: user.id }, data: { name } });
     if (!user.active) throw new UnauthorizedException('This account has been deactivated');
-    const token = await this.jwt.signAsync({ sub: user.id, role: user.role, phone: user.phone, b2b: user.b2bAccountId || undefined, warehouseId: user.warehouseId || undefined, vendorId: user.vendorId || undefined });
+    const token = await this.jwt.signAsync({ sub: user.id, role: user.role, phone: user.phone, b2b: user.b2bAccountId || undefined, warehouseId: user.warehouseId || undefined, vendorId: user.vendorId || undefined, isField: user.isField || undefined });
     return { token, isNew, user: this.publicUser(user) };
   }
 
@@ -54,12 +54,12 @@ export class AuthService {
     const user = await this.db.user.findFirst({ where: { email: email.toLowerCase(), passwordHash: { not: null } } });
     if (!user || !user.passwordHash || !(await bcrypt.compare(password, user.passwordHash))) throw new UnauthorizedException('Invalid email or password');
     if (!user.active) throw new UnauthorizedException('This account has been deactivated');
-    const token = await this.jwt.signAsync({ sub: user.id, role: user.role, phone: user.phone, b2b: user.b2bAccountId || undefined, warehouseId: user.warehouseId || undefined, vendorId: user.vendorId || undefined });
+    const token = await this.jwt.signAsync({ sub: user.id, role: user.role, phone: user.phone, b2b: user.b2bAccountId || undefined, warehouseId: user.warehouseId || undefined, vendorId: user.vendorId || undefined, isField: user.isField || undefined });
     return { token, isNew: false, user: this.publicUser(user) };
   }
 
   makeCode(phone: string) { return 'FR' + phone.slice(-4) + Math.random().toString(36).slice(2, 5).toUpperCase(); }
-  publicUser(u: any) { return { id: u.id, phone: u.phone, email: u.email || null, name: u.name, role: u.role, lang: u.lang, referralCode: u.referralCode, walletBalance: u.walletBalance, b2bAccountId: u.b2bAccountId, referredById: u.referredById || null, warehouseId: u.warehouseId || null, vendorId: u.vendorId || null, active: u.active, isSuperAdmin: !!u.isSuperAdmin, householdSize: u.householdSize ?? null }; }
+  publicUser(u: any) { return { id: u.id, phone: u.phone, email: u.email || null, name: u.name, role: u.role, lang: u.lang, referralCode: u.referralCode, walletBalance: u.walletBalance, b2bAccountId: u.b2bAccountId, referredById: u.referredById || null, warehouseId: u.warehouseId || null, vendorId: u.vendorId || null, active: u.active, isSuperAdmin: !!u.isSuperAdmin, householdSize: u.householdSize ?? null, isField: !!u.isField }; }
 
   async me(userId: string) {
     const u = await this.db.user.findUniqueOrThrow({ where: { id: userId }, include: { addresses: { include: { zone: true } }, b2bAccount: true } });

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { DispatchService } from './dispatch.service';
 import { CurrentUser, Roles } from '../common/auth.guard';
@@ -22,7 +22,8 @@ export class DispatchController {
   @Roles(...STAFF) @Get('admin/dispatch/live') live() { return this.svc.liveRiders(); }
   @Get('riders/live') liveForAll(@CurrentUser() u: any) { return this.svc.liveRiders(!STAFF.includes(u.role)); }
 
-  @Roles('RIDER') @Post('rider/location') ping(@CurrentUser() u: any, @Body() b: { lat: number; lng: number }) { return this.svc.ping(u.sub, b.lat, b.lng); }
+  // Live location ping — riders, and any staff flagged as field team (isField in the JWT). Others get 403.
+  @Post('rider/location') ping(@CurrentUser() u: any, @Body() b: { lat: number; lng: number }) { if (u.role !== 'RIDER' && !u.isField) throw new ForbiddenException('Location sharing is only for riders and field staff'); return this.svc.ping(u.sub, b.lat, b.lng); }
   @Roles('RIDER') @Post('rider/stops/:id/scan') scan(@CurrentUser() u: any, @Param('id') id: string, @Body() b: { lotNo: string }) { return this.svc.scanLoad(u.sub, id, b.lotNo); }
   @Get('orders/:id/rider-location') async riderLoc(@CurrentUser() u: any, @Param('id') id: string) {
     const stop = await this.svc['db'].routeStop.findUnique({ where: { orderId: id }, include: { route: { include: { rider: { select: { id: true, name: true, phone: true } } } }, order: { select: { userId: true, address: { select: { lat: true, lng: true } } } } } });

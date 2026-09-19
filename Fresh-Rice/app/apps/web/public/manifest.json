@@ -1,0 +1,1 @@
+{ "name": "FreshRice Direct", "short_name": "FreshRice", "start_url": "/shop", "display": "standalone", "background_color": "#fbf8f1", "theme_color": "#2e7d4f", "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }] }

@@ -88,4 +88,19 @@ check "lot milestone notified this order" "$(curl -s -H "Authorization: Bearer $
 for i in 1 2 3; do curl -s -H "X-Forwarded-For: 203.0.113.$i" "$A/inventory/trace/$LOTNO" >/dev/null; done
 check "duplicate-scan flag" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/trace-scans?hours=1&minIps=3" | py "print(any(r['lotNo']=='$LOTNO' and r['flagged'] for r in d))")" True
 
+# --- Live tracking: riders + field staff, duty shifts ---
+check "staff sees live list" "$(curl -s -H "Authorization: Bearer $SL" $A/admin/dispatch/live | py "print(any(r['kind']=='rider' for r in d))")" True
+check "customer sees on-duty riders only" "$(curl -s -H "Authorization: Bearer $C" $A/riders/live | py "print(all(r['kind']=='rider' and r['route'] for r in d))")" True
+check "customer cannot share location" "$(curl "${J[@]}" -H "Authorization: Bearer $C" -X POST $A/rider/location -d '{"lat":1,"lng":1}' -o /dev/null -w '%{http_code}')" 403
+check "rider-location carries rider phone" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$OID/rider-location | py "print(d is None or ('rider' in d and 'phone' in d['rider']))")" True
+SID=$(curl -s -H "Authorization: Bearer $AD" $A/admin/staff | py "print([s['id'] for s in d if s['role']=='SALES'][0])")
+curl "${J[@]}" -H "Authorization: Bearer $AD" -X PATCH $A/admin/staff/$SID -d '{"isField":true}' >/dev/null
+SL=$(tok 9000000006)  # re-login so the JWT carries isField
+check "field staff clocks in" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/me/shift/start -d '{"lat":17.44,"lng":78.35}' | py "print(d.get('id') is not None)")" True
+check "field staff can share location" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/rider/location -d '{"lat":17.44,"lng":78.35}' | py "print(d['ok'])")" True
+check "field staff on live map for staff" "$(curl -s -H "Authorization: Bearer $AD" $A/admin/dispatch/live | py "print(any(r['kind']=='field' and r['onDuty'] for r in d))")" True
+check "field staff hidden from customers" "$(curl -s -H "Authorization: Bearer $C" $A/riders/live | py "print(not any(r['kind']=='field' for r in d))")" True
+check "field staff clocks out" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/me/shift/end -d '{}' | py "print(d.get('endedAt') is not None)")" True
+check "hours report lists them" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/shifts" | py "print(any(r['userId']=='$SID' and r['shifts']>=1 for r in d))")" True
+
 [ $fail = 0 ] && echo "ALL PASS" || { echo "SOME FAILED"; exit 1; }

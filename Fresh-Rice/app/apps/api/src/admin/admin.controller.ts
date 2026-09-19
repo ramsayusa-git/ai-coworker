@@ -66,24 +66,24 @@ export class AdminController {
   // The built-in super-admin (isSuperAdmin=true) is excluded here on purpose — it's not a
   // manageable staff record: nobody (including other ADMINs) can see, edit, deactivate,
   // or role-change it from this UI/API. It only exists via its own email+password login.
-  private staffSelect = { id: true, phone: true, email: true, name: true, role: true, active: true, warehouseId: true, createdAt: true, warehouse: true, _count: { select: { assignedLeads: true } } } as const;
+  private staffSelect = { id: true, phone: true, email: true, name: true, role: true, active: true, isField: true, warehouseId: true, createdAt: true, warehouse: true, _count: { select: { assignedLeads: true } } } as const;
   @Get('staff') @Roles('ADMIN') staff() {
     return this.db.user.findMany({ where: { role: { in: ['MARKETING', 'SALES', 'OPS', 'ADMIN', 'WAREHOUSE_STAFF'] }, isSuperAdmin: false }, select: this.staffSelect, orderBy: { createdAt: 'desc' } });
   }
-  @Post('staff') @Roles('ADMIN') async createStaff(@Body() b: { phone: string; name: string; role: string; warehouseId?: string }) {
+  @Post('staff') @Roles('ADMIN') async createStaff(@Body() b: { phone: string; name: string; role: string; warehouseId?: string; isField?: boolean }) {
     const phone = '+91' + b.phone.replace(/\D/g, '').slice(-10);
     const existing = await this.db.user.findUnique({ where: { phone } });
     if (existing?.isSuperAdmin) throw new ForbiddenException('This account cannot be modified');
     return this.db.user.upsert({
       where: { phone },
-      update: { role: b.role as any, name: b.name, warehouseId: b.role === 'WAREHOUSE_STAFF' ? b.warehouseId : null, active: true },
-      create: { phone, name: b.name, role: b.role as any, warehouseId: b.role === 'WAREHOUSE_STAFF' ? b.warehouseId : null, referralCode: 'ST' + phone.slice(-4) + Math.random().toString(36).slice(2, 4).toUpperCase() },
+      update: { role: b.role as any, name: b.name, warehouseId: b.role === 'WAREHOUSE_STAFF' ? b.warehouseId : null, active: true, isField: !!b.isField },
+      create: { phone, name: b.name, role: b.role as any, warehouseId: b.role === 'WAREHOUSE_STAFF' ? b.warehouseId : null, isField: !!b.isField, referralCode: 'ST' + phone.slice(-4) + Math.random().toString(36).slice(2, 4).toUpperCase() },
       select: this.staffSelect,
     });
   }
-  @Patch('staff/:id') @Roles('ADMIN') async updateStaff(@Param('id') id: string, @Body() b: { role?: string; warehouseId?: string; active?: boolean; name?: string }) {
+  @Patch('staff/:id') @Roles('ADMIN') async updateStaff(@Param('id') id: string, @Body() b: { role?: string; warehouseId?: string; active?: boolean; name?: string; isField?: boolean }) {
     const target = await this.db.user.findUniqueOrThrow({ where: { id } });
     if (target.isSuperAdmin) throw new ForbiddenException('This account cannot be modified');
-    return this.db.user.update({ where: { id }, data: { role: b.role as any, warehouseId: b.warehouseId, active: b.active, name: b.name }, select: this.staffSelect });
+    return this.db.user.update({ where: { id }, data: { role: b.role as any, warehouseId: b.warehouseId, active: b.active, name: b.name, isField: b.isField }, select: this.staffSelect });
   }
 }

@@ -63,21 +63,23 @@ export class DispatchService {
   /** Every rider with last known position + current route progress. onDutyOnly=true (customers) drops riders
    *  who have no route in progress and hides inactive riders. Single query pass, no N+1. */
   async liveRiders(onDutyOnly = false) {
-    const riders = await this.db.user.findMany({ where: { role: 'RIDER', ...(onDutyOnly ? { active: true } : {}) }, select: { id: true, name: true, phone: true, active: true }, orderBy: { name: 'asc' } });
+    const riders = await this.db.user.findMany({ where: { OR: [{ role: 'RIDER' }, { isField: true }], ...(onDutyOnly ? { active: true } : {}) }, select: { id: true, name: true, phone: true, active: true, role: true, isField: true }, orderBy: [{ role: 'asc' }, { name: 'asc' }] });
     const ids = riders.map((r) => r.id);
-    const [locs, routes, delivered] = await Promise.all([
+    const [locs, routes, delivered, shifts] = await Promise.all([
       this.db.riderLocation.findMany({ where: { riderId: { in: ids } }, orderBy: { at: 'desc' }, distinct: ['riderId'] }),
       this.db.route.findMany({ where: { riderId: { in: ids }, status: 'IN_PROGRESS' }, include: { zone: true, _count: { select: { stops: true } } } }),
       this.db.routeStop.groupBy({ by: ['routeId'], where: { status: 'DELIVERED', route: { riderId: { in: ids }, status: 'IN_PROGRESS' } }, _count: { _all: true } }),
+      this.db.shift.findMany({ where: { userId: { in: ids }, endedAt: null }, orderBy: { startedAt: 'desc' }, distinct: ['userId'] }),
     ]);
+    const shiftBy = new Map(shifts.map((s) => [s.userId, s]));
     const locBy = new Map(locs.map((l) => [l.riderId, l])); const routeBy = new Map(routes.map((r) => [r.riderId!, r])); const doneBy = new Map(delivered.map((d) => [d.routeId, d._count._all]));
     const staleMs = 10 * 60000;
     const out = riders.map((r) => {
-      const loc = locBy.get(r.id); const route = routeBy.get(r.id);
-      return { ...r, loc: loc ? { lat: loc.lat, lng: loc.lng, at: loc.at } : null, online: !!loc && Date.now() - loc.at.getTime() < staleMs,
+      const loc = locBy.get(r.id); const route = routeBy.get(r.id); const sh = shiftBy.get(r.id);
+      return { ...r, kind: r.role === 'RIDER' ? 'rider' : 'field', onDuty: !!sh, dutySince: sh?.startedAt || null, loc: loc ? { lat: loc.lat, lng: loc.lng, at: loc.at } : null, online: !!loc && Date.now() - loc.at.getTime() < staleMs,
         route: route ? { id: route.id, zone: route.zone.name, stops: route._count.stops, delivered: doneBy.get(route.id) || 0 } : null };
     });
-    return onDutyOnly ? out.filter((r) => r.route) : out;
+    return onDutyOnly ? out.filter((r) => r.kind === 'rider' && r.route) : out;
   }
 
   /** Scan-to-load: rider scans bag QR (lot|sku) at warehouse; must match the stop's allocated lot */

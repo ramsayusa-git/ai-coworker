@@ -46,6 +46,7 @@ export default function Account() {
       {add ? <div className="mt-2"><AddressForm onSaved={() => { mutate(); setAdd(false); }} /></div> : <button className="btn-secondary mt-2" onClick={() => setAdd(true)}>+ Add</button>}</div>
     {['ADMIN', 'OPS'].includes(user.role) && <Link href="/admin" className="btn-secondary w-full mb-2">Open admin console</Link>}
     {user.role === 'RIDER' && <Link href="/rider" className="btn-secondary w-full mb-2">Open rider app</Link>}
+    <Link href="/shop/riders" className="btn-secondary w-full mb-2">🛵 Riders on the road (live map)</Link>
     {user.b2bAccountId && <Link href="/b2b" className="btn-secondary w-full mb-2">Business portal</Link>}
     <button className="btn-secondary w-full" onClick={logout}>Log out</button></div>;
 }

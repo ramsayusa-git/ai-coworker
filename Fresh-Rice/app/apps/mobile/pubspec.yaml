@@ -1,0 +1,21 @@
+name: freshrice
+description: FreshRice - traceable Telangana rice delivered. Customer + rider app.
+publish_to: 'none'
+version: 0.3.0+3
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+  url_launcher: ^6.3.1
+  image_picker: ^1.1.2
+  intl: ^0.19.0
+  geolocator: ^13.0.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+flutter:
+  uses-material-design: true

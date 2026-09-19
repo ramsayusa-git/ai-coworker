@@ -1,0 +1,672 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  B2B_USER
+  RIDER
+  OPS
+  ADMIN
+  MARKETING
+  SALES
+  VENDOR_USER
+  WAREHOUSE_STAFF
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  WON
+  LOST
+}
+
+enum LeadActivityType {
+  CALL
+  WHATSAPP
+  EMAIL
+  VISIT
+  NOTE
+}
+
+enum Lang {
+  te
+  hi
+  en
+}
+
+enum VehicleType {
+  TWO_WHEELER
+  THREE_WHEELER
+  TEMPO
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  PACKED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  FAILED
+}
+
+enum OrderChannel {
+  B2C
+  B2B
+  SUBSCRIPTION
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  WALLET
+  COD
+  CREDIT
+  MANDATE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum SubFrequency {
+  WEEKLY
+  BIWEEKLY
+  TRIWEEKLY
+  MONTHLY
+}
+
+enum SubStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum RouteStatus {
+  DRAFT
+  PUBLISHED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum StopStatus {
+  PENDING
+  ARRIVED
+  DELIVERED
+  FAILED
+}
+
+enum LedgerReason {
+  GRN
+  SALE
+  RESERVE
+  RELEASE
+  DAMAGE
+  ADJUST
+}
+
+enum PriceScope {
+  BASE
+  ZONE
+  B2B_TIER
+}
+
+model User {
+  id            String         @id @default(uuid())
+  phone         String         @unique
+  email         String?
+  passwordHash  String?
+  isSuperAdmin  Boolean        @default(false)
+  householdSize Int? // for the rice meter (run-out prediction)
+  isField       Boolean        @default(false) // field team (sales reps, supervisors): mobile app shares live location, shown on the live map
+  name          String?
+  lang          Lang           @default(te)
+  role          Role           @default(CUSTOMER)
+  active        Boolean        @default(true)
+  b2bAccountId  String?
+  b2bAccount    B2bAccount?    @relation(fields: [b2bAccountId], references: [id])
+  warehouseId   String?
+  warehouse     Warehouse?     @relation(fields: [warehouseId], references: [id])
+  vendorId      String?
+  vendor        Vendor?        @relation(fields: [vendorId], references: [id])
+  createdAt     DateTime       @default(now())
+  addresses     Address[]
+  orders        Order[]
+  subscriptions Subscription[]
+  walletTxns    WalletLedger[]
+  routes        Route[]        @relation("RiderRoutes")
+  otps          Otp[]
+  referralCode  String?        @unique
+  referredById  String?
+  walletBalance Int            @default(0)
+  assignedLeads Lead[]         @relation("AssignedLeads")
+  leadActivities LeadActivity[]
+}
+
+model Lead {
+  id            String         @id @default(uuid())
+  name          String
+  phone         String
+  company       String?
+  source        String?
+  status        LeadStatus     @default(NEW)
+  assignedTo    User?          @relation("AssignedLeads", fields: [assignedToId], references: [id])
+  assignedToId  String?
+  estValuePaise Int            @default(0)
+  zoneId        String?
+  notes         String?
+  b2bAccountId  String?
+  nextFollowUpAt DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  activities    LeadActivity[]
+}
+
+model LeadActivity {
+  id            String           @id @default(uuid())
+  lead          Lead             @relation(fields: [leadId], references: [id])
+  leadId        String
+  type          LeadActivityType
+  note          String?
+  nextFollowUpAt DateTime?
+  createdBy     User?            @relation(fields: [createdById], references: [id])
+  createdById   String?
+  createdAt     DateTime         @default(now())
+
+  @@index([leadId])
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
+model Zone {
+  id          String      @id @default(uuid())
+  name        String
+  pincodes    String[]
+  active      Boolean     @default(true)
+  warehouse   Warehouse?  @relation(fields: [warehouseId], references: [id])
+  warehouseId String?
+  addresses   Address[]
+  slots       Slot[]
+  routes      Route[]
+  prices      PriceList[]
+}
+
+model Slot {
+  id        String  @id @default(uuid())
+  zone      Zone    @relation(fields: [zoneId], references: [id])
+  zoneId    String
+  label     String // "07:00-10:00"
+  startHour Int
+  endHour   Int
+  capacity  Int     @default(60)
+  orders    Order[]
+}
+
+model Address {
+  id            String         @id @default(uuid())
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String
+  label         String         @default("Home")
+  line1         String
+  landmark      String?
+  complex       String?
+  floor         Int            @default(0)
+  hasLift       Boolean        @default(true)
+  pincode       String
+  lat           Float?
+  lng           Float?
+  zone          Zone?          @relation(fields: [zoneId], references: [id])
+  zoneId        String?
+  orders        Order[]
+  subscriptions Subscription[]
+}
+
+enum VendorType {
+  MILL
+  ADDON_SUPPLIER
+  PACKAGING
+  LOGISTICS
+  OTHER
+}
+
+enum PoStatus {
+  DRAFT
+  SENT
+  PARTIAL
+  RECEIVED
+  CLOSED
+  CANCELLED
+}
+
+model Vendor {
+  id        String          @id @default(uuid())
+  name      String
+  type      VendorType      @default(MILL)
+  district  String?
+  gstin     String?
+  contact   String?
+  phone     String?
+  email     String?
+  address   String?
+  bankRef   String?
+  termsDays Int             @default(7)
+  rating    Int? // 1-5 quality rating
+  active    Boolean         @default(true)
+  notes     String?
+  // "Mill story" shown on the public /trace page — the mill writes it from the vendor portal
+  storyTitle String?
+  story      String?
+  storyPhoto String? // data: URL (<=400 KB) or https URL
+  lots      Lot[]
+  pos       PurchaseOrder[]
+  ledger    VendorLedger[]
+  portalUsers User[]
+  createdAt DateTime        @default(now())
+}
+
+model VendorLedger {
+  id         String    @id @default(uuid())
+  vendor     Vendor    @relation(fields: [vendorId], references: [id])
+  vendorId   String
+  deltaPaise Int // + bill (we owe), - payment
+  reason     String // bill | payment | debit_note
+  ref        String?
+  poId       String?
+  dueOn      DateTime?
+  at         DateTime  @default(now())
+}
+
+model Warehouse {
+  id           String          @id @default(uuid())
+  code         String          @unique
+  name         String
+  address      String?
+  pincode      String?
+  active       Boolean         @default(true)
+  zones        Zone[]
+  lots         Lot[]
+  pos          PurchaseOrder[]
+  transfersOut StockTransfer[] @relation("TransferFrom")
+  transfersIn  StockTransfer[] @relation("TransferTo")
+  staff        User[]
+}
+
+model StockTransfer {
+  id            String    @id @default(uuid())
+  fromWarehouse Warehouse @relation("TransferFrom", fields: [fromId], references: [id])
+  fromId        String
+  toWarehouse   Warehouse @relation("TransferTo", fields: [toId], references: [id])
+  toId          String
+  lotNo         String
+  kg            Float
+  newLotNo      String
+  note          String?
+  at            DateTime  @default(now())
+}
+
+model PurchaseOrder {
+  id          String    @id @default(uuid())
+  poNo        Int       @unique @default(autoincrement())
+  vendor      Vendor    @relation(fields: [vendorId], references: [id])
+  vendorId    String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouseId String
+  status      PoStatus  @default(DRAFT)
+  expectedOn  DateTime?
+  notes       String?
+  totalPaise  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  lines       PoLine[]
+  lots        Lot[]
+}
+
+model PoLine {
+  id             String        @id @default(uuid())
+  po             PurchaseOrder @relation(fields: [poId], references: [id])
+  poId           String
+  variety        Variety       @relation(fields: [varietyId], references: [id])
+  varietyId      String
+  kg             Float
+  ratePaisePerKg Int
+  receivedKg     Float         @default(0)
+}
+
+model Variety {
+  id            String   @id @default(uuid())
+  code          String   @unique // SONA, HMT, BPT, KOLAM, BASMATI, BROWN
+  name          String
+  nameTe        String?
+  description   String?
+  isAddon       Boolean  @default(false)
+  agedPreferred Boolean  @default(true)
+  skus          Sku[]
+  lots          Lot[]
+  poLines       PoLine[]
+}
+
+model Sku {
+  id            String         @id @default(uuid())
+  variety       Variety        @relation(fields: [varietyId], references: [id])
+  varietyId     String
+  code          String         @unique // SONA-20
+  packKg        Float
+  gstPct        Float          @default(5)
+  active        Boolean        @default(true)
+  prices        PriceList[]
+  orderItems    OrderItem[]
+  subscriptions Subscription[]
+  ledger        StockLedger[]
+}
+
+model PriceList {
+  id         String     @id @default(uuid())
+  scope      PriceScope @default(BASE)
+  zone       Zone?      @relation(fields: [zoneId], references: [id])
+  zoneId     String?
+  b2bTier    Int?
+  sku        Sku        @relation(fields: [skuId], references: [id])
+  skuId      String
+  pricePaise Int // per pack, incl. nothing (GST added at checkout)
+  validFrom  DateTime   @default(now())
+  validTo    DateTime?
+}
+
+model Lot {
+  id             String         @id @default(uuid())
+  lotNo          String         @unique
+  po             PurchaseOrder? @relation(fields: [poId], references: [id])
+  poId           String?
+  vendor         Vendor         @relation(fields: [vendorId], references: [id])
+  vendorId       String
+  warehouse      Warehouse      @relation(fields: [warehouseId], references: [id])
+  warehouseId    String
+  variety        Variety        @relation(fields: [varietyId], references: [id])
+  varietyId      String
+  harvestSeason  String // "Kharif 2025"
+  milledOn       DateTime
+  moisturePct    Float
+  brokenPct      Float
+  costPaisePerKg Int
+  receivedKg     Float
+  onHandKg       Float
+  receivedAt     DateTime       @default(now())
+  ledger         StockLedger[]
+  orderItems     OrderItem[]
+}
+
+/// Every public /trace scan. Used for the duplicate-scan (counterfeit) flag: one lot code scanned from
+/// many distinct IPs in a day is a bag QR being copied.
+model TraceScan {
+  id    String   @id @default(uuid())
+  lotNo String
+  ip    String
+  ua    String?
+  at    DateTime @default(now())
+  @@index([lotNo, at])
+}
+
+/// Duty shifts for riders + field staff: clock in / clock out from the mobile app. Hours reports come from here.
+model Shift {
+  id        String    @id @default(uuid())
+  userId    String
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  startLat  Float?
+  startLng  Float?
+  endLat    Float?
+  endLng    Float?
+  autoClosed Boolean  @default(false) // ended by the 16h safety cron, not the person
+  @@index([userId, startedAt])
+}
+
+model StockLedger {
+  id      String       @id @default(uuid())
+  lot     Lot          @relation(fields: [lotId], references: [id])
+  lotId   String
+  sku     Sku?         @relation(fields: [skuId], references: [id])
+  skuId   String?
+  kgDelta Float
+  reason  LedgerReason
+  refType String?
+  refId   String?
+  at      DateTime     @default(now())
+
+  @@index([lotId])
+}
+
+model B2bAccount {
+  id               String      @id @default(uuid())
+  name             String
+  gstin            String?
+  tier             Int         @default(1)
+  creditLimitPaise Int         @default(0)
+  termsDays        Int         @default(15)
+  onHold           Boolean     @default(false)
+  users            User[]
+  orders           Order[]
+  ledger           B2bLedger[]
+  createdAt        DateTime    @default(now())
+}
+
+model B2bLedger {
+  id         String     @id @default(uuid())
+  account    B2bAccount @relation(fields: [accountId], references: [id])
+  accountId  String
+  deltaPaise Int // + invoice, - payment
+  reason     String
+  orderId    String?
+  dueOn      DateTime?
+  at         DateTime   @default(now())
+}
+
+model Subscription {
+  id         String       @id @default(uuid())
+  user       User         @relation(fields: [userId], references: [id])
+  userId     String
+  sku        Sku          @relation(fields: [skuId], references: [id])
+  skuId      String
+  address    Address      @relation(fields: [addressId], references: [id])
+  addressId  String
+  qty        Int          @default(1)
+  frequency  SubFrequency
+  nextRunOn  DateTime
+  status     SubStatus    @default(ACTIVE)
+  skipNext   Boolean      @default(false)
+  mandateRef String?
+  createdAt  DateTime     @default(now())
+  orders     Order[]
+}
+
+model Order {
+  id               String        @id @default(uuid())
+  orderNo          Int           @unique @default(autoincrement())
+  user             User          @relation(fields: [userId], references: [id])
+  userId           String
+  b2bAccount       B2bAccount?   @relation(fields: [b2bAccountId], references: [id])
+  b2bAccountId     String?
+  address          Address       @relation(fields: [addressId], references: [id])
+  addressId        String
+  slot             Slot?         @relation(fields: [slotId], references: [id])
+  slotId           String?
+  deliveryDate     DateTime
+  channel          OrderChannel  @default(B2C)
+  status           OrderStatus   @default(PENDING_PAYMENT)
+  subtotalPaise    Int
+  gstPaise         Int
+  deliveryFeePaise Int           @default(0)
+  discountPaise    Int           @default(0)
+  totalPaise       Int
+  totalKg          Float
+  couponCode       String?
+  idempotencyKey   String?       @unique
+  subscription     Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId   String?
+  items            OrderItem[]
+  payment          Payment?
+  invoice          Invoice?
+  stop             RouteStop?
+  notes            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  events           OrderEvent[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  sku       Sku     @relation(fields: [skuId], references: [id])
+  skuId     String
+  lot       Lot?    @relation(fields: [lotId], references: [id])
+  lotId     String?
+  qty       Int
+  unitPaise Int
+}
+
+model OrderEvent {
+  id      String   @id @default(uuid())
+  order   Order    @relation(fields: [orderId], references: [id])
+  orderId String
+  type    String
+  payload Json?
+  at      DateTime @default(now())
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  order       Order         @relation(fields: [orderId], references: [id])
+  orderId     String        @unique
+  provider    String        @default("mock")
+  providerRef String?
+  method      PaymentMethod
+  amountPaise Int
+  status      PaymentStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+}
+
+model WalletLedger {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  deltaPaise Int
+  reason     String
+  refId      String?
+  at         DateTime @default(now())
+}
+
+model Route {
+  id          String      @id @default(uuid())
+  date        DateTime
+  zone        Zone        @relation(fields: [zoneId], references: [id])
+  zoneId      String
+  rider       User?       @relation("RiderRoutes", fields: [riderId], references: [id])
+  riderId     String?
+  vehicleType VehicleType @default(THREE_WHEELER)
+  capacityKg  Float       @default(150)
+  loadKg      Float       @default(0)
+  status      RouteStatus @default(DRAFT)
+  stops       RouteStop[]
+  createdAt   DateTime    @default(now())
+}
+
+model RouteStop {
+  id          String     @id @default(uuid())
+  route       Route      @relation(fields: [routeId], references: [id])
+  routeId     String
+  order       Order      @relation(fields: [orderId], references: [id])
+  orderId     String     @unique
+  seq         Int
+  status      StopStatus @default(PENDING)
+  deliveryOtp String?
+  otpVerified Boolean    @default(false)
+  podPhotoUrl String?
+  podLat      Float?
+  podLng      Float?
+  loadedAt    DateTime?
+  eta         DateTime?
+  deliveredAt DateTime?
+  failReason  String?
+}
+
+model Coupon {
+  id               String    @id @default(uuid())
+  code             String    @unique
+  type             String // PERCENT | FLAT
+  value            Int // percent or paise
+  minOrderPaise    Int       @default(0)
+  maxDiscountPaise Int?
+  firstOrderOnly   Boolean   @default(false)
+  usesPerUser      Int       @default(1)
+  totalUses        Int?
+  usedCount        Int       @default(0)
+  validFrom        DateTime  @default(now())
+  validTo          DateTime?
+  active           Boolean   @default(true)
+}
+
+model RiderLocation {
+  id      String   @id @default(uuid())
+  riderId String
+  lat     Float
+  lng     Float
+  at      DateTime @default(now())
+
+  @@index([riderId, at])
+}
+
+model Notification {
+  id       String   @id @default(uuid())
+  phone    String
+  channel  String   @default("whatsapp")
+  template String
+  body     String
+  status   String   @default("queued")
+  at       DateTime @default(now())
+}
+
+model Event {
+  id      String   @id @default(uuid())
+  actor   String?
+  type    String
+  payload Json?
+  at      DateTime @default(now())
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  invoiceNo     String   @unique // FR/2026-27/000123
+  order         Order    @relation(fields: [orderId], references: [id])
+  orderId       String   @unique
+  buyerName     String
+  buyerGstin    String?
+  buyerAddress  String
+  sellerGstin   String   @default("36XXXXX0000X1Z5")
+  fssaiNo       String   @default("13626000000000")
+  lines         Json
+  subtotalPaise Int
+  gstPaise      Int
+  totalPaise    Int
+  issuedAt      DateTime @default(now())
+}
