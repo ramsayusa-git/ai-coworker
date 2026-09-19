@@ -538,6 +538,21 @@ model IssueMessage {
   @@index([issueId, createdAt])
 }
 
+/// Long-lived service keys for integrations (the FreshRice MCP server, scripts). Acts as the linked user (its role + scoping).
+model ApiKey {
+  id         String    @id @default(uuid())
+  name       String
+  keyHash    String    @unique // sha256 of the key; the plain key is shown once at creation
+  prefix     String // first 8 chars, for display
+  userId     String
+  scopes     String[]  @default(["read"]) // read | write
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  createdById String?
+  createdAt  DateTime  @default(now())
+}
+
 model StockLedger {
   id      String       @id @default(uuid())
   lot     Lot          @relation(fields: [lotId], references: [id])

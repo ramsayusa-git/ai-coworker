@@ -1,6 +1,12 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException, ForbiddenException, SetMetadata, createParamDecorator } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { createHash } from 'crypto';
+import { PrismaService } from '../prisma/prisma.service';
+
+export const WRITE_KEY = 'requiresWrite';
+/** Mark a handler as a write for API-key callers (keys with only the `read` scope get 403). JWT users are unaffected. */
+export const Write = () => SetMetadata(WRITE_KEY, true);
 
 export const ROLES_KEY = 'roles';
 export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
@@ -17,13 +23,23 @@ export const ScopeVendor = (paramName: string) => SetMetadata(SCOPE_VENDOR_KEY, 
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwt: JwtService, private reflector: Reflector) {}
+  constructor(private jwt: JwtService, private reflector: Reflector, private db: PrismaService) {}
   async canActivate(ctx: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [ctx.getHandler(), ctx.getClass()]);
     const req = ctx.switchToHttp().getRequest();
     const auth: string = req.headers['authorization'] || '';
     const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-    if (token) {
+    if (token && token.startsWith('frk_')) {
+      // Service API key (MCP server, scripts): resolves to its linked user; read-only keys can't hit @Write() handlers.
+      const key = await this.db.apiKey.findUnique({ where: { keyHash: createHash('sha256').update(token).digest('hex') } });
+      if (!key || key.revokedAt || (key.expiresAt && key.expiresAt < new Date())) throw new UnauthorizedException('Invalid or revoked API key');
+      const u = await this.db.user.findUnique({ where: { id: key.userId } });
+      if (!u || !u.active) throw new UnauthorizedException('API key user inactive');
+      req.user = { sub: u.id, role: u.role, phone: u.phone, b2b: u.b2bAccountId || undefined, warehouseId: u.warehouseId || undefined, vendorId: u.vendorId || undefined, isField: u.isField || undefined, apiKey: { id: key.id, name: key.name, scopes: key.scopes } };
+      const isWrite = this.reflector.getAllAndOverride<boolean>(WRITE_KEY, [ctx.getHandler(), ctx.getClass()]) || !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+      if (isWrite && !key.scopes.includes('write')) throw new ForbiddenException('This API key is read-only');
+      this.db.apiKey.update({ where: { id: key.id }, data: { lastUsedAt: new Date() } }).catch(() => {});
+    } else if (token) {
       try { req.user = await this.jwt.verifyAsync(token, { secret: process.env.JWT_SECRET || 'dev' }); } catch { if (!isPublic) throw new UnauthorizedException('Invalid token'); }
     } else if (!isPublic) throw new UnauthorizedException('Missing token');
     const roles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [ctx.getHandler(), ctx.getClass()]);
