@@ -129,4 +129,13 @@ RI=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/orders/$OID/invoic
 check "reissue cancels old + issues rev 2" "$(echo "$RI" | py "print(d['cancelled']['status'], d['invoice']['revision'], d['invoice']['invoiceNo']!='$INV')")" "CANCELLED 2 True"
 check "active invoice is the new one" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$OID/invoice | py "print(d['invoice']['revision'], len(d['history']))")" "2 2"
 
+# --- Invoice templates ---
+check "templates list has a default" "$(curl -s -H "Authorization: Bearer $AD" $A/admin/invoice-templates | py "print(any(t['isDefault'] for t in d))")" True
+check "template gstin validated" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/invoice-templates -d '{"name":"bad","gstin":"NOPE"}' -o /dev/null -w '%{http_code}')" 400
+TPL=$(curl -s -H "Authorization: Bearer $AD" $A/admin/invoice-templates | py "print(d[0]['id'])")
+check "template preview html" "$(curl -s -o /dev/null -w '%{http_code}' "$A/admin/invoice-templates/$TPL/preview?t=$AD")" 200
+check "template preview needs token" "$(curl -s -o /dev/null -w '%{http_code}' "$A/admin/invoice-templates/$TPL/preview")" 401
+check "sales cannot edit templates" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/admin/invoice-templates -d '{"name":"x"}' -o /dev/null -w '%{http_code}')" 403
+check "new invoice number unique + prefixed" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$OID/invoice | py "import re;print(bool(re.match(r'^[A-Z0-9-]{1,8}/20\\d\\d-\\d\\d/\\d{6}$', d['invoice']['invoiceNo'])))")" True
+
 [ $fail = 0 ] && echo "ALL PASS" || { echo "SOME FAILED"; exit 1; }

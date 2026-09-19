@@ -19,22 +19,22 @@ export class InvoicesController {
   @Public() @Roles() @Get('orders/:id/invoice.html') async html(@Param('id') id: string, @Res() res: Response) {
     const t = (res.req.query.t as string) || '';
     let user: any = null; try { user = await this.jwt.verifyAsync(t, { secret: process.env.JWT_SECRET || 'dev' }); } catch { return res.status(401).send('Login required'); }
-    const { invoice, order } = await this.svc.forOrder(id, user);
+    const { invoice, order, tpl } = await this.svc.forOrder(id, user);
     if (!invoice) return res.status(400).send('Invoice not yet issued (order unpaid or cancelled)');
-    res.type('html').send(this.svc.html(invoice, order));
+    res.type('html').send(this.svc.html(invoice, order, { tpl }));
   }
   /** PDF download (owner or staff). */
   @Get('orders/:id/invoice.pdf') async pdf(@CurrentUser() u: any, @Param('id') id: string, @Res() res: Response) {
-    const { invoice, order } = await this.svc.forOrder(id, u);
+    const { invoice, order, tpl } = await this.svc.forOrder(id, u);
     if (!invoice) return res.status(400).send('Invoice not yet issued');
-    const buf = await this.svc.pdf(invoice, order);
+    const buf = await this.svc.pdf(invoice, order, tpl);
     res.setHeader('Content-Type', 'application/pdf'); res.setHeader('Content-Disposition', `attachment; filename=${invoice.invoiceNo.replace(/\//g, '-')}.pdf`); res.send(buf);
   }
   /** Signed public links used in WhatsApp/email — no login. */
   @Public() @Roles() @Get('invoices/public/:id/:sig') async pub(@Param('id') id: string, @Param('sig') sig: string, @Query('format') format: string, @Res() res: Response) {
-    const { invoice, order } = await this.svc.byPublic(id, sig);
-    if (format === 'pdf') { const buf = await this.svc.pdf(invoice, order); res.setHeader('Content-Type', 'application/pdf'); res.setHeader('Content-Disposition', `inline; filename=${invoice.invoiceNo.replace(/\//g, '-')}.pdf`); return res.send(buf); }
-    res.type('html').send(this.svc.html(invoice, order));
+    const { invoice, order, tpl } = await this.svc.byPublic(id, sig);
+    if (format === 'pdf') { const buf = await this.svc.pdf(invoice, order, tpl); res.setHeader('Content-Type', 'application/pdf'); res.setHeader('Content-Disposition', `inline; filename=${invoice.invoiceNo.replace(/\//g, '-')}.pdf`); return res.send(buf); }
+    res.type('html').send(this.svc.html(invoice, order, { tpl }));
   }
   @Roles('ADMIN', 'OPS', 'SALES') @Get('admin/invoices') list(@Query('status') status?: string, @Query('search') search?: string) { return this.svc.list({ status, search }); }
 }

@@ -441,6 +441,41 @@ model Shift {
   @@index([userId, startedAt])
 }
 
+/// Key/value app settings edited from the admin UI (invoice templates, approval limits, ...). Value is JSON.
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
+/// Invoice templates: one per channel (B2C / B2B) plus optional variants. Seller details, branding, footer, numbering.
+model InvoiceTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  channel     String   @default("B2C") // B2C | B2B | ANY
+  isDefault   Boolean  @default(false)
+  brandName   String   @default("FreshRice")
+  legalName   String   @default("Aetos Tech Labs")
+  address     String   @default("Kukatpally, Hyderabad 500072")
+  gstin       String   @default("36XXXXX0000X1Z5")
+  fssai       String   @default("13626000000000")
+  phone       String?
+  email       String?
+  logo        String? // data: URL <=200 KB
+  accentColor String   @default("#1d5133")
+  footer      String   @default("Rice is a pre-packed & labelled commodity taxed at 5% GST. Store in a cool, dry place. Milling date and lot printed on each bag.")
+  terms       String? // payment terms / declaration (B2B)
+  bankDetails String? // shown on B2B invoices: bank, account, IFSC, UPI
+  signatory   String? // "For Aetos Tech Labs — Authorised signatory"
+  showLot     Boolean  @default(true)
+  numberPrefix String  @default("FR")
+  nextNumber  Int      @default(1) // next sequence number for this template's series
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model StockLedger {
   id      String       @id @default(uuid())
   lot     Lot          @relation(fields: [lotId], references: [id])
@@ -673,6 +708,7 @@ model Invoice {
   buyerName     String
   buyerGstin    String?
   buyerAddress  String
+  templateId    String? // InvoiceTemplate used at issue time (snapshot of seller fields below)
   sellerGstin   String        @default("36XXXXX0000X1Z5")
   fssaiNo       String        @default("13626000000000")
   lines         Json
