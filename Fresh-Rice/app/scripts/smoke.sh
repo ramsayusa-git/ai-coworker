@@ -138,4 +138,20 @@ check "template preview needs token" "$(curl -s -o /dev/null -w '%{http_code}' "
 check "sales cannot edit templates" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/admin/invoice-templates -d '{"name":"x"}' -o /dev/null -w '%{http_code}')" 403
 check "new invoice number unique + prefixed" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$OID/invoice | py "import re;print(bool(re.match(r'^[A-Z0-9-]{1,8}/20\\d\\d-\\d\\d/\\d{6}$', d['invoice']['invoiceNo'])))")" True
 
+# --- Issues desk ---
+IS=$(curl "${J[@]}" -H "Authorization: Bearer $C" -X POST $A/issues -d "{\"category\":\"DAMAGED\",\"title\":\"Smoke torn bag\",\"orderId\":\"$OID\"}")
+IID=$(echo "$IS" | py "print(d['id'])"); check "customer raises issue (auto HIGH)" "$(echo "$IS" | py "print(d['status'], d['priority'])")" "OPEN HIGH"
+check "bad category rejected" "$(curl "${J[@]}" -H "Authorization: Bearer $C" -X POST $A/issues -d '{"category":"NOPE","title":"x"}' -o /dev/null -w '%{http_code}')" 400
+check "staff sees queue" "$(curl -s -H "Authorization: Bearer $SL" "$A/issues?status=OPEN" | py "print(any(i['id']=='$IID' for i in d))")" True
+curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/issues/$IID/messages -d '{"body":"On it","internal":false}' >/dev/null
+curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/issues/$IID/messages -d '{"body":"secret","internal":true}' >/dev/null
+check "reply auto-assigns + in progress" "$(curl -s -H "Authorization: Bearer $SL" $A/issues/$IID | py "print(d['status'], d['assignee'] is not None, d['firstResponseAt'] is not None)")" "IN_PROGRESS True True"
+check "customer never sees internal notes" "$(curl -s -H "Authorization: Bearer $C" $A/issues/$IID | py "print(len(d['messages']))")" 1
+check "customer cannot change status" "$(curl "${J[@]}" -H "Authorization: Bearer $C" -X PATCH $A/issues/$IID -d '{"status":"CLOSED"}' -o /dev/null -w '%{http_code}')" 403
+check "resolve needs note" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X PATCH $A/issues/$IID -d '{"status":"RESOLVED"}' -o /dev/null -w '%{http_code}')" 400
+check "resolve with note" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X PATCH $A/issues/$IID -d '{"status":"RESOLVED","resolution":"replaced"}' | py "print(d['status'])")" RESOLVED
+check "whatsapp RATE closes + rates" "$(curl "${J[@]}" -X POST $A/webhooks/whatsapp -d '{"phone":"919000000003","text":"RATE 4"}' | py "print(d['action'])")" issue_rate
+check "whatsapp ISSUE opens ticket" "$(curl "${J[@]}" -X POST $A/webhooks/whatsapp -d '{"phone":"919000000003","text":"ISSUE order is late"}' | py "print(d['action'])")" issue_open
+check "issue stats" "$(curl -s -H "Authorization: Bearer $AD" $A/issues/stats | py "print(d['open']>=1 and 'byCategory30d' in d)")" True
+
 [ $fail = 0 ] && echo "ALL PASS" || { echo "SOME FAILED"; exit 1; }

@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional, Inject, forwardRef } from '@nestjs/common';
+import { IssuesService } from '../issues/issues.service';
 import { PrismaService } from '../prisma/prisma.service';
 import * as nodemailer from 'nodemailer';
 
@@ -13,7 +14,7 @@ import * as nodemailer from 'nodemailer';
 export class NotificationsService {
   private log = new Logger('Notify');
   private mailer: nodemailer.Transporter | null = null;
-  constructor(private db: PrismaService) {}
+  constructor(private db: PrismaService, @Optional() @Inject(forwardRef(() => IssuesService)) private issues?: IssuesService) {}
 
   private getMailer() {
     if (this.mailer) return this.mailer;
@@ -68,6 +69,10 @@ export class NotificationsService {
     const user = await this.db.user.findUnique({ where: { phone } });
     if (!user) return { handled: false };
     const t = text.trim().toUpperCase();
+    // Issues desk: "ISSUE <text>" opens/updates a ticket; a resolved ticket takes "RATE n" before the order NPS does.
+    if (t.startsWith('ISSUE') && this.issues) { const r = await this.issues.fromWhatsapp(phone, text.trim().replace(/^issue[:\s-]*/i, '') || text.trim()); if (r) { await this.send(phone, 'issue_ack', r.appended ? `Added to your open issue #${r.issue.ticketNo}. Our team will reply here.` : `Got it — issue #${r.issue.ticketNo} logged. We'll get back to you shortly.`); return { handled: true, action: r.appended ? 'issue_append' : 'issue_open' }; } }
+    const rm = t.match(/^RATE\s*([1-5])$/);
+    if (rm && this.issues) { const resolved = await this.db.issue.findFirst({ where: { raisedById: user.id, status: 'RESOLVED', rating: null }, orderBy: { resolvedAt: 'desc' } }); if (resolved) { await this.issues.rate({ sub: user.id, role: user.role }, resolved.id, Number(rm[1])); await this.send(phone, 'rate_ack', 'Thanks for rating how we handled it!'); return { handled: true, action: 'issue_rate' }; } }
     const sub = await this.db.subscription.findFirst({ where: { userId: user.id, status: { not: 'CANCELLED' } }, orderBy: { nextRunOn: 'asc' } });
     if (t === 'SKIP' && sub) { await this.db.subscription.update({ where: { id: sub.id }, data: { skipNext: true } }); await this.send(phone, 'sub_skip_ack', 'Got it — your next delivery is skipped. Reply RESUME anytime.'); return { handled: true, action: 'skip' }; }
     if (t === 'PAUSE' && sub) { await this.db.subscription.update({ where: { id: sub.id }, data: { status: 'PAUSED' } }); await this.send(phone, 'sub_pause_ack', 'Subscription paused. Reply RESUME to restart.'); return { handled: true, action: 'pause' }; }

@@ -47,6 +47,7 @@ export default function Account() {
     {['ADMIN', 'OPS'].includes(user.role) && <Link href="/admin" className="btn-secondary w-full mb-2">Open admin console</Link>}
     {user.role === 'RIDER' && <Link href="/rider" className="btn-secondary w-full mb-2">Open rider app</Link>}
     <Link href="/shop/riders" className="btn-secondary w-full mb-2">🛵 Riders on the road (live map)</Link>
+    <Link href="/shop/issues" className="btn-secondary w-full mb-2">🛟 Help & issues</Link>
     {user.b2bAccountId && <Link href="/b2b" className="btn-secondary w-full mb-2">Business portal</Link>}
     <button className="btn-secondary w-full" onClick={logout}>Log out</button></div>;
 }

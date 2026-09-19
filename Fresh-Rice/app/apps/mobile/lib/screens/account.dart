@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../api.dart';
 import '../cart.dart';
 import 'checkout.dart';
+import 'issues.dart';
 
 class AccountScreen extends StatefulWidget {
   final VoidCallback onLogout; final VoidCallback? onSettings;
@@ -47,6 +48,7 @@ class _AccountScreenState extends State<AccountScreen> {
         const Text('Add addresses from the checkout screen.', style: TextStyle(fontSize: 12, color: Colors.grey)),
       ]))),
       Card(child: ListTile(leading: const Icon(Icons.language), title: const Text('Language'), trailing: DropdownButton<String>(value: u['lang'] ?? 'te', items: const [DropdownMenuItem(value: 'te', child: Text('తెలుగు')), DropdownMenuItem(value: 'hi', child: Text('हिन्दी')), DropdownMenuItem(value: 'en', child: Text('English'))], onChanged: (v) async { await Api.call('/auth/me', method: 'PATCH', body: {'lang': v}); load(); }))),
+      Card(child: ListTile(leading: const Icon(Icons.support), title: const Text('Help & issues'), subtitle: const Text('Report a problem, follow up on a ticket'), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IssuesScreen())))),
       Card(child: ListTile(leading: const Icon(Icons.chat), title: const Text('WhatsApp support'), onTap: () => launchUrl(Uri.parse('https://wa.me/919000000001'), mode: LaunchMode.externalApplication))),
       const SizedBox(height: 8),
       OutlinedButton(onPressed: () async { await Api.setSession(null, null); widget.onLogout(); }, child: const Text('Log out')),

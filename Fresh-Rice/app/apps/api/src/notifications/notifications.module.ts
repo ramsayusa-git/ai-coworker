@@ -1,6 +1,7 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Module, forwardRef } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
+import { IssuesModule } from '../issues/issues.module';
 @Global()
-@Module({ providers: [NotificationsService], controllers: [NotificationsController], exports: [NotificationsService] })
+@Module({ imports: [forwardRef(() => IssuesModule)], providers: [NotificationsService], controllers: [NotificationsController], exports: [NotificationsService] })
 export class NotificationsModule {}

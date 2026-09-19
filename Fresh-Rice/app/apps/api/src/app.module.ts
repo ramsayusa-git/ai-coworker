@@ -22,6 +22,7 @@ import { WarehousesModule } from './warehouses/warehouses.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { VendorPortalModule } from './vendor-portal/vendor-portal.module';
 import { SalesModule } from './sales/sales.module';
+import { IssuesModule } from './issues/issues.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { SalesModule } from './sales/sales.module';
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60000, limit: 120 }]),
     PrismaModule, AuthModule, CatalogModule, ZonesModule, InventoryModule, OrdersModule,
-    SubscriptionsModule, DispatchModule, B2bModule, AdminModule, NotificationsModule, PaymentsModule, VendorsModule, WarehousesModule, InvoicesModule, ReportsModule, CouponsModule, VendorPortalModule, SalesModule,
+    SubscriptionsModule, DispatchModule, B2bModule, AdminModule, NotificationsModule, PaymentsModule, VendorsModule, WarehousesModule, InvoicesModule, ReportsModule, CouponsModule, VendorPortalModule, SalesModule, IssuesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
