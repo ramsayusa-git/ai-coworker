@@ -20,14 +20,23 @@ module.exports = {
       time: true,
     },
     {
+      // Dev server with hot reload. next dev leaks under memory pressure (hit 2.4 GB on 19 Sep with swap
+      // exhausted) — so cap the heap, restart at 1.2 GB, and let pm2 bring it back in seconds instead of
+      // leaving :4200 dead. Never run this and freshrice-web-prod at the same time.
       name: 'freshrice-web',
       cwd: __dirname + '/apps/web',
       script: 'node_modules/.bin/next',
       args: 'dev -p 4200',
       interpreter: 'none',
-      env: { NODE_ENV: 'development' },
-      max_memory_restart: '800M',
+      env: { NODE_ENV: 'development', WEB_PORT: '4200', API_INTERNAL_URL: 'http://localhost:4100', NODE_OPTIONS: '--max-old-space-size=1536' },
+      max_memory_restart: '1200M',
+      autorestart: true,
+      restart_delay: 2000,
+      max_restarts: 100,
       time: true,
+      out_file: __dirname + '/logs/web.log',
+      error_file: __dirname + '/logs/web.log',
+      merge_logs: true,
     },
     // Built apps. autorestart:true + memory caps so a crash or leak is recovered in seconds
     // instead of leaving the site down until someone notices.

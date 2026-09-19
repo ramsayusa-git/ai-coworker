@@ -9,7 +9,9 @@ LOG="$APP/logs/watchdog.log"
 ts() { date '+%F %T'; }
 
 need=""
-for name in freshrice-api-prod freshrice-web-prod freshrice-mcp; do
+# WEB_APP: freshrice-web (next dev, hot reload) or freshrice-web-prod (next start). Keep in sync with what pm2 runs.
+WEB_APP=freshrice-web
+for name in freshrice-api-prod $WEB_APP freshrice-mcp; do
   st=$(pm2 jlist 2>/dev/null | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{const p=JSON.parse(d||"[]").find(x=>x.name===process.argv[1]);console.log(p?p.pm2_env.status:"missing")})' "$name" 2>/dev/null)
   [ "$st" = "online" ] || need="$need,$name"
 done
@@ -23,6 +25,6 @@ fi
 # HTTP probes (PM2 can say "online" while the port is dead, e.g. EADDRINUSE loop)
 w=$(curl -s -m 8 -o /dev/null -w '%{http_code}' http://localhost:4200/ || echo 000)
 a=$(curl -s -m 8 -o /dev/null -w '%{http_code}' http://localhost:4100/v1/auth/me || echo 000)
-if [ "$w" = "000" ]; then echo "$(ts) web :4200 unreachable — restarting" >> "$LOG"; pm2 restart freshrice-web-prod >> "$LOG" 2>&1; fi
+if [ "$w" = "000" ]; then echo "$(ts) web :4200 unreachable — restarting" >> "$LOG"; pm2 restart $WEB_APP >> "$LOG" 2>&1; fi
 if [ "$a" = "000" ]; then echo "$(ts) api :4100 unreachable — restarting" >> "$LOG"; pm2 restart freshrice-api-prod >> "$LOG" 2>&1; fi
 exit 0
