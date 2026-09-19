@@ -201,7 +201,12 @@ check "manager (sales) sees report's request" "$(curl -s -H "Authorization: Bear
 check "requester cannot self-approve" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/hr/leave/$LVID/approve -d '{}' -o /dev/null -w '%{http_code}')" 403
 check "manager approves" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/hr/leave/$LVID/approve -d '{}' | py "print(d['status'])")" APPROVED
 check "usage counted" "$(curl -s -H "Authorization: Bearer $MK" "$A/me/hr/balances?year=${NXT:0:4}" | py "print([b['used'] for b in d if b['code']=='LWP'][0] >= 2)")" True
-YD=$(date -d "-$((RANDOM % 300 + 3)) day" +%F); RG=$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/leave -d "{\"type\":\"REG\",\"from\":\"$YD\",\"reason\":\"forgot to punch\",\"claimedIn\":\"${YD}T03:30:00Z\",\"claimedOut\":\"${YD}T12:30:00Z\"}"); RGID=$(echo "$RG" | py "print(d['id'])")
+# Random past day for the regularisation check, but never a Sunday: the seeded staff profile
+# FR-MK1 has weeklyOffs={0} (Sunday), so attendance for a Sunday is WO no matter how many
+# shifts we regularise onto it — the check below wants P, and would fail ~1 run in 7.
+YD=$(date -d "-$((RANDOM % 300 + 3)) day" +%F)
+while [ "$(date -d "$YD" +%w)" = "0" ]; do YD=$(date -d "$YD -1 day" +%F); done
+RG=$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X POST $A/me/hr/leave -d "{\"type\":\"REG\",\"from\":\"$YD\",\"reason\":\"forgot to punch\",\"claimedIn\":\"${YD}T03:30:00Z\",\"claimedOut\":\"${YD}T12:30:00Z\"}"); RGID=$(echo "$RG" | py "print(d['id'])")
 check "regularisation pending" "$(echo "$RG" | py "print(d['status'], d['type'])")" "PENDING REG"
 check "admin approves regularisation → shift created" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/hr/leave/$RGID/approve -d '{}' >/dev/null; curl -s -H "Authorization: Bearer $AD" "$A/admin/hr/attendance?month=${YD:0:7}&userId=$MID" | py "print([x['code'] for x in d['rows'][0]['days'] if x['date']=='$YD'][0])")" P
 check "payroll json has net" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/hr/payroll?month=$MON" | py "print([r['netPayableRupees']>0 for r in d if r['employeeCode']=='FR-MK1'][0])")" True

@@ -2,5 +2,11 @@ import { Module } from '@nestjs/common';
 import { InventoryController } from './inventory.controller';
 import { InventoryService } from './inventory.service';
 import { LotMilestonesService } from './lot-milestones';
-@Module({ controllers: [InventoryController], providers: [InventoryService, LotMilestonesService], exports: [InventoryService, LotMilestonesService] })
+import { StickersController } from './stickers.controller';
+import { StickersService } from './stickers.service';
+@Module({
+  controllers: [InventoryController, StickersController],
+  providers: [InventoryService, LotMilestonesService, StickersService],
+  exports: [InventoryService, LotMilestonesService, StickersService],
+})
 export class InventoryModule {}

@@ -420,6 +420,8 @@ model Lot {
   receivedAt     DateTime       @default(now())
   ledger         StockLedger[]
   orderItems     OrderItem[]
+  stickerBatches StickerBatch[]
+  stickers       BagSticker[]
 }
 
 /// Every public /trace scan. Used for the duplicate-scan (counterfeit) flag: one lot code scanned from
@@ -1022,4 +1024,53 @@ model Invoice {
   totalPaise    Int
   issuedAt      DateTime      @default(now())
   @@index([orderId, status])
+}
+
+
+/// One print run of bag stickers for a single lot + pack size.
+model StickerBatch {
+  id          String       @id @default(uuid())
+  lot         Lot          @relation(fields: [lotId], references: [id])
+  lotId       String
+  packKg      Int
+  count       Int
+  note        String?
+  createdById String?
+  createdAt   DateTime     @default(now())
+  printedAt   DateTime?
+  stickers    BagSticker[]
+
+  @@index([lotId, createdAt])
+}
+
+/// One physical sticker = one bag. `code` is what the QR encodes
+/// (<PUBLIC_WEB_URL>/trace/<code>). It is random rather than derived from the lot
+/// number so a counterfeiter cannot mint codes that look valid — and because each
+/// bag is unique, repeat scans of ONE code from many devices is a real duplicate
+/// signal, unlike a lot code which thousands of honest customers legitimately share.
+model BagSticker {
+  id          String        @id @default(uuid())
+  code        String        @unique
+  batch       StickerBatch  @relation(fields: [batchId], references: [id])
+  batchId     String
+  lot         Lot           @relation(fields: [lotId], references: [id])
+  lotId       String
+  packKg      Int
+  serial      Int
+  status      StickerStatus @default(PRINTED)
+  appliedAt   DateTime?
+  voidedAt    DateTime?
+  scanCount   Int           @default(0)
+  firstScanAt DateTime?
+  lastScanAt  DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@index([lotId, status])
+  @@index([batchId, serial])
+}
+
+enum StickerStatus {
+  PRINTED
+  APPLIED
+  VOID
 }

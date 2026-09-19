@@ -20,6 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Public } from '../common/auth.guard';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
+import { StickersService } from './stickers.service';
 import { Roles, ScopeWarehouse, CurrentUser } from '../common/auth.guard';
 // WAREHOUSE_STAFF may use the warehouse-scoped endpoints below (their own warehouseId only,
 // enforced by @ScopeWarehouse); transfers between warehouses stay ADMIN/OPS only.
@@ -29,12 +30,16 @@ const PUBLIC_BASE = process.env.PUBLIC_WEB_URL || 'https://freshrice.in';
 
 @ApiTags('inventory') @ApiBearerAuth() @Roles('ADMIN', 'OPS', 'WAREHOUSE_STAFF') @Controller('inventory')
 export class InventoryController {
-  constructor(private svc: InventoryService, private db: PrismaService, private jwt: JwtService) {}
+  constructor(private svc: InventoryService, private db: PrismaService, private jwt: JwtService, private stickers: StickersService) {}
   /** Public lot-traceability lookup for the bag-label QR: /v1/inventory/trace/:lotNo — no auth, safe fields only.
    *  @Roles() with no args overrides the class-level ADMIN/OPS/WAREHOUSE_STAFF restriction — @Public() alone
    *  only skips the "token required" check, it doesn't clear an inherited @Roles() list. */
   @Public() @Roles() @Get('trace/:lotNo') async trace(@Param('lotNo') lotNo: string, @Req() req: Request) {
-    const lot = await this.db.lot.findUnique({ where: { lotNo }, include: { vendor: true, variety: { include: { skus: { where: { active: true }, include: { prices: { where: { scope: 'BASE', validFrom: { lte: new Date() }, OR: [{ validTo: null }, { validTo: { gt: new Date() } }] }, orderBy: { validFrom: 'desc' }, take: 1 } } } } } } });
+    // The same public URL serves both kinds of QR: a per-bag sticker code (new) and a bare lot
+    // number (older labels, still in the field). Try the sticker first — it is the more specific
+    // match and carries the per-bag scan history.
+    const sticker = await this.stickers.recordScan(lotNo);
+    const lot = sticker ? sticker.lot : await this.db.lot.findUnique({ where: { lotNo }, include: { vendor: true, variety: { include: { skus: { where: { active: true }, include: { prices: { where: { scope: 'BASE', validFrom: { lte: new Date() }, OR: [{ validTo: null }, { validTo: { gt: new Date() } }] }, orderBy: { validFrom: 'desc' }, take: 1 } } } } } } });
     // Log the scan (fire-and-forget) for the duplicate-scan flag — BEFORE the not-found return, so a QR carrying a
     // lot code we never issued is also recorded and shows up as "unknown lot" on Stock & Lots.
     // Behind nginx the real IP is in X-Forwarded-For.
@@ -47,6 +52,10 @@ export class InventoryController {
     const perKg = lot.variety.skus.filter((s) => s.prices[0]).map((s) => Math.round(s.prices[0].pricePaise / s.packKg));
     return {
       found: true,
+      // Present only when a per-bag sticker was scanned. scanCount>1 on a UNIQUE bag code is the
+      // honest counterfeit signal: the same physical sticker has been scanned more than once.
+      bag: sticker ? { code: sticker.code, serial: sticker.serial, packKg: sticker.packKg, status: sticker.status,
+                       scanCount: sticker.scanCount + 1, firstScanAt: sticker.firstScanAt || new Date() } : null,
       lotNo: lot.lotNo,
       variety: lot.variety.name,
       agedPreferred: lot.variety.agedPreferred,

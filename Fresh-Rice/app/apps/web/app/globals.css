@@ -19,3 +19,29 @@ table.tbl td { @apply py-2 px-2 border-b border-gray-100 align-top; }
 .marquee { display: flex; gap: 1.5rem; width: max-content; animation: marquee 32s linear infinite; }
 @keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
 .glass { background: rgba(255,255,255,.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.25); }
+
+/* ---------- Modern admin surface (#48/#49) ----------
+   Additive only: every class above still behaves exactly as before, so the
+   older pages are untouched while the new shell opts into these.          */
+:root {
+  --line: 229 231 235;
+  --elev-1: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+  --elev-2: 0 4px 8px -2px rgba(16,24,40,.10), 0 2px 4px -2px rgba(16,24,40,.06);
+  --elev-3: 0 12px 24px -6px rgba(16,24,40,.12), 0 4px 8px -4px rgba(16,24,40,.07);
+}
+
+/* Frosted panel for light backgrounds (.glass above is tuned for the dark hero
+   and vanishes on white). */
+.glass-panel {
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255,255,255,.6);
+  box-shadow: var(--elev-2);
+}
+.card-modern { @apply rounded-2xl border border-gray-200 bg-white p-4; box-shadow: var(--elev-1); transition: box-shadow .18s ease, transform .18s ease; }
+.card-modern:hover { box-shadow: var(--elev-2); }
+.card-grad { background: linear-gradient(135deg,#fff 0%,#fbf8f1 100%); }
+.brand-grad { background: linear-gradient(120deg,#1d5133 0%,#2e7d4f 45%,#b8862b 120%); }
+.text-grad { background: linear-gradient(100deg,#1d5133,#2e7d4f 55%,#b8862b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ring-brand { @apply ring-2 ring-leaf-500 ring-offset-1; }

@@ -77,6 +77,17 @@ export default function Trace({ params }: { params: Promise<{ lotNo: string }> }
         <div className="flex justify-between"><span className="text-gray-500">Brokens</span><b>{data.brokenPct}%</b></div>
       </div>
 
+      {/* Only shown when a per-bag sticker was scanned (not a bare lot code). A unique bag code
+          scanned more than once is worth telling the customer about — gently, since the honest
+          explanation (they scanned it twice themselves) is by far the most likely one. */}
+      {data.bag && <div className={'mt-4 rounded-lg border p-3 ' + (data.bag.scanCount > 3 ? 'border-amber-400 bg-amber-50' : 'border-leaf-600/30 bg-leaf-600/10')}>
+        <div className="text-xs uppercase tracking-wide text-leaf-700 font-semibold">This exact bag</div>
+        <div className="text-sm mt-1">Bag <b>#{data.bag.serial}</b> · {data.bag.packKg} kg · code <span className="font-mono text-xs">{data.bag.code}</span></div>
+        {data.bag.scanCount <= 3
+          ? <div className="text-xs text-gray-600 mt-1">✅ This sticker is genuine and registered to the lot below.{data.bag.scanCount > 1 && ` You've scanned it ${data.bag.scanCount} times.`}</div>
+          : <div className="text-xs text-amber-800 mt-1">⚠ This sticker has been scanned {data.bag.scanCount} times from several devices. If it wasn't you each time, the sticker may have been copied — please <a className="underline" href="/shop/issues">tell us</a> and we'll check the batch.</div>}
+      </div>}
+
       {data.cook && <div id="cook" className="mt-4 scroll-mt-4 bg-leaf-600/10 border border-leaf-600/30 rounded-lg p-3">
         <div className="text-xs uppercase tracking-wide text-leaf-700 font-semibold mb-1">Cook mode · for this exact lot</div>
         <div className="grid grid-cols-3 gap-2 text-center my-2">
