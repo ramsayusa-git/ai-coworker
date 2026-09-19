@@ -62,6 +62,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       Row(children: [
         if (['CONFIRMED', 'PENDING_PAYMENT'].contains(o!['status'])) TextButton(onPressed: () async { await Api.call('/orders/${widget.id}/cancel', method: 'POST'); load(); }, child: const Text('Cancel order', style: TextStyle(color: Colors.red))),
         if (!['PENDING_PAYMENT', 'CANCELLED'].contains(o!['status'])) TextButton.icon(onPressed: () => launchUrl(Uri.parse('$apiUrl/v1/orders/${widget.id}/invoice.html?t=${Api.token}'), mode: LaunchMode.externalApplication), icon: const Icon(Icons.receipt), label: const Text('Invoice')),
+        if (!['PENDING_PAYMENT', 'CANCELLED'].contains(o!['status'])) TextButton.icon(onPressed: () async { try { final r = await Api.call('/orders/${widget.id}/invoice/resend', body: {}); if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invoice ${r['invoiceNo']} sent · WhatsApp: ${r['results']['whatsapp'] ?? '-'}'))); } catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e'))); } }, icon: const Icon(Icons.send), label: const Text('Resend invoice')),
       ]),
       if (o!['status'] == 'DELIVERED' && !rated && !(o!['events'] as List).any((e) => e['type'] == 'RATED')) Card(child: Padding(padding: const EdgeInsets.all(12), child: Column(children: [
         const Text('How likely are you to recommend FreshRice? (0–10)'),

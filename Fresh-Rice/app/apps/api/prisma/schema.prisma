@@ -525,7 +525,7 @@ model Order {
   subscriptionId   String?
   items            OrderItem[]
   payment          Payment?
-  invoice          Invoice?
+  invoices      Invoice[]
   stop             RouteStop?
   notes            String?
   createdAt        DateTime      @default(now())
@@ -654,19 +654,31 @@ model Event {
   at      DateTime @default(now())
 }
 
+enum InvoiceStatus {
+  ISSUED
+  CANCELLED // superseded by a reissue, or voided
+}
+
 model Invoice {
-  id            String   @id @default(uuid())
-  invoiceNo     String   @unique // FR/2026-27/000123
-  order         Order    @relation(fields: [orderId], references: [id])
-  orderId       String   @unique
+  id            String        @id @default(uuid())
+  invoiceNo     String        @unique // FR/2026-27/000123
+  order         Order         @relation(fields: [orderId], references: [id])
+  orderId       String // one ISSUED invoice per order at a time; cancelled ones stay for the audit trail
+  status        InvoiceStatus @default(ISSUED)
+  revision      Int           @default(1)
+  supersedesId  String? // the invoice this one replaced (reissue chain)
+  cancelledAt   DateTime?
+  cancelReason  String?
+  cancelledById String?
   buyerName     String
   buyerGstin    String?
   buyerAddress  String
-  sellerGstin   String   @default("36XXXXX0000X1Z5")
-  fssaiNo       String   @default("13626000000000")
+  sellerGstin   String        @default("36XXXXX0000X1Z5")
+  fssaiNo       String        @default("13626000000000")
   lines         Json
   subtotalPaise Int
   gstPaise      Int
   totalPaise    Int
-  issuedAt      DateTime @default(now())
+  issuedAt      DateTime      @default(now())
+  @@index([orderId, status])
 }

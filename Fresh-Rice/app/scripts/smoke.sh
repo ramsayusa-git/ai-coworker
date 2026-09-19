@@ -115,4 +115,18 @@ check "import commits valid rows" "$(curl "${J[@]}" -H "Authorization: Bearer $A
 check "import updates on re-run (no dupes)" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/import/leads -d "{\"rows\":[{\"name\":\"Smoke Import\",\"phone\":\"$IMPP\",\"status\":\"CONTACTED\"}],\"commit\":true}" | py "print(d['updated'])")" 1
 check "api still alive after exports" "$(curl -s -o /dev/null -w '%{http_code}' "$A/zones/check?pincode=500072")" 200
 
+# --- Invoices: resend (signed public link + pdf), reissue with audit trail ---
+INV=$(curl -s -H "Authorization: Bearer $C" $A/orders/$OID/invoice | py "print(d['invoice']['invoiceNo'])")
+RS=$(curl "${J[@]}" -H "Authorization: Bearer $C" -X POST $A/orders/$OID/invoice/resend -d '{}')
+check "customer resend logs whatsapp" "$(echo "$RS" | py "print(d['results']['whatsapp'])")" logged
+PUB=$(echo "$RS" | py "print(d['url'].split('/i/')[1])")
+check "public invoice link opens" "$(curl -s -o /dev/null -w '%{http_code}' "$A/invoices/public/$PUB")" 200
+check "public invoice pdf" "$(curl -s "$A/invoices/public/$PUB?format=pdf" | head -c 4)" "%PDF"
+check "public link bad signature" "$(curl -s -o /dev/null -w '%{http_code}' "$A/invoices/public/$(echo $PUB | cut -d/ -f1)/nope")" 403
+check "customer cannot reissue" "$(curl "${J[@]}" -H "Authorization: Bearer $C" -X POST $A/orders/$OID/invoice/reissue -d '{"reason":"x"}' -o /dev/null -w '%{http_code}')" 403
+check "reissue needs reason" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/orders/$OID/invoice/reissue -d '{"reason":""}' -o /dev/null -w '%{http_code}')" 400
+RI=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/orders/$OID/invoice/reissue -d '{"reason":"smoke gstin fix","buyerGstin":"36AABCU9603R1ZM"}')
+check "reissue cancels old + issues rev 2" "$(echo "$RI" | py "print(d['cancelled']['status'], d['invoice']['revision'], d['invoice']['invoiceNo']!='$INV')")" "CANCELLED 2 True"
+check "active invoice is the new one" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$OID/invoice | py "print(d['invoice']['revision'], len(d['history']))")" "2 2"
+
 [ $fail = 0 ] && echo "ALL PASS" || { echo "SOME FAILED"; exit 1; }

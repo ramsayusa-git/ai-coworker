@@ -28,11 +28,13 @@ export class NotificationsService {
   }
 
   /** OTP + transactional email. Send alongside SMS/WhatsApp, or on its own via sendEmail(). */
-  async sendEmail(to: string, subject: string, body: string) {
+  async sendEmail(to: string, subject: string, body: string, opts: { html?: string; attachments?: { filename: string; content: Buffer; contentType?: string }[] } = {}) {
     const mailer = this.getMailer();
     if (!mailer) throw new Error('SMTP not configured (SMTP_HOST/SMTP_USER/SMTP_PASS)');
-    await mailer.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to, subject, text: body });
+    await mailer.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to, subject, text: body, html: opts.html, attachments: opts.attachments });
   }
+  get emailConfigured() { return !!this.getMailer(); }
+  get whatsappConfigured() { return !!(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID); }
 
   async send(phone: string, template: string, body: string, email?: string | null) {
     let status = 'logged'; let channel = 'log';

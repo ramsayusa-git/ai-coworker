@@ -9,7 +9,7 @@ import { StatusBadge, Field } from '@/components/ui';
 import { LiveMap, timeAgo, wa } from '@/components/live-map';
 const STEPS = ['CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
 export default function Order({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params); const sp = useSearchParams(); useEffect(() => { if (sp.get('placed')) { confetti({ particleCount: 140, spread: 70, origin: { y: 0.3 }, colors: ['#2e7d4f', '#b8862b', '#fbf8f1'] }); } }, []); const { data: o, mutate } = useSWR('/orders/' + id, fetcher, { refreshInterval: 10000 }); const { data: loc } = useSWR(o?.status === 'OUT_FOR_DELIVERY' ? `/orders/${id}/rider-location` : null, fetcher, { refreshInterval: 15000 }); const [score, setScore] = useState(9); const [rated, setRated] = useState(false);
+  const { id } = use(params); const sp = useSearchParams(); useEffect(() => { if (sp.get('placed')) { confetti({ particleCount: 140, spread: 70, origin: { y: 0.3 }, colors: ['#2e7d4f', '#b8862b', '#fbf8f1'] }); } }, []); const { data: o, mutate } = useSWR('/orders/' + id, fetcher, { refreshInterval: 10000 }); const { data: loc } = useSWR(o?.status === 'OUT_FOR_DELIVERY' ? `/orders/${id}/rider-location` : null, fetcher, { refreshInterval: 15000 }); const [score, setScore] = useState(9); const [rated, setRated] = useState(false); const [sent, setSent] = useState('');
   if (!o) return <div className="text-gray-400">Loading…</div>;
   const idx = STEPS.indexOf(o.status);
   return <div><div className="flex justify-between items-center"><h1 className="text-xl font-bold">Order #{o.orderNo}</h1><StatusBadge s={o.status} /></div>
@@ -22,7 +22,9 @@ export default function Order({ params }: { params: Promise<{ id: string }> }) {
       <div className="flex justify-between mt-2"><span>GST</span><span>{paise(o.gstPaise)}</span></div>{o.discountPaise > 0 && <div className="flex justify-between"><span>Wallet</span><span>-{paise(o.discountPaise)}</span></div>}<div className="flex justify-between font-bold"><span>Total</span><span>{paise(o.totalPaise)}</span></div>
       <div className="text-xs text-gray-500 mt-1">{o.payment?.method} · {o.payment?.status}</div></div>
     <div className="flex gap-2 mt-3">{['CONFIRMED', 'PENDING_PAYMENT'].includes(o.status) && <button className="btn-danger" onClick={async () => { await api(`/orders/${id}/cancel`, { method: 'POST' }); mutate(); }}>Cancel order</button>}
-      {['DELIVERED', 'OUT_FOR_DELIVERY', 'PACKED', 'CONFIRMED'].includes(o.status) && <a className="btn-secondary" target="_blank" href={`${API}/v1/orders/${id}/invoice.html?t=${getToken()}`}>Invoice</a>}</div>
+      {['DELIVERED', 'OUT_FOR_DELIVERY', 'PACKED', 'CONFIRMED'].includes(o.status) && <><a className="btn-secondary" target="_blank" href={`${API}/v1/orders/${id}/invoice.html?t=${getToken()}`}>Invoice</a>
+        <button className="btn-secondary" onClick={async () => { try { const r = await api(`/orders/${id}/invoice/resend`, { body: {} }); setSent(`Invoice ${r.invoiceNo} sent — WhatsApp: ${r.results.whatsapp || '-'}${r.results.email ? ` · email: ${r.results.email}` : ''}`); } catch (e: any) { setSent(e.message); } }}>Resend invoice</button></>}</div>
+    {sent && <div className="text-xs text-leaf-700 mt-1">{sent}</div>}
     {o.status === 'DELIVERED' && !rated && !o.events?.some((e: any) => e.type === 'RATED') && <div className="card mt-3"><Field label="How likely are you to recommend us? (0–10)"><input type="range" min={0} max={10} value={score} onChange={(e) => setScore(Number(e.target.value))} className="w-full" /></Field><div className="flex justify-between items-center"><b>{score}</b><button className="btn-primary" onClick={async () => { await api(`/orders/${id}/rate`, { body: { score } }); setRated(true); }}>Submit</button></div></div>}
     <div className="mt-4 text-xs text-gray-500">{o.events?.map((e: any) => <div key={e.id}>{fmtDT(e.at)} · {e.type}</div>)}</div></div>;
 }
