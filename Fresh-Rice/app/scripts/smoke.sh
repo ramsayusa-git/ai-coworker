@@ -210,6 +210,11 @@ check "attendance csv" "$(curl -s -H "Authorization: Bearer $AD" "$A/admin/hr/at
 check "roster upsert" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X PUT $A/admin/hr/roster -d "{\"rows\":[{\"userId\":\"$MID\",\"date\":\"$NXT\",\"start\":\"06:00\",\"end\":\"14:00\",\"label\":\"early\"}]}" | py "print(d['upserted'])")" 1
 check "ops cannot edit policy" "$(curl "${J[@]}" -H "Authorization: Bearer $MK" -X PUT $A/admin/hr/policy -d '{"graceMin":5}' -o /dev/null -w '%{http_code}')" 403
 curl -s -X DELETE -H "Authorization: Bearer $AD" $A/admin/hr/holidays/$HOL >/dev/null
+# Free the leave dates again. Without this the suite leaves an APPROVED leave behind on every run; NXT only has
+# 40 possible Mondays to draw from, so after a handful of runs a new run collides with an old leave, the create
+# is rejected as overlapping and four HR checks fail for no reason. (The REG request is left alone on purpose —
+# cancelling it would orphan the regularised Shift that the attendance and payroll checks rely on.)
+curl -s -X POST -H "Authorization: Bearer $MK" $A/me/hr/leave/$LVID/cancel >/dev/null
 # --- Fleet: vehicles, vendors, ledger, checks, costs ---
 REG="TS09S$(date +%s | tail -c 5)"; FV=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/fleet/vendors -d '{"name":"Smoke Autos","phone":"9800000011","paymentTerms":"monthly net 7"}'); FVID=$(echo "$FV" | py "print(d['id'])")
 check "fleet vendor created" "$(echo "$FV" | py "print(d['name'])")" "Smoke Autos"

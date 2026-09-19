@@ -30,7 +30,7 @@ function RiceMeter({ user, refresh }: { user: any; refresh: () => void }) {
 export default function Account() {
   const { user, logout, refresh } = useAuth(); const { data: addrs, mutate } = useSWR(user ? '/addresses' : null, fetcher); const [add, setAdd] = useState(false); const { data: ref } = useSWR(user ? '/auth/referrals/mine' : null, fetcher, { refreshInterval: 20000 });
   const [email, setEmail] = useState(''); const [emailSaved, setEmailSaved] = useState(false);
-  if (!user) return <Link href="/login" className="btn-primary">Login</Link>;
+  if (!user) return <div className="card text-center"><div className="text-3xl">📏</div><h1 className="text-lg font-bold mt-1">Your account & rice meter</h1><p className="text-sm text-gray-600 mt-1 mb-4">Login with your phone to see how much of your last bag is left, when it runs out, and reorder in one tap.</p><Link href="/login?next=/shop/account" className="btn-primary inline-block">Login with OTP</Link></div>;
   return <div><h1 className="text-xl font-bold mb-3">Account</h1>
     {user.role === 'CUSTOMER' && <RiceMeter user={user} refresh={refresh} />}
     <div className="card mb-3"><div className="font-semibold">{user.name || 'Set your name'}</div><div className="text-sm text-gray-600">{user.phone}</div><div className="text-sm mt-2">Wallet: <b>{paise(user.walletBalance)}</b></div>

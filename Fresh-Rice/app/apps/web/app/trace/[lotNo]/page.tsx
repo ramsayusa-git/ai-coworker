@@ -1,5 +1,5 @@
 'use client';
-import { use, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { fetcher, fmtDate, paise } from '@/lib/api';
@@ -7,13 +7,14 @@ import { motion } from 'framer-motion';
 
 /** "Compare your supermarket bag": packed date + MRP + pack size → how old that rice really is and what it costs per kg vs ours. */
 function CompareBag({ ourPerKgPaise, variety }: { ourPerKgPaise: number | null; variety: string }) {
-  const [packed, setPacked] = useState(''); const [mrp, setMrp] = useState(''); const [kg, setKg] = useState('25'); const [open, setOpen] = useState(false);
+  // Opens automatically when the visitor arrives via /trace/<lot>#compare (landing-page feature card).
+  const [packed, setPacked] = useState(''); const [mrp, setMrp] = useState(''); const [kg, setKg] = useState('25'); const [open, setOpen] = useState(() => typeof window !== 'undefined' && window.location.hash === '#compare');
   const packedDate = packed ? new Date(packed) : null;
   // Packed-on is always AFTER milling, so "months since packed" is a floor on the rice's real age.
   const minMonths = packedDate && !isNaN(packedDate.getTime()) ? Math.max(0, Math.floor((Date.now() - packedDate.getTime()) / (30 * 86400000))) : null;
   const theirPerKg = mrp && Number(kg) > 0 ? (Number(mrp) * 100) / Number(kg) : null;
   const diff = theirPerKg && ourPerKgPaise ? theirPerKg - ourPerKgPaise : null;
-  return <div className="mt-3">
+  return <div className="mt-3 scroll-mt-4" id="compare">
     <button className="btn-secondary w-full" onClick={() => setOpen(!open)}>{open ? 'Hide' : 'Compare your supermarket bag'}</button>
     {open && <div className="bg-white border rounded-lg p-3 mt-2 text-sm space-y-2">
       <div className="text-xs text-gray-500">From the back of a supermarket rice bag. Most bags print a packed-on date and never the milling date.</div>
@@ -30,6 +31,13 @@ function CompareBag({ ourPerKgPaise, variety }: { ourPerKgPaise: number | null; 
 export default function Trace({ params }: { params: Promise<{ lotNo: string }> }) {
   const { lotNo } = use(params);
   const { data, isLoading } = useSWR(`/inventory/trace/${encodeURIComponent(lotNo)}`, fetcher);
+  // Sections (#cook / #mill / #compare) only exist after the fetch, so the browser's own hash-jump misses them.
+  useEffect(() => {
+    if (!data?.found) return;
+    const id = window.location.hash.slice(1); if (!id) return;
+    const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    return () => clearTimeout(t);
+  }, [data?.found]);
 
   if (isLoading) return <main className="min-h-screen flex items-center justify-center p-4 hero-bg"><div className="card w-full max-w-md text-center text-gray-500">Loading…</div></main>;
   if (!data?.found) return <main className="min-h-screen flex items-center justify-center p-4 hero-bg"><div className="card w-full max-w-md text-center">
@@ -69,7 +77,7 @@ export default function Trace({ params }: { params: Promise<{ lotNo: string }> }
         <div className="flex justify-between"><span className="text-gray-500">Brokens</span><b>{data.brokenPct}%</b></div>
       </div>
 
-      {data.cook && <div className="mt-4 bg-leaf-600/10 border border-leaf-600/30 rounded-lg p-3">
+      {data.cook && <div id="cook" className="mt-4 scroll-mt-4 bg-leaf-600/10 border border-leaf-600/30 rounded-lg p-3">
         <div className="text-xs uppercase tracking-wide text-leaf-700 font-semibold mb-1">Cook mode · for this exact lot</div>
         <div className="grid grid-cols-3 gap-2 text-center my-2">
           <div className="bg-white rounded p-2"><div className="text-lg font-bold">{data.cook.ratio}</div><div className="text-xs text-gray-500">rice : water</div></div>
@@ -79,7 +87,7 @@ export default function Trace({ params }: { params: Promise<{ lotNo: string }> }
         <div className="text-xs text-gray-600">{data.cook.note} Worked out from this lot's age ({data.agedMonths} mo) and moisture ({data.moisturePct}%).</div>
       </div>}
 
-      {data.millStory && <div className="mt-4 border rounded-lg overflow-hidden">
+      {data.millStory && <div id="mill" className="mt-4 scroll-mt-4 border rounded-lg overflow-hidden">
         {data.millStory.photo && <img src={data.millStory.photo} alt={data.millStory.title} className="w-full h-40 object-cover" />}
         <div className="p-3"><div className="text-xs uppercase tracking-wide text-rice-600 font-semibold">From the mill</div><div className="font-semibold">{data.millStory.title}</div><p className="text-sm text-gray-700 mt-1 whitespace-pre-line">{data.millStory.text}</p></div>
       </div>}

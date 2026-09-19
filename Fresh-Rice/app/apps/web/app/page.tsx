@@ -3,23 +3,27 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import { Grain, GrainField, Counter, Reveal, Section, fadeUp, Journey, BagLabel } from '@/components/graphics';
 
 const VARIETIES = [{ n: 'Sona Masoori', t: 'సోనా మసూరి', d: 'The daily staple. Aged 6–12 months so it cooks fluffy, not sticky.', c: 'from-amber-100 to-amber-50' }, { n: 'HMT', t: 'హెచ్‌ఎంటీ', d: 'Fine grain, soft texture — Warangal\'s favourite.', c: 'from-lime-100 to-lime-50' }, { n: 'BPT 5204', t: 'బీపీటీ', d: 'Slightly sticky, great for pulihora and curd rice.', c: 'from-emerald-100 to-emerald-50' }, { n: 'Basmati 1121', t: 'బాస్మతి', d: 'Steam basmati for biryani weekends. Fresh milled.', c: 'from-orange-100 to-orange-50' }, { n: 'Brown rice', t: 'బ్రౌన్ రైస్', d: 'Unpolished, low-GI, for the health-conscious.', c: 'from-stone-200 to-stone-50' }];
 const STEPS = [['Pick your rice', 'Variety, pack size and how often — every 3 weeks is the household favourite.'], ['We message you the night before', 'Reply SKIP if you\'re away. No app needed.'], ['Bag arrives, OTP handover', 'Carried up to your kitchen. Lot label on every bag.'], ['Refer a neighbour', '₹100 in your wallet the moment their first bag is delivered.']];
 const QUOTES = ['"First time rice came with the milling date. My mother approved." — Lakshmi, KPHB', '"25 kg to the 4th floor, no lift, on time. Every week." — Suresh, Ameerpet PG', '"Aged Sona Masoori that actually tastes like the village rice." — Padma, Madhapur', '"WhatsApp SKIP when we travel. That\'s it." — Ravi, Gachibowli'];
 
-// Each card links to where the feature actually lives. The trace links open a real lot so visitors see live numbers.
-const FEATURES = [
-  { i: '🍚', t: 'Cook mode for your exact lot', d: 'Rice : water ratio, soak time and cooker whistles worked out from that lot’s real age and moisture. A 7-month lot at 12.8 % moisture says 1 : 1.9, 20 min soak, 3 whistles.', h: '/trace/LOT-SONA-2508-02', c: 'See a live lot' },
-  { i: '🏭', t: 'From the mill, in their words', d: 'The mill that milled your bag writes its own story and photo. It appears on every trace page for their lots — the lot number on your bag is theirs.', h: '/trace/LOT-SONA-2508-02', c: 'Read Sri Balaji’s' },
-  { i: '⚖️', t: 'Compare your supermarket bag', d: 'Type the packed-on date and MRP from the bag you have at home. We show how old it is at minimum and what you pay per kg vs ours.', h: '/trace/LOT-SONA-2508-02', c: 'Try the comparison' },
-  { i: '📏', t: 'Household rice meter', d: 'On your account page: how much of the last bag is left, the day it runs out, and one tap to put the right pack back in the cart. Learns your pace after 3 weeks.', h: '/shop/account', c: 'Open my account' },
-  { i: '🎂', t: 'Your rice’s birthday', d: 'A WhatsApp when a bag you bought crosses 6 months (it’s in the sweet spot now) and again past 12 (time for a fresher lot). Once per bag, never spam.', h: '/shop/orders', c: 'My orders' },
-  { i: '🔍', t: 'Every scan is watched', d: 'Each QR scan is logged. If one lot code starts showing up from many different phones — or a code we never printed — our ops desk sees it in red the same day.', h: '/trace/LOT-SONA-2508-02', c: 'Scan a real label' },
+// Each card links to where the feature actually lives. The trace links open a real lot (with a section anchor) so visitors see live numbers.
+// `auth: true` targets need a login; logged-out visitors are sent to /login?next=… so they land on the feature afterwards.
+const DEMO_LOT = '/trace/LOT-SONA-2508-02';
+const FEATURES: { i: string; t: string; d: string; h: string; c: string; auth?: boolean }[] = [
+  { i: '🍚', t: 'Cook mode for your exact lot', d: 'Rice : water ratio, soak time and cooker whistles worked out from that lot’s real age and moisture. A 7-month lot at 12.8 % moisture says 1 : 1.9, 20 min soak, 3 whistles.', h: DEMO_LOT + '#cook', c: 'See it on a live lot' },
+  { i: '🏭', t: 'From the mill, in their words', d: 'The mill that milled your bag writes its own story and photo. It appears on every trace page for their lots — the lot number on your bag is theirs.', h: DEMO_LOT + '#mill', c: 'Read Sri Balaji’s story' },
+  { i: '⚖️', t: 'Compare your supermarket bag', d: 'Type the packed-on date and MRP from the bag you have at home. We show how old it is at minimum and what you pay per kg vs ours.', h: DEMO_LOT + '#compare', c: 'Try the comparison' },
+  { i: '📏', t: 'Household rice meter', d: 'On your account page: how much of the last bag is left, the day it runs out, and one tap to put the right pack back in the cart. Learns your pace after 3 weeks.', h: '/shop/account', c: 'Open my rice meter', auth: true },
+  { i: '🎂', t: 'Your rice’s birthday', d: 'A WhatsApp when a bag you bought crosses 6 months (it’s in the sweet spot now) and again past 12 (time for a fresher lot). Once per bag, never spam.', h: '/shop/orders', c: 'See my bags', auth: true },
+  { i: '🔍', t: 'Every scan is watched', d: 'Each QR scan is logged. If one lot code starts showing up from many different phones — or a code we never printed — our ops desk sees it in red the same day.', h: DEMO_LOT, c: 'Scan a real label' },
 ];
 
 export default function Landing() {
+  const { user } = useAuth();
   const [pin, setPin] = useState(''); const [res, setRes] = useState<any>(null); const [checking, setChecking] = useState(false);
   const check = async () => { setChecking(true); try { setRes(await api('/zones/check?pincode=' + pin)); } catch (e: any) { setRes({ error: e.message }); } finally { setChecking(false); } };
   return <main className="min-h-screen overflow-x-hidden">
@@ -55,7 +59,7 @@ export default function Landing() {
       <motion.div variants={fadeUp} className="text-xs uppercase tracking-widest text-rice-700 font-semibold text-center">More than rice</motion.div>
       <motion.h2 variants={fadeUp} className="text-3xl font-bold text-center mt-2">What comes with every bag</motion.h2>
       <motion.p variants={fadeUp} className="text-center text-gray-600 mt-2 max-w-2xl mx-auto">Scan the QR on the label. Everything below is worked out from <em>that</em> lot — its real age, moisture and mill — not a generic chart.</motion.p>
-      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">{FEATURES.map((f, i) => <motion.div key={f.t} variants={fadeUp} whileHover={{ y: -4 }} className="card flex flex-col"><div className="text-3xl">{f.i}</div><div className="font-bold mt-2">{f.t}</div><div className="text-sm text-gray-600 mt-1 flex-1">{f.d}</div><Link href={f.h} className="text-sm font-semibold text-leaf-700 mt-3 underline underline-offset-2">{f.c} →</Link></motion.div>)}</div>
+      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">{FEATURES.map((f) => { const needsLogin = f.auth && !user; const href = needsLogin ? '/login?next=' + encodeURIComponent(f.h) : f.h; return <motion.div key={f.t} variants={fadeUp} whileHover={{ y: -4 }} className="h-full"><Link href={href} className="card flex flex-col h-full hover:border-leaf-600 hover:shadow-md transition-shadow cursor-pointer"><div className="text-3xl">{f.i}</div><div className="font-bold mt-2">{f.t}</div><div className="text-sm text-gray-600 mt-1 flex-1">{f.d}</div><div className="text-sm font-semibold text-leaf-700 mt-3 underline underline-offset-2">{needsLogin ? 'Login to ' + f.c.charAt(0).toLowerCase() + f.c.slice(1) : f.c} →</div></Link></motion.div>; })}</div>
     </div></Section>
 
     {/* HOW */}
