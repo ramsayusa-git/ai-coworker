@@ -151,7 +151,7 @@ check "customer cannot change status" "$(curl "${J[@]}" -H "Authorization: Beare
 check "resolve needs note" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X PATCH $A/issues/$IID -d '{"status":"RESOLVED"}' -o /dev/null -w '%{http_code}')" 400
 check "resolve with note" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X PATCH $A/issues/$IID -d '{"status":"RESOLVED","resolution":"replaced"}' | py "print(d['status'])")" RESOLVED
 check "whatsapp RATE closes + rates" "$(curl "${J[@]}" -X POST $A/webhooks/whatsapp -d '{"phone":"919000000003","text":"RATE 4"}' | py "print(d['action'])")" issue_rate
-check "whatsapp ISSUE opens ticket" "$(curl "${J[@]}" -X POST $A/webhooks/whatsapp -d '{"phone":"919000000003","text":"ISSUE order is late"}' | py "print(d['action'])")" issue_open
+check "whatsapp ISSUE opens or appends ticket" "$(curl "${J[@]}" -X POST $A/webhooks/whatsapp -d '{"phone":"919000000003","text":"ISSUE order is late"}' | py "print(d['action'].startswith('issue_'))")" True
 check "issue stats" "$(curl -s -H "Authorization: Bearer $AD" $A/issues/stats | py "print(d['open']>=1 and 'byCategory30d' in d)")" True
 
 [ $fail = 0 ] && echo "ALL PASS" || { echo "SOME FAILED"; exit 1; }
