@@ -639,6 +639,8 @@ model Order {
   payment          Payment?
   invoices      Invoice[]
   issues        Issue[]
+  modifications OrderModification[]
+  revision      Int           @default(1)
   stop             RouteStop?
   notes            String?
   createdAt        DateTime      @default(now())
@@ -656,6 +658,45 @@ model OrderItem {
   lotId     String?
   qty       Int
   unitPaise Int
+}
+
+enum ModType {
+  ITEMS
+  SLOT
+  ADDRESS
+  DISCOUNT
+  NOTE
+}
+
+enum ModStatus {
+  APPLIED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+/// Every change to an order after placement: who, what (before/after), why, and — for goodwill
+/// discounts above the requester's limit — the approval chain.
+model OrderModification {
+  id           String    @id @default(uuid())
+  order        Order     @relation(fields: [orderId], references: [id])
+  orderId      String
+  type         ModType
+  status       ModStatus @default(APPLIED)
+  before       Json?
+  after        Json?
+  /// discount amount (paise) for DISCOUNT; total delta (paise) for ITEMS
+  amountPaise  Int       @default(0)
+  reason       String
+  issueId      String?
+  requestedBy  String
+  requestedRole String
+  approvedBy   String?
+  approvedAt   DateTime?
+  decisionNote String?
+  createdAt    DateTime  @default(now())
+  @@index([orderId])
+  @@index([status])
 }
 
 model OrderEvent {

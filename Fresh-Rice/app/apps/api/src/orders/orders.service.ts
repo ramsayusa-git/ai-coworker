@@ -151,7 +151,7 @@ export class OrdersService {
   }
 
   get(id: string) {
-    return this.db.order.findUniqueOrThrow({ where: { id }, include: { items: { include: { sku: { include: { variety: true } }, lot: { include: { vendor: true } } } }, payment: true, address: true, slot: true, events: { orderBy: { at: 'asc' } }, stop: { include: { route: { include: { rider: true } } } }, user: { select: { name: true, phone: true } } } });
+    return this.db.order.findUniqueOrThrow({ where: { id }, include: { items: { include: { sku: { include: { variety: true } }, lot: { include: { vendor: true } } } }, payment: true, address: true, slot: true, events: { orderBy: { at: 'asc' } }, modifications: { where: { status: { in: ['APPLIED', 'APPROVED'] } }, orderBy: { createdAt: 'asc' }, select: { id: true, type: true, status: true, before: true, after: true, amountPaise: true, reason: true, createdAt: true } }, stop: { include: { route: { include: { rider: true } } } }, user: { select: { name: true, phone: true } } } });
   }
   mine(userId: string) { return this.db.order.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, include: { items: { include: { sku: { include: { variety: true } } } }, payment: true, slot: true, stop: true } }); }
   list(q: { status?: OrderStatus; date?: string; zoneId?: string }) {

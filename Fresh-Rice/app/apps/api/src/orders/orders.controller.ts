@@ -23,7 +23,7 @@ export class OrdersController {
   @Get('orders/mine') mine(@CurrentUser() u: any) { return this.svc.mine(u.sub); }
   @Get('orders/:id') async get(@CurrentUser() u: any, @Param('id') id: string) {
     const o = await this.svc.get(id);
-    if (o.userId !== u.sub && !['ADMIN', 'OPS', 'RIDER'].includes(u.role)) throw new Error('Forbidden');
+    if (o.userId !== u.sub && !['ADMIN', 'OPS', 'RIDER', 'SALES', 'MARKETING'].includes(u.role)) throw new Error('Forbidden');
     return o;
   }
   @Post('orders/:id/cancel') async cancel(@CurrentUser() u: any, @Param('id') id: string) {

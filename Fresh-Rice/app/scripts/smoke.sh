@@ -153,6 +153,31 @@ check "whatsapp RATE closes + rates" "$(curl "${J[@]}" -X POST $A/webhooks/whats
 check "whatsapp ISSUE opens or appends ticket" "$(curl "${J[@]}" -X POST $A/webhooks/whatsapp -d '{"phone":"919000000003","text":"ISSUE order is late"}' | py "print(d['action'].startswith('issue_'))")" True
 check "issue stats" "$(curl -s -H "Authorization: Bearer $AD" $A/issues/stats | py "print(d['open']>=1 and 'byCategory30d' in d)")" True
 
+# --- Order modifications + discount approvals ---
+MO=$(curl "${J[@]}" -H "Authorization: Bearer $C" -X POST $A/orders -d "{\"addressId\":\"$ADDR\",\"deliveryDate\":\"$(date -d '+2 day' +%F)\",\"items\":[{\"skuId\":\"$SKU\",\"qty\":1}],\"paymentMethod\":\"UPI\"}"); MOID=$(echo "$MO" | py "print(d['id'])"); MT0=$(echo "$MO" | py "print(d['totalPaise'])")
+check "customer adds note (self-service)" "$(curl "${J[@]}" -H "Authorization: Bearer $C" -X PATCH $A/orders/$MOID -d '{"type":"NOTE","reason":"gate code","note":"Gate code 4321"}' | py "print(d['status'])")" APPLIED
+check "customer cannot change items" "$(curl "${J[@]}" -H "Authorization: Bearer $C" -X PATCH $A/orders/$MOID -d '{"type":"ITEMS","reason":"x","items":[]}' -o /dev/null -w '%{http_code}')" 403
+check "modify needs reason" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/orders/$MOID/modify -d "{\"type\":\"ITEMS\",\"items\":[{\"skuId\":\"$SKU\",\"qty\":2}]}" -o /dev/null -w '%{http_code}')" 400
+check "paid order increase needs collect flag" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/orders/$MOID/modify -d "{\"type\":\"ITEMS\",\"reason\":\"wants 2 bags\",\"items\":[{\"skuId\":\"$SKU\",\"qty\":2}]}" -o /dev/null -w '%{http_code}')" 400
+MI=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/orders/$MOID/modify -d "{\"type\":\"ITEMS\",\"reason\":\"wants 2 bags\",\"collectOnDelivery\":true,\"items\":[{\"skuId\":\"$SKU\",\"qty\":2}]}")
+check "items modified, delta positive" "$(echo "$MI" | py "print(d['status']=='APPLIED' and d['after']['delta']>0 and d['after']['items'][0]['qty']==2)")" True
+check "order revision + balance due event" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$MOID | py "print(d['revision']==3 and d['items'][0]['qty']==2 and any(e['type']=='BALANCE_DUE' for e in d['events']) and len(d['modifications'])==2)")" True
+check "audit trail visible to staff" "$(curl -s -H "Authorization: Bearer $SL" $A/orders/$MOID/modifications | py "print(len(d)==2 and d[1]['requester']['role']=='ADMIN')")" True
+check "discount limits default" "$(curl -s -H "Authorization: Bearer $SL" $A/admin/settings/discount-limits | py "print(d['SALES'])")" 10000
+check "sales cannot edit limits" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X PUT $A/admin/settings/discount-limits -d '{"SALES":1}' -o /dev/null -w '%{http_code}')" 403
+W1=$(curl -s -H "Authorization: Bearer $C" $A/auth/me | py "print(d['walletBalance'])")
+check "sales small discount auto-applied" "$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/admin/orders/$MOID/discount -d '{"amountPaise":5000,"reason":"late delivery apology"}' | py "print(d['applied'])")" True
+check "paid order → wallet credit" "$(curl -s -H "Authorization: Bearer $C" $A/auth/me | py "print(d['walletBalance']-$W1)")" 5000
+PD=$(curl "${J[@]}" -H "Authorization: Bearer $SL" -X POST $A/admin/orders/$MOID/discount -d '{"amountPaise":15000,"reason":"damaged bag"}'); PDID=$(echo "$PD" | py "print(d['id'])")
+check "sales big discount goes to approval" "$(echo "$PD" | py "print(d['status'], d['approvers'][0])")" "PENDING_APPROVAL OPS"
+check "discount over pct cap rejected" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/orders/$MOID/discount -d '{"pct":50,"reason":"x"}' -o /dev/null -w '%{http_code}')" 400
+check "sales cannot see approvals" "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $SL" $A/admin/approvals)" 403
+check "approval queue lists it" "$(curl -s -H "Authorization: Bearer $AD" $A/admin/approvals | py "print(any(x['id']=='$PDID' and x['canApprove'] for x in d))")" True
+check "reject needs note" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/approvals/$PDID/reject -d '{}' -o /dev/null -w '%{http_code}')" 400
+check "admin approves" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/approvals/$PDID/approve -d '{"note":"ok"}' | py "print(d['status'])")" APPROVED
+check "approved discount applied to order" "$(curl -s -H "Authorization: Bearer $C" $A/orders/$MOID | py "print(d['discountPaise'])")" 20000
+check "already decided" "$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/approvals/$PDID/approve -d '{}' -o /dev/null -w '%{http_code}')" 400
+check "approval stats" "$(curl -s -H "Authorization: Bearer $SL" $A/admin/approvals/stats | py "print(d['discountsToday']>=2)")" True
 # --- Service API keys (MCP) ---
 AK=$(curl "${J[@]}" -H "Authorization: Bearer $AD" -X POST $A/admin/api-keys -d '{"name":"smoke ro"}')
 AKEY=$(echo "$AK" | py "print(d['key'])"); AKID=$(echo "$AK" | py "print(d['id'])")
