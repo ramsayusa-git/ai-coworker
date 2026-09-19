@@ -1,7 +1,7 @@
 name: freshrice
 description: FreshRice - traceable Telangana rice delivered. Customer + rider app.
 publish_to: 'none'
-version: 0.4.0+4
+version: 0.5.0+5
 environment:
   sdk: ^3.5.0
 dependencies:
